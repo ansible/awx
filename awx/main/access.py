@@ -802,6 +802,11 @@ class OrganizationAccess(NotificationAttachMixin, BaseAccess):
             if self.user in obj.admin_role and self.user in sub_obj.use_role:
                 return True
             return False
+
+        if relationship == "galaxy_credentials":
+            if self.user in obj.admin_role and self.user in sub_obj.use_role:
+                return True
+            return False
         return super(OrganizationAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
 
     def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
@@ -885,10 +890,16 @@ class InventoryAccess(BaseAccess):
             if self.user in sub_obj.use_role and self.user in obj.admin_role:
                 return True
             return False
+        if relationship == "input_inventories":
+            if self.user in sub_obj.use_role and self.user in obj.admin_role:
+                return True
+            return False
         return super(InventoryAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
 
     def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
         if relationship == "instance_groups":
+            return self.can_attach(obj, sub_obj, relationship, *args, **kwargs)
+        if relationship == "input_inventories":
             return self.can_attach(obj, sub_obj, relationship, *args, **kwargs)
         return super(InventoryAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
 
@@ -1325,7 +1336,9 @@ class ExecutionEnvironmentAccess(BaseAccess):
     def can_add(self, data):
         if not data:  # So the browseable API will work
             return Organization.access_qs(self.user, 'add_executionenvironment').exists()
-        return self.check_related('organization', Organization, data, mandatory=True, role_field='execution_environment_admin_role')
+        return self.check_related('organization', Organization, data, mandatory=True, role_field='execution_environment_admin_role') and self.check_related(
+            'credential', Credential, data, role_field='use_role'
+        )
 
     @check_superuser
     def can_change(self, obj, data):
@@ -1338,6 +1351,8 @@ class ExecutionEnvironmentAccess(BaseAccess):
             if self.user not in obj.organization.execution_environment_admin_role:
                 raise PermissionDenied
         if not self.check_related('organization', Organization, data, obj=obj, role_field='execution_environment_admin_role'):
+            return False
+        if not self.check_related('credential', Credential, data, obj=obj, role_field='use_role'):
             return False
         # Special case that check_related does not catch, org users can not remove the organization from the EE
         if data and ('organization' in data or 'organization_id' in data):
@@ -1383,8 +1398,10 @@ class ProjectAccess(NotificationAttachMixin, BaseAccess):
             if not self.user.can_access(ExecutionEnvironment, 'read', ee):
                 return False
 
-        return self.check_related('organization', Organization, data, role_field='project_admin_role', mandatory=True) and self.check_related(
-            'credential', Credential, data, role_field='use_role'
+        return (
+            self.check_related('organization', Organization, data, role_field='project_admin_role', mandatory=True)
+            and self.check_related('credential', Credential, data, role_field='use_role')
+            and self.check_related('signature_validation_credential', Credential, data, role_field='use_role')
         )
 
     @check_superuser
@@ -1398,6 +1415,7 @@ class ProjectAccess(NotificationAttachMixin, BaseAccess):
             self.check_related('organization', Organization, data, obj=obj, role_field='project_admin_role')
             and self.user in obj.admin_role
             and self.check_related('credential', Credential, data, obj=obj, role_field='use_role')
+            and self.check_related('signature_validation_credential', Credential, data, obj=obj, role_field='use_role')
         )
 
     @check_superuser
@@ -1914,8 +1932,6 @@ class WorkflowJobTemplateNodeAccess(UnifiedCredentialsMixin, BaseAccess):
             return self.user in obj.workflow_job_template.admin_role
 
     def ujt_execute(self, obj, data=None):
-        if not obj.unified_job_template:
-            return True
         return self.check_related('unified_job_template', UnifiedJobTemplate, data, obj=obj, role_field='execute_role', mandatory=True)
 
     def can_change(self, obj, data):
@@ -1935,11 +1951,15 @@ class WorkflowJobTemplateNodeAccess(UnifiedCredentialsMixin, BaseAccess):
     def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
         if relationship in ('success_nodes', 'failure_nodes', 'always_nodes'):
             return self.wfjt_admin(obj) and self.check_same_WFJT(obj, sub_obj)
+        if relationship == 'instance_groups':
+            return self.can_change(obj, None) and (self.user in sub_obj.use_role)
         return super().can_attach(obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check)
 
     def can_unattach(self, obj, sub_obj, relationship, data=None):
         if relationship in ('success_nodes', 'failure_nodes', 'always_nodes'):
             return self.wfjt_admin(obj)
+        if relationship == 'instance_groups':
+            return self.can_change(obj, None) and (self.user in sub_obj.use_role)
         return super().can_unattach(obj, sub_obj, relationship, data=None)
 
 
@@ -2575,6 +2595,17 @@ class ScheduleAccess(UnifiedCredentialsMixin, BaseAccess):
 
     def can_delete(self, obj):
         return self.can_change(obj, {})
+
+    @check_superuser
+    def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
+        if relationship == 'instance_groups':
+            return self.can_change(obj, None) and (self.user in sub_obj.use_role)
+        return super().can_attach(obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check)
+
+    def can_unattach(self, obj, sub_obj, relationship, data=None):
+        if relationship == 'instance_groups':
+            return self.can_attach(obj, sub_obj, relationship, data)
+        return super().can_unattach(obj, sub_obj, relationship, data=data)
 
 
 class NotificationTemplateAccess(BaseAccess):

@@ -4,7 +4,6 @@
 import base64
 import json
 import logging
-import operator
 from collections import OrderedDict
 
 from django.conf import settings
@@ -35,7 +34,7 @@ from awx.main.utils import get_awx_version, get_custom_venv_choices
 from awx.main.utils.licensing import validate_entitlement_manifest
 from awx.api.versioning import URLPathVersioning, reverse
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
-from awx.main.models import Project, Organization, Instance, InstanceGroup, JobTemplate
+from awx.main.models import Project, Organization, JobTemplate
 from awx.main.utils import set_environ
 from awx.main.utils.analytics_proxy import TokenError
 from awx.main.utils.licensing import get_licenser
@@ -153,27 +152,7 @@ class ApiV2PingView(APIView):
         Everything returned here should be considered public / insecure, as
         this requires no auth and is intended for use by the installer process.
         """
-        response = {'ha': is_ha_environment(), 'version': get_awx_version(), 'active_node': settings.CLUSTER_HOST_ID, 'install_uuid': settings.INSTALL_UUID}
-
-        response['instances'] = []
-        for instance in Instance.objects.exclude(node_type='hop'):
-            response['instances'].append(
-                dict(
-                    node=instance.hostname,
-                    node_type=instance.node_type,
-                    uuid=instance.uuid,
-                    heartbeat=instance.last_seen,
-                    capacity=instance.capacity,
-                    version=instance.version,
-                )
-            )
-            response['instances'] = sorted(response['instances'], key=operator.itemgetter('node'))
-        response['instance_groups'] = []
-        for instance_group in InstanceGroup.objects.prefetch_related('instances'):
-            response['instance_groups'].append(
-                dict(name=instance_group.name, capacity=instance_group.capacity, instances=[x.hostname for x in instance_group.instances.all()])
-            )
-            response['instance_groups'] = sorted(response['instance_groups'], key=lambda x: x['name'].lower())
+        response = {'ha': is_ha_environment(), 'version': get_awx_version()}
         return Response(response)
 
 
@@ -361,6 +340,35 @@ class ApiV2ConfigView(APIView):
         if not license_data.get('valid_key', False):
             license_data = {}
 
+        # Check superuser/auditor first
+        if request.user.is_superuser or request.user.is_system_auditor:
+            is_privileged = True
+        else:
+            # Single query checking all three organization role types at once
+            is_privileged = (
+                (
+                    Organization.access_qs(request.user, 'change')
+                    | Organization.access_qs(request.user, 'audit')
+                    | Organization.access_qs(request.user, 'add_project')
+                )
+                .distinct()
+                .exists()
+            )
+
+        if not is_privileged:
+            allowed_license_keys = {
+                'license_type',
+                'valid_key',
+                'compliant',
+                'date_warning',
+                'date_expired',
+                'trial',
+                'product_name',
+                'time_remaining',
+                'grace_period_remaining',
+            }
+            license_data = {k: v for k, v in license_data.items() if k in allowed_license_keys}
+
         pendo_state = settings.PENDO_TRACKING_STATE if settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
 
         data = dict(
@@ -373,22 +381,7 @@ class ApiV2ConfigView(APIView):
             become_methods=PRIVILEGE_ESCALATION_METHODS,
         )
 
-        # Check superuser/auditor first
-        if request.user.is_superuser or request.user.is_system_auditor:
-            has_org_access = True
-        else:
-            # Single query checking all three organization role types at once
-            has_org_access = (
-                (
-                    Organization.access_qs(request.user, 'change')
-                    | Organization.access_qs(request.user, 'audit')
-                    | Organization.access_qs(request.user, 'add_project')
-                )
-                .distinct()
-                .exists()
-            )
-
-        if has_org_access:
+        if is_privileged:
             data.update(
                 dict(
                     project_base_dir=settings.PROJECTS_ROOT,

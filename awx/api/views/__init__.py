@@ -30,7 +30,7 @@ from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 
@@ -159,6 +159,11 @@ def api_exception_handler(exc, context):
         exc = ParseError(exc.args[0])
     if isinstance(context['view'], UnifiedJobStdout):
         context['view'].renderer_classes = [renderers.BrowsableAPIRenderer, JSONRenderer]
+    if isinstance(exc, Http404):
+        req = context['request']._request
+        if 'awx.named_url_rewritten' in req.environ:
+            req.path = req.environ['awx.named_url_rewritten']
+            exc = NotFound(detail=_('Not found.'))
     if isinstance(exc, APIException):
         req = context['request']._request
         if 'awx.named_url_rewritten' in req.environ and not str(getattr(exc, 'status_code', 0)).startswith('2'):
@@ -1785,9 +1790,10 @@ class CredentialExternalTest(OIDCCredentialTestMixin, SubDetailAPIView):
         backend_kwargs = {}
         for field_name, value in obj.inputs.items():
             backend_kwargs[field_name] = obj.get_input(field_name)
-        for field_name, value in request.data.get('inputs', {}).items():
-            if value != '$encrypted$':
-                backend_kwargs[field_name] = value
+        if request.user.can_access(models.Credential, 'change', obj, None):
+            for field_name, value in request.data.get('inputs', {}).items():
+                if value != '$encrypted$':
+                    backend_kwargs[field_name] = value
         backend_kwargs.update(request.data.get('metadata', {}))
 
         # Handle OIDC workload identity token generation if enabled
@@ -1975,8 +1981,11 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
     def list(self, *args, **kwargs):
         try:
             return super(HostList, self).list(*args, **kwargs)
-        except Exception as e:
+        except RuntimeError as e:
             return Response(dict(error=_(str(e))), status=status.HTTP_400_BAD_REQUEST)
+        except Exception:
+            logger.exception('Unexpected error in HostList')
+            return Response(dict(error=_('Invalid host filter.')), status=status.HTTP_400_BAD_REQUEST)
 
 
 class HostDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
@@ -3165,6 +3174,8 @@ class JobTemplateCallback(GenericAPIView):
         job_template = self.get_object()
         matching_hosts = self.find_matching_hosts()
         data = dict(host_config_key=job_template.host_config_key, matching_hosts=[x.name for x in matching_hosts])
+        if not (request.user and request.user.is_authenticated and (request.user.is_superuser or request.user in job_template.admin_role)):
+            data['host_config_key'] = '$encrypted$'
         if settings.DEBUG:
             d = dict([(k, v) for k, v in request.META.items() if k.startswith('HTTP_') or k.startswith('REMOTE_')])
             data['request_meta'] = d
@@ -3562,6 +3573,19 @@ class WorkflowJobTemplateCopy(CopyAPIView):
                         if not user.can_access(cred.__class__, 'use', cred):
                             logger.debug('Deep copy: removing {} from relationship due to permissions'.format(cred))
                             item.remove(cred.pk)
+                elif field_name in ['instance_groups']:
+                    for ig in item.all():
+                        if not user.can_access(ig.__class__, 'use', ig):
+                            logger.debug('Deep copy: removing {} from relationship due to permissions'.format(ig))
+                            item.remove(ig.pk)
+                elif field_name in ['execution_environment']:
+                    if not user.can_access(item.__class__, 'read', item):
+                        setattr(obj, field_name, None)
+                elif field_name in ['labels']:
+                    for label in item.all():
+                        if not user.can_access(label.__class__, 'read', label):
+                            logger.debug('Deep copy: removing {} from relationship due to permissions'.format(label))
+                            item.remove(label.pk)
             obj.save()
 
 
@@ -3866,7 +3890,12 @@ class SystemJobTemplateLaunch(GenericAPIView):
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 
-        new_job = obj.create_unified_job(extra_vars=request.data.get('extra_vars', {}))
+        extra_vars = request.data.get('extra_vars', {})
+        accepted, rejected, errors = obj._accept_or_ignore_job_kwargs(extra_vars=extra_vars)
+        if errors:
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+        new_job = obj.create_unified_job(**accepted)
         new_job.signal_start()
         data = OrderedDict()
         data['system_job'] = new_job.id
@@ -4280,6 +4309,8 @@ class JobJobEventsChildrenSummary(APIView):
     def get(self, request, **kwargs):
         resp = dict(children_summary={}, meta_event_nested_uuid={}, event_processing_finished=False, is_tree=True)
         job = get_object_or_404(models.Job, pk=kwargs['pk'])
+        if not request.user.can_access(models.Job, 'read', job):
+            raise PermissionDenied()
         if not job.event_processing_finished:
             return Response(resp)
         else:
@@ -4713,6 +4744,7 @@ class UnifiedJobStdout(RetrieveAPIView):
 
                 # Remove any ANSI escape sequences containing job event data.
                 content = re.sub(r'\x1b\[K(?:[A-Za-z0-9+/=]+\x1b\[\d+D)+\x1b\[K', '', content)
+                content = re.sub(r'\x1b\].*?(?:\x07|\x1b\\)', '', content, flags=re.DOTALL)
 
                 conv = Ansi2HTMLConverter()
                 body = conv.convert(html.escape(content))

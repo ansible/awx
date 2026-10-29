@@ -180,6 +180,27 @@ class TestWorkflowJobTemplateNodeAccess:
                 #    raise Exception('Attaching workflow nodes only allowed for other nodes')
                 pass
 
+    def test_ujt_execute_null_ujt_requires_execute_role(self, wfjt, rando):
+        """When a node has no unified_job_template (None), assigning one
+        via data must still require execute_role on the new UJT.
+
+        Regression: previously ujt_execute short-circuited to True for
+        null-UJT nodes, letting any WFJT admin point a node at an
+        arbitrary UJT without execute_role.
+        """
+        node = wfjt.workflow_job_template_nodes.create(unified_job_template=None)
+        target_jt = JobTemplate.objects.create(name='target-jt')
+        wfjt.admin_role.members.add(rando)
+
+        access = WorkflowJobTemplateNodeAccess(rando)
+
+        # REJECT: rando lacks execute_role on target_jt
+        assert not access.ujt_execute(node, data={'unified_job_template': target_jt.pk})
+
+        # PERMIT: grant execute_role, now the check should pass
+        target_jt.execute_role.members.add(rando)
+        assert access.ujt_execute(node, data={'unified_job_template': target_jt.pk})
+
     # TODO: Implement additional tests for _nodes attachments here
 
 

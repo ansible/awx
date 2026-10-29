@@ -175,6 +175,54 @@ def test_cred_type_injectors_schema(injectors, valid):
 
 
 @pytest.mark.parametrize(
+    'injectors, valid',
+    [
+        # Blocked: for loop (DoS vector via nested iteration)
+        ({'env': {'PROBE': '{% for i in range(1) %}{{ username }}{% endfor %}'}}, False),
+        # Blocked: extends (no loader -> unhandled TypeError before fix)
+        ({'env': {'PROBE': '{% extends "base" %}'}}, False),
+        # Blocked: include
+        ({'env': {'PROBE': '{% include "other" %}'}}, False),
+        # Blocked: import
+        ({'env': {'PROBE': '{% import "macros" as m %}'}}, False),
+        # Blocked: from-import
+        ({'env': {'PROBE': '{% from "macros" import foo %}'}}, False),
+        # Blocked: macro definition
+        ({'env': {'PROBE': '{% macro m() %}x{% endmacro %}'}}, False),
+        # Catch-all: render-time exception wrapped as ValidationError
+        ({'env': {'PROBE': '{{ 1 / 0 }}'}}, False),
+        # Syntax error caught at parse time
+        ({'env': {'PROBE': '{% if %}'}}, False),
+        # Allowed: simple variable substitution (must still work)
+        ({'env': {'PROBE': '{{ username }}'}}, True),
+        # Allowed: conditional expression (if/else not in blocked list)
+        ({'env': {'PROBE': '{% if username %}{{ username }}{% endif %}'}}, True),
+    ],
+)
+def test_cred_type_injector_blocked_jinja2_constructs(injectors, valid):
+    """Injector templates containing dangerous Jinja2 constructs (for,
+    extends, include, import, macro, etc.) must be rejected; simple
+    variable substitution and conditionals must still be allowed."""
+    type_ = CredentialType(
+        kind='cloud',
+        name='SomeCloud',
+        managed=True,
+        inputs={
+            'fields': [
+                {'id': 'username', 'type': 'string', 'label': '_'},
+            ]
+        },
+        injectors=injectors,
+    )
+    field = CredentialType._meta.get_field('injectors')
+    if valid is False:
+        with pytest.raises(ValidationError):
+            field.clean(injectors, type_)
+    else:
+        field.clean(injectors, type_)
+
+
+@pytest.mark.parametrize(
     'inputs',
     [
         ['must-be-a-dict'],
@@ -267,6 +315,63 @@ def test_credential_input_field_accepts_non_internal_fields_only():
     field = cred._meta.get_field('inputs')
     # Should not raise
     field.validate(cred.inputs, cred)
+
+
+@pytest.mark.parametrize(
+    'env_var, valid',
+    [
+        # --- New prefix-based rejection: LD_ (dynamic linker hijacking) ---
+        ('LD_PRELOAD', False),
+        ('LD_LIBRARY_PATH', False),
+        # --- New prefix-based rejection: BASH_ (shell behaviour) ---
+        ('BASH_ENV', False),
+        ('BASH_FUNC_x', False),
+        # --- New prefix-based rejection: PYTHON (runtime hijacking) ---
+        ('PYTHONHOME', False),
+        ('PYTHONSTARTUP', False),
+        # --- New explicit blocklist entries ---
+        ('ENV', False),
+        ('IFS', False),
+        ('CDPATH', False),
+        ('PROMPT_COMMAND', False),
+        ('SHELLOPTS', False),
+        ('BASHOPTS', False),
+        ('GLOBIGNORE', False),
+        ('PERL5OPT', False),
+        ('PERL5LIB', False),
+        ('RUBYOPT', False),
+        ('RUBYLIB', False),
+        ('NODE_OPTIONS', False),
+        ('GIT_SSH_COMMAND', False),
+        ('GIT_EXEC_PATH', False),
+        ('GIT_TEMPLATE_DIR', False),
+        # --- Permitted: safe custom env vars that pass all checks ---
+        ('MY_CUSTOM_VAR', True),
+        ('AWS_ACCESS_KEY_ID', True),
+    ],
+)
+def test_env_var_blocklist_rejects_dangerous_injectors(env_var, valid):
+    """Regression: credential-type injectors must reject env vars that can
+    hijack the execution environment (LD_*, BASH_*, PYTHON*, and specific
+    blocklist entries added for process-hijacking prevention), while still
+    permitting safe custom env vars."""
+    type_ = CredentialType(
+        kind='cloud',
+        name='SomeCloud',
+        managed=True,
+        inputs={
+            'fields': [
+                {'id': 'secret', 'type': 'string', 'label': '_'},
+            ]
+        },
+        injectors={'env': {env_var: '{{secret}}'}},
+    )
+    field = CredentialType._meta.get_field('injectors')
+    if valid is False:
+        with pytest.raises(ValidationError):
+            field.clean({'env': {env_var: '{{secret}}'}}, type_)
+    else:
+        field.clean({'env': {env_var: '{{secret}}'}}, type_)
 
 
 def test_implicit_role_field_parents():

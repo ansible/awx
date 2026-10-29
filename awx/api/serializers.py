@@ -1489,6 +1489,14 @@ class ProjectOptionsSerializer(BaseSerializer):
             errors['scm_refspec'] = _('SCM refspec can only be used with git projects.')
         if attrs.get('scm_track_submodules') and scm_type != 'git':
             errors['scm_track_submodules'] = _('SCM track_submodules can only be used with git projects.')
+        if attrs.get('scm_branch', '').lstrip().startswith('-'):
+            errors['scm_branch'] = _('Branch names beginning with "-" are not allowed.')
+        if attrs.get('scm_refspec', '').lstrip().startswith('-'):
+            errors['scm_refspec'] = _('Refspec values beginning with "-" are not allowed.')
+
+        scm_url = attrs.get('scm_url', None)
+        if scm_url is not None and scm_url.strip().startswith('-'):
+            errors['scm_url'] = _('SCM URL cannot begin with a dash.')
 
         if errors:
             raise serializers.ValidationError(errors)
@@ -3657,6 +3665,14 @@ class JobTemplateSerializer(CleanTextMixin, JobTemplateMixin, UnifiedJobTemplate
             res['webhook_credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.webhook_credential_id})
         return res
 
+    def to_representation(self, obj):
+        ret = super(JobTemplateSerializer, self).to_representation(obj)
+        request = self.context.get('request')
+        user = request.user if request else None
+        if not (user and user.is_authenticated and (user.is_superuser or user in obj.admin_role)):
+            ret['host_config_key'] = '$encrypted$'
+        return ret
+
     def validate(self, attrs):
         def get_field_from_model_or_attrs(fd):
             return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
@@ -3999,6 +4015,9 @@ class AdHocCommandSerializer(CleanTextMixin, UnifiedJobSerializer):
 
     def validate(self, attrs):
         ret = super(AdHocCommandSerializer, self).validate(attrs)
+        limit = ret.get('limit', '')
+        if limit.startswith('-'):
+            raise serializers.ValidationError({'limit': _('Limit must not start with a dash.')})
         return ret
 
     def validate_extra_vars(self, value):
@@ -4332,6 +4351,11 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
     job_slice_count = serializers.IntegerField(required=False, allow_null=True, min_value=0, default=None)
     timeout = serializers.IntegerField(required=False, allow_null=True, default=None)
     exclude_errors = ()
+
+    def validate_scm_branch(self, value):
+        if value and value.lstrip().startswith('-'):
+            raise serializers.ValidationError(_('SCM branch/revision cannot begin with "-".'))
+        return value
 
     class Meta:
         fields = (
@@ -5182,6 +5206,8 @@ class WorkflowJobLaunchSerializer(PromptFieldCleanTextMixin, BaseSerializer):
 
 
 class BulkJobNodeSerializer(WorkflowJobNodeSerializer):
+    job = serializers.PrimaryKeyRelatedField(read_only=True)
+    workflow_job = serializers.PrimaryKeyRelatedField(read_only=True)
     # We don't do a PrimaryKeyRelatedField for unified_job_template and others, because that increases the number
     # of database queries, rather we take them as integer and later convert them to objects in get_objectified_jobs
     unified_job_template = serializers.IntegerField(
@@ -5309,7 +5335,7 @@ class BulkJobLaunchSerializer(PromptFieldCleanTextMixin, serializers.Serializer)
 
         self.check_list_permission(Credential, requested_use_credentials, 'use')
         self.check_list_permission(Label, requested_use_labels)
-        self.check_list_permission(InstanceGroup, requested_use_instance_groups)  # TODO: change to use_role for conflict
+        self.check_list_permission(InstanceGroup, requested_use_instance_groups, 'use')
         self.check_list_permission(ExecutionEnvironment, requested_use_execution_environments)  # TODO: change if roles introduced
 
         jobs_object = self.get_objectified_jobs(attrs, key_to_obj_map)
@@ -5646,6 +5672,16 @@ class NotificationTemplateSerializer(CleanTextMixin, BaseSerializer):
             raise serializers.ValidationError(_('Missing required fields for Notification Configuration: notification_type'))
 
         notification_class = NotificationTemplate.CLASS_FOR_NOTIFICATION_TYPE[notification_type]
+
+        # When notification_type changes, ensure stale config is cleaned
+        if self.instance and notification_type != self.instance.notification_type:
+            if 'notification_configuration' not in attrs:
+                attrs['notification_configuration'] = self.instance.notification_configuration.copy()
+            valid_keys = set(notification_class.init_parameters.keys())
+            stale_keys = [k for k in attrs['notification_configuration'] if k not in valid_keys]
+            for k in stale_keys:
+                del attrs['notification_configuration'][k]
+
         missing_fields = []
         incorrect_type_fields = []
         password_fields_to_forward = []
@@ -5678,6 +5714,8 @@ class NotificationTemplateSerializer(CleanTextMixin, BaseSerializer):
                 continue
             if field_type == "password" and field_val == "$encrypted$" and object_actual is not None:
                 password_fields_to_forward.append(field)
+            if field_type == "password" and isinstance(field_val, str) and field_val.startswith('$encrypted$') and field_val != '$encrypted$':
+                error_list.append(_('Raw encrypted values are not allowed for field \'{}\'.').format(field))
             if field == "http_method" and field_val.lower() not in ['put', 'post']:
                 error_list.append(_("HTTP method must be either 'POST' or 'PUT'."))
         if missing_fields:
@@ -6038,7 +6076,7 @@ class InstanceSerializer(CleanTextMixin, BaseSerializer):
             'hostname': {
                 'validators': [
                     MaxLengthValidator(limit_value=250),
-                    validators.UniqueValidator(queryset=Instance.objects.all()),
+                    validators.UniqueValidator(queryset=Instance.objects.all(), lookup='iexact'),
                     RegexValidator(
                         regex=r'^localhost$|^127(?:\.[0-9]+){0,2}\.[0-9]+$|^(?:0*\:)*?:?0*1$',
                         flags=re.IGNORECASE,
@@ -6179,6 +6217,8 @@ class InstanceSerializer(CleanTextMixin, BaseSerializer):
         """
         if self.instance and self.instance.hostname != value:
             raise serializers.ValidationError(_("Cannot change hostname."))
+
+        value = value.lower()
 
         return value
 
@@ -6442,6 +6482,24 @@ class InstanceGroupSerializer(CleanTextMixin, BaseSerializer):
 
         if automount_service_account_token:
             raise serializers.ValidationError(_('automountServiceAccountToken is not allowed for security reasons'))
+
+        blocked_volume_names = set()
+        for volume in spec.get('volumes', []):
+            if 'secret' in volume:
+                blocked_volume_names.add(volume.get('name'))
+                raise serializers.ValidationError(_('Mounting Kubernetes secrets via pod_spec_override is not allowed for security reasons'))
+            if 'projected' in volume:
+                sources = volume.get('projected', {}).get('sources', [])
+                if any('serviceAccountToken' in source for source in sources):
+                    blocked_volume_names.add(volume.get('name'))
+                    raise serializers.ValidationError(_('Projected serviceAccountToken volumes are not allowed for security reasons'))
+
+        if blocked_volume_names:
+            for container_key in ('containers', 'initContainers', 'ephemeralContainers'):
+                for container in spec.get(container_key, []):
+                    for volume_mount in container.get('volumeMounts', []):
+                        if volume_mount.get('name') in blocked_volume_names:
+                            raise serializers.ValidationError(_('Volume mount references a blocked volume'))
 
         return value
 

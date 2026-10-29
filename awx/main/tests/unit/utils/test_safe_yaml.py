@@ -3,7 +3,7 @@
 from copy import deepcopy
 import pytest
 import yaml
-from awx.main.utils.safe_yaml import safe_dump
+from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 
 
 @pytest.mark.parametrize('value', [None, 1, 1.5, []])
@@ -87,3 +87,45 @@ def test_deep_diff_unsafe_marking():
     deep['a'][1][0]['b']['z'] = 'not safe'
     yaml = safe_dump(deep, jt_vars)
     assert "!unsafe 'z'" in yaml
+
+
+class TestSanitizeJinjaBypass:
+    """Regression tests for sanitize_jinja regex bypass.
+
+    The old regex r'\\{\\{[^}]+}}' failed to match Jinja expressions
+    containing an interior '}' (e.g. ``{{ {} or ... }}``), because
+    ``[^}]+`` stopped at the first '}' and never reached the closing '}}'.
+    The fix replaces the regex with a simple substring check.
+    """
+
+    def test_plain_jinja_expression_rejected(self):
+        """Plain ``{{ ... }}`` expression is rejected (control, always held)."""
+        with pytest.raises(ValueError):
+            sanitize_jinja("{{ lookup('pipe','id') }}")
+
+    def test_bypass_jinja_expression_rejected(self):
+        """Interior-'}' bypass payload must also be rejected (discriminating)."""
+        with pytest.raises(ValueError):
+            sanitize_jinja("{{ {} or lookup('pipe','id') }}")
+
+    def test_plain_jinja_statement_rejected(self):
+        """Plain ``{% ... %}`` statement is rejected (control, always held)."""
+        with pytest.raises(ValueError):
+            sanitize_jinja("{% if True %}")
+
+    def test_bypass_jinja_statement_rejected(self):
+        """Interior-'%' bypass payload must also be rejected (discriminating)."""
+        with pytest.raises(ValueError):
+            sanitize_jinja("{% 100%of_targets %}")
+
+    def test_safe_string_permitted(self):
+        """A plain string with no Jinja markers passes through unchanged."""
+        assert sanitize_jinja("normal-hostname") == "normal-hostname"
+
+    def test_non_string_permitted(self):
+        """Non-string types are returned as-is."""
+        assert sanitize_jinja(42) == 42
+
+    def test_none_permitted(self):
+        """None is returned as-is."""
+        assert sanitize_jinja(None) is None

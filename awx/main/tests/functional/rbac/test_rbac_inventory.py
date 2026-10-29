@@ -225,3 +225,41 @@ class TestHostFilterRBAC:
         idsB = [h['id'] for h in respB.data['results']]
         assert data['hostB'].id in idsB
         assert data['hostA'].id not in idsB
+
+
+@pytest.mark.django_db
+class TestInputInventoriesAttach:
+    """Guard for input_inventories attach/unattach on constructed inventories.
+
+    The fix requires use_role on the sub_obj AND admin_role on the obj;
+    read_role alone on the sub_obj must be denied.
+    """
+
+    def test_attach_denied_with_only_read_role(self, constructed_inventory, inventory, alice):
+        constructed_inventory.admin_role.members.add(alice)
+        inventory.read_role.members.add(alice)
+        access = InventoryAccess(alice)
+        assert not access.can_attach(constructed_inventory, inventory, 'input_inventories')
+
+    def test_attach_allowed_with_use_role(self, constructed_inventory, inventory, alice):
+        constructed_inventory.admin_role.members.add(alice)
+        inventory.use_role.members.add(alice)
+        access = InventoryAccess(alice)
+        assert access.can_attach(constructed_inventory, inventory, 'input_inventories')
+
+    def test_attach_denied_without_admin_on_constructed(self, constructed_inventory, inventory, alice):
+        inventory.use_role.members.add(alice)
+        access = InventoryAccess(alice)
+        assert not access.can_attach(constructed_inventory, inventory, 'input_inventories')
+
+    def test_unattach_denied_with_only_read_role(self, constructed_inventory, inventory, alice):
+        constructed_inventory.admin_role.members.add(alice)
+        inventory.read_role.members.add(alice)
+        access = InventoryAccess(alice)
+        assert not access.can_unattach(constructed_inventory, inventory, 'input_inventories')
+
+    def test_unattach_allowed_with_use_role(self, constructed_inventory, inventory, alice):
+        constructed_inventory.admin_role.members.add(alice)
+        inventory.use_role.members.add(alice)
+        access = InventoryAccess(alice)
+        assert access.can_unattach(constructed_inventory, inventory, 'input_inventories')

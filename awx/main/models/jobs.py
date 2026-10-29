@@ -197,6 +197,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Custom
 
     FIELDS_TO_PRESERVE_AT_COPY = ['labels', 'instance_groups', 'credentials', 'survey_spec', 'prevent_instance_group_fallback']
     FIELDS_TO_DISCARD_AT_COPY = ['vault_credential', 'credential']
+    PASSWORD_FIELDS = ['host_config_key']
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'organization')]
 
     class Meta:
@@ -1221,7 +1222,7 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
         used as options for the management commands.
         """
         rejected = {}
-        allowed_vars = set(['days', 'older_than', 'granularity'])
+        allowed_vars = set(['days', 'older_than', 'granularity', 'batch_size', 'dry_run'])
         given_vars = set(data.keys())
         unallowed_vars = given_vars - (allowed_vars & given_vars)
         errors_list = []
@@ -1243,6 +1244,19 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
                 except ValueError:
                     errors_list.append(_("days must be a positive integer."))
                     rejected['days'] = data.pop('days')
+
+            if 'batch_size' in data:
+                try:
+                    if isinstance(data['batch_size'], (bool, type(None))):
+                        raise ValueError
+                    if float(data['batch_size']) != int(data['batch_size']):
+                        raise ValueError
+                    batch_size = int(data['batch_size'])
+                    if batch_size < 0:
+                        raise ValueError
+                except ValueError:
+                    errors_list.append(_("batch_size must be a positive integer."))
+                    rejected['batch_size'] = data.pop('batch_size')
 
         if errors_list:
             errors['extra_vars'] = errors_list
