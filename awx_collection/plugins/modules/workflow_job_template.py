@@ -304,9 +304,18 @@ options:
                 - This parameter is mutually exclusive with suboption C(organization).
               type: dict
               suboptions:
+                name:
+                  description:
+                    - The inventory the inventory source belongs to.
+                    - Inventory source names are unique only within an inventory, so set this when two inventories
+                      have a source with the same name.
+                    - Used for looking up the inventory source, not a direct model field.
+                  type: str
                 organization:
                   description:
                     - Name of key for use in model for organizational reference
+                    - With C(name), qualifies the inventory lookup; without it, filters on the inventory source's own
+                      organization.
                   type: dict
                   suboptions:
                     name:
@@ -455,6 +464,7 @@ EXAMPLES = '''
         unified_job_template:
           name: example-project
           inventory:
+            name: Demo Inventory
             organization:
               name: Default
           type: inventory_source
@@ -609,20 +619,27 @@ def create_workflow_nodes(module, response, workflow_nodes, workflow_id):
         if workflow_node['unified_job_template']['name']:
             if workflow_node['unified_job_template']['type'] is None:
                 module.fail_json(msg='Could not find unified job template type in workflow_nodes {0}'.format(workflow_node))
+            lookup_endpoint = 'unified_job_templates'
             search_fields['type'] = workflow_node['unified_job_template']['type']
             if workflow_node['unified_job_template']['type'] == 'inventory_source':
-                if 'inventory' in workflow_node['unified_job_template']:
-                    if 'organization' in workflow_node['unified_job_template']['inventory']:
-                        organization_id = module.resolve_name_to_id('organizations', workflow_node['unified_job_template']['inventory']['organization']['name'])
-                        search_fields['organization'] = organization_id
-                    else:
-                        pass
+                inventory = workflow_node['unified_job_template'].get('inventory') or {}
+                inventory_organization_id = None
+                if 'organization' in inventory:
+                    inventory_organization_id = module.resolve_name_to_id('organizations', inventory['organization']['name'])
+                if inventory.get('name'):
+                    # Source names are unique only within an inventory, so qualify by the inventory itself
+                    inventory_lookup = {'organization': inventory_organization_id} if inventory_organization_id else {}
+                    inventory_id = module.get_one('inventories', name_or_id=inventory['name'], allow_none=False, data=inventory_lookup)['id']
+                    lookup_endpoint = 'inventory_sources'
+                    search_fields = {'inventory': inventory_id}
+                elif inventory_organization_id:
+                    search_fields['organization'] = inventory_organization_id
             elif 'organization' in workflow_node['unified_job_template']:
                 organization_id = module.resolve_name_to_id('organizations', workflow_node['unified_job_template']['organization']['name'])
                 search_fields['organization'] = organization_id
             else:
                 pass
-            unified_job_template = module.get_one('unified_job_templates', name_or_id=workflow_node['unified_job_template']['name'], **{'data': search_fields})
+            unified_job_template = module.get_one(lookup_endpoint, name_or_id=workflow_node['unified_job_template']['name'], **{'data': search_fields})
             if unified_job_template:
                 workflow_node_fields['unified_job_template'] = unified_job_template['id']
             else:
