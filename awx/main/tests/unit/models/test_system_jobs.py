@@ -49,6 +49,49 @@ def test_unallowed_system_job_data():
     assert 'days' in accepted
 
 
+@pytest.mark.parametrize(
+    "resources",
+    [
+        ['jobs'],
+        ['jobs', 'notifications'],
+        ['jobs', 'ad_hoc_commands', 'project_updates', 'inventory_updates', 'management_jobs', 'workflow_jobs', 'notifications'],
+        [],
+    ],
+)
+def test_valid_cleanup_jobs_resources(resources):
+    sjt = SystemJobTemplate(job_type='cleanup_jobs')
+    accepted, rejected, errors = sjt.accept_or_ignore_variables({'days': 30, 'resources': resources})
+    assert not rejected
+    assert not errors
+    assert accepted['resources'] == resources
+
+
+@pytest.mark.parametrize(
+    "resources",
+    [
+        'jobs',  # not a list
+        ['jobs', 'bogus'],  # contains an unknown resource
+        ['bogus'],
+        {'jobs': True},  # wrong type
+        [{}],  # non-string (unhashable) entry
+        ['jobs', 5],  # non-string entry mixed with a valid one
+        [None],  # non-string entry
+    ],
+)
+def test_invalid_cleanup_jobs_resources(resources):
+    sjt = SystemJobTemplate(job_type='cleanup_jobs')
+    accepted, rejected, errors = sjt.accept_or_ignore_variables({'days': 30, 'resources': resources})
+    assert 'resources' in rejected
+    assert str(errors['extra_vars'][0]).startswith('resources must be a list containing any of:')
+
+
+def test_resources_not_allowed_for_cleanup_activitystream():
+    sjt = SystemJobTemplate(job_type='cleanup_activitystream')
+    accepted, ignored, errors = sjt.accept_or_ignore_variables({'days': 30, 'resources': ['jobs']})
+    assert 'resources' in ignored
+    assert 'days' in accepted
+
+
 def test_reject_other_prommpts():
     sjt = SystemJobTemplate()
     accepted, ignored, errors = sjt._accept_or_ignore_job_kwargs(limit="")
