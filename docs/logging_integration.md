@@ -171,8 +171,8 @@ supported services:
  - A flag to indicate how system tracking records will be sent
  - Selecting which loggers to send
  - Enabling sending logs
- - Connection type (HTTPS, TCP, or UDP)
- - Timeout value if connection type is based on TCP protocol (HTTPS and TCP)
+ - Connection type (HTTPS, TCP, UDP, or RELP)
+ - Timeout value if connection type is based on TCP protocol (HTTPS, TCP and RELP)
 
 Some settings for the log handler will not be exposed to the user via
 this mechanism. For example, threading (enabled).
@@ -184,8 +184,8 @@ One note on configuring Host and Port: When entering URL it is customary to
 include port number, like `https://localhost:4399/foo/bar`. So for the convenience
 of users, when connection type is HTTPS, we allow entering hostname as a URL
 with port number and thus ignore Port field. In other words, Port field is
-optional in this case. On the other hand, TCP and UDP connections are determined
-by `<hostname, port number>` tuple rather than URL. So in the case of TCP/UDP
+optional in this case. On the other hand, TCP, UDP and RELP connections are determined
+by `<hostname, port number>` tuple rather than URL. So in the case of a TCP, UDP or RELP
 connection, Port field is supposed to be provided and Host field is supposed to
 contain hostname only. If instead a URL is entered in Host field, its hostname
 portion will be extracted as the actual hostname.

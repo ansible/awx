@@ -188,10 +188,10 @@ class SettingLoggingTest(GenericAPIView):
         except subprocess.CalledProcessError as exc:
             return Response({'error': exc.output}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check to ensure port is open at host
-        if protocol in ['udp', 'tcp']:
+        # Check to ensure port is open at host. RELP runs over TCP, so the connect below tests it.
+        if protocol in ['udp', 'tcp', 'relp']:
             port = getattr(settings, 'LOG_AGGREGATOR_PORT', None)
-            # Error if port is not set when using UDP/TCP
+            # Error if port is not set when using UDP/TCP/RELP
             if not port:
                 return Response({'error': 'Port required for ' + protocol}, status=status.HTTP_400_BAD_REQUEST)
         else:
