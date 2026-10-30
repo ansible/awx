@@ -372,14 +372,10 @@ class Metrics(MetricsNamespace):
                     instance_data[instance] = json.loads(instance_data_from_redis.decode('UTF-8'))
         return instance_data
 
-    def generate_metrics(self, request, emitted_metric_headers=None, skip_fields=None):
+    def generate_metrics(self, request, skip_fields=None):
         # takes the api request, filters, and generates prometheus data
         # if additional filtering is added, update metrics_view.md
-        # emitted_metric_headers tracks metric families that already have HELP/TYPE so
-        # overlapping names stay Prometheus-compliant (AAP-84834).
         # skip_fields: omit families already emitted contiguously by metrics().
-        if emitted_metric_headers is None:
-            emitted_metric_headers = set()
         skip_fields = set(skip_fields or ())
         instance_data = self.load_other_metrics(request)
         metrics_filter = request.query_params.getlist("metric")
@@ -391,10 +387,7 @@ class Metrics(MetricsNamespace):
                 if len(metrics_filter) == 0 or field in metrics_filter:
                     # Add subsystem label only for operational metrics
                     namespace = self._namespace if field in SHARED_SUBSYSTEM_METRIC_FIELDS else None
-                    include_header = field not in emitted_metric_headers
-                    output_text += self.METRICS[field].to_prometheus(instance_data, namespace, include_header=include_header)
-                    if include_header:
-                        emitted_metric_headers.add(field)
+                    output_text += self.METRICS[field].to_prometheus(instance_data, namespace)
         return output_text
 
 
