@@ -20,6 +20,15 @@ from .dispatcherd_metrics import get_dispatcherd_metrics
 root_key = settings.SUBSYSTEM_METRICS_REDIS_KEY_PREFIX
 logger = logging.getLogger('awx.main.analytics')
 
+# Operational metrics present on every Metrics subclass (_METRICSLIST). When
+# multiple subsystems contribute samples, Prometheus text format requires one
+# contiguous family (single HELP/TYPE, then all samples) — AAP-84834.
+SHARED_SUBSYSTEM_METRIC_FIELDS = (
+    'subsystem_metrics_pipe_execute_seconds',
+    'subsystem_metrics_pipe_execute_calls',
+    'subsystem_metrics_send_metrics_seconds',
+)
+
 
 class MetricsNamespace:
     def __init__(self, namespace):
@@ -72,8 +81,11 @@ class BaseM:
         value = conn.hget(root_key, self.field)
         return self.decode_value(value)
 
-    def to_prometheus(self, instance_data, namespace=None):
-        output_text = f"# HELP {self.field} {self.help_text}\n# TYPE {self.field} gauge\n"
+    def to_prometheus(self, instance_data, namespace=None, include_header=True):
+        # Prometheus text format allows only one HELP/TYPE per metric family (AAP-84834).
+        output_text = ''
+        if include_header:
+            output_text += f"# HELP {self.field} {self.help_text}\n# TYPE {self.field} gauge\n"
         for instance in instance_data:
             if self.field in instance_data[instance]:
                 # Build label string
@@ -174,8 +186,11 @@ class HistogramM(BaseM):
         self.sum.store_value(conn)
         self.inf.store_value(conn)
 
-    def to_prometheus(self, instance_data, namespace=None):
-        output_text = f"# HELP {self.field} {self.help_text}\n# TYPE {self.field} histogram\n"
+    def to_prometheus(self, instance_data, namespace=None, include_header=True):
+        # Prometheus text format allows only one HELP/TYPE per metric family (AAP-84834).
+        output_text = ''
+        if include_header:
+            output_text += f"# HELP {self.field} {self.help_text}\n# TYPE {self.field} histogram\n"
         for instance in instance_data:
             # Build label string
             node_label = f'node="{instance}"'
@@ -357,21 +372,21 @@ class Metrics(MetricsNamespace):
                     instance_data[instance] = json.loads(instance_data_from_redis.decode('UTF-8'))
         return instance_data
 
-    def generate_metrics(self, request):
+    def generate_metrics(self, request, skip_fields=None):
         # takes the api request, filters, and generates prometheus data
         # if additional filtering is added, update metrics_view.md
+        # skip_fields: omit families already emitted contiguously by metrics().
+        skip_fields = set(skip_fields or ())
         instance_data = self.load_other_metrics(request)
         metrics_filter = request.query_params.getlist("metric")
         output_text = ''
         if instance_data:
             for field in self.METRICS:
+                if field in skip_fields:
+                    continue
                 if len(metrics_filter) == 0 or field in metrics_filter:
                     # Add subsystem label only for operational metrics
-                    namespace = (
-                        self._namespace
-                        if field in ['subsystem_metrics_pipe_execute_seconds', 'subsystem_metrics_pipe_execute_calls', 'subsystem_metrics_send_metrics_seconds']
-                        else None
-                    )
+                    namespace = self._namespace if field in SHARED_SUBSYSTEM_METRIC_FIELDS else None
                     output_text += self.METRICS[field].to_prometheus(instance_data, namespace)
         return output_text
 
@@ -441,10 +456,31 @@ class CallbackReceiverMetrics(Metrics):
 
 
 def metrics(request):
+    # Shared operational metrics must be one contiguous family across subsystems
+    # (HELP/TYPE once, then all samples) per Prometheus text exposition format.
+    exporters = (
+        DispatcherMetrics(),
+        CallbackReceiverMetrics(),
+        IndirectCountingMetrics(),
+    )
+    loaded = [(exporter, exporter.load_other_metrics(request)) for exporter in exporters]
+    metrics_filter = request.query_params.getlist("metric")
     output_text = ''
-    output_text += DispatcherMetrics().generate_metrics(request)
-    output_text += CallbackReceiverMetrics().generate_metrics(request)
-    output_text += IndirectCountingMetrics().generate_metrics(request)
+
+    for field in SHARED_SUBSYSTEM_METRIC_FIELDS:
+        if metrics_filter and field not in metrics_filter:
+            continue
+        metric = exporters[0].METRICS[field]
+        include_header = True
+        for exporter, instance_data in loaded:
+            if not instance_data:
+                continue
+            output_text += metric.to_prometheus(instance_data, namespace=exporter._namespace, include_header=include_header)
+            include_header = False
+
+    # Remaining (non-shared) metrics per subsystem; skip shared fields already emitted.
+    for exporter, _instance_data in loaded:
+        output_text += exporter.generate_metrics(request, skip_fields=SHARED_SUBSYSTEM_METRIC_FIELDS)
 
     dispatcherd_metrics = get_dispatcherd_metrics(request)
     if dispatcherd_metrics:

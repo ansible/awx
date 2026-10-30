@@ -166,8 +166,27 @@ def test_indirect_counting_metrics_init():
 @mock.patch.object(subsystem_metrics_module, 'get_dispatcherd_metrics', return_value='')
 def test_subsystem_metrics_function_includes_indirect_counting(mock_dispatcherd, mock_dispatcher, mock_callback, mock_indirect):
     """subsystem_metrics.metrics() calls generate_metrics on IndirectCountingMetrics."""
+    from awx.main.analytics.subsystem_metrics import FloatM, IntM, SHARED_SUBSYSTEM_METRIC_FIELDS
+
+    shared = {
+        'subsystem_metrics_pipe_execute_seconds': FloatM('subsystem_metrics_pipe_execute_seconds', 't'),
+        'subsystem_metrics_pipe_execute_calls': IntM('subsystem_metrics_pipe_execute_calls', 't'),
+        'subsystem_metrics_send_metrics_seconds': FloatM('subsystem_metrics_send_metrics_seconds', 't'),
+    }
     for m in (mock_dispatcher, mock_callback, mock_indirect):
+        m.return_value.load_other_metrics.return_value = {}
         m.return_value.generate_metrics.return_value = ''
+        m.return_value.METRICS = shared
+        m.return_value._namespace = 'test'
     request = mock.MagicMock()
+    request.query_params.getlist.return_value = []
     subsystem_metrics_module.metrics(request)
-    mock_indirect.return_value.generate_metrics.assert_called_once_with(request)
+    mock_indirect.return_value.generate_metrics.assert_called_once_with(
+        request, skip_fields=SHARED_SUBSYSTEM_METRIC_FIELDS
+    )
+    mock_dispatcher.return_value.generate_metrics.assert_called_once_with(
+        request, skip_fields=SHARED_SUBSYSTEM_METRIC_FIELDS
+    )
+    mock_callback.return_value.generate_metrics.assert_called_once_with(
+        request, skip_fields=SHARED_SUBSYSTEM_METRIC_FIELDS
+    )
