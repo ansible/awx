@@ -2685,6 +2685,14 @@ class ActivityStreamAccess(BaseAccess):
         self.activity_stream_ordering = activity_stream_ordering
         self.activity_stream_queryset = activity_stream_queryset
 
+    def get_queryset(self):
+        if self.activity_stream_queryset is not None and (self.user.is_superuser or self.user.is_system_auditor):
+            qs = self.activity_stream_queryset
+            if self.select_related:
+                qs = qs.select_related(*self.select_related)
+            return qs
+        return super().get_queryset()
+
     def filtered_queryset(self):
         """
         The full set is returned if the user is:

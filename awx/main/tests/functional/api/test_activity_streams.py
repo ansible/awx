@@ -326,7 +326,7 @@ def test_activity_stream_limited_visibility_preserves_pages(get, org_admin, sett
 
 
 @pytest.mark.django_db
-def test_activity_stream_filtered_windowed_pagination_preserves_count_and_pages(get, project, user, org_admin, settings):
+def test_activity_stream_filtered_windowed_pagination_preserves_count_and_pages(get, project, user, admin, org_admin, settings):
     """Filtered pages rank matching visible rows and count all matching rows."""
     settings.ACTIVITY_STREAM_ENABLED = True
     marker = 'activity-stream-pagination-marker'
@@ -365,6 +365,11 @@ def test_activity_stream_filtered_windowed_pagination_preserves_count_and_pages(
     assert pages == original_ids
     assert response.data['next'] is None
     assert response.data['previous'] is not None
+
+    superuser_page = get(f'{url}?{query}&page=1', admin)
+    assert superuser_page.status_code == 200
+    assert superuser_page.data['count'] == len(original_ids)
+    assert [result['id'] for result in superuser_page.data['results']] == original_ids[:3]
 
     no_access_user = user('activity-stream-no-access', False)
     no_access_page = get(f'{url}?{query}&page=1', no_access_user)
