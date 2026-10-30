@@ -25,6 +25,8 @@ from django.contrib.auth.password_validation import validate_password as django_
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError as DjangoValidationError
 from django.db import models
+from django.db.models import Prefetch
+from django.db.models.query import prefetch_related_objects
 from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import force_str
 from django.utils.text import capfirst
@@ -6494,6 +6496,38 @@ class InstanceGroupSerializer(CleanTextMixin, BaseSerializer):
 
 class ActivityStreamSerializer(BaseSerializer):
     changes = serializers.SerializerMethodField()
+    _ACTIVITY_STREAM_RELATED_FIELDS = frozenset(field.name for field in ActivityStream._meta.local_many_to_many)
+    _RELATED_OBJECT_SELECT_RELATED = {'credential': ('credential_type',), 'job': ('job_template',)}
+
+    def _prefetch_page_related_objects(self):
+        """Prefetch relations used by this activity-stream page."""
+        if self.context.get('activity_stream_relations_prefetched'):
+            return
+
+        page = getattr(self.parent, 'instance', None)
+        if page is None:
+            return
+
+        association_types = {object_type for obj in page for object_type in (obj.object1, obj.object2)}
+        if 'user' in association_types:
+            association_types.add('role')
+        relation_names = association_types & self._ACTIVITY_STREAM_RELATED_FIELDS
+        if relation_names:
+            prefetches = []
+            for relation_name in sorted(relation_names):
+                select_related = self._RELATED_OBJECT_SELECT_RELATED.get(relation_name)
+                if select_related:
+                    related_model = ActivityStream._meta.get_field(relation_name).related_model
+                    prefetches.append(Prefetch(relation_name, queryset=related_model.objects.select_related(*select_related)))
+                else:
+                    prefetches.append(relation_name)
+            prefetch_related_objects(page, *prefetches)
+        self.context['activity_stream_relations_prefetched'] = True
+
+    def to_representation(self, obj):
+        self._prefetch_page_related_objects()
+        return super().to_representation(obj)
+
     object_association = serializers.SerializerMethodField(help_text=_("When present, shows the field name of the role or relationship that changed."))
     object_type = serializers.SerializerMethodField(help_text=_("When present, shows the model on which the role or relationship was defined."))
 

@@ -9,7 +9,8 @@ from functools import reduce
 
 # Django
 from django.conf import settings
-from django.db.models import Q, Prefetch
+from django.db.models import F, Q, Prefetch, Window
+from django.db.models.functions import RowNumber
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
@@ -2676,26 +2677,21 @@ class ActivityStreamAccess(BaseAccess):
     """
 
     model = ActivityStream
-    prefetch_related = (
-        'organization',
-        'user',
-        'inventory',
-        'host',
-        'group',
-        'inventory_update',
-        'credential',
-        'credential_type',
-        'team',
-        'ad_hoc_command',
-        'notification_template',
-        'notification',
-        'label',
-        'role',
-        'actor',
-        'schedule',
-        'unified_job_template',
-        'workflow_job_template_node',
-    )
+    select_related = ('actor',)
+
+    def __init__(self, user, save_messages=False, activity_stream_limit=None, activity_stream_ordering='id', activity_stream_queryset=None):
+        super().__init__(user, save_messages=save_messages)
+        self.activity_stream_limit = activity_stream_limit
+        self.activity_stream_ordering = activity_stream_ordering
+        self.activity_stream_queryset = activity_stream_queryset
+
+    def get_queryset(self):
+        if self.activity_stream_queryset is not None and (self.user.is_superuser or self.user.is_system_auditor):
+            qs = self.activity_stream_queryset
+            if self.select_related:
+                qs = qs.select_related(*self.select_related)
+            return qs
+        return super().get_queryset()
 
     def filtered_queryset(self):
         """
@@ -2718,7 +2714,7 @@ class ActivityStreamAccess(BaseAccess):
          - schedules
          - custom inventory scripts
         """
-        qs = self.model.objects.all()
+        qs = self.activity_stream_queryset if self.activity_stream_queryset is not None else self.model.objects.all()
         # FIXME: the following fields will be attached to the wrong object
         # if they are included in prefetch_related because of
         # https://github.com/django-polymorphic/django-polymorphic/issues/68
@@ -2726,72 +2722,87 @@ class ActivityStreamAccess(BaseAccess):
         # 'inventory_source', 'workflow_job_template'
 
         AS = ActivityStream
-
-        q = Q(pk__in=AS.user.through.objects.filter(user=self.user).values('activitystream_id'))
+        activity_stream_ids = [AS.user.through.objects.filter(user=self.user).values('activitystream_id')]
 
         inventory_set = Inventory.access_ids_qs(self.user, 'view')
         if inventory_set.exists():
-            q |= (
-                Q(pk__in=AS.ad_hoc_command.through.objects.filter(adhoccommand__inventory__in=inventory_set).values('activitystream_id'))
-                | Q(pk__in=AS.inventory.through.objects.filter(inventory__in=inventory_set).values('activitystream_id'))
-                | Q(pk__in=AS.host.through.objects.filter(host__inventory__in=inventory_set).values('activitystream_id'))
-                | Q(pk__in=AS.group.through.objects.filter(group__inventory__in=inventory_set).values('activitystream_id'))
-                | Q(pk__in=AS.inventory_source.through.objects.filter(inventorysource__inventory__in=inventory_set).values('activitystream_id'))
-                | Q(
-                    pk__in=AS.inventory_update.through.objects.filter(inventoryupdate__inventory_source__inventory__in=inventory_set).values(
-                        'activitystream_id'
-                    )
-                )
+            activity_stream_ids.extend(
+                [
+                    AS.ad_hoc_command.through.objects.filter(adhoccommand__inventory__in=inventory_set).values('activitystream_id'),
+                    AS.inventory.through.objects.filter(inventory__in=inventory_set).values('activitystream_id'),
+                    AS.host.through.objects.filter(host__inventory__in=inventory_set).values('activitystream_id'),
+                    AS.group.through.objects.filter(group__inventory__in=inventory_set).values('activitystream_id'),
+                    AS.inventory_source.through.objects.filter(inventorysource__inventory__in=inventory_set).values('activitystream_id'),
+                    AS.inventory_update.through.objects.filter(inventoryupdate__inventory_source__inventory__in=inventory_set).values('activitystream_id'),
+                ]
             )
 
         credential_set = Credential.access_ids_qs(self.user, 'view')
         if credential_set.exists():
-            q |= Q(pk__in=AS.credential.through.objects.filter(credential__in=credential_set).values('activitystream_id'))
+            activity_stream_ids.append(AS.credential.through.objects.filter(credential__in=credential_set).values('activitystream_id'))
 
         auditing_orgs = (Organization.access_qs(self.user, 'change') | Organization.access_qs(self.user, 'audit')).distinct().values_list('id', flat=True)
         if auditing_orgs.exists():
-            q |= (
-                Q(pk__in=AS.user.through.objects.filter(user__in=auditing_orgs.values('member_role__members')).values('activitystream_id'))
-                | Q(pk__in=AS.organization.through.objects.filter(organization__in=auditing_orgs).values('activitystream_id'))
-                | Q(pk__in=AS.notification_template.through.objects.filter(notificationtemplate__organization__in=auditing_orgs).values('activitystream_id'))
-                | Q(
-                    pk__in=AS.notification.through.objects.filter(notification__notification_template__organization__in=auditing_orgs).values(
-                        'activitystream_id'
-                    )
-                )
-                | Q(pk__in=AS.label.through.objects.filter(label__organization__in=auditing_orgs).values('activitystream_id'))
-                | Q(pk__in=AS.role.through.objects.filter(role__in=Role.visible_roles(self.user)).values('activitystream_id'))
+            activity_stream_ids.extend(
+                [
+                    AS.user.through.objects.filter(user__in=auditing_orgs.values('member_role__members')).values('activitystream_id'),
+                    AS.organization.through.objects.filter(organization__in=auditing_orgs).values('activitystream_id'),
+                    AS.notification_template.through.objects.filter(notificationtemplate__organization__in=auditing_orgs).values('activitystream_id'),
+                    AS.notification.through.objects.filter(notification__notification_template__organization__in=auditing_orgs).values('activitystream_id'),
+                    AS.label.through.objects.filter(label__organization__in=auditing_orgs).values('activitystream_id'),
+                    AS.role.through.objects.filter(role__in=Role.visible_roles(self.user)).values('activitystream_id'),
+                ]
             )
 
         project_set = Project.access_ids_qs(self.user, 'view')
         if project_set.exists():
-            q |= Q(pk__in=AS.project.through.objects.filter(project__in=project_set).values('activitystream_id')) | Q(
-                pk__in=AS.project_update.through.objects.filter(projectupdate__project__in=project_set).values('activitystream_id')
+            activity_stream_ids.extend(
+                [
+                    AS.project.through.objects.filter(project__in=project_set).values('activitystream_id'),
+                    AS.project_update.through.objects.filter(projectupdate__project__in=project_set).values('activitystream_id'),
+                ]
             )
 
         jt_set = JobTemplate.access_ids_qs(self.user, 'view')
         if jt_set.exists():
-            q |= Q(pk__in=AS.job_template.through.objects.filter(jobtemplate__in=jt_set).values('activitystream_id')) | Q(
-                pk__in=AS.job.through.objects.filter(job__job_template__in=jt_set).values('activitystream_id')
+            activity_stream_ids.extend(
+                [
+                    AS.job_template.through.objects.filter(jobtemplate__in=jt_set).values('activitystream_id'),
+                    AS.job.through.objects.filter(job__job_template__in=jt_set).values('activitystream_id'),
+                ]
             )
 
         wfjt_set = WorkflowJobTemplate.access_ids_qs(self.user, 'view')
         if wfjt_set.exists():
-            q |= (
-                Q(pk__in=AS.workflow_job_template.through.objects.filter(workflowjobtemplate__in=wfjt_set).values('activitystream_id'))
-                | Q(
-                    pk__in=AS.workflow_job_template_node.through.objects.filter(workflowjobtemplatenode__workflow_job_template__in=wfjt_set).values(
+            activity_stream_ids.extend(
+                [
+                    AS.workflow_job_template.through.objects.filter(workflowjobtemplate__in=wfjt_set).values('activitystream_id'),
+                    AS.workflow_job_template_node.through.objects.filter(workflowjobtemplatenode__workflow_job_template__in=wfjt_set).values(
                         'activitystream_id'
-                    )
-                )
-                | Q(pk__in=AS.workflow_job.through.objects.filter(workflowjob__workflow_job_template__in=wfjt_set).values('activitystream_id'))
+                    ),
+                    AS.workflow_job.through.objects.filter(workflowjob__workflow_job_template__in=wfjt_set).values('activitystream_id'),
+                ]
             )
 
         team_set = Team.access_ids_qs(self.user, 'view')
         if team_set.exists():
-            q |= Q(pk__in=AS.team.through.objects.filter(team__in=team_set).values('activitystream_id'))
+            activity_stream_ids.append(AS.team.through.objects.filter(team__in=team_set).values('activitystream_id'))
 
-        return qs.filter(q)
+        if self.activity_stream_limit:
+            branch_ordering = F('activitystream_id').desc() if self.activity_stream_ordering == '-id' else F('activitystream_id').asc()
+            filtered_activity_stream_ids = None
+            if self.activity_stream_queryset is not None:
+                filtered_activity_stream_ids = self.activity_stream_queryset.order_by().values('pk')
+            activity_stream_ids = [
+                ids.filter(**({'activitystream_id__in': filtered_activity_stream_ids} if filtered_activity_stream_ids is not None else {}))
+                .annotate(_activity_stream_rank=Window(RowNumber(), order_by=branch_ordering))
+                .filter(_activity_stream_rank__lte=self.activity_stream_limit)
+                .values('activitystream_id')
+                for ids in activity_stream_ids
+            ]
+
+        visible_activity_stream_ids = activity_stream_ids[0].union(*activity_stream_ids[1:])
+        return qs.filter(pk__in=visible_activity_stream_ids)
 
     def can_add(self, data):
         return False
