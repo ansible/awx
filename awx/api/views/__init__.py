@@ -4892,6 +4892,10 @@ class ActivityStreamList(SimpleListAPIView):
         # For the unfiltered list, bound each Activity Stream visibility branch
         # to the end of the requested page. Filtered requests need the complete
         # queryset because their count and result semantics differ.
+        #
+        # TODO: Optimize filtered requests in a follow-up change. The filters
+        # must be applied before branch ranking/limiting, while preserving the
+        # filtered count and page boundaries for RBAC-scoped users.
         pagination = self.pagination_class()
         if pagination.has_filter_params(self.request, self):
             return super().get_queryset()
