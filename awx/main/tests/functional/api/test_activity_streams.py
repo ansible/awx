@@ -311,12 +311,68 @@ def test_activity_stream_limited_visibility_preserves_pages(get, org_admin, sett
     url = reverse('api:activity_stream_list')
     visible_ids = list(ActivityStreamAccess(org_admin).get_queryset().order_by('-id').values_list('id', flat=True))
 
-    for page, page_size in ((1, 1), (1, 20), (1, 100)):
+    page_size = 3
+    for page in range(1, (len(visible_ids) + page_size - 1) // page_size + 1):
         response = get(f'{url}?order_by=-id&page={page}&page_size={page_size}', org_admin)
         assert response.status_code == 200
         start = (page - 1) * page_size
         expected_ids = visible_ids[start : start + page_size]
         assert [result['id'] for result in response.data['results']] == expected_ids
+
+    for page_size in (1, 20, 100):
+        response = get(f'{url}?order_by=-id&page=1&page_size={page_size}', org_admin)
+        assert response.status_code == 200
+        assert [result['id'] for result in response.data['results']] == visible_ids[:page_size]
+
+
+@pytest.mark.django_db
+def test_activity_stream_filtered_windowed_pagination_preserves_count_and_pages(get, project, user, org_admin, settings):
+    """Filtered pages rank matching visible rows and count all matching rows."""
+    settings.ACTIVITY_STREAM_ENABLED = True
+    marker = 'activity-stream-pagination-marker'
+    entry_ids = []
+    for _ in range(7):
+        entry = ActivityStream.objects.create(
+            operation='create',
+            object1='project',
+            object2='',
+            actor=org_admin,
+            changes='{"marker": "activity-stream-pagination-marker"}',
+        )
+        entry.project.add(project)
+        entry_ids.append(entry.id)
+
+    url = reverse('api:activity_stream_list')
+    query = 'search={}&order_by=-id&page_size=3'.format(marker)
+    original_ids = list(
+        ActivityStreamAccess(org_admin)
+        .get_queryset()
+        .filter(changes__icontains=marker)
+        .order_by('-id')
+        .values_list('id', flat=True)
+    )
+    assert original_ids == entry_ids[::-1]
+
+    pages = []
+    for page in range(1, (len(original_ids) + 2) // 3 + 1):
+        response = get(f'{url}?{query}&page={page}', org_admin)
+        assert response.status_code == 200
+        assert response.data['count'] == len(original_ids)
+        start = (page - 1) * 3
+        pages.extend(result['id'] for result in response.data['results'])
+        assert [result['id'] for result in response.data['results']] == original_ids[start : start + 3]
+
+    assert pages == original_ids
+    assert response.data['next'] is None
+    assert response.data['previous'] is not None
+
+    no_access_user = user('activity-stream-no-access', False)
+    no_access_page = get(f'{url}?{query}&page=1', no_access_user)
+    assert no_access_page.status_code == 200
+    assert no_access_page.data['count'] == 0
+    assert no_access_page.data['results'] == []
+    assert no_access_page.data['next'] is None
+    assert no_access_page.data['previous'] is None
 
 
 @pytest.mark.django_db

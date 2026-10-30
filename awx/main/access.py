@@ -2679,10 +2679,11 @@ class ActivityStreamAccess(BaseAccess):
     model = ActivityStream
     select_related = ('actor',)
 
-    def __init__(self, user, save_messages=False, activity_stream_limit=None, activity_stream_ordering='id'):
+    def __init__(self, user, save_messages=False, activity_stream_limit=None, activity_stream_ordering='id', activity_stream_queryset=None):
         super().__init__(user, save_messages=save_messages)
         self.activity_stream_limit = activity_stream_limit
         self.activity_stream_ordering = activity_stream_ordering
+        self.activity_stream_queryset = activity_stream_queryset
 
     def filtered_queryset(self):
         """
@@ -2705,7 +2706,7 @@ class ActivityStreamAccess(BaseAccess):
          - schedules
          - custom inventory scripts
         """
-        qs = self.model.objects.all()
+        qs = self.activity_stream_queryset if self.activity_stream_queryset is not None else self.model.objects.all()
         # FIXME: the following fields will be attached to the wrong object
         # if they are included in prefetch_related because of
         # https://github.com/django-polymorphic/django-polymorphic/issues/68
@@ -2781,8 +2782,12 @@ class ActivityStreamAccess(BaseAccess):
 
         if self.activity_stream_limit:
             branch_ordering = F('activitystream_id').desc() if self.activity_stream_ordering == '-id' else F('activitystream_id').asc()
+            filtered_activity_stream_ids = None
+            if self.activity_stream_queryset is not None:
+                filtered_activity_stream_ids = self.activity_stream_queryset.order_by().values('pk')
             activity_stream_ids = [
-                ids.annotate(_activity_stream_rank=Window(RowNumber(), order_by=branch_ordering))
+                ids.filter(**({'activitystream_id__in': filtered_activity_stream_ids} if filtered_activity_stream_ids is not None else {}))
+                .annotate(_activity_stream_rank=Window(RowNumber(), order_by=branch_ordering))
                 .filter(_activity_stream_rank__lte=self.activity_stream_limit)
                 .values('activitystream_id')
                 for ids in activity_stream_ids

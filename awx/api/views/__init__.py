@@ -4889,16 +4889,13 @@ class ActivityStreamList(SimpleListAPIView):
     resource_purpose = 'audit trail entries for tracking system changes'
 
     def get_queryset(self):
-        # For the unfiltered list, bound each Activity Stream visibility branch
-        # to the end of the requested page. Filtered requests need the complete
-        # queryset because their count and result semantics differ.
-        #
-        # TODO: Optimize filtered requests in a follow-up change. The filters
-        # must be applied before branch ranking/limiting, while preserving the
-        # filtered count and page boundaries for RBAC-scoped users.
         pagination = self.pagination_class()
         if pagination.has_filter_params(self.request, self):
-            return super().get_queryset()
+            # Filter backends run after get_queryset(). Start with the base table
+            # so filter_queryset() can push the filters into the visibility
+            # branches before windowing them.
+            self.activity_stream_count_queryset = None
+            return models.ActivityStream.objects.all().select_related('actor')
 
         requested_ordering = self.request.query_params.get('order_by', 'id')
         if requested_ordering not in ('id', '-id'):
@@ -4916,6 +4913,37 @@ class ActivityStreamList(SimpleListAPIView):
             self.request.user,
             activity_stream_limit=limit,
             activity_stream_ordering=requested_ordering,
+        ).get_queryset()
+
+    def filter_queryset(self, queryset):
+        if not self.pagination_class().has_filter_params(self.request, self):
+            return super().filter_queryset(queryset)
+
+        filtered_queryset = super().filter_queryset(queryset)
+        pagination = self.pagination_class()
+        requested_ordering = self.request.query_params.get('order_by', 'id')
+        access_kwargs = {'activity_stream_queryset': filtered_queryset}
+        if requested_ordering not in ('id', '-id'):
+            self.activity_stream_count_queryset = None
+            return ActivityStreamAccess(self.request.user, **access_kwargs).get_queryset()
+
+        try:
+            page = max(int(self.request.query_params.get('page', 1)), 1)
+            page_size = int(self.request.query_params.get('page_size', pagination.page_size or settings.PAGE_SIZE))
+        except (TypeError, ValueError):
+            self.activity_stream_count_queryset = None
+            return ActivityStreamAccess(self.request.user, **access_kwargs).get_queryset()
+
+        page_size = min(max(page_size, 1), settings.MAX_PAGE_SIZE)
+        self.activity_stream_count_queryset = ActivityStreamAccess(
+            self.request.user,
+            **access_kwargs,
+        ).get_queryset()
+        return ActivityStreamAccess(
+            self.request.user,
+            activity_stream_limit=page * page_size,
+            activity_stream_ordering=requested_ordering,
+            **access_kwargs,
         ).get_queryset()
 
     @extend_schema_if_available(

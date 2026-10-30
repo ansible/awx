@@ -141,7 +141,27 @@ class Pagination(pagination.PageNumberPagination):
 class ActivityStreamPagination(Pagination):
     django_paginator_class = ActivityStreamPaginator
 
+    def paginate_queryset(self, queryset, request, **kwargs):
+        original_paginator = self.django_paginator_class
+        view = kwargs.get('view')
+        count_queryset = getattr(view, 'activity_stream_count_queryset', None)
+        self._use_activity_stream_count_queryset = count_queryset is not None
+        if count_queryset is not None:
+            class CountedActivityStreamPaginator(ActivityStreamPaginator):
+                @cached_property
+                def count(self):
+                    return count_queryset.count()
+
+            self.django_paginator_class = CountedActivityStreamPaginator
+        try:
+            return super().paginate_queryset(queryset, request, **kwargs)
+        finally:
+            self.django_paginator_class = original_paginator
+            self._use_activity_stream_count_queryset = False
+
     def get_filtered_paginator_class(self):
+        if getattr(self, '_use_activity_stream_count_queryset', False):
+            return self.django_paginator_class
         return DjangoPaginator
 
 
