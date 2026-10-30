@@ -8,6 +8,7 @@ services:
     container_name: tools_init_awx
     command: /awx_devel/tools/docker-compose/editable_dependencies/install.sh
     user: root
+    privileged: true
     working_dir: "/"
     environment:
       RUN_MIGRATIONS: 1
