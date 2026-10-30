@@ -1,0 +1,19 @@
+name: Approval label authorization
+
+on:
+  pull_request_target:
+    types: [labeled, unlabeled]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: write
+
+jobs:
+  approval-label-authorization:
+    if: github.event.label.name == 'breaking-change-approved'
+    uses: ansible/actions/.github/workflows/approval-label-authorization.yml@f05241d5dba5201988581fc476bc2db3291d44e9
+    with:
+      app-client-id: ${{ vars.ANSIBLE_AAP_API_CHANGE_APPROVAL_BOT_APP_CLIENT_ID }}
+    secrets:
+      app-private-key: ${{ secrets.ANSIBLE_AAP_API_CHANGE_APPROVAL_BOT_APP_PRIVATE_KEY }}
