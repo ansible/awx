@@ -1,0 +1,23 @@
+---
+# Caller workflow for oasdiff breaking change detection.
+# Consumes reusable workflow from ansible/actions (PR #161).
+# Jira: AAP-86434 (AC1, AC2, AC4)
+name: "API: Breaking Change Detection"
+
+on:
+  pull_request:
+    branches:
+      - devel
+      - release_**
+      - feature_**
+      - stable-**
+
+jobs:
+  detect:
+    # ansible/actions PR #161 — pinned to current HEAD
+    uses: ansible/actions/.github/workflows/oasdiff-detect-breaking-changes.yml@33e68a1cfd0844e1d2514701a7f88505ccaf0019
+    with:
+      spec-path: schema.json
+    permissions:
+      contents: read
+      pull-requests: read
