@@ -4,6 +4,7 @@
 import datetime
 import logging
 import re
+import uuid
 
 import dateutil.rrule
 import dateutil.parser
@@ -14,6 +15,7 @@ from dateutil.zoneinfo import get_zonefile_instance
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.timezone import now, make_aware
+from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
 # AWX
@@ -281,13 +283,96 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
     def get_absolute_url(self, request=None):
         return reverse('api:schedule_detail', kwargs={'pk': self.pk}, request=request)
 
+    def _blocked_inventory_explanation(self, schedule_inventory):
+        """Explain why a saved schedule inventory can no longer be applied."""
+        template = self.unified_job_template
+        template_inventory = getattr(template, 'inventory', None)
+        if template_inventory is not None and getattr(template_inventory, 'name', None):
+            template_inventory_name = template_inventory.name
+        else:
+            template_inventory_name = gettext('none')
+        schedule_inventory_name = getattr(schedule_inventory, 'name', None) or gettext('unknown')
+        return gettext(
+            'Scheduled job was not run. Schedule "{schedule}" is configured to use inventory "{schedule_inventory}", '
+            'but job template "{template}" is not set to prompt for an inventory on launch. '
+            'The job was not started, so it did not use the job template inventory "{template_inventory}".'
+        ).format(
+            schedule=self.name,
+            schedule_inventory=schedule_inventory_name,
+            template=getattr(template, 'name', ''),
+            template_inventory=template_inventory_name,
+        )
+
     def get_job_kwargs(self):
         config_data = self.prompts_dict()
         job_kwargs, rejected, errors = self.unified_job_template._accept_or_ignore_job_kwargs(**config_data)
         if errors:
             logger.info('Errors creating scheduled job: {}'.format(errors))
+        # A saved inventory that no longer prompts would otherwise be dropped and the
+        # job would silently run against the template inventory.
+        if 'inventory' in errors:
+            job_kwargs['_blocked_explanation'] = self._blocked_inventory_explanation(rejected.get('inventory'))
         job_kwargs['_eager_fields'] = {'launch_type': 'scheduled', 'schedule': self}
         return job_kwargs
+
+    def _write_blocked_job_output(self, job, explanation):
+        """Put the refusal message in the job output pane.
+
+        That pane is rendered from job events. A job that never starts has no
+        events, so the output stays blank unless one is recorded here.
+        """
+        from django.db import connection
+
+        from awx.main.models.events import JobEvent, UnpartitionedJobEvent
+        from awx.main.utils.common import create_partition
+
+        text = explanation if str(explanation).endswith('\n') else '{}\n'.format(explanation)
+        try:
+            event_cls = job.event_class
+        except NotImplementedError:
+            return
+        if event_cls not in (JobEvent, UnpartitionedJobEvent):
+            return
+        # Playbook jobs never reach pre_run, which is what normally creates the
+        # hourly job-event partition. Inserting an event without it fails.
+        if connection.vendor == 'postgresql':
+            create_partition(event_cls._meta.db_table, start=job.created)
+        event_cls.objects.create(
+            **{
+                event_cls.JOB_REFERENCE: job.id,
+                'event': 'error',
+                'failed': True,
+                'counter': 1,
+                'stdout': text,
+                'start_line': 0,
+                'end_line': text.count('\n'),
+                'job_created': job.created,
+                'uuid': str(uuid.uuid4()),
+                'verbosity': 0,
+            }
+        )
+        job.emitted_events = 1
+        job.save(update_fields=['emitted_events'])
+
+    def create_scheduled_job(self):
+        """Create the unified job for this schedule.
+
+        Returns (job, start). ``start`` is False when the job was saved in an
+        error state and must not be started. This happens when the schedule
+        still stores an inventory that the template will no longer accept.
+        """
+        job_kwargs = self.get_job_kwargs()
+        blocked_explanation = job_kwargs.pop('_blocked_explanation', None)
+        job = self.unified_job_template.create_unified_job(**job_kwargs)
+        if blocked_explanation:
+            logger.warning('Not starting scheduled job from schedule %s: %s', self.pk, blocked_explanation)
+            job.status = 'error'
+            job.job_explanation = blocked_explanation
+            job.save(update_fields=['status', 'job_explanation'])
+            self._write_blocked_job_output(job, blocked_explanation)
+            job.websocket_emit_status('error')
+            return job, False
+        return job, True
 
     def get_end_date(ruleset):
         # if we have a complex ruleset with a lot of options getting the last index of the ruleset can take some time
