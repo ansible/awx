@@ -21,10 +21,11 @@ def test_default_to_jobs_default(set_up_defaults, organization):
     """
     # Fill in some other unrelated EEs
     ExecutionEnvironment.objects.create(name='Steves environment', image='quay.io/ansible/awx-ee')
-    ExecutionEnvironment(name=settings.GLOBAL_JOB_EXECUTION_ENVIRONMENTS[0]['name'], image='quay.io/ansible/awx-ee', organization=organization)
+    ExecutionEnvironment(name=settings.GLOBAL_JOB_EXECUTION_ENVIRONMENTS[0]['name'], image='quay.io/ansible/awx-ee', organization=organization, pull='missing')
     default_ee = get_default_execution_environment()
     assert default_ee.image == settings.GLOBAL_JOB_EXECUTION_ENVIRONMENTS[0]['image']
     assert default_ee.name == settings.GLOBAL_JOB_EXECUTION_ENVIRONMENTS[0]['name']
+    assert default_ee.pull == settings.GLOBAL_JOB_EXECUTION_ENVIRONMENTS[0]['pull']
 
 
 @pytest.mark.django_db
