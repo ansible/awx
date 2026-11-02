@@ -125,3 +125,50 @@ def test_galaxy_update_on_launch_update(post, patch, organization, admin_user):
     assert r2.data['galaxy_update_on_launch'] is True
     p = Project.objects.get(pk=r1.data['id'])
     assert p.galaxy_update_on_launch is True
+
+
+@pytest.mark.django_db
+def test_galaxy_update_on_launch_in_serializer(get, post, organization, admin_user):
+    """Test that galaxy_update_on_launch appears in project serialization"""
+    # Create project with galaxy_update_on_launch enabled
+    r1 = post(
+        url=reverse('api:project_list'),
+        data={
+            'name': 'test-project-serialized',
+            'organization': organization.id,
+            'scm_type': 'git',
+            'scm_url': 'https://github.com/ansible/test-playbooks.git',
+            'galaxy_update_on_launch': True,
+        },
+        user=admin_user,
+        expect=201,
+    )
+
+    # Retrieve the project and verify galaxy_update_on_launch is in the response
+    r2 = get(
+        url=reverse('api:project_detail', kwargs={'pk': r1.data['id']}),
+        user=admin_user,
+        expect=200,
+    )
+    assert 'galaxy_update_on_launch' in r2.data
+    assert r2.data['galaxy_update_on_launch'] is True
+
+
+@pytest.mark.django_db
+def test_galaxy_update_on_launch_validation(post, organization, admin_user):
+    """Test that galaxy_update_on_launch accepts boolean values"""
+    # Test with string 'true' should coerce to boolean
+    r = post(
+        url=reverse('api:project_list'),
+        data={
+            'name': 'test-validation',
+            'organization': organization.id,
+            'scm_type': 'git',
+            'scm_url': 'https://github.com/ansible/test-playbooks.git',
+            'galaxy_update_on_launch': 'true',
+        },
+        user=admin_user,
+        expect=201,
+    )
+    p = Project.objects.get(pk=r.data['id'])
+    assert p.galaxy_update_on_launch is True
