@@ -65,7 +65,8 @@ spec:
     - name: pipeline-github-target-branch
       value: "{{target_branch}}"
     - name: pipeline-github-pr-revision
-      value: "{{revision}}"
+      # Diagnostic only: keep the actual AWX source identical to failed run plls9.
+      value: "cdb5c5b58d77c8782e6ebf594c2c3b1090343ef5"
     - name: pipeline-github-pr-number
       value: "{{pull_request_number}}"
     - name: pipeline-sender
@@ -81,13 +82,27 @@ spec:
     - name: aap-deploy-ansible-verbosity
       value: "2"
 
-    # --- git-resolver inputs so the overlay can resolve its in-repo tasks from the same branch ---
+    # Temporary AAP-100207 validation. Remove these overrides after the comparison.
+    # Keep aap-dev images, published UI source, and mapping identical to run plls9.
+    - name: aap-dev-revision
+      value: "c2e01aa56831543a7134cd75487eb0085f8d0587"
+    - name: ui-revision
+      value: "e71b585aa4cece774d21c658d05d463e1235f5a3"
+    - name: test-mapping-image
+      value: "quay.io/aap-ci/test-mapping@sha256:96fd4cf98ceebbe6551d21afc04bc6bd631438bc8f96074c1a2e16ec52668e72"
+    - name: dependency-source-overrides
+      value: '[{"name":"gateway","repo":"https://github.com/ansible/jewel.git","ref":"a39b016d5bc6846a4d6262d4820dbcc91daf355a"}]'
+    - name: gateway-proxy-preflight
+      value: "true"
+
+    # Keep catalog tasks at plls9's revision; regenerating overlays must not silently
+    # change the deploy runner while we are validating the Gateway-only source fix.
     - name: git-resolver-org
       value: ansible-automation-platform             # <<< SET: same as pipelineRef org
     - name: git-resolver-repo
       value: aap-konflux-pipelines
     - name: git-resolver-revision
-      value: feat/aap-component-ui-tests             # <<< SET: same as pipelineRef revision
+      value: "86c27eeef77aa110a7af69968995d06013976a58"
     - name: git-resolver-token-secret
       value: github-aap-pde-ci-bot-credentials-ansible-automation-platform   # AAP-org bot (reads internal aap-konflux-pipelines)
     - name: git-resolver-token-key
