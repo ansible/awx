@@ -267,6 +267,9 @@
             requirements_cache_hit: "{{ has_requirements | bool and (reqcache_stat.stat.exists | default(false)) }}"
 
     - block:
+        # NOTE: Only ansible-galaxy collection install supports --no-cache flag.
+        # Role install and combined install commands do not support cache bypass,
+        # so galaxy_update_on_launch only affects collection-only installs.
         - name: Fetch galaxy roles from roles/requirements.(yml/yaml)
           ansible.builtin.command:
             cmd: "ansible-galaxy role install -r {{ req_file }} {{ verbosity }}"
@@ -282,7 +285,7 @@
           when:
             - roles_enabled | bool
             - req_file | length > 0
-            - not (requirements_cache_hit | default(false) | bool) or (galaxy_update_on_launch | default(false) | bool)
+            - not (requirements_cache_hit | default(false) | bool)
           tags:
             - install_roles
 
@@ -322,7 +325,7 @@
             - collections_enabled | bool
             - roles_enabled | bool
             - req_file | length > 0
-            - not (requirements_cache_hit | default(false) | bool) or (galaxy_update_on_launch | default(false) | bool)
+            - not (requirements_cache_hit | default(false) | bool)
           tags:
             - install_collections
             - install_roles
