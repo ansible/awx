@@ -1055,9 +1055,11 @@ SPECTACULAR_SETTINGS = {
     'COMPONENT_SPLIT_REQUEST': True,
     # Postprocessing hooks for OpenAPI schema generation
     'POSTPROCESSING_HOOKS': [
+        'drf_spectacular.hooks.postprocess_schema_enums',
         'awx.api.schema.filter_credential_type_schema',
         'awx.api.schema.inject_ai_descriptions',
         'awx.api.schema.inject_clean_text_pattern_components',
+        'ansible_base.lib.utils.schema.deprecated_fields_detail_hook',
     ],
     'SWAGGER_UI_SETTINGS': {
         'deepLinking': True,
