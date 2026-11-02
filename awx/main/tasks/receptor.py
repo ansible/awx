@@ -53,6 +53,28 @@ __RECEPTOR_CONF_LOCKFILE = f'{__RECEPTOR_CONF}.lock'
 RECEPTOR_ACTIVE_STATES = ('Pending', 'Running')
 
 
+def upsert_pod_container_env(container, name, value):
+    """Set a container env var by name, replacing any existing entry with that name.
+
+    A matching valueFrom entry is replaced with a literal value so the object is
+    not invalid. Escapes `$` as `$$` so kubelet does not expand dependent env vars,
+    matching the subprocess envvars path. All matching names are removed so a later
+    duplicate in pod_spec_override cannot win; the replacement stays at the first
+    match index so kubelet $(VAR) ordering of other entries is preserved.
+    """
+    env_list = container.get('env')
+    if not isinstance(env_list, list):
+        env_list = []
+        container['env'] = env_list
+    entry = {'name': name, 'value': str(value).replace('$', '$$')}
+    matches = [index for index, existing in enumerate(env_list) if isinstance(existing, dict) and existing.get('name') == name]
+    if any('valueFrom' in env_list[index] for index in matches):
+        logger.warning('Replacing valueFrom env entry %s with a literal value on the job pod spec', name)
+    for index in reversed(matches):
+        del env_list[index]
+    env_list.insert(matches[0] if matches else len(env_list), entry)
+
+
 class ReceptorConnectionType(Enum):
     DATAGRAM = 0
     STREAM = 1
@@ -689,6 +711,7 @@ class AWXReceptorJob:
 
     @property
     def pod_definition(self):
+        """Return the worker pod spec, with AWX_TASK_ENV applied on the container."""
         ee = self.task.instance.execution_environment
 
         default_pod_spec = get_default_pod_spec()
@@ -702,18 +725,23 @@ class AWXReceptorJob:
         # defaults they don't want to change
         pod_spec = deepmerge(default_pod_spec, pod_spec_override)
 
-        pod_spec['spec']['containers'][0]['image'] = ee.image
-        pod_spec['spec']['containers'][0]['args'] = ['ansible-runner', 'worker', '--private-data-dir=/runner']
-
+        # AWX_TASK_ENV already rides in runner envvars for the playbook. Set it on the
+        # worker container too so kubelet / os.environ see it (proxies, visibility).
+        # After pod_spec_override so Jobs extra env wins on name collision; keepalive last
+        # so AWX_RUNNER_KEEPALIVE_SECONDS still wins.
+        container = pod_spec['spec']['containers'][0]
+        container['image'] = ee.image
+        container['args'] = ['ansible-runner', 'worker', '--private-data-dir=/runner']
+        for key, value in settings.AWX_TASK_ENV.items():
+            upsert_pod_container_env(container, key, value)
         if settings.AWX_RUNNER_KEEPALIVE_SECONDS:
-            pod_spec['spec']['containers'][0].setdefault('env', [])
-            pod_spec['spec']['containers'][0]['env'].append({'name': 'ANSIBLE_RUNNER_KEEPALIVE_SECONDS', 'value': str(settings.AWX_RUNNER_KEEPALIVE_SECONDS)})
+            upsert_pod_container_env(container, 'ANSIBLE_RUNNER_KEEPALIVE_SECONDS', settings.AWX_RUNNER_KEEPALIVE_SECONDS)
 
         # Enforce EE Pull Policy
         pull_options = {"always": "Always", "missing": "IfNotPresent", "never": "Never"}
         if self.task and self.task.instance.execution_environment:
             if self.task.instance.execution_environment.pull:
-                pod_spec['spec']['containers'][0]['imagePullPolicy'] = pull_options[self.task.instance.execution_environment.pull]
+                container['imagePullPolicy'] = pull_options[self.task.instance.execution_environment.pull]
 
         # This allows the user to also expose the isolated path list
         # to EEs running in k8s/ocp environments, i.e. container groups.

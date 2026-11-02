@@ -32,6 +32,7 @@ from awx.main.models import (
     build_safe_env,
 )
 from awx.main.models.credential import HIDDEN_PASSWORD, ManagedCredentialType
+from awx.main.redact import UriCleaner
 
 from awx.main.tasks import jobs, system, receptor
 from awx.main.utils import encrypt_field, encrypt_value
@@ -557,6 +558,164 @@ class TestGenericRun:
             with mock.patch.object(task, 'build_credentials_list', return_value=[], autospec=True):
                 env = task.build_env(job, private_data_dir)
         assert env['FOO'] == 'BAR'
+
+    @pytest.mark.parametrize(
+        'value,expected',
+        [
+            ('True', True),
+            ('true', True),
+            ('1', True),
+            ('yes', True),
+            ('on', True),
+            ('y', True),
+            ('t', True),
+            ('False', False),
+            ('0', False),
+            ('', False),
+        ],
+    )
+    def test_env_flag_enabled(self, value, expected):
+        """Truthy spellings match strtobool; other strings are False."""
+        assert jobs.env_flag_enabled({'RUNNER_OMIT_EVENTS': value}, 'RUNNER_OMIT_EVENTS') is expected
+
+    def test_env_flag_enabled_missing_key(self):
+        """A missing or unrelated key is False, not an error."""
+        assert jobs.env_flag_enabled({}, 'RUNNER_OMIT_EVENTS') is False
+        assert jobs.env_flag_enabled({'RUNNER_ONLY_FAILED_EVENTS': 'True'}, 'RUNNER_OMIT_EVENTS') is False
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize(
+        'task_env,omit_expected,only_failed_expected',
+        [
+            ({'RUNNER_OMIT_EVENTS': 'True', 'RUNNER_ONLY_FAILED_EVENTS': 'yes'}, True, True),
+            ({'RUNNER_OMIT_EVENTS': 'False', 'RUNNER_ONLY_FAILED_EVENTS': '0'}, False, False),
+            ({}, False, False),
+        ],
+    )
+    def test_run_passes_omit_event_flags_to_receptor(
+        self, patch_Job, execution_environment, mock_me, mock_create_partition, private_data_dir, task_env, omit_expected, only_failed_expected
+    ):
+        """AWX_TASK_ENV runner flags must be forwarded as ansible-runner constructor params."""
+        job = Job(pk=1, id=1, status='running', inventory=Inventory(), project=Project(local_path='/projects/_23_foo'), playbook='site.yml')
+        job.websocket_emit_status = mock.Mock()
+        job.send_notification_templates = mock.Mock()
+        job.log_lifecycle = mock.Mock()
+        job.execution_environment = execution_environment
+        job.resolve_execution_environment = mock.Mock(return_value=execution_environment)
+        job.cancel_flag = False
+
+        task = jobs.RunJob()
+        task.instance = job
+        task.update_model = mock.Mock(return_value=job)
+        task.build_private_data_dir = mock.Mock(return_value=private_data_dir)
+        task.build_project_dir = mock.Mock()
+        task.build_extra_vars_file = mock.Mock()
+        task.build_inventory = mock.Mock(return_value=os.path.join(private_data_dir, 'inventory', 'hosts'))
+        task.post_run_hook = mock.Mock()
+
+        receptor_job = mock.Mock()
+        receptor_job.run.return_value = mock.Mock(status='successful', rc=0)
+        receptor_job.unit_id = 'wu-1'
+        receptor_job.receptor_ctl = None
+
+        with (
+            mock.patch('awx.main.tasks.jobs.settings.AWX_TASK_ENV', task_env),
+            mock.patch('awx.main.tasks.jobs.settings.AWX_ISOLATION_BASE_PATH', private_data_dir),
+            mock.patch('awx.main.tasks.jobs.evaluate_policy'),
+            mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=False),
+            mock.patch('awx.main.tasks.jobs.AWXReceptorJob', return_value=receptor_job) as mock_receptor_cls,
+            mock.patch('awx.main.tasks.jobs._finalize_job_run', return_value=job),
+            mock.patch.object(task, 'build_credentials_list', return_value=[]),
+            mock.patch.object(task.model.objects, 'get', return_value=job),
+        ):
+            task.run(1)
+
+        mock_receptor_cls.assert_called_once()
+        params = mock_receptor_cls.call_args[0][1]
+        assert params['omit_event_data'] is omit_expected
+        assert params['only_failed_event_data'] is only_failed_expected
+        for key, value in task_env.items():
+            assert params['envvars'][key] == value
+
+    @pytest.mark.django_db
+    @pytest.mark.usefixtures('patch_Organization')
+    @pytest.mark.parametrize(
+        'task_env',
+        [
+            {'RUNNER_OMIT_EVENTS': 'True'},
+            {'RUNNER_ONLY_FAILED_EVENTS': 'True'},
+            {'RUNNER_OMIT_EVENTS': 'True', 'RUNNER_ONLY_FAILED_EVENTS': 'yes'},
+        ],
+    )
+    def test_run_keeps_omit_event_flags_disabled_for_project_update(self, execution_environment, mock_me, mock_create_partition, private_data_dir, task_env):
+        """Project updates keep event metadata even when global omission flags are enabled."""
+        project_update = ProjectUpdate(pk=1, id=1, status='running', project=Project(pk=1, organization=Organization(pk=1)))
+        project_update.websocket_emit_status = mock.Mock()
+        project_update.send_notification_templates = mock.Mock()
+        project_update.log_lifecycle = mock.Mock()
+        project_update.execution_environment = execution_environment
+        project_update.resolve_execution_environment = mock.Mock(return_value=execution_environment)
+        project_update.cancel_flag = False
+        project_update.scm_type = 'git'
+
+        task = jobs.RunProjectUpdate()
+        task.instance = project_update
+        task.update_model = mock.Mock(return_value=project_update)
+        task.build_private_data_dir = mock.Mock(return_value=private_data_dir)
+        task.build_project_dir = mock.Mock()
+        task.build_extra_vars_file = mock.Mock()
+        task.build_private_data_files = mock.Mock(return_value=({}, None))
+        task.pre_run_hook = mock.Mock()
+        task.post_run_hook = mock.Mock()
+
+        receptor_job = mock.Mock()
+        receptor_job.run.return_value = mock.Mock(status='successful', rc=0)
+        receptor_job.unit_id = 'wu-1'
+        receptor_job.receptor_ctl = None
+
+        with (
+            mock.patch('awx.main.tasks.jobs.settings.AWX_TASK_ENV', task_env),
+            mock.patch('awx.main.tasks.jobs.settings.AWX_ISOLATION_BASE_PATH', private_data_dir),
+            mock.patch('awx.main.tasks.jobs.evaluate_policy'),
+            mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=False),
+            mock.patch('awx.main.tasks.jobs.AWXReceptorJob', return_value=receptor_job) as mock_receptor_cls,
+            mock.patch('awx.main.tasks.jobs._finalize_job_run', return_value=project_update),
+            mock.patch.object(task, 'build_credentials_list', return_value=[]),
+            mock.patch.object(task.model.objects, 'get', return_value=project_update),
+        ):
+            task.run(1)
+
+        mock_receptor_cls.assert_called_once()
+        params = mock_receptor_cls.call_args[0][1]
+        assert params['omit_event_data'] is False
+        assert params['only_failed_event_data'] is False
+        for key, value in task_env.items():
+            assert params['envvars'][key] == value
+
+        # Flags stay off so the project-update callback still sees task_action / scm_version.
+        task.runner_callback.dispatcher = mock.Mock()
+        task.runner_callback.event_data_key = 'project_update_id'
+        task.runner_callback.wrapup_event_type = 'playbook_on_stats'
+        scm_url = 'https://scmuser:scmpass@git.example.com/org/repo.git'
+        task.runner_callback.event_handler(
+            {
+                'event': 'runner_on_failed',
+                'stdout': f'failed: {scm_url}',
+                'event_data': {'task_action': 'git', 'res': {'msg': f'Failed to clone {scm_url}'}},
+            }
+        )
+        dispatched = json.dumps(task.runner_callback.dispatcher.dispatch.call_args[0][0])
+        assert 'scmuser' not in dispatched
+        assert 'scmpass' not in dispatched
+        assert UriCleaner.REPLACE_STR in dispatched
+
+        task.runner_callback.event_handler(
+            {
+                'event': 'runner_on_ok',
+                'event_data': {'task_action': 'set_fact', 'res': {'ansible_facts': {'scm_version': 'abc123def'}}},
+            }
+        )
+        assert task.runner_callback.playbook_new_revision == 'abc123def'
 
 
 @pytest.mark.django_db

@@ -468,7 +468,7 @@ def test_run_job_cloud_credentials(job_template_with_credentials):
 
 
 @pytest.mark.django_db
-@override_settings(RESOURCE_SERVER={'URL': 'https://gateway.example.com', 'SECRET_KEY': 'test-secret-key', 'VALIDATE_HTTPS': False})
+@override_settings(RESOURCE_SERVER={'URL': 'https://gateway.example.com', 'SECRET_KEY': 'test-secret-key-at-least-32-bytes-long', 'VALIDATE_HTTPS': False})
 def test_populate_workload_identity_tokens_with_flag_enabled(job_template_with_credentials, mocker):
     """Test populate_workload_identity_tokens sets context when flag is enabled."""
     with feature_flag_enabled('FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED'):
@@ -529,7 +529,7 @@ def test_populate_workload_identity_tokens_with_flag_enabled(job_template_with_c
 
 
 @pytest.mark.django_db
-@override_settings(RESOURCE_SERVER={'URL': 'https://gateway.example.com', 'SECRET_KEY': 'test-secret-key', 'VALIDATE_HTTPS': False})
+@override_settings(RESOURCE_SERVER={'URL': 'https://gateway.example.com', 'SECRET_KEY': 'test-secret-key-at-least-32-bytes-long', 'VALIDATE_HTTPS': False})
 def test_populate_workload_identity_tokens_passes_workload_ttl_from_job_timeout(job_template_with_credentials, mocker):
     """Test populate_workload_identity_tokens passes workload_ttl_seconds from get_instance_timeout to the client."""
     with feature_flag_enabled('FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED'):
@@ -628,7 +628,7 @@ def test_populate_workload_identity_tokens_with_flag_disabled(job_template_with_
 
 
 @pytest.mark.django_db
-@override_settings(RESOURCE_SERVER={'URL': 'https://gateway.example.com', 'SECRET_KEY': 'test-secret-key', 'VALIDATE_HTTPS': False})
+@override_settings(RESOURCE_SERVER={'URL': 'https://gateway.example.com', 'SECRET_KEY': 'test-secret-key-at-least-32-bytes-long', 'VALIDATE_HTTPS': False})
 def test_populate_workload_identity_tokens_multiple_input_sources_per_credential(job_template_with_credentials, mocker):
     """Test that a single credential with two input sources from different workload identity
     credential types gets a separate JWT token for each input source, keyed by input source PK."""

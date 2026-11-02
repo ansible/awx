@@ -76,8 +76,10 @@ botocore==1.40.46
     #   -r /awx_devel/requirements/requirements.in
     #   boto3
     #   s3transfer
-brotli==1.2.0
-    # via aiohttp
+brotli==1.2.1
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   aiohttp
 cachetools==6.2.0
     # via -r /awx_devel/requirements/requirements.in
 # certifi @ git+https://github.com/ansible/system-certifi.git@devel  # git requirements installed separately
@@ -384,8 +386,9 @@ pygithub==2.8.1
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   awx-plugins-core
-pyjwt[crypto]==2.10.1
+pyjwt[crypto]==2.15.1
     # via
+    #   -r /awx_devel/requirements/requirements.in
     #   adal
     #   django-ansible-base
     #   msal
