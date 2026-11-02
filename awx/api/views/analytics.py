@@ -2,6 +2,8 @@ import requests
 import logging
 import urllib.parse as urlparse
 
+from requests.utils import get_environ_proxies
+
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.utils import translation
@@ -198,6 +200,7 @@ class AnalyticsGenericView(APIView):
             headers=headers,
             json=getattr(request, 'data', {}),
             timeout=(31, 31),
+            proxies=get_environ_proxies(url),
         )
         return response
 
