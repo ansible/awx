@@ -62,13 +62,18 @@ subscriptions:
 EXAMPLES = '''
 - name: Get subscriptions
   subscriptions:
-    client_id: "c6bd7594-d776-46e5-8156-6d17af147479"
-    client_secret: "MO9QUvoOZ5fc5JQKXoTch1AsTLI7nFsZ"
+    client_id: "00000000-0000-0000-0000-000000000000"
+    client_secret: "your-client-secret-here"
+
+- name: Get subscriptions with username and password
+  subscriptions:
+    username: "my_username"
+    password: "my_password"
 
 - name: Get subscriptions with a filter
   subscriptions:
-    client_id: "c6bd7594-d776-46e5-8156-6d17af147479"
-    client_secret: "MO9QUvoOZ5fc5JQKXoTch1AsTLI7nFsZ"
+    client_id: "00000000-0000-0000-0000-000000000000"
+    client_secret: "your-client-secret-here"
     filters:
       product_name: "Red Hat Ansible Automation Platform"
       support_level: "Self-Support"

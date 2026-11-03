@@ -7,16 +7,14 @@ on:
       - reopened
       - synchronize
 
-permissions:
-  contents: write # to determine modified files (actions/labeler)
-  pull-requests: write # to add labels to PRs (actions/labeler)
-
 jobs:
   triage:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     name: Label PR
-
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Label PR
         uses: actions/labeler@v3
@@ -28,19 +26,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     name: Label PR - Community
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
           show-progress: false
 
       - uses: ./.github/actions/setup-python
-        with:
-          python-version: '3.x'
 
       - name: Install python requests
-        run: pip install requests
+        run: 'pip install --only-binary :all: requests==2.34.2'
       - name: Check if user is a member of Ansible org
-        uses: jannekem/run-python-script-action@v1
+        uses: jannekem/run-python-script-action@9d8e2e0878d575fb6073277f38ce3f10ebf4f059 # v1
         id: check_user
         with:
           script: |

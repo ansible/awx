@@ -1,7 +1,8 @@
 import pytest
 
 # AWX context managers for testing
-from awx.main.signals import disable_activity_stream, disable_computed_fields, update_inventory_computed_fields
+from awx.main.signals import disable_activity_stream, disable_computed_fields
+from awx.main.tasks.system import update_inventory_computed_fields
 
 # AWX models
 from awx.main.models.organization import Organization

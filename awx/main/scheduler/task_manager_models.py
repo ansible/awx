@@ -146,12 +146,19 @@ class TaskManagerInstances:
             self.instances_by_hostname[instance.hostname] = TaskManagerInstance(instance, **kwargs)
 
     def consume_capacity(self, task):
+        """Subtract a task's capacity from its execution and control instances.
+
+        For the control instance, jobs_running is only incremented when the controller
+        differs from the execution node to avoid double-counting on hybrid nodes.
+        """
         control_instance = self.instances_by_hostname.get(task.controller_node, '')
         execution_instance = self.instances_by_hostname.get(task.execution_node, '')
         if execution_instance and execution_instance.node_type in ('hybrid', 'execution'):
             self.instances_by_hostname[task.execution_node].consume_capacity(task.task_impact, job_impact=True)
         if control_instance and control_instance.node_type in ('hybrid', 'control'):
-            self.instances_by_hostname[task.controller_node].consume_capacity(self.control_task_impact)
+            # Track jobs_running on the controller unless it was already counted as the execution node
+            count_as_job = control_instance != execution_instance
+            self.instances_by_hostname[task.controller_node].consume_capacity(self.control_task_impact, job_impact=count_as_job)
 
     def __getitem__(self, hostname):
         return self.instances_by_hostname.get(hostname)
@@ -207,6 +214,11 @@ class TaskManagerInstanceGroups:
         return self.instance_groups[group_name].instances
 
     def fit_task_to_most_remaining_capacity_instance(self, task, instance_group_name, impact=None, capacity_type=None, add_hybrid_control_cost=False):
+        """Select the instance with the most remaining capacity after absorbing the task.
+
+        When two or more instances would have equal remaining capacity, prefer the
+        instance with fewer jobs_running to balance controller load during bursts.
+        """
         impact = impact if impact else task.task_impact
         capacity_type = capacity_type if capacity_type else task.capacity_type
         instance_most_capacity = None
@@ -220,7 +232,11 @@ class TaskManagerInstanceGroups:
             # hybrid nodes _always_ control their own tasks
             if add_hybrid_control_cost and i.node_type == 'hybrid':
                 would_be_remaining -= self.control_task_impact
-            if would_be_remaining >= 0 and (instance_most_capacity is None or would_be_remaining > most_remaining_capacity):
+            if would_be_remaining >= 0 and (
+                instance_most_capacity is None
+                or would_be_remaining > most_remaining_capacity
+                or (would_be_remaining == most_remaining_capacity and i.jobs_running < instance_most_capacity.jobs_running)
+            ):
                 instance_most_capacity = i
                 most_remaining_capacity = would_be_remaining
         return instance_most_capacity

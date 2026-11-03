@@ -99,6 +99,7 @@ class ControllerModule(AnsibleModule):
         aap_token=dict(
             type='raw',
             no_log=True,
+            aliases=['oauth_token', 'controller_oauthtoken', 'tower_oauthtoken'],
             required=False,
             fallback=(env_fallback, ['CONTROLLER_OAUTH_TOKEN', 'TOWER_OAUTH_TOKEN', 'AAP_TOKEN'])
         ),
@@ -118,10 +119,12 @@ class ControllerModule(AnsibleModule):
         'request_timeout': 'request_timeout',
         'max_retries': 'max_retries',
         'retry_backoff_factor': 'retry_backoff_factor',
+        'aap_token': 'aap_token',
     }
     host = '127.0.0.1'
     username = None
     password = None
+    aap_token = None
     verify_ssl = True
     request_timeout = 10
     max_retries = 5
@@ -160,6 +163,8 @@ class ControllerModule(AnsibleModule):
             if direct_value is not None:
                 setattr(self, short_param, direct_value)
 
+        self._parse_aap_token()
+
         # Perform some basic validation
         if not self.host.startswith(("https://", "http://")):  # NOSONAR
             self.host = "https://{0}".format(self.host)
@@ -185,6 +190,15 @@ class ControllerModule(AnsibleModule):
                     sockaddr[0]
         except Exception as e:
             self.fail_json(msg="Unable to resolve controller_host ({1}): {0}".format(self.url.hostname, e))
+
+    def _parse_aap_token(self):
+        # aap_token can be the token string itself, or the dict that the
+        # ansible.platform.token module sets as the aap_token fact
+        if isinstance(self.aap_token, dict):
+            if 'token' in self.aap_token:
+                self.aap_token = self.aap_token['token']
+            else:
+                self.fail_json(msg="The provided dict in aap_token did not properly contain the token entry")
 
     def build_url(self, endpoint, query_params=None, app_key=None):
         # Make sure we start with /api/vX
@@ -284,7 +298,8 @@ class ControllerModule(AnsibleModule):
 
                     # If we made it here then we have values from reading the ini file, so let's pull them out into a dict
                     config_data = {}
-                    for honorred_setting in self.short_params:
+                    # 'oauth_token' is the legacy (pre-aap_token) config file key, kept for backward compatibility
+                    for honorred_setting in list(self.short_params) + ['oauth_token']:
                         try:
                             config_data[honorred_setting] = config.get('general', honorred_setting)
                         except NoOptionError:
@@ -295,6 +310,12 @@ class ControllerModule(AnsibleModule):
 
         except Exception as e:
             raise_from(ConfigFileException("An unknown exception occured trying to load config file: {0}".format(e)), e)
+
+        # Backward compatibility: config files written for older collection
+        # releases used the oauth_token key; map it to aap_token.
+        # If both keys are present, the new aap_token key wins.
+        if 'oauth_token' in config_data and 'aap_token' not in config_data:
+            config_data['aap_token'] = config_data['oauth_token']
 
         # If we made it here, we have a dict which has values in it from our config, any final settings logic can be performed here
         for honorred_setting in self.short_params:
@@ -417,7 +438,7 @@ class ControllerAPIModule(ControllerModule):
             raise RuntimeError('Expected list from API at {0}, got: {1}'.format(endpoint, response))
         next_page = response['json']['next']
 
-        if response['json']['count'] > 10000:
+        if response['json'].get('count', 0) > 10000:
             self.fail_json(msg='The number of items being queried for is higher than 10,000.')
 
         while next_page is not None:
@@ -472,8 +493,11 @@ class ControllerAPIModule(ControllerModule):
                     fail_msg += ', detail: {0}'.format(response['json']['detail'])
                 self.fail_json(msg=fail_msg)
 
-            if 'count' not in response['json'] or 'results' not in response['json']:
-                self.fail_json(msg="The endpoint did not provide count and results")
+            if 'results' not in response['json']:
+                self.fail_json(msg="The endpoint did not provide a results list")
+
+            if 'count' not in response['json']:
+                response['json']['count'] = len(response['json']['results'])
 
         if response['json']['count'] == 0:
             if allow_none:
@@ -572,12 +596,7 @@ class ControllerAPIModule(ControllerModule):
         # Extract the headers, this will be used in a couple of places
         headers = kwargs.get('headers', {})
 
-        # Authenticate to AWX (if not already done so)
-        if not self.authenticated:
-            # This method will set a cookie in the cookie jar for us
-            self.authenticate(**kwargs)
-
-        headers['Authorization'] = self._get_basic_authorization_header()
+        headers['Authorization'] = self._get_authorization_header(**kwargs)
 
         if method in ['POST', 'PUT', 'PATCH']:
             headers.setdefault('Content-Type', 'application/json')
@@ -760,6 +779,19 @@ class ControllerAPIModule(ControllerModule):
             prefix = "{0}/".format(prefix)
 
         return prefix
+
+    def _get_authorization_header(self, **kwargs):
+        if self.aap_token:
+            # A token (e.g. issued by the AAP gateway) is validated by the server on
+            # every request, so no login round-trip is needed
+            return 'Bearer {0}'.format(self.aap_token)
+
+        # Authenticate to AWX (if not already done so)
+        if not self.authenticated:
+            # This method will set a cookie in the cookie jar for us
+            self.authenticate(**kwargs)
+
+        return self._get_basic_authorization_header()
 
     def _get_basic_authorization_header(self):
         basic_credentials = b64encode("{0}:{1}".format(self.username, self.password).encode()).decode()

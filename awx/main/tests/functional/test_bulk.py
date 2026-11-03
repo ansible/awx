@@ -1,6 +1,7 @@
 import pytest
 
 from uuid import uuid4
+from unittest import mock
 
 from awx.api.versioning import reverse
 
@@ -33,6 +34,12 @@ def test_bulk_host_create_num_queries(organization, inventory, post, get, user, 
     organization.admin_role.members.add(org_admin)
     organization.inventory_admin_role.members.add(org_inv_admin)
     inventory.admin_role.members.add(inventory_admin)
+
+    # The first request in a process pays one query per database-backed
+    # setting it reads; later ones hit the settings wrapper's in-memory
+    # cache. Warm it so the budget below measures steady state regardless
+    # of which test ran first in this xdist worker.
+    post(reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': [{'name': uuid4()}]}, superuser, expect=201)
 
     for u in [org_admin, inventory_admin, org_inv_admin, superuser]:
         hosts = [{'name': uuid4()} for i in range(num_hosts)]
@@ -99,6 +106,17 @@ def test_bulk_job_launch_queries(job_template, organization, inventory, project,
     jt.save()
     inventory.save()
     jobs = [{'unified_job_template': jt.id, 'inventory': inventory.id} for _ in range(num_jobs)]
+
+    # The first request in a process pays one query per database-backed
+    # setting it reads; later ones hit the settings wrapper's in-memory
+    # cache. Warm it so the budget below measures steady state regardless
+    # of which test ran first in this xdist worker.
+    post(
+        reverse('api:bulk_job_launch'),
+        {'name': 'Bulk Job Launch Warmup', 'jobs': [{'unified_job_template': jt.id, 'inventory': inventory.id}]},
+        normal_user,
+        expect=201,
+    )
 
     # This is not working, we need to figure that out if we want to include tests for more jobs
     # with mock.patch('awx.api.serializers.settings.BULK_JOB_MAX_LAUNCH', num_jobs + 1):
@@ -629,3 +647,44 @@ def test_bulk_host_create_performance_large_inventory(organization, inventory, p
 
     assert len(response.data['hosts']) == 10
     assert Host.objects.filter(inventory=inventory).count() == 10010
+
+
+@pytest.mark.django_db
+def test_bulk_job_launch_rejects_unsafe_limit(organization, inventory, project, post, user):
+    """PromptFieldCleanTextMixin._run_clean_text_validation must raise when
+    enforcement is on -- BulkJobNodeSerializer skips the normal validate()
+    chain that would otherwise do this (AAP-78694)."""
+    normal_user = user('normal_user', False)
+    organization.member_role.members.add(normal_user)
+    jt = JobTemplate.objects.create(name='my-jt', inventory=inventory, project=project, playbook='helloworld.yml')
+    jt.execute_role.members.add(normal_user)
+    with mock.patch('awx.api.serializers.get_setting', return_value=True):
+        response = post(
+            reverse('api:bulk_job_launch'),
+            {'name': 'Bulk Job Launch', 'jobs': [{'unified_job_template': jt.id, 'limit': '<script>x</script>'}]},
+            normal_user,
+            expect=400,
+        )
+    assert 'limit' in str(response.data)
+
+
+@pytest.mark.django_db
+def test_bulk_job_launch_allows_jinja_extra_vars(organization, inventory, project, post, user):
+    """BulkJobLaunchSerializer stringifies extra_vars before CleanTextMixin
+    runs; excluded_fields must keep legitimate Jinja from being rejected
+    (AAP-78694)."""
+    normal_user = user('normal_user', False)
+    organization.member_role.members.add(normal_user)
+    jt = JobTemplate.objects.create(name='my-jt', inventory=inventory, project=project, playbook='helloworld.yml')
+    jt.execute_role.members.add(normal_user)
+    with mock.patch('ansible_base.lib.serializers.mixins.get_setting', return_value=True):
+        post(
+            reverse('api:bulk_job_launch'),
+            {
+                'name': 'Bulk Job Launch',
+                'jobs': [{'unified_job_template': jt.id}],
+                'extra_vars': {'foo': '{{ bar }}'},
+            },
+            normal_user,
+            expect=201,
+        )

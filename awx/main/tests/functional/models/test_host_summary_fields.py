@@ -47,10 +47,6 @@ class TestHostSummaryFields:
         ).save()
 
         summary = JobHostSummary.objects.filter(host=host, job=job).first()
-        host.last_job = job
-        host.last_job_host_summary = summary
-        host.save(update_fields=['last_job', 'last_job_host_summary'])
-        host.refresh_from_db()
 
         return host, job, summary
 

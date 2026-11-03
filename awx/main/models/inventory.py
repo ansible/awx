@@ -27,7 +27,10 @@ from ansible_base.lib.utils.models import prevent_search
 
 # AWX
 from awx.api.versioning import reverse
+from awx.main.utils.common import load_all_entry_points_for
+from awx.main.utils.lazy_registry import LazyLoadDict
 from awx.main.utils.plugins import discover_available_cloud_provider_plugin_names, compute_cloud_inventory_sources
+from awx_plugins.interfaces._temporary_private_licensing_api import detect_server_product_name
 from awx.main.consumers import emit_channel_notification
 from awx.main.fields import (
     ImplicitRoleField,
@@ -39,7 +42,6 @@ from awx.main.models.base import BaseModel, CommonModelNameNotUnique, VarsDictPr
 from awx.main.models.events import InventoryUpdateEvent, UnpartitionedInventoryUpdateEvent
 from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate
 from awx.main.models.mixins import (
-    ResourceMixin,
     TaskManagerInventoryUpdateMixin,
     RelatedJobsMixin,
     CustomVirtualEnvMixin,
@@ -68,7 +70,7 @@ class InventoryConstructedInventoryMembership(models.Model):
     )
 
 
-class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQueryPathMixin):
+class Inventory(CommonModelNameNotUnique, RelatedJobsMixin, OpaQueryPathMixin):
     """
     an inventory source contains lists and hosts.
     """
@@ -280,21 +282,17 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQu
 
     def get_sliced_hosts(self, host_queryset, slice_number, slice_count):
         """
-        Returns a slice of Hosts given a slice number and total slice count, or
-        the original queryset if slicing is not requested.
-
-        NOTE: If slicing is performed, this will return a List[Host] with the
-        resulting slice. If slicing is not performed it will return the
-        original queryset (not evaluating it or forcing it to a list). This
-        puts the burden on the caller to check the resulting type. This is
-        non-ideal because it's easy to get wrong, but I think the only way
-        around it is to force the queryset which has memory implications for
-        large inventories.
+        Returns a queryset of Hosts for a given slice number and total slice
+        count, or the original queryset if slicing is not requested.
         """
-
         if slice_count > 1 and slice_number > 0:
             offset = slice_number - 1
-            host_queryset = host_queryset[offset::slice_count]
+            # Fetch only PKs to avoid loading the full host records into memory
+            # before slicing the query set. Unfortunately it seems that there is
+            # no good way to slice a queryset without converting it to a list first
+            all_pks = list(host_queryset.values_list('pk', flat=True))
+            sliced_pks = all_pks[offset::slice_count]
+            host_queryset = host_queryset.filter(pk__in=sliced_pks)
         return host_queryset
 
     def get_script_data(self, hostvars=False, towervars=False, show_all=False, slice_number=1, slice_count=1):
@@ -547,23 +545,6 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
             default='',
             help_text=_('Host variables in JSON or YAML format.'),
         )
-    )
-    last_job = models.ForeignKey(
-        'Job',
-        related_name='hosts_as_last_job+',
-        null=True,
-        default=None,
-        editable=False,
-        on_delete=models.SET_NULL,
-    )
-    last_job_host_summary = models.ForeignKey(
-        'JobHostSummary',
-        related_name='hosts_as_last_job_summary+',
-        blank=True,
-        null=True,
-        default=None,
-        editable=False,
-        on_delete=models.SET_NULL,
     )
     inventory_sources = models.ManyToManyField(
         'InventorySource',
@@ -926,12 +907,22 @@ class HostMetricSummaryMonthly(models.Model):
     indirectly_managed_hosts = models.IntegerField(default=0, help_text=("Manually entered number indirectly managed hosts for a certain month"))
 
 
+def _load_inventory_plugins():
+    is_awx = detect_server_product_name() == 'AWX'
+    extra_entry_point_groups = () if is_awx else ('inventory.supported',)
+    all_entry_points = load_all_entry_points_for(['inventory', *extra_entry_point_groups])
+
+    for entry_point_name, entry_point in all_entry_points.items():
+        cls = entry_point.load()
+        InventorySourceOptions.injectors[entry_point_name] = cls
+
+
 class InventorySourceOptions(BaseModel):
     """
     Common fields for InventorySource and InventoryUpdate.
     """
 
-    injectors = dict()
+    injectors = LazyLoadDict(_load_inventory_plugins)
 
     # From the options of the Django management base command
     INVENTORY_UPDATE_VERBOSITY_CHOICES = [

@@ -21,7 +21,7 @@ class LoggedBasicAuthentication(authentication.BasicAuthentication):
         ret = super(LoggedBasicAuthentication, self).authenticate(request)
         if ret:
             username = ret[0].username if ret[0] else '<none>'
-            logger.info(smart_str(u"User {} performed a {} to {} through the API".format(username, request.method, request.path)))
+            logger.info(smart_str("User {} performed a {} to {} through the API".format(username, request.method, request.path)))
         return ret
 
     def authenticate_header(self, request):

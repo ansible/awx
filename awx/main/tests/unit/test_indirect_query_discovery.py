@@ -419,14 +419,13 @@ class TestExternalQueryDiscovery:
 class TestPrivateDataDirIntegration:
     """Tests for vendor collection copying (AC7.10-AC7.11)."""
 
-    @mock.patch('awx.main.tasks.jobs.flag_enabled')
+    @mock.patch('awx.main.tasks.jobs.settings.INDIRECT_NODE_COUNTING_ENABLED', True)
     @mock.patch('awx.main.tasks.jobs.shutil.copytree')
     @mock.patch('awx.main.tasks.jobs.os.path.exists')
-    def test_vendor_collections_copied(self, mock_exists, mock_copytree, mock_flag):
+    def test_vendor_collections_copied(self, mock_exists, mock_copytree):
         """AC7.10: build_private_data_files() copies vendor collections to private_data_dir."""
         from awx.main.tasks.jobs import BaseTask
 
-        mock_flag.return_value = True
         mock_exists.return_value = True
 
         task = BaseTask()
@@ -439,15 +438,14 @@ class TestPrivateDataDirIntegration:
 
         mock_copytree.assert_called_once_with('/var/lib/awx/vendor_collections', f'{private_data_dir}/vendor_collections')
 
-    @mock.patch('awx.main.tasks.jobs.flag_enabled')
+    @mock.patch('awx.main.tasks.jobs.settings.INDIRECT_NODE_COUNTING_ENABLED', True)
     @mock.patch('awx.main.tasks.jobs.logger')
     @mock.patch('awx.main.tasks.jobs.shutil.copytree')
     @mock.patch('awx.main.tasks.jobs.os.path.exists')
-    def test_missing_source_handled_gracefully(self, mock_exists, mock_copytree, mock_logger, mock_flag):
+    def test_missing_source_handled_gracefully(self, mock_exists, mock_copytree, mock_logger):
         """AC7.11: Collection copy handles missing source directory gracefully."""
         from awx.main.tasks.jobs import BaseTask
 
-        mock_flag.return_value = True
         mock_exists.return_value = False
 
         task = BaseTask()

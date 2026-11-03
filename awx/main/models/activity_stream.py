@@ -93,7 +93,7 @@ class ActivityStream(models.Model):
                 timestamp = self.timestamp
         else:
             timestamp = '_delayed_'
-        return u'%s-%s-pk=%s' % (operation, timestamp, self.pk)
+        return '%s-%s-pk=%s' % (operation, timestamp, self.pk)
 
     def get_absolute_url(self, request=None):
         return reverse('api:activity_stream_detail', kwargs={'pk': self.pk}, request=request)

@@ -1,7 +1,6 @@
 import collections
 import os
 import sqlite3
-import sys
 import unittest
 
 import pytest
@@ -125,7 +124,7 @@ def test_sql_above_threshold(tmpdir):
         args, kw = _call
         assert args == ('EXPLAIN VERBOSE {}'.format(QUERY['sql']),)
 
-    path = os.path.join(tmpdir, '{}.sqlite'.format(os.path.basename(sys.argv[0])))
+    path = os.path.join(tmpdir, 'unknown.sqlite')
     assert os.path.exists(path)
 
     # verify the results

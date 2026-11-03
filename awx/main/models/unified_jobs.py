@@ -20,6 +20,9 @@ from dispatcherd.factories import get_control_from_settings
 # Django
 from django.conf import settings
 from django.db import models, connection, transaction
+
+# psycopg
+from psycopg import sql
 from django.db.models.constraints import UniqueConstraint
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.utils.translation import gettext_lazy as _
@@ -42,7 +45,6 @@ from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, 
 from awx.main.dispatch import get_task_queuename
 from awx.main.registrar import activity_stream_registrar
 from awx.main.models.mixins import TaskManagerUnifiedJobMixin, ExecutionEnvironmentMixin
-from awx.main.models.rbac import to_permissions
 from awx.main.utils.common import (
     camelcase_to_underscore,
     get_model_for_type,
@@ -211,21 +213,18 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         return [c for c in cls.__subclasses__() if permission_registry.is_registered(c)]
 
     @classmethod
-    def accessible_pk_qs(cls, accessor, role_field):
+    def access_ids_qs(cls, accessor, action):
         """
-        A re-implementation of accessible pk queryset for the "normal" unified JTs.
-        Does not return inventory sources or system JTs, these should
-        be handled inside of get_queryset where it is utilized.
+        Returns a queryset of IDs for UnifiedJobTemplates accessible to the user.
+        Handles the polymorphic nature by checking permissions across all submodels.
         """
         # do not use this if in a subclass
         if cls != UnifiedJobTemplate:
-            return super(UnifiedJobTemplate, cls).accessible_pk_qs(accessor, role_field)
-
-        action = to_permissions[role_field]
+            return super(UnifiedJobTemplate, cls).access_ids_qs(accessor, action)
 
         # Special condition for super auditor
         role_subclasses = cls._submodels_with_roles()
-        all_codenames = {f'{action}_{cls._meta.model_name}' for cls in role_subclasses}
+        all_codenames = {f'{action}_{subcls._meta.model_name}' for subcls in role_subclasses}
         if not (all_codenames - accessor.singleton_permissions()):
             role_cts = ContentType.objects.get_for_models(*role_subclasses).values()
             qs = cls.objects.filter(polymorphic_ctype__in=role_cts)
@@ -234,7 +233,11 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         dab_role_cts = permission_registry.content_type_model.objects.get_for_models(*role_subclasses).values()
 
         return (
-            RoleEvaluation.objects.filter(role__in=accessor.has_roles.all(), codename__in=all_codenames, content_type_id__in=[ct.id for ct in dab_role_cts])
+            RoleEvaluation.objects.filter(
+                role_id__in=RoleEvaluation.actor_role_ids(accessor),
+                codename__in=all_codenames,
+                content_type_id__in=[ct.id for ct in dab_role_cts],
+            )
             .values_list('object_id')
             .distinct()
         )
@@ -829,7 +832,7 @@ class UnifiedJob(
         return True
 
     def __str__(self):
-        return u'%s-%s-%s' % (self.created, self.id, self.status)
+        return '%s-%s-%s' % (self.created, self.id, self.status)
 
     @property
     def log_format(self):
@@ -862,11 +865,26 @@ class UnifiedJob(
 
         return update_fields
 
-    def _update_parent_instance(self):
+    def _update_parent_instance(self, skip_locked=False):
         parent_instance = self._get_parent_instance()
-        if parent_instance:
+        if not parent_instance:
+            return
+        if skip_locked:
+            with transaction.atomic():
+                locked = type(parent_instance).objects.select_for_update(skip_locked=True).filter(pk=parent_instance.pk).first()
+                if locked is None:
+                    logger.debug(
+                        '%s skipping parent instance update, row locked by another session',
+                        self.log_format,
+                    )
+                    return
+                update_fields = self._update_parent_instance_no_save(locked)
+                if update_fields:
+                    locked.save(update_fields=update_fields)
+        else:
             update_fields = self._update_parent_instance_no_save(parent_instance)
-            parent_instance.save(update_fields=update_fields)
+            if update_fields:
+                parent_instance.save(update_fields=update_fields)
 
     def _set_default_dependencies_processed(self):
         pass
@@ -948,7 +966,7 @@ class UnifiedJob(
             # This dodges lock contention at the expense of the foreign key not being
             # completely correct.
             if getattr(self, 'allow_simultaneous', False):
-                connection.on_commit(self._update_parent_instance)
+                connection.on_commit(lambda: self._update_parent_instance(skip_locked=True))
             else:
                 self._update_parent_instance()
 
@@ -1175,17 +1193,23 @@ class UnifiedJob(
                         raise StdoutMaxBytesExceeded(total, max_supported)
 
                 tbl = self._meta.db_table + 'event'
-                created_by_cond = ''
+                where_parts = [
+                    sql.SQL('{} = {}').format(sql.Identifier(self.event_parent_key), sql.Literal(self.id)),
+                    sql.SQL("stdout != ''"),
+                ]
                 if self.has_unpartitioned_events:
-                    tbl = f'_unpartitioned_{tbl}'
+                    tbl = '_unpartitioned_' + tbl
                 else:
-                    created_by_cond = f"job_created='{self.created.isoformat()}' AND "
+                    where_parts.insert(0, sql.SQL('job_created = {}').format(sql.Literal(self.created)))
 
-                sql = f"copy (select stdout from {tbl} where {created_by_cond}{self.event_parent_key}={self.id} and stdout != '' order by start_line) to stdout"  # nosql
+                copy_sql = sql.SQL('COPY (SELECT stdout FROM {} WHERE {} ORDER BY start_line) TO STDOUT').format(
+                    sql.Identifier(tbl),
+                    sql.SQL(' AND ').join(where_parts),
+                )
                 # psycopg3's copy writes bytes, but callers of this
                 # function assume a str-based fd will be returned; decode
                 # .write() calls on the fly to maintain this interface
-                with cursor.copy(sql) as copy:
+                with cursor.copy(copy_sql) as copy:
                     while data := copy.read():
                         fd.write(smart_str(bytes(data)))
 
@@ -1403,14 +1427,14 @@ class UnifiedJob(
 
         if not all(opts.values()):
             missing_fields = ', '.join([k for k, v in opts.items() if not v])
-            self.job_explanation = u'Missing needed fields: %s.' % missing_fields
+            self.job_explanation = 'Missing needed fields: %s.' % missing_fields
             self.save(update_fields=['job_explanation'])
 
         return opts
 
     def pre_start(self):
         if not self.can_start:
-            self.job_explanation = u'%s is not in a startable state: %s, expecting one of %s' % (self._meta.verbose_name, self.status, str(('new', 'waiting')))
+            self.job_explanation = '%s is not in a startable state: %s, expecting one of %s' % (self._meta.verbose_name, self.status, str(('new', 'waiting')))
             self.save(update_fields=['job_explanation'])
             return (False, None)
 

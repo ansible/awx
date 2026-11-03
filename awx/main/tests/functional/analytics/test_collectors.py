@@ -166,6 +166,6 @@ def test_copy_tables_workflow_job_node_query(sqlite_copy, workflow_job):
             for index, relationship in zip([7, 8, 9], ["success_nodes", "failure_nodes", "always_nodes"]):
                 for i, l in enumerate(lines):
                     related_nodes = [int(e) for e in l[index].split(",")] if l[index] else []
-                    assert related_nodes == list(
-                        getattr(workflow_job.workflow_nodes.all()[i], relationship).all().values_list("id", flat=True)
-                    ), f"(right side) workflow_nodes.all()[{i}].{relationship}.all()"
+                    assert related_nodes == list(getattr(workflow_job.workflow_nodes.all()[i], relationship).all().values_list("id", flat=True)), (
+                        f"(right side) workflow_nodes.all()[{i}].{relationship}.all()"
+                    )

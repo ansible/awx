@@ -62,10 +62,11 @@ def oidc_credential(oidc_credentialtype):
 @pytest.fixture
 def mock_oidc_backend():
     """Fixture that mocks OIDC JWT generation and credential backend."""
-    with mock.patch('awx.api.views.retrieve_workload_identity_jwt_with_claims') as mock_jwt, mock.patch('awx.api.views._jwt_decode') as mock_decode, mock.patch(
-        'awx.main.models.credential.CredentialType.plugin', new_callable=mock.PropertyMock
-    ) as mock_plugin:
-
+    with (
+        mock.patch('awx.api.views.retrieve_workload_identity_jwt_with_claims') as mock_jwt,
+        mock.patch('awx.api.views._jwt_decode') as mock_decode,
+        mock.patch('awx.main.models.credential.CredentialType.plugin', new_callable=mock.PropertyMock) as mock_plugin,
+    ):
         # Set default return values
         mock_jwt.return_value = 'fake.jwt.token'
         mock_decode.return_value = {'iss': 'http://gateway/o', 'aud': 'vault'}

@@ -139,15 +139,18 @@ class UnifiedJob(HasStatus, base.Base):
         """
         self.get()
         job_args = self.job_args
-        expected_prefix = '/tmp/awx_{}'.format(self.id)
+        expected_segment = 'awx_{}'.format(self.id)
         for arg1, arg2 in zip(job_args[:-1], job_args[1:]):
             if arg1 == '-v':
                 if ':' in arg2:
                     host_loc = arg2.split(':')[0]
-                    if host_loc.startswith(expected_prefix):
+                    parts = host_loc.rstrip('/').split('/')
+                    if any(p == expected_segment or p.startswith(expected_segment + '_') for p in parts):
                         return host_loc
         raise RuntimeError(
-            'Could not find a controller private_data_dir for this job. Searched for volume mount to {} inside of args {}'.format(expected_prefix, job_args)
+            'Could not find a controller private_data_dir for this job. Searched for volume mount matching {} inside of args {}'.format(
+                expected_segment, job_args
+            )
         )
 
 

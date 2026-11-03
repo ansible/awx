@@ -51,7 +51,7 @@ class AnalyticsRootView(APIView):
     name = _('Automation Analytics')
     resource_purpose = 'automation analytics endpoints'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A list of additional API endpoints related to analytics"})
+    @extend_schema_if_available(extensions={"x-ai-description": "Returns available analytics API endpoints and their descriptions."})
     def get(self, request, format=None):
         data = OrderedDict()
         data['authorized'] = reverse('api:analytics_authorized', request=request)

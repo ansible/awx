@@ -34,7 +34,10 @@ class ControllerAWXKitModule(ControllerModule):
 
     def authenticate(self):
         try:
-            self.connection.login(username=self.username, password=self.password)
+            if self.aap_token:
+                self.connection.session.headers['Authorization'] = 'Bearer {0}'.format(self.aap_token)
+            else:
+                self.connection.login(username=self.username, password=self.password)
             self.authenticated = True
         except Exception:
             self.fail_json("Failed to authenticate")

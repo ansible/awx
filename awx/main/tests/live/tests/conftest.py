@@ -15,7 +15,7 @@ from awx.api.versioning import reverse
 # These tests are invoked from the awx/main/tests/live/ subfolder
 # so any fixtures from higher-up conftest files must be explicitly included
 from awx.main.tests.functional.conftest import *  # noqa
-from awx.main.tests.conftest import load_all_credentials  # noqa: F401; pylint: disable=unused-import
+from awx.main.tests.conftest import load_all_credentials  # noqa: F401  # pylint: disable=unused-import
 from awx.main.tests import data
 
 from awx.main.models import Project, JobTemplate, Organization, Inventory, WorkflowJob, UnifiedJob

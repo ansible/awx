@@ -102,6 +102,14 @@ def test_org_auditor_sees_orphans(normal_job, org_auditor):
     assert access.can_read(normal_job)
 
 
+@pytest.mark.django_db
+def test_job_access_queryset_does_not_add_distinct(normal_job, org_admin):
+    queryset = JobAccess(org_admin).filtered_queryset()
+
+    assert not queryset.query.distinct
+    assert queryset.count() == queryset.values('pk').distinct().count()
+
+
 # Delete permissions testing
 @pytest.mark.django_db
 def test_JT_admin_delete_denied(normal_job, rando):

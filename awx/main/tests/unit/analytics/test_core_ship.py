@@ -9,7 +9,7 @@ from unittest import mock
 
 from django.test.utils import override_settings
 
-from awx.main.analytics.core import ship, _get_cert_upload_url
+from awx.main.analytics.core import ship, _get_cert_upload_url, _log_shipping_response
 
 
 class TestGetCertUploadUrl:
@@ -70,6 +70,7 @@ class TestShipMTLS:
         # Mock successful mTLS response
         mock_response = mock.Mock()
         mock_response.status_code = 200
+        mock_response.json.return_value = {'request_id': 'abc-123', 'account_number': '12345', 'org_id': '67890'}
         mock_session = mock.Mock()
         mock_session.headers = {}
         mock_session.post.return_value = mock_response
@@ -81,6 +82,7 @@ class TestShipMTLS:
         mock_get_cert.assert_called_once()
         mock_temp_files.assert_called_once_with('cert-pem-data', 'key-pem-data')
         mock_session.post.assert_called_once()
+        mock_response.json.assert_called_once()
 
         # Verify cert URL is used (cert. subdomain added)
         call_args = mock_session.post.call_args
@@ -126,6 +128,7 @@ class TestShipMTLS:
         # Mock successful OIDC response
         mock_oidc_response = mock.Mock()
         mock_oidc_response.status_code = 200
+        mock_oidc_response.json.return_value = {'request_id': 'oidc-456', 'account_number': '12345', 'org_id': '67890'}
         mock_oidc_instance = mock.Mock()
         mock_oidc_instance.make_request.return_value = mock_oidc_response
         mock_oidc_client.return_value = mock_oidc_instance
@@ -172,6 +175,7 @@ class TestShipMTLS:
         # Mock successful OIDC response
         mock_oidc_response = mock.Mock()
         mock_oidc_response.status_code = 200
+        mock_oidc_response.json.return_value = {'request_id': 'oidc-789', 'account_number': '12345', 'org_id': '67890'}
         mock_oidc_instance = mock.Mock()
         mock_oidc_instance.make_request.return_value = mock_oidc_response
         mock_oidc_client.return_value = mock_oidc_instance
@@ -209,6 +213,7 @@ class TestShipMTLS:
         # Mock successful OIDC response
         mock_oidc_response = mock.Mock()
         mock_oidc_response.status_code = 200
+        mock_oidc_response.json.return_value = {'request_id': 'oidc-no-cert', 'account_number': '12345', 'org_id': '67890'}
         mock_oidc_instance = mock.Mock()
         mock_oidc_instance.make_request.return_value = mock_oidc_response
         mock_oidc_client.return_value = mock_oidc_instance
@@ -269,3 +274,34 @@ class TestShipMTLS:
         assert result is False
         mock_session.post.assert_called_once()
         mock_oidc_instance.make_request.assert_called_once()
+
+
+class TestLogShippingResponse:
+    """Test _log_shipping_response() helper function."""
+
+    def test_logs_response_fields(self):
+        """Test that request_id, account_number, and org_id are logged."""
+        response = mock.Mock()
+        response.json.return_value = {'request_id': 'req-abc', 'account_number': '99999', 'org_id': '11111'}
+        with mock.patch('awx.main.analytics.core.logger') as mock_logger:
+            _log_shipping_response(response, '/tmp/analytics.tar.gz')
+            mock_logger.info.assert_called_once_with("Analytics upload successful: file=analytics.tar.gz request_id=req-abc account_number=99999 org_id=11111")
+
+    def test_logs_unknown_for_missing_fields(self):
+        """Test fallback to 'unknown' when response fields are absent."""
+        response = mock.Mock()
+        response.json.return_value = {}
+        with mock.patch('awx.main.analytics.core.logger') as mock_logger:
+            _log_shipping_response(response, '/tmp/analytics.tar.gz')
+            mock_logger.info.assert_called_once_with(
+                "Analytics upload successful: file=analytics.tar.gz request_id=unknown account_number=unknown org_id=unknown"
+            )
+
+    def test_graceful_fallback_on_json_error(self):
+        """Test fallback log when response body is not valid JSON."""
+        response = mock.Mock()
+        response.json.side_effect = ValueError("No JSON")
+        response.status_code = 202
+        with mock.patch('awx.main.analytics.core.logger') as mock_logger:
+            _log_shipping_response(response, '/tmp/analytics.tar.gz')
+            mock_logger.info.assert_called_once_with("Analytics upload successful: file=analytics.tar.gz status=202")

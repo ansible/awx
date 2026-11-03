@@ -68,6 +68,27 @@ Cluster management
     Do not run other ``awx-manage`` commands unless instructed by Red Hat Ansible personnel.
 
 
+Indirect node counting
+~~~~~~~~~~~~~~~~~~~~~~
+
+Red Hat Support can temporarily disable indirect node counting when diagnosing
+Controller performance issues. Indirect node counting is enabled by default.
+
+::
+
+    awx-manage set_indirect_node_counting --disable
+
+To resume processing indirect managed nodes, run:
+
+::
+
+    awx-manage set_indirect_node_counting --enable
+
+The command updates the controller setting and clears the setting cache across
+the cluster. Allow the change to propagate to workers before launching a job
+that must use the new value. A service restart is not required.
+
+
 .. _ag_token_utility:
 
 Session management

@@ -45,7 +45,7 @@ def test_kv_unsafe():
 
 
 def test_kv_unsafe_unicode():
-    assert safe_dump({'a': u'🐉'}) == '!unsafe \'a\': !unsafe "\\U0001F409"\n'
+    assert safe_dump({'a': '🐉'}) == '!unsafe \'a\': !unsafe "\\U0001F409"\n'
 
 
 def test_kv_unsafe_in_list():

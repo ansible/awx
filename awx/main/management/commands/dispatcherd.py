@@ -6,6 +6,7 @@ import json
 import logging
 import logging.config
 import os
+import time
 
 from django.conf import settings
 from django.core.cache import cache as django_cache
@@ -15,6 +16,7 @@ from django.db import connection
 from dispatcherd.config import setup as dispatcher_setup
 
 from awx.main.dispatch.config import get_dispatcherd_config
+from awx.main.tasks.receptor import receptor_config_exists
 
 logger = logging.getLogger('awx.main.dispatch')
 
@@ -51,6 +53,14 @@ class Command(BaseCommand):
 
     def handle(self, *arg, **options):
         ensure_no_dispatcherd_env_config()
+
+        for attempt in range(5):
+            if receptor_config_exists():
+                break
+            logger.info("Waiting for receptor config... (attempt %d/5)", attempt + 1)
+            time.sleep(2)
+        else:
+            raise CommandError("Receptor config not found after 10s")
 
         self.configure_dispatcher_logging()
         config = get_dispatcherd_config(for_service=True)
