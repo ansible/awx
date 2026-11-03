@@ -149,10 +149,18 @@ def test_reaper_releases_after_reconnect_retry_fails():
 
 
 def test_reaper_does_not_force_release_on_transient_failure():
-    """A transient release failure must not delete the local proxy."""
+    """A transient release failure must not delete the local proxy.
+
+    The first failure triggers a reconnect; the replacement controller fails
+    the retry and then release_work_unit's own release, and must not be
+    force-released.
+    """
     ctl = FakeCtl({'unit-a': {}}, fail_release_transient={'unit-a'})
-    _, admin = run_reaper(ctl, make_jobs('unit-a'))
+    retry = FakeCtl({'unit-a': {}}, fail_release_transient={'unit-a'})
+    _, admin = run_reaper(ctl, make_jobs('unit-a'), extra_ctl=retry)
 
     assert 'work release unit-a' in ctl.calls
-    assert 'work force-release unit-a' not in ctl.calls
+    # Reconnect retry plus the release_work_unit attempt.
+    assert retry.calls.count('work release unit-a') == 2
+    assert 'work force-release unit-a' not in retry.calls
     admin.assert_called_once()
