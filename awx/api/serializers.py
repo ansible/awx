@@ -131,6 +131,7 @@ from awx.main.validators import vars_validate_or_raise
 
 from awx.api.versioning import reverse
 from ansible_base.lib.utils.views.deprecation import DeprecationSerializerMixin
+from drf_spectacular.utils import extend_schema_serializer
 from awx.api.fields import BooleanNullField, CharNullField, ChoiceNullField, VerbatimField, DeprecatedCredentialField
 
 # AWX Utils
@@ -2584,6 +2585,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
         return summary_fields
 
 
+@extend_schema_serializer(deprecate_fields=["credential"])
 class InventorySourceSerializer(DeprecationSerializerMixin, CleanTextMixin, UnifiedJobTemplateSerializer, InventorySourceOptionsSerializer):
     status = serializers.ChoiceField(choices=InventorySource.INVENTORY_SOURCE_STATUS_CHOICES, read_only=True)
     last_update_failed = serializers.BooleanField(read_only=True)
@@ -2762,6 +2764,7 @@ class InventorySourceUpdateSerializer(InventorySourceSerializer):
         return super(InventorySourceUpdateSerializer, self).validate(attrs)
 
 
+@extend_schema_serializer(deprecate_fields=["credential"])
 class InventoryUpdateSerializer(DeprecationSerializerMixin, UnifiedJobSerializer, InventorySourceOptionsSerializer):
     custom_virtualenv = serializers.ReadOnlyField()
 

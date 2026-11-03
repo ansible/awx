@@ -3,6 +3,7 @@ import json
 import warnings
 from unittest.mock import Mock, mock_open, patch
 
+from drf_spectacular.openapi import AutoSchema
 from rest_framework.permissions import IsAuthenticated
 
 from awx.api.schema import (
@@ -114,9 +115,7 @@ class TestCustomAutoSchema:
         schema = CustomAutoSchema()
         schema.view = view
 
-        with patch.object(
-            CustomAutoSchema.__bases__[0], "get_tags", return_value=["Default Tag"]
-        ) as mock_super:
+        with patch.object(AutoSchema, "get_tags", return_value=["Default Tag"]) as mock_super:
             tags = schema.get_tags()
             mock_super.assert_called_once()
             assert tags == ["Default Tag"]
@@ -129,9 +128,7 @@ class TestCustomAutoSchema:
         schema = CustomAutoSchema()
         schema.view = view
 
-        with patch.object(
-            CustomAutoSchema.__bases__[0], "get_tags", return_value=["Super Tag"]
-        ) as mock_super:
+        with patch.object(AutoSchema, "get_tags", return_value=["Super Tag"]) as mock_super:
             tags = schema.get_tags()
             mock_super.assert_called_once()
             assert tags == ["Super Tag"]
@@ -145,7 +142,7 @@ class TestCustomAutoSchema:
         schema = CustomAutoSchema()
         schema.view = view
 
-        with patch.object(CustomAutoSchema.__bases__[0], "get_tags", return_value=[]):
+        with patch.object(AutoSchema, "get_tags", return_value=[]):
             with warnings.catch_warnings(record=True) as w:
                 warnings.simplefilter("always")
                 tags = schema.get_tags()
@@ -176,6 +173,7 @@ class TestCustomAutoSchema:
 
         schema = CustomAutoSchema()
         schema.view = view
+        schema.method = "GET"
 
         assert schema.is_deprecated() is True
 
@@ -187,6 +185,7 @@ class TestCustomAutoSchema:
 
         schema = CustomAutoSchema()
         schema.view = view
+        schema.method = "GET"
 
         assert schema.is_deprecated() is True
 
@@ -196,36 +195,31 @@ class TestCustomAutoSchema:
 
         schema = CustomAutoSchema()
         schema.view = view
+        schema.method = "GET"
 
         assert schema.is_deprecated() is False
 
-    def test_get_extensions_includes_deprecated_detail(self):
-        """Test get_extensions adds x-api-deprecated-detail from @deprecated decorator."""
-        view = Mock(spec=["deprecation"])
-        view.deprecation = {"detail": "Use /api/v2/new_endpoint/ instead."}
-        view.__class__ = type("FakeView", (), {"deprecation": view.deprecation})
-
-        schema = CustomAutoSchema()
-        schema.view = view
-        schema.method = "GET"
-
-        extensions = schema.get_extensions()
-        assert (
-            extensions.get("x-api-deprecated-detail")
-            == "Use /api/v2/new_endpoint/ instead."
-        )
-
-    def test_get_extensions_no_detail_when_not_deprecated(self):
-        """Test get_extensions omits x-api-deprecated-detail when view is not deprecated."""
+    def test_is_deprecated_with_class_level_deprecation(self):
+        """Test is_deprecated returns True when view class has deprecation dict."""
         view = Mock(spec=[])
-        view.__class__ = type("FakeView", (), {})
+        view.__class__ = type("DeprecatedView", (), {"deprecation": {"detail": "Gone."}})
 
         schema = CustomAutoSchema()
         schema.view = view
         schema.method = "GET"
 
-        extensions = schema.get_extensions()
-        assert "x-api-deprecated-detail" not in extensions
+        assert schema.is_deprecated() is True
+
+    def test_is_deprecated_false_no_attrs(self):
+        """Test is_deprecated returns False when view class has no deprecation attrs."""
+        view = Mock(spec=[])
+        view.__class__ = type("PlainView", (), {})
+
+        schema = CustomAutoSchema()
+        schema.view = view
+        schema.method = "GET"
+
+        assert schema.is_deprecated() is False
 
     def test_get_tags_serializer_meta_without_model(self):
         """Test get_tags when serializer has Meta but no model attribute."""
@@ -265,9 +259,7 @@ class TestCustomAutoSchema:
 
             # Should have warned about the exception
             assert len(w) == 1
-            assert "ComplexView.get_serializer() raised an exception" in str(
-                w[0].message
-            )
+            assert "ComplexView.get_serializer() raised an exception" in str(w[0].message)
 
         # But still recovered and got tags from view.model
         assert tags == ["Recovery Models"]
@@ -372,34 +364,15 @@ class TestFilterCredentialTypeSchema:
         returned = filter_credential_type_schema(result, None, None, None)
 
         # POST/PUT schema: no None (required field)
-        assert result["components"]["schemas"]["CredentialTypeRequest"]["properties"][
-            "kind"
-        ]["enum"] == ["cloud", "net"]
-        assert (
-            result["components"]["schemas"]["CredentialTypeRequest"]["properties"][
-                "kind"
-            ]["description"]
-            == "* `cloud` - Cloud\\n* `net` - Network"
-        )
+        assert result["components"]["schemas"]["CredentialTypeRequest"]["properties"]["kind"]["enum"] == ["cloud", "net"]
+        assert result["components"]["schemas"]["CredentialTypeRequest"]["properties"]["kind"]["description"] == "* `cloud` - Cloud\\n* `net` - Network"
 
         # PATCH schema: includes None (optional field)
-        assert result["components"]["schemas"]["PatchedCredentialTypeRequest"][
-            "properties"
-        ]["kind"]["enum"] == ["cloud", "net", None]
-        assert (
-            result["components"]["schemas"]["PatchedCredentialTypeRequest"][
-                "properties"
-            ]["kind"]["description"]
-            == "* `cloud` - Cloud\\n* `net` - Network"
-        )
+        assert result["components"]["schemas"]["PatchedCredentialTypeRequest"]["properties"]["kind"]["enum"] == ["cloud", "net", None]
+        assert result["components"]["schemas"]["PatchedCredentialTypeRequest"]["properties"]["kind"]["description"] == "* `cloud` - Cloud\\n* `net` - Network"
 
         # Other properties should be preserved
-        assert (
-            result["components"]["schemas"]["CredentialTypeRequest"]["properties"][
-                "kind"
-            ]["type"]
-            == "string"
-        )
+        assert result["components"]["schemas"]["CredentialTypeRequest"]["properties"]["kind"]["type"] == "string"
 
         # Function should return the result
         assert returned is result
@@ -441,47 +414,29 @@ class TestFilterCredentialTypeSchema:
         result = {
             "components": {
                 "schemas": {
-                    "CredentialTypeRequest": {
-                        "properties": {"kind": {"enum": ["ssh", "cloud", "net", None]}}
-                    },
-                    "OtherSchema": {
-                        "properties": {"kind": {"enum": ["option1", "option2"]}}
-                    },
+                    "CredentialTypeRequest": {"properties": {"kind": {"enum": ["ssh", "cloud", "net", None]}}},
+                    "OtherSchema": {"properties": {"kind": {"enum": ["option1", "option2"]}}},
                 }
             }
         }
 
-        other_schema_before = copy.deepcopy(
-            result["components"]["schemas"]["OtherSchema"]
-        )
+        other_schema_before = copy.deepcopy(result["components"]["schemas"]["OtherSchema"])
 
         filter_credential_type_schema(result, None, None, None)
 
         # CredentialTypeRequest should be filtered (no None for required field)
-        assert result["components"]["schemas"]["CredentialTypeRequest"]["properties"][
-            "kind"
-        ]["enum"] == ["cloud", "net"]
+        assert result["components"]["schemas"]["CredentialTypeRequest"]["properties"]["kind"]["enum"] == ["cloud", "net"]
 
         # OtherSchema should be unchanged
         assert result["components"]["schemas"]["OtherSchema"] == other_schema_before
 
     def test_handles_only_one_schema_present(self):
         """Test that function works when only one target schema is present."""
-        result = {
-            "components": {
-                "schemas": {
-                    "CredentialTypeRequest": {
-                        "properties": {"kind": {"enum": ["ssh", "cloud", "net", None]}}
-                    }
-                }
-            }
-        }
+        result = {"components": {"schemas": {"CredentialTypeRequest": {"properties": {"kind": {"enum": ["ssh", "cloud", "net", None]}}}}}}
 
         filter_credential_type_schema(result, None, None, None)
 
-        assert result["components"]["schemas"]["CredentialTypeRequest"]["properties"][
-            "kind"
-        ]["enum"] == ["cloud", "net"]
+        assert result["components"]["schemas"]["CredentialTypeRequest"]["properties"]["kind"]["enum"] == ["cloud", "net"]
 
     def test_handles_missing_properties(self):
         """Test graceful handling when schema has no properties key."""
@@ -534,14 +489,10 @@ class TestFilterCredentialTypeSchema:
         filter_credential_type_schema(result, None, None, None)
 
         # POST/PUT schema: no None (required field)
-        assert result["components"]["schemas"]["CredentialTypeRequest"]["properties"][
-            "kind"
-        ]["enum"] == ["cloud", "net"]
+        assert result["components"]["schemas"]["CredentialTypeRequest"]["properties"]["kind"]["enum"] == ["cloud", "net"]
 
         # PATCH schema: includes None (optional field)
-        assert result["components"]["schemas"]["PatchedCredentialTypeRequest"][
-            "properties"
-        ]["kind"]["enum"] == ["cloud", "net", None]
+        assert result["components"]["schemas"]["PatchedCredentialTypeRequest"]["properties"]["kind"]["enum"] == ["cloud", "net", None]
 
 
 class TestInjectAiDescriptions:
@@ -569,13 +520,8 @@ class TestInjectAiDescriptions:
         with patch("builtins.open", mock_open(read_data=json.dumps(overlay))):
             returned = inject_ai_descriptions(result, None, None, None)
 
-        assert (
-            result["paths"]["/api/v2/items/"]["get"]["x-ai-description"] == "List items"
-        )
-        assert (
-            result["paths"]["/api/v2/items/"]["post"]["x-ai-description"]
-            == "Create an item"
-        )
+        assert result["paths"]["/api/v2/items/"]["get"]["x-ai-description"] == "List items"
+        assert result["paths"]["/api/v2/items/"]["post"]["x-ai-description"] == "Create an item"
         assert returned is result
 
     def test_does_not_overwrite_existing_descriptions(self):
@@ -590,10 +536,7 @@ class TestInjectAiDescriptions:
         with patch("builtins.open", mock_open(read_data=json.dumps(overlay))):
             inject_ai_descriptions(result, None, None, None)
 
-        assert (
-            result["paths"]["/api/v2/items/"]["get"]["x-ai-description"]
-            == "Decorator description"
-        )
+        assert result["paths"]["/api/v2/items/"]["get"]["x-ai-description"] == "Decorator description"
 
     def test_skips_operations_not_in_overlay(self):
         """Test that operations without a matching operationId in the overlay are unchanged."""
@@ -664,9 +607,7 @@ class TestInjectAiDescriptions:
         with patch("builtins.open", mock_open(read_data=json.dumps(overlay))):
             inject_ai_descriptions(result, None, None, None)
 
-        assert (
-            result["paths"]["/api/v2/items/"]["get"]["x-ai-description"] == "List items"
-        )
+        assert result["paths"]["/api/v2/items/"]["get"]["x-ai-description"] == "List items"
 
     def test_handles_operation_without_operation_id(self):
         """Test that operations without operationId are skipped."""
@@ -698,10 +639,7 @@ class TestInjectCleanTextPatternComponents:
     def _make_result(self, schemas=None):
         """Build a minimal OpenAPI result with optional CredentialType schemas."""
         if schemas is None:
-            schemas = {
-                name: {"properties": {"inputs": {"type": "object"}}}
-                for name in self.TARGET_SCHEMAS
-            }
+            schemas = {name: {"properties": {"inputs": {"type": "object"}}} for name in self.TARGET_SCHEMAS}
         return {"components": {"schemas": schemas}}
 
     def _assert_inputs_shape(self, inputs, *, expect_default=False, expect_note=True):
@@ -757,9 +695,7 @@ class TestInjectCleanTextPatternComponents:
 
         inject_clean_text_pattern_components(result, None, None, None)
 
-        description = result["components"]["schemas"]["CredentialType"]["properties"][
-            "inputs"
-        ]["description"]
+        description = result["components"]["schemas"]["CredentialType"]["properties"]["inputs"]["description"]
         assert description.startswith(existing)
         assert self.ENHANCED_NOTE in description
         assert description.count(self.ENHANCED_NOTE) == 1
@@ -782,9 +718,7 @@ class TestInjectCleanTextPatternComponents:
 
         inject_clean_text_pattern_components(result, None, None, None)
 
-        description = result["components"]["schemas"]["CredentialTypeRequest"][
-            "properties"
-        ]["inputs"]["description"]
+        description = result["components"]["schemas"]["CredentialTypeRequest"]["properties"]["inputs"]["description"]
         assert description.count(self.ENHANCED_NOTE) == 1
 
     def test_preserves_existing_default(self):
@@ -804,9 +738,7 @@ class TestInjectCleanTextPatternComponents:
 
         inject_clean_text_pattern_components(result, None, None, None)
 
-        inputs = result["components"]["schemas"]["PatchedCredentialTypeRequest"][
-            "properties"
-        ]["inputs"]
+        inputs = result["components"]["schemas"]["PatchedCredentialTypeRequest"]["properties"]["inputs"]
         self._assert_inputs_shape(inputs, expect_default=True)
         assert inputs["default"] == {"fields": []}
 
