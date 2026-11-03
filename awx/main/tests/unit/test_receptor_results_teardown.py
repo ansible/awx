@@ -84,6 +84,8 @@ def test_process_phase_closes_results_on_success():
     assert res.status == 'successful'
     assert 'sock-shutdown' in events
     assert 'file-close' in events
+    assert 'sock-close' in events
+    assert events.index('sock-shutdown') < events.index('sock-close')
 
 
 def test_results_teardown_precedes_work_release():
@@ -96,8 +98,10 @@ def test_results_teardown_precedes_work_release():
 
     assert 'release' in events
     assert 'sock-shutdown' in events
+    assert 'sock-close' in events
     assert events.index('sock-shutdown') < events.index('release')
     assert events.index('file-close') < events.index('release')
+    assert events.index('sock-close') < events.index('release')
 
 
 def test_cancel_path_tears_down_exactly_once():
@@ -110,6 +114,7 @@ def test_cancel_path_tears_down_exactly_once():
     assert res.status == 'canceled'
     assert 'cancel' in events
     assert events.count('sock-shutdown') == 1
+    assert events.count('sock-close') == 1
     assert 'file-close' in events
 
 
@@ -138,8 +143,10 @@ def test_error_path_closes_both_results_streams():
     assert res.status == 'error'
     assert 'sock-shutdown' in first_events
     assert 'file-close' in first_events
+    assert 'sock-close' in first_events
     assert 'sock-shutdown' in second_events
     assert 'file-close' in second_events
+    assert 'sock-close' in second_events
 
 
 def test_adoption_process_phase_closes_before_release():
@@ -155,6 +162,14 @@ def test_adoption_process_phase_closes_before_release():
     assert 'release' in events
     assert events.index('sock-shutdown') < events.index('release')
     assert events.index('file-close') < events.index('release')
+    assert events.index('sock-close') < events.index('release')
+
+
+def test_close_results_closes_socket_after_shutdown():
+    events = []
+    receptor.AWXReceptorJob._close_results(FakeSock(events), FakeResultFile(events))
+
+    assert events == ['sock-shutdown', 'file-close', 'sock-close']
 
 
 def test_close_results_swallows_teardown_errors():
@@ -261,6 +276,7 @@ def test_cancel_path_closes_stream_when_work_cancel_fails():
     elapsed = time.monotonic() - start
 
     assert 'sock-shutdown' in events
+    assert 'sock-close' in events
     assert elapsed < 3, f'cancel path waited {elapsed:.1f}s on the processor join after work cancel failed'
 
 
@@ -291,4 +307,5 @@ def test_reattach_to_work_unit_orders_teardown_before_finalize_and_release():
     assert 'finalize' in events
     assert 'release' in events
     assert events.index('sock-shutdown') < events.index('finalize')
+    assert events.index('sock-close') < events.index('finalize')
     assert events.index('finalize') < events.index('release')
