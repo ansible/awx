@@ -1,0 +1,145 @@
+"""AAP-97861 Path B (awx): receptor work-unit reaper resilience.
+
+These tests encode the behaviour the fix must provide. They fail on the current
+devel tree and pass with the fix: a per-unit failure must not abort the pass, a
+dead receptorctl socket must be re-established, and a stale unit that is still
+listed must be force-released.
+"""
+
+from unittest import mock
+
+from awx.main.tasks import receptor, system
+
+
+class FakeCtl:
+    def __init__(self, work_list, fail_cancel=(), fail_release=(), fail_force_release=(), fail_connection=()):
+        self.work_list = work_list
+        self.fail_cancel = set(fail_cancel)
+        self.fail_release = set(fail_release)
+        self.fail_force_release = set(fail_force_release)
+        self.fail_connection = set(fail_connection)
+        self.connection_dead = False
+        self.calls = []
+
+    def simple_command(self, command):
+        self.calls.append(command)
+        if self.connection_dead:
+            raise ValueError('Socket path does not exist: /run/receptor.sock')
+        parts = command.split()
+        if len(parts) == 3 and parts[0] == 'work':
+            unit = parts[2]
+            if unit in self.fail_connection:
+                self.connection_dead = True
+                raise ValueError('Socket path does not exist: /run/receptor.sock')
+            if parts[1] == 'cancel' and unit in self.fail_cancel:
+                raise RuntimeError(f'error cancelling remote unit:  unknown work unit {unit}')
+            if parts[1] == 'release' and unit in self.fail_release:
+                raise RuntimeError(f'error releasing remote unit:  unknown work unit {unit}')
+            if parts[1] == 'force-release' and unit in self.fail_force_release:
+                raise RuntimeError(f'error force-releasing unit {unit}')
+        if command == 'work list':
+            return dict(self.work_list)
+        return {}
+
+
+def make_jobs(*unit_ids):
+    return [mock.Mock(work_unit_id=unit, log_format=f'job {unit}') for unit in unit_ids]
+
+
+def run_reaper(ctl, jobs, extra_ctl=None):
+    qs = mock.MagicMock()
+    qs.exclude.return_value = jobs
+    ctl_factory = mock.Mock(side_effect=[ctl, extra_ctl] if extra_ctl else [ctl])
+    with (
+        mock.patch.object(system, 'get_receptor_ctl', ctl_factory),
+        mock.patch.object(system, 'administrative_workunit_reaper') as admin,
+        mock.patch.object(system.UnifiedJob, 'objects') as objects,
+    ):
+        objects.filter.return_value = qs
+        system.awx_receptor_workunit_reaper()
+    return ctl_factory, admin
+
+
+def test_reaper_continues_after_one_bad_unit():
+    ctl = FakeCtl({'unit-a': {}, 'unit-b': {}, 'unit-c': {}}, fail_cancel={'unit-a'})
+    _, admin = run_reaper(ctl, make_jobs('unit-a', 'unit-b', 'unit-c'))
+
+    assert 'work release unit-b' in ctl.calls
+    assert 'work release unit-c' in ctl.calls
+    admin.assert_called_once()
+
+
+def test_reaper_reestablishes_connection_after_socket_failure():
+    dead = FakeCtl({'unit-a': {}, 'unit-b': {}}, fail_connection={'unit-a'})
+    live = FakeCtl({'unit-a': {}, 'unit-b': {}})
+
+    ctl_factory, admin = run_reaper(dead, make_jobs('unit-a', 'unit-b'), extra_ctl=live)
+
+    assert ctl_factory.call_count == 2
+    assert 'work release unit-a' in live.calls
+    assert 'work release unit-b' in live.calls
+    admin.assert_called_once()
+
+
+def test_reaper_force_releases_when_normal_release_fails():
+    ctl = FakeCtl({'unit-a': {}}, fail_release={'unit-a'})
+    _, admin = run_reaper(ctl, make_jobs('unit-a'))
+
+    assert 'work release unit-a' in ctl.calls
+    assert 'work force-release unit-a' in ctl.calls
+    admin.assert_called_once()
+
+
+def test_administrative_reaper_continues_after_one_bad_unit():
+    work_list = {
+        'unit-a': {'ExtraData': '--worker-info', 'StateName': 'Succeeded'},
+        'unit-b': {'ExtraData': '--worker-info', 'StateName': 'Succeeded'},
+    }
+    ctl = FakeCtl(work_list, fail_release={'unit-a'}, fail_force_release={'unit-a'})
+
+    with mock.patch.object(receptor, 'get_receptor_ctl', return_value=ctl):
+        receptor.administrative_workunit_reaper(work_list=work_list)
+
+    assert 'work release unit-a' in ctl.calls
+    assert 'work release unit-b' in ctl.calls
+    assert 'work force-release unit-a' in ctl.calls
+
+
+def test_administrative_reaper_no_socket_is_noop():
+    with mock.patch.object(receptor, 'get_receptor_ctl', side_effect=FileNotFoundError):
+        receptor.administrative_workunit_reaper()
+
+
+def test_administrative_reaper_work_list_failure_returns():
+    ctl = mock.Mock()
+    ctl.simple_command.side_effect = ValueError('Socket path does not exist')
+    with mock.patch.object(receptor, 'get_receptor_ctl', return_value=ctl):
+        receptor.administrative_workunit_reaper()
+
+
+def test_reaper_stops_pass_when_reconnect_fails():
+    dead = FakeCtl({'unit-a': {}, 'unit-b': {}}, fail_connection={'unit-a'})
+    qs = mock.MagicMock()
+    qs.exclude.return_value = make_jobs('unit-a', 'unit-b')
+    ctl_factory = mock.Mock(side_effect=[dead, FileNotFoundError('no socket')])
+
+    with (
+        mock.patch.object(system, 'get_receptor_ctl', ctl_factory),
+        mock.patch.object(system, 'administrative_workunit_reaper') as admin,
+        mock.patch.object(system.UnifiedJob, 'objects') as objects,
+    ):
+        objects.filter.return_value = qs
+        system.awx_receptor_workunit_reaper()
+
+    admin.assert_called_once()
+    assert ctl_factory.call_count == 2
+
+
+def test_reaper_releases_after_reconnect_retry_fails():
+    dead = FakeCtl({'unit-a': {}}, fail_connection={'unit-a'})
+    live = FakeCtl({'unit-a': {}}, fail_cancel={'unit-a'}, fail_release={'unit-a'})
+
+    _, admin = run_reaper(dead, make_jobs('unit-a'), extra_ctl=live)
+
+    assert 'work force-release unit-a' in live.calls
+    admin.assert_called_once()

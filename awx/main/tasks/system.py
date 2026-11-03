@@ -77,6 +77,7 @@ from awx.main.tasks.receptor import (
     administrative_workunit_reaper,
     get_receptor_ctl,
     reattach_to_work_unit,
+    release_work_unit,
     worker_cleanup,
     worker_info,
     write_receptor_config,
@@ -1074,8 +1075,28 @@ def awx_receptor_workunit_reaper():
         jobs_with_unreleased_receptor_units = jobs_with_unreleased_receptor_units.exclude(status__in=ERROR_STATES)
     for job in jobs_with_unreleased_receptor_units:
         logger.debug(f"{job.log_format} is not active, reaping receptor work unit {job.work_unit_id}")
-        receptor_ctl.simple_command(f"work cancel {job.work_unit_id}")
-        receptor_ctl.simple_command(f"work release {job.work_unit_id}")
+        try:
+            receptor_ctl.simple_command(f"work cancel {job.work_unit_id}")
+            receptor_ctl.simple_command(f"work release {job.work_unit_id}")
+        except (ValueError, OSError) as exc:
+            # ValueError is what ReceptorControl raises when the control socket is gone;
+            # OSError also covers a connection that died mid-command.
+            logger.warning(f"Lost receptorctl connection while reaping {job.work_unit_id}: {exc}. Reconnecting.")
+            try:
+                receptor_ctl = get_receptor_ctl()
+            except Exception:
+                logger.exception('Unable to re-establish receptorctl connection; stopping reaper pass')
+                break
+            try:
+                receptor_ctl.simple_command(f"work cancel {job.work_unit_id}")
+                receptor_ctl.simple_command(f"work release {job.work_unit_id}")
+            except Exception:
+                logger.warning(f"Failed to reap work unit {job.work_unit_id} after reconnect", exc_info=True)
+                release_work_unit(receptor_ctl, job.work_unit_id, receptor_work_list)
+        except Exception:
+            logger.warning(f"Failed to reap work unit {job.work_unit_id}", exc_info=True)
+            # A cancel failure must not skip this unit's own release attempt.
+            release_work_unit(receptor_ctl, job.work_unit_id, receptor_work_list)
 
     administrative_workunit_reaper(receptor_work_list)
 

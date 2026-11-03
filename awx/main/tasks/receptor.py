@@ -255,6 +255,30 @@ def get_conn_type(node_name, receptor_ctl):
     return ReceptorConnectionType(node.get('ConnType'))
 
 
+def release_work_unit(receptor_ctl, unit_id, work_list):
+    """Release one work unit, force-releasing it when the remote side is gone.
+
+    ``work release`` raises "unknown work unit" when the remote unit has already
+    disappeared; in that case the stale local proxy directory is only removed by
+    ``work force-release``. The wire command is ``work force-release <unit>``
+    (the receptorctl ``--force`` flag maps to it).
+    """
+    try:
+        receptor_ctl.simple_command(f"work release {unit_id}")
+        return True
+    except Exception:
+        logger.warning(f"Error releasing work unit {unit_id}", exc_info=True)
+
+    if unit_id in work_list:
+        try:
+            receptor_ctl.simple_command(f"work force-release {unit_id}")
+            return True
+        except Exception:
+            logger.warning(f"Error force-releasing work unit {unit_id}", exc_info=True)
+
+    return False
+
+
 def administrative_workunit_reaper(work_list=None):
     """
     This releases completed work units that were spawned by actions inside of this module
@@ -264,9 +288,17 @@ def administrative_workunit_reaper(work_list=None):
     These should ordinarily be released when the method finishes, but this is a
     cleanup of last-resort, in case something went awry
     """
-    receptor_ctl = get_receptor_ctl()
+    try:
+        receptor_ctl = get_receptor_ctl()
+    except FileNotFoundError:
+        logger.info('Receptorctl sockfile not found for administrative workunit reaper, doing nothing')
+        return
     if work_list is None:
-        work_list = receptor_ctl.simple_command("work list")
+        try:
+            work_list = receptor_ctl.simple_command("work list")
+        except Exception:
+            logger.exception('Error getting work list for administrative workunit reaper')
+            return
 
     for unit_id, work_data in work_list.items():
         extra_data = work_data.get('ExtraData')
@@ -286,7 +318,7 @@ def administrative_workunit_reaper(work_list=None):
             if work_data.get('StateName') in RECEPTOR_ACTIVE_STATES:
                 continue  # do not want to touch active work units
             logger.info(f'Reaping orphaned work unit {unit_id} with params {params}')
-        receptor_ctl.simple_command(f"work release {unit_id}")
+        release_work_unit(receptor_ctl, unit_id, work_list)
 
 
 class RemoteJobError(RuntimeError):
