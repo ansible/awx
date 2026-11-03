@@ -262,3 +262,33 @@ def test_cancel_path_closes_stream_when_work_cancel_fails():
 
     assert 'sock-shutdown' in events
     assert elapsed < 3, f'cancel path waited {elapsed:.1f}s on the processor join after work cancel failed'
+
+
+def test_reattach_to_work_unit_orders_teardown_before_finalize_and_release():
+    """The adoption caller must tear down, then finalize, then release."""
+    events = []
+    ctl = make_ctl(events)
+    job = mock.Mock(work_unit_id='unit-1', id=1, pk=1)
+    receptor_job = make_process_phase_job(mock.Mock(status='successful', rc=0))
+    receptor_job.unit_id = 'unit-1'
+
+    def finalize(*_args, **_kwargs):
+        events.append('finalize')
+
+    with (
+        mock.patch.object(receptor.connections, 'close_all'),
+        mock.patch.object(receptor, 'signal_callback', return_value=False),
+        mock.patch.object(receptor, '_compute_adoption_dedup', return_value=(0, [])),
+        mock.patch.object(receptor, '_build_adoption_callback', return_value=mock.Mock()),
+        mock.patch.object(receptor, '_get_or_create_private_data_dir', return_value='/tmp/adoption'),
+        mock.patch.object(receptor, '_AdoptionTask', return_value=mock.Mock()),
+        mock.patch.object(receptor, 'AWXReceptorJob', return_value=receptor_job),
+        mock.patch.object(receptor, '_finalize_adopted_job', side_effect=finalize),
+        mock.patch.object(receptor.shutil, 'rmtree'),
+    ):
+        assert receptor.reattach_to_work_unit(job, ctl) is True
+
+    assert 'finalize' in events
+    assert 'release' in events
+    assert events.index('sock-shutdown') < events.index('finalize')
+    assert events.index('finalize') < events.index('release')
