@@ -132,9 +132,6 @@ class LaunchTimeRelatedFieldsSerializer(serializers.Serializer):
 
 
 class TestMetadataLaunchTimeListOfIdsFields:
-    # AAP-14260: launch-time instance_groups must report type list_of_ids,
-    # matching the already-correct credentials field, so OPTIONS-driven clients
-    # (e.g. the awxkit CLI) build a list argument instead of a scalar one.
 
     def test_credentials_reports_list_of_ids(self, monkeypatch):
         monkeypatch.setattr(awx_metadata, 'inject_top_level_clean_text_patterns', lambda field, field_info: field_info)

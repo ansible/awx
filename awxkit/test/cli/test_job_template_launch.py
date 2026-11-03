@@ -35,13 +35,6 @@ class OptionsPage(Page):
 
 
 class TestJobTemplateLaunchFieldAssignment(unittest.TestCase):
-    # AAP-14260: the awx job_templates launch CLI command builds its
-    # --credentials and --instance_groups arguments from the launch
-    # endpoint's OPTIONS metadata via
-    # ResourceOptionsParser.build_query_arguments(). A field only becomes
-    # a list-accepting argument if its metadata type is list_of_ids;
-    # credentials already worked this way (the foundation), instance_groups
-    # did not until the metadata type was fixed.
 
     def setUp(self):
         top_parser = argparse.ArgumentParser()
