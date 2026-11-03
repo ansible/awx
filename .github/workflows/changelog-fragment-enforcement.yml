@@ -12,6 +12,10 @@ on:
       - feature_**
       - stable-**
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   enforce:
     # ansible/actions PR #167 — pinned to current HEAD
@@ -19,6 +23,3 @@ jobs:
     with:
       spec-paths: "schema.json"
       fragment-dir: "changelogs/fragments"
-    permissions:
-      contents: read
-      pull-requests: read

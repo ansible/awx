@@ -9,6 +9,11 @@ on:
   pull_request_target:
     types: [labeled, unlabeled]
 
+permissions:
+  contents: read
+  issues: read
+  pull-requests: write
+
 jobs:
   authorize:
     # ansible/actions PR #164 — pinned to current HEAD
@@ -19,7 +24,3 @@ jobs:
       app-client-id: ${{ vars.LABEL_AUTH_APP_CLIENT_ID }}
     secrets:
       app-private-key: ${{ secrets.LABEL_AUTH_APP_PRIVATE_KEY }}
-    permissions:
-      contents: read
-      issues: read
-      pull-requests: write
