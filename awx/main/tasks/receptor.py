@@ -258,8 +258,11 @@ def get_conn_type(node_name, receptor_ctl):
 def release_work_unit(receptor_ctl, unit_id, work_list):
     """Release one work unit, force-releasing it when the remote side is gone.
 
-    ``work release`` raises "unknown work unit" when the remote unit has already
-    disappeared; only then is the stale local proxy directory removed with
+    ``work release`` fails differently depending on which side is missing. A plain
+    "unknown work unit" comes from the local lookup, so the proxy directory is
+    already gone and there is nothing to clean up. "error cancelling remote unit:
+    unknown work unit" means the local proxy still exists but the remote side is
+    gone; only then is the stale local directory removed with
     ``work force-release``. The wire command is ``work force-release <unit>``
     (the receptorctl ``--force`` flag maps to it). Other release failures are
     left alone so a later pass can retry.
@@ -268,13 +271,23 @@ def release_work_unit(receptor_ctl, unit_id, work_list):
         receptor_ctl.simple_command(f"work release {unit_id}")
         return True
     except Exception as exc:
-        # Only a remote-gone condition justifies deleting the local proxy: a
-        # transient failure must leave both sides alone so a later pass can
-        # retry, otherwise ``force-release`` orphans the remote unit's files.
-        if 'unknown work unit' not in str(exc).lower():
+        # Receptor reports the same "unknown work unit" text for both sides, so
+        # classify with the typed prefixes used by FuzzyError. Check the
+        # cancel/remote prefix first: it also contains "unknown work unit".
+        message = str(exc)
+        if message.startswith(WorkUnitCancelError._MESSAGE):
+            # The local proxy remains but the remote unit is gone: drop the proxy.
+            logger.warning(f"Work unit {unit_id} is gone remotely; force-releasing the local proxy")
+        elif message.startswith(WorkUnitError._MESSAGE):
+            # The local unit disappeared between listing and release; force-release
+            # would fail the same way, so treat it as already cleaned up.
+            logger.debug(f"Work unit {unit_id} is already gone locally; nothing to release")
+            return True
+        else:
+            # A transient failure must leave both sides alone so a later pass can
+            # retry, otherwise ``force-release`` orphans the remote unit's files.
             logger.warning(f"Error releasing work unit {unit_id}", exc_info=True)
             return False
-        logger.warning(f"Work unit {unit_id} is gone remotely; force-releasing the local proxy")
 
     if unit_id in work_list:
         try:

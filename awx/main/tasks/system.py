@@ -1065,7 +1065,9 @@ def awx_receptor_workunit_reaper():
         return
     try:
         receptor_work_list = receptor_ctl.simple_command("work list")
-    except ValueError as exc:
+    except (ValueError, OSError) as exc:
+        # ValueError is what ReceptorControl raises when the control socket is
+        # gone; OSError also covers a connection that died mid-command.
         logger.info(f'Error getting work list for workunit reaper, error: {str(exc)}')
         return
 
@@ -1084,6 +1086,9 @@ def awx_receptor_workunit_reaper():
             logger.warning(f"Lost receptorctl connection while reaping {job.work_unit_id}: {exc}. Reconnecting.")
             try:
                 receptor_ctl = get_receptor_ctl()
+                # Connect eagerly so an unavailable socket stops the pass here
+                # rather than failing once per remaining unit on the retry below.
+                receptor_ctl.connect()
             except Exception:
                 logger.exception('Unable to re-establish receptorctl connection; stopping reaper pass')
                 break
