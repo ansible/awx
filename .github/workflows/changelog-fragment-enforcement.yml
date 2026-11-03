@@ -11,6 +11,7 @@ on:
       - release_**
       - feature_**
       - stable-**
+      - AAP-86434/**
 
 permissions:
   contents: read
