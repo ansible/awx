@@ -17,7 +17,7 @@ permissions:
 jobs:
   authorize:
     # ansible/actions PR #164 — pinned to current HEAD
-    uses: ansible/actions/.github/workflows/approval-label-authorization.yml@f05241d5dba5201988581fc476bc2db3291d44e9
+    uses: ansible/actions/.github/workflows/approval-label-authorization.yml@AAP-91965_approvers-team-label # PR #164 HEAD: f05241d
     with:
       approval-label: breaking-change-approved
       team-slug: ansible-staff-eng-leads
