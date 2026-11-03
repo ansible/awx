@@ -12,10 +12,11 @@ from awx.main.tasks import receptor, system
 
 
 class FakeCtl:
-    def __init__(self, work_list, fail_cancel=(), fail_release=(), fail_force_release=(), fail_connection=()):
+    def __init__(self, work_list, fail_cancel=(), fail_release=(), fail_release_transient=(), fail_force_release=(), fail_connection=()):
         self.work_list = work_list
         self.fail_cancel = set(fail_cancel)
         self.fail_release = set(fail_release)
+        self.fail_release_transient = set(fail_release_transient)
         self.fail_force_release = set(fail_force_release)
         self.fail_connection = set(fail_connection)
         self.connection_dead = False
@@ -35,6 +36,8 @@ class FakeCtl:
                 raise RuntimeError(f'error cancelling remote unit:  unknown work unit {unit}')
             if parts[1] == 'release' and unit in self.fail_release:
                 raise RuntimeError(f'error releasing remote unit:  unknown work unit {unit}')
+            if parts[1] == 'release' and unit in self.fail_release_transient:
+                raise ConnectionError('socket died mid-command')
             if parts[1] == 'force-release' and unit in self.fail_force_release:
                 raise RuntimeError(f'error force-releasing unit {unit}')
         if command == 'work list':
@@ -142,4 +145,14 @@ def test_reaper_releases_after_reconnect_retry_fails():
     _, admin = run_reaper(dead, make_jobs('unit-a'), extra_ctl=live)
 
     assert 'work force-release unit-a' in live.calls
+    admin.assert_called_once()
+
+
+def test_reaper_does_not_force_release_on_transient_failure():
+    """A transient release failure must not delete the local proxy."""
+    ctl = FakeCtl({'unit-a': {}}, fail_release_transient={'unit-a'})
+    _, admin = run_reaper(ctl, make_jobs('unit-a'))
+
+    assert 'work release unit-a' in ctl.calls
+    assert 'work force-release unit-a' not in ctl.calls
     admin.assert_called_once()

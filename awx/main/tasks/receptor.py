@@ -259,15 +259,22 @@ def release_work_unit(receptor_ctl, unit_id, work_list):
     """Release one work unit, force-releasing it when the remote side is gone.
 
     ``work release`` raises "unknown work unit" when the remote unit has already
-    disappeared; in that case the stale local proxy directory is only removed by
+    disappeared; only then is the stale local proxy directory removed with
     ``work force-release``. The wire command is ``work force-release <unit>``
-    (the receptorctl ``--force`` flag maps to it).
+    (the receptorctl ``--force`` flag maps to it). Other release failures are
+    left alone so a later pass can retry.
     """
     try:
         receptor_ctl.simple_command(f"work release {unit_id}")
         return True
-    except Exception:
-        logger.warning(f"Error releasing work unit {unit_id}", exc_info=True)
+    except Exception as exc:
+        # Only a remote-gone condition justifies deleting the local proxy: a
+        # transient failure must leave both sides alone so a later pass can
+        # retry, otherwise ``force-release`` orphans the remote unit's files.
+        if 'unknown work unit' not in str(exc).lower():
+            logger.warning(f"Error releasing work unit {unit_id}", exc_info=True)
+            return False
+        logger.warning(f"Work unit {unit_id} is gone remotely; force-releasing the local proxy")
 
     if unit_id in work_list:
         try:
