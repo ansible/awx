@@ -606,13 +606,16 @@ class AWXReceptorJob:
                         raise SignalExit()
                     res = processor_future.result()
                 except SignalExit:
-                    receptor_ctl.simple_command(f"work cancel {self.unit_id}")
-                    # Yank the stream before the executor joins the processor;
-                    # otherwise a processor blocked on a slow/unreachable remote
-                    # EN keeps the dispatcher worker waiting on the join.
-                    self._close_results(resultsock, resultfile)
-                    # The outer finally must not tear the stream down again.
-                    resultsock, resultfile = None, None
+                    try:
+                        receptor_ctl.simple_command(f"work cancel {self.unit_id}")
+                    finally:
+                        # Yank the stream before the executor joins the processor.
+                        # Even if the cancel command itself fails, a processor
+                        # blocked on a slow/unreachable remote EN must not keep
+                        # the dispatcher worker waiting on the join.
+                        self._close_results(resultsock, resultfile)
+                        # The outer finally must not tear the stream down again.
+                        resultsock, resultfile = None, None
                     result = namedtuple('result', ['status', 'rc'])
                     res = result('canceled', 1)
                 finally:

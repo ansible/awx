@@ -8,6 +8,8 @@ import threading
 import time
 from unittest import mock
 
+import pytest
+
 from awx.main.tasks import receptor
 
 
@@ -217,3 +219,46 @@ def test_cancel_path_unblocks_blocked_processor():
     assert started.is_set()
     assert res.status == 'canceled'
     assert elapsed < 3, f'cancel path waited {elapsed:.1f}s on the processor join'
+
+
+def test_cancel_path_closes_stream_when_work_cancel_fails():
+    """A failing work cancel must not re-open the executor-join hang."""
+    started = threading.Event()
+    unblock = threading.Event()
+
+    def blocking_processor(_resultfile):
+        started.set()
+        unblock.wait(timeout=5)
+        return mock.Mock(status='successful', rc=0)
+
+    def signal():
+        started.wait(timeout=5)
+        return True
+
+    events = []
+    ctl = make_ctl(events)
+    ctl.simple_command.side_effect = RuntimeError('control socket is gone')
+    sock = FakeSock(events)
+    orig_shutdown = sock.shutdown
+
+    def shutdown(how):
+        orig_shutdown(how)
+        unblock.set()
+
+    sock.shutdown = shutdown
+    ctl.get_work_results.return_value = (sock, FakeResultFile(events))
+
+    job = make_process_phase_job(None)
+    job.processor = blocking_processor
+
+    start = time.monotonic()
+    with (
+        mock.patch.object(receptor.connections, 'close_all'),
+        mock.patch.object(receptor, 'signal_callback', side_effect=signal),
+        pytest.raises(RuntimeError, match='control socket is gone'),
+    ):
+        job._process_phase(ctl)
+    elapsed = time.monotonic() - start
+
+    assert 'sock-shutdown' in events
+    assert elapsed < 3, f'cancel path waited {elapsed:.1f}s on the processor join after work cancel failed'
