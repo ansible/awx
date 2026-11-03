@@ -83,11 +83,11 @@ spec:
       value: "2"
 
     # Temporary AAP-100207 validation. Remove these overrides after the comparison.
-    # Keep aap-dev images, published UI source, and mapping identical to run plls9.
+    # Keep aap-dev images and mapping fixed; use the validated UI prototype commit.
     - name: aap-dev-revision
       value: "c2e01aa56831543a7134cd75487eb0085f8d0587"
     - name: ui-revision
-      value: "e71b585aa4cece774d21c658d05d463e1235f5a3"
+      value: "beef31580bd07996e6ac212b868f34e1076807f0"
     - name: test-mapping-image
       value: "quay.io/aap-ci/test-mapping@sha256:96fd4cf98ceebbe6551d21afc04bc6bd631438bc8f96074c1a2e16ec52668e72"
     - name: dependency-source-overrides
