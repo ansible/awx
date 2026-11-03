@@ -1,6 +1,6 @@
 ---
 # Caller workflow for oasdiff breaking change detection.
-# Consumes reusable workflow from ansible/actions (PR #161).
+# Consumes reusable workflow from djyasin/actions (PR #161).
 # Jira: AAP-86434 (AC1, AC2, AC4)
 name: "API: Breaking Change Detection"
 
@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   detect:
-    # ansible/actions PR #161 — pinned to current HEAD
-    uses: ansible/actions/.github/workflows/oasdiff-detect-breaking-changes.yml@feat/oasdiff-breaking-change-detection # PR #161 HEAD: 33e68a1
+    # djyasin/actions PR #161 — pinned to current HEAD
+    uses: djyasin/actions/.github/workflows/oasdiff-detect-breaking-changes.yml@feat/oasdiff-breaking-change-detection # PR #161 HEAD: 33e68a1
     with:
       spec-path: schema.json
