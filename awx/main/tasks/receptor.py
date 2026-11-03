@@ -548,6 +548,32 @@ class AWXReceptorJob:
         if self.work_type != 'local' and os.path.exists(artifact_dir):
             shutil.rmtree(artifact_dir)
 
+    @staticmethod
+    def _close_results(resultsock, resultfile):
+        """Best-effort teardown of the Receptor results stream.
+
+        The controller must stop reading and close the stream before ``work
+        release`` can remove the unit directory on the Receptor side. Otherwise
+        an in-flight stdout reader or status writer races the removal
+        (AAP-97861). Safe to call more than once: shutting down an already
+        closed socket raises OSError/ENOTCONN, which is swallowed.
+        """
+        if resultsock is not None:
+            try:
+                resultsock.shutdown(socket.SHUT_RDWR)
+            except (OSError, ValueError):
+                pass
+        if resultfile is not None:
+            try:
+                resultfile.close()
+            except (OSError, ValueError):
+                pass
+        if resultsock is not None:
+            try:
+                resultsock.close()
+            except (OSError, ValueError):
+                pass
+
     def _process_phase(self, receptor_ctl):
         """Stream events from the receptor work unit via the ansible-runner process streamer.
 
@@ -569,31 +595,36 @@ class AWXReceptorJob:
         # If a cancel happens, the main thread will encounter an exception, in which case
         # we yank the socket out from underneath the processor, which will cause it to exit.
         # The ThreadPoolExecutor context manager ensures we do not leave any threads laying around.
-        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-            processor_future = executor.submit(self.processor, resultfile)
+        try:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                processor_future = executor.submit(self.processor, resultfile)
 
-            try:
-                signal_state.raise_exception = True
-                # address race condition where SIGTERM was issued after this dispatcher task started
-                if signal_callback():
-                    raise SignalExit()
-                res = processor_future.result()
-            except SignalExit:
-                receptor_ctl.simple_command(f"work cancel {self.unit_id}")
-                if resultsock:
-                    try:
-                        resultsock.shutdown(socket.SHUT_RDWR)
-                    except Exception:
-                        pass
-                if resultfile:
-                    resultfile.close()
-                result = namedtuple('result', ['status', 'rc'])
-                res = result('canceled', 1)
-            finally:
-                signal_state.raise_exception = False
+                try:
+                    signal_state.raise_exception = True
+                    # address race condition where SIGTERM was issued after this dispatcher task started
+                    if signal_callback():
+                        raise SignalExit()
+                    res = processor_future.result()
+                except SignalExit:
+                    receptor_ctl.simple_command(f"work cancel {self.unit_id}")
+                    # Yank the stream before the executor joins the processor;
+                    # otherwise a processor blocked on a slow/unreachable remote
+                    # EN keeps the dispatcher worker waiting on the join.
+                    self._close_results(resultsock, resultfile)
+                    # The outer finally must not tear the stream down again.
+                    resultsock, resultfile = None, None
+                    result = namedtuple('result', ['status', 'rc'])
+                    res = result('canceled', 1)
+                finally:
+                    signal_state.raise_exception = False
+        finally:
+            # The executor has joined the processor thread, so nothing reads the
+            # results stream any more. Close it before the caller releases the
+            # work unit so Receptor does not race the unit-directory removal.
+            self._close_results(resultsock, resultfile)
 
-            if res.status == 'error':
-                return self._handle_work_error(receptor_ctl, res)
+        if res.status == 'error':
+            return self._handle_work_error(receptor_ctl, res)
 
         return res
 
@@ -630,9 +661,11 @@ class AWXReceptorJob:
                 # massive, only ask for last 1000 bytes
                 startpos = max(stdout_size - 1000, 0)
                 _resultsock, resultfile = receptor_ctl.get_work_results(self.unit_id, startpos=startpos, return_socket=True, return_sockfile=True)
-                lines = resultfile.readlines()
-                receptor_output = b"".join(lines).decode()
-                _resultsock.shutdown(socket.SHUT_RDWR)
+                try:
+                    lines = resultfile.readlines()
+                    receptor_output = b"".join(lines).decode()
+                finally:
+                    self._close_results(_resultsock, resultfile)
             if receptor_output:
                 self.task.runner_callback.delay_update(result_traceback=f'Worker output:\n{receptor_output}')
             elif detail:
