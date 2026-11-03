@@ -1,4 +1,4 @@
-"""AAP-97861 Path A (awx): Receptor results-stream teardown before release.
+"""Path A (awx): Receptor results-stream teardown before release.
 
 These tests encode the behaviour the fix must provide. They fail on the current
 devel tree and pass with the fix.

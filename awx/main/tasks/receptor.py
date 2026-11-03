@@ -554,8 +554,8 @@ class AWXReceptorJob:
 
         The controller must stop reading and close the stream before ``work
         release`` can remove the unit directory on the Receptor side. Otherwise
-        an in-flight stdout reader or status writer races the removal
-        (AAP-97861). Safe to call more than once: shutting down an already
+        an in-flight stdout reader or status writer races the removal.
+        Safe to call more than once: shutting down an already
         closed socket raises OSError/ENOTCONN, which is swallowed.
         """
         if resultsock is not None:
