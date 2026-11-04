@@ -76,7 +76,8 @@ def construct_rsyslog_conf_template(settings=settings):
             if parsed.port:
                 port = parsed.port
         except ValueError:
-            port = settings.LOG_AGGREGATOR_PORT
+            # getattr: a port stored before the 1-65535 bound fails validation on read and is then unset
+            port = getattr(settings, 'LOG_AGGREGATOR_PORT', '')
 
         # https://github.com/rsyslog/rsyslog-doc/blob/master/source/configuration/modules/omhttp.rst
         ssl = 'on' if parsed.scheme == 'https' else 'off'
