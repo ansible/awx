@@ -14,6 +14,7 @@ pytest-django
 pytest-mock
 pytest-timeout
 pytest-xdist
+pysqlite3-binary ; platform_machine == "x86_64"  # SQLite >= 3.35 for tests (INSERT ... RETURNING); only x86_64 wheels, see settings_for_test.py
 tox  # for awxkit
 logutils
 jupyter
