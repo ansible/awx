@@ -245,7 +245,17 @@ def main():
     team = module.params.get('team')
     state = module.params.get('state')
 
-    cred_type_id = module.resolve_name_to_id('credential_types', credential_type)
+    # A credential cannot exist without its credential type. When deleting, a missing
+    # type means the credential is already absent — succeed instead of failing the lookup.
+    cred_type = module.get_one(
+        'credential_types',
+        name_or_id=credential_type,
+        allow_none=(state == 'absent'),
+    )
+    if cred_type is None:
+        module.exit_json(**module.json_output)
+    cred_type_id = cred_type['id']
+
     if organization:
         org_id = module.resolve_name_to_id('organizations', organization)
 
