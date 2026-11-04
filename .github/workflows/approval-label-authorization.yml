@@ -11,9 +11,9 @@ permissions:
 
 jobs:
   approval-label-authorization:
-    if: github.event.label.name == 'breaking-change-approved'
-    uses: ansible/actions/.github/workflows/approval-label-authorization.yml@3540239ad509e66f3c879318679113f4f7c2685c
+    uses: ansible/actions/.github/workflows/approval-label-authorization.yml@1a563d2009e4d48e2f8282df746bb042b49193b7
     with:
+      approval-label: breaking-change-approved
       app-client-id: ${{ vars.ANSIBLE_ORG_MEMBERS_READ_ONLY_APP_CLIENT_ID }}
     secrets:
       app-private-key: ${{ secrets.ANSIBLE_ORG_MEMBERS_READ_ONLY_APP_PRIVATE_KEY }}
