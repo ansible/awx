@@ -477,7 +477,7 @@ class BaseAccess(object):
                 user_capabilities['schedule'] = user_capabilities['start']
                 continue
             elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob, CredentialInputSource, ExecutionEnvironment, InstanceGroup)):
-                user_capabilities['delete'] = user_capabilities['edit']
+                user_capabilities['delete'] = self.can_delete(obj)
                 continue
             elif display_method == 'copy' and isinstance(obj, (Group, Host)):
                 user_capabilities['copy'] = user_capabilities['edit']
@@ -1163,9 +1163,7 @@ class CredentialAccess(BaseAccess):
     def can_delete(self, obj):
         # Unassociated credentials may be marked deleted by anyone, though we
         # shouldn't ever end up with those.
-        # if obj.user is None and obj.team is None:
-        #    return True
-        return self.can_change(obj, None)
+        return super().can_delete(obj)
 
     def get_user_capabilities(self, obj, **kwargs):
         user_capabilities = super(CredentialAccess, self).get_user_capabilities(obj, **kwargs)
@@ -1259,7 +1257,7 @@ class TeamAccess(BaseAccess):
         return self.user in obj.admin_role
 
     def can_delete(self, obj):
-        return self.can_change(obj, None)
+        return super().can_delete(obj)
 
     def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
         """Reverse obj and sub_obj, defer to RoleAccess if this is an assignment
@@ -1348,7 +1346,7 @@ class ExecutionEnvironmentAccess(BaseAccess):
     def can_delete(self, obj):
         if obj.managed:
             raise PermissionDenied
-        return self.can_change(obj, None)
+        return super().can_delete(obj)
 
 
 class ProjectAccess(NotificationAttachMixin, BaseAccess):
@@ -1405,7 +1403,7 @@ class ProjectAccess(NotificationAttachMixin, BaseAccess):
         return obj and self.user in obj.update_role
 
     def can_delete(self, obj):
-        return self.can_change(obj, None)
+        return super().can_delete(obj)
 
 
 class ProjectUpdateAccess(BaseAccess):
@@ -1626,7 +1624,7 @@ class JobTemplateAccess(NotificationAttachMixin, UnifiedCredentialsMixin, BaseAc
         return hasattr(obj, fk_id_attr) and getattr(obj, fk_id_attr) is None and new_value == ''
 
     def can_delete(self, obj):
-        return self.user.is_superuser or self.user in obj.admin_role
+        return super().can_delete(obj)
 
     @check_superuser
     # object here is the job template. sub_object here is what is being attached
@@ -2606,7 +2604,7 @@ class NotificationTemplateAccess(BaseAccess):
         return self.can_change(obj, data)
 
     def can_delete(self, obj):
-        return self.can_change(obj, None)
+        return super().can_delete(obj)
 
     @check_superuser
     def can_start(self, obj, validate_license=True):

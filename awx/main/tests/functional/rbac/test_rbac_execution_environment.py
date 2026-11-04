@@ -110,6 +110,30 @@ def test_give_object_permission_to_ee(setup_managed_roles, org_ee, ee_rd, org_me
 
 
 @pytest.mark.django_db
+def test_execution_environment_delete_requires_delete_permission(org_ee, rando, setup_managed_roles):
+    content_type = permission_registry.content_type_model.objects.get_for_model(org_ee)
+    change_role = RoleDefinition.objects.create_from_permissions(
+        name='ee-change-only',
+        permissions=['change_executionenvironment'],
+        content_type=content_type,
+    )
+    delete_role = RoleDefinition.objects.create_from_permissions(
+        name='ee-delete',
+        permissions=['change_executionenvironment', 'delete_executionenvironment'],
+        content_type=content_type,
+    )
+
+    change_role.give_permission(rando, org_ee)
+    access = ExecutionEnvironmentAccess(rando)
+    assert rando.has_obj_perm(org_ee, 'change')
+    assert not rando.has_obj_perm(org_ee, 'delete')
+    assert not access.can_delete(org_ee)
+
+    delete_role.give_permission(rando, org_ee)
+    assert access.can_delete(org_ee)
+
+
+@pytest.mark.django_db
 def test_need_related_organization_access(org_ee, ee_rd, org_member):
     org2 = Organization.objects.create(name='another organization')
     ee_rd.give_permission(org_member, org_ee)
