@@ -98,7 +98,16 @@ JOB_FOLDER_PREFIX = 'awx_%s_'
 CONTAINER_VOLUMES_MOUNT_TYPES = ['z', 'O', 'ro', 'rw']
 MAX_ISOLATED_PATH_COLON_DELIMITER = 2
 
-SURVEY_TYPE_MAPPING = {'text': str, 'textarea': str, 'password': str, 'multiplechoice': str, 'multiselect': str, 'integer': int, 'float': (float, int)}
+SURVEY_TYPE_MAPPING = {
+    'text': str,
+    'textarea': str,
+    'password': str,
+    'multiplechoice': str,
+    'multiselect': str,
+    'integer': int,
+    'float': (float, int),
+    'boolean': bool,
+}
 
 
 # Note, the \u001b[... are ansi color codes. We don't currenly import any of the python modules which define the codes.
