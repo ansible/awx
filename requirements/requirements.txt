@@ -528,7 +528,7 @@ typing-extensions==4.15.0
     #   twisted
 uritemplate==4.2.0
     # via drf-spectacular
-urllib3==2.6.3
+urllib3==2.8.0
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   botocore

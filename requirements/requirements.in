@@ -65,7 +65,7 @@ requests
 slack-sdk
 twilio
 twisted[tls]>=24.7.0  # CVE-2024-41810
-urllib3>=2.6.3 # CVE-2024-37891
+urllib3>=2.8.0
 uWSGI>=2.0.28
 uwsgitop
 wheel>=0.46.2  # CVE-2026-24049
