@@ -5,6 +5,8 @@ from awx.api.versioning import reverse
 from awx.main.access import BaseAccess, JobTemplateAccess, ScheduleAccess
 from awx.main.models.jobs import JobTemplate
 from awx.main.models import Project, Organization, Schedule
+from ansible_base.rbac import permission_registry
+from ansible_base.rbac.models import RoleDefinition
 
 
 @mock.patch.object(BaseAccess, 'check_license', return_value=None)
@@ -122,6 +124,30 @@ def test_job_template_access_admin(role_names, jt_linked, rando):
         assert access.can_unattach(jt_linked, cred, 'credentials', {})
 
     assert access.can_read(jt_linked)
+    assert access.can_delete(jt_linked)
+
+
+@pytest.mark.django_db
+def test_job_template_delete_requires_delete_permission(jt_linked, rando, setup_managed_roles):
+    content_type = permission_registry.content_type_model.objects.get_for_model(JobTemplate)
+    change_role = RoleDefinition.objects.create_from_permissions(
+        name='job-template-change-only',
+        permissions=['view_jobtemplate', 'change_jobtemplate'],
+        content_type=content_type,
+    )
+    delete_role = RoleDefinition.objects.create_from_permissions(
+        name='job-template-delete',
+        permissions=['view_jobtemplate', 'change_jobtemplate', 'delete_jobtemplate'],
+        content_type=content_type,
+    )
+
+    change_role.give_permission(rando, jt_linked)
+    access = JobTemplateAccess(rando)
+    assert rando.has_obj_perm(jt_linked, 'change')
+    assert not rando.has_obj_perm(jt_linked, 'delete')
+    assert not access.can_delete(jt_linked)
+
+    delete_role.give_permission(rando, jt_linked)
     assert access.can_delete(jt_linked)
 
 

@@ -425,6 +425,7 @@ class BaseAccess(object):
                 )
 
     def get_user_capabilities(self, obj, method_list=[], parent_obj=None, capabilities_cache={}):
+        """Return the requested UI capabilities for an object the user may access."""
         if obj is None:
             return {}
         user_capabilities = {}
@@ -477,7 +478,7 @@ class BaseAccess(object):
                 user_capabilities['schedule'] = user_capabilities['start']
                 continue
             elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob, CredentialInputSource, ExecutionEnvironment, InstanceGroup)):
-                user_capabilities['delete'] = user_capabilities['edit']
+                user_capabilities['delete'] = self.can_delete(obj)
                 continue
             elif display_method == 'copy' and isinstance(obj, (Group, Host)):
                 user_capabilities['copy'] = user_capabilities['edit']
@@ -785,12 +786,6 @@ class OrganizationAccess(NotificationAttachMixin, BaseAccess):
                 return False
 
         return self.user in obj.admin_role
-
-    def can_delete(self, obj):
-        is_change_possible = self.can_change(obj, None)
-        if not is_change_possible:
-            return False
-        return True
 
     def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
         # If the request is updating the membership, check the membership role permissions instead
@@ -1160,14 +1155,8 @@ class CredentialAccess(BaseAccess):
             return False
         return self.user in obj.admin_role and self.check_related('organization', Organization, data, obj=obj, role_field='credential_admin_role')
 
-    def can_delete(self, obj):
-        # Unassociated credentials may be marked deleted by anyone, though we
-        # shouldn't ever end up with those.
-        # if obj.user is None and obj.team is None:
-        #    return True
-        return self.can_change(obj, None)
-
     def get_user_capabilities(self, obj, **kwargs):
+        """Return object capabilities, including credential use and managed-state restrictions."""
         user_capabilities = super(CredentialAccess, self).get_user_capabilities(obj, **kwargs)
         user_capabilities['use'] = self.can_use(obj)
         if getattr(obj, 'managed', False) is True:
@@ -1258,9 +1247,6 @@ class TeamAccess(BaseAccess):
             return False
         return self.user in obj.admin_role
 
-    def can_delete(self, obj):
-        return self.can_change(obj, None)
-
     def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
         """Reverse obj and sub_obj, defer to RoleAccess if this is an assignment
         of a resource role to the team."""
@@ -1348,7 +1334,7 @@ class ExecutionEnvironmentAccess(BaseAccess):
     def can_delete(self, obj):
         if obj.managed:
             raise PermissionDenied
-        return self.can_change(obj, None)
+        return super().can_delete(obj)
 
 
 class ProjectAccess(NotificationAttachMixin, BaseAccess):
@@ -1403,9 +1389,6 @@ class ProjectAccess(NotificationAttachMixin, BaseAccess):
     @check_superuser
     def can_start(self, obj, validate_license=True):
         return obj and self.user in obj.update_role
-
-    def can_delete(self, obj):
-        return self.can_change(obj, None)
 
 
 class ProjectUpdateAccess(BaseAccess):
@@ -1624,9 +1607,6 @@ class JobTemplateAccess(NotificationAttachMixin, UnifiedCredentialsMixin, BaseAc
         if new_value == getattr(obj, fk_id_attr, None):
             return True
         return hasattr(obj, fk_id_attr) and getattr(obj, fk_id_attr) is None and new_value == ''
-
-    def can_delete(self, obj):
-        return self.user.is_superuser or self.user in obj.admin_role
 
     @check_superuser
     # object here is the job template. sub_object here is what is being attached
@@ -2604,9 +2584,6 @@ class NotificationTemplateAccess(BaseAccess):
 
     def can_admin(self, obj, data):
         return self.can_change(obj, data)
-
-    def can_delete(self, obj):
-        return self.can_change(obj, None)
 
     @check_superuser
     def can_start(self, obj, validate_license=True):

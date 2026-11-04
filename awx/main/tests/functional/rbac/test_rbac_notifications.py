@@ -1,5 +1,7 @@
 import pytest
 
+from ansible_base.rbac import permission_registry
+from ansible_base.rbac.models import RoleDefinition
 from awx.main.models import Organization, Project
 from awx.main.access import NotificationTemplateAccess, NotificationAccess, JobTemplateAccess
 
@@ -84,6 +86,30 @@ def test_notification_template_access_admin(role, organization_factory, notifica
     assert not access.can_read(nf)
     assert not access.can_change(nf, None)
     assert not access.can_delete(nf)
+
+
+@pytest.mark.django_db
+def test_notification_template_delete_requires_delete_permission(notification_template, rando, setup_managed_roles):
+    content_type = permission_registry.content_type_model.objects.get_for_model(notification_template)
+    change_role = RoleDefinition.objects.create_from_permissions(
+        name='notification-template-change-only',
+        permissions=['view_notificationtemplate', 'change_notificationtemplate'],
+        content_type=content_type,
+    )
+    delete_role = RoleDefinition.objects.create_from_permissions(
+        name='notification-template-delete',
+        permissions=['view_notificationtemplate', 'change_notificationtemplate', 'delete_notificationtemplate'],
+        content_type=content_type,
+    )
+
+    change_role.give_permission(rando, notification_template)
+    access = NotificationTemplateAccess(rando)
+    assert rando.has_obj_perm(notification_template, 'change')
+    assert not rando.has_obj_perm(notification_template, 'delete')
+    assert not access.can_delete(notification_template)
+
+    delete_role.give_permission(rando, notification_template)
+    assert access.can_delete(notification_template)
 
 
 @pytest.mark.django_db
