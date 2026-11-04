@@ -561,6 +561,10 @@ def main():
     if inventory is not None:
         new_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)
     if project is not None:
+        # organization is a job-template lookup hint. The controller stores the
+        # template in the project's organization, so a project the user can use
+        # in another organization must still resolve.
+        project_data = None
         if organization_id is not None:
             project_data = module.get_one(
                 'projects',
@@ -571,11 +575,25 @@ def main():
                     }
                 }
             )
-            if project_data is None:
-                module.fail_json(msg="The project {0} in organization {1} was not found on the controller instance server".format(project, organization))
-            new_fields['project'] = project_data['id']
-        else:
-            new_fields['project'] = module.resolve_name_to_id('projects', project)
+        if project_data is None:
+            project_data = module.get_exactly_one('projects', name_or_id=project)
+        new_fields['project'] = project_data['id']
+
+        project_org = project_data.get('organization')
+        if organization_id is not None and project_org and project_org != organization_id:
+            new_fields.pop('organization', None)
+            # Labels are unique per organization. The template is stored in the
+            # project's organization, so look up labels there.
+            search_fields['organization'] = project_org
+            existing_item = module.get_one(
+                'job_templates',
+                name_or_id=name,
+                **{
+                    'data': {
+                        'organization': project_org,
+                    }
+                }
+            )
     if webhook_credential is not None:
         new_fields['webhook_credential'] = module.resolve_name_to_id('credentials', webhook_credential)
 
