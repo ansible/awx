@@ -1,0 +1,16 @@
+---
+services:
+  otel:
+    image: mirror.gcr.io/otel/opentelemetry-collector-contrib:0.88.0
+    container_name: tools_otel_1
+    hostname: otel
+    command: ["--config=/etc/otel-collector-config.yaml", ""]
+    networks:
+      - awx
+    ports:
+      - "4317:4317"  # OTLP gRPC receiver
+      - "4318:4318"  # OTLP http receiver
+      - "55679:55679"  # zpages http://localhost:55679/debug/servicez /tracez
+    volumes:
+      - "../../otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml"
+      - "../../otel/awx-logs:/awx-logs/"

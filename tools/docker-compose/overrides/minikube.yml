@@ -1,0 +1,5 @@
+---
+networks:
+  default:
+    external:
+      name: minikube
