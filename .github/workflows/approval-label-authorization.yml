@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   approval-label-authorization:
-    uses: ansible/actions/.github/workflows/approval-label-authorization.yml@1a563d2009e4d48e2f8282df746bb042b49193b7
+    uses: ansible/actions/.github/workflows/approval-label-authorization.yml@840524b6226e3f516e924bcee5fa90af8041a744
     with:
       approval-label: breaking-change-approved
       app-client-id: ${{ vars.ANSIBLE_ORG_MEMBERS_READ_ONLY_APP_CLIENT_ID }}
