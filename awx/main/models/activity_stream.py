@@ -22,6 +22,7 @@ class ActivityStream(models.Model):
     class Meta:
         app_label = 'main'
         ordering = ('pk',)
+        indexes = [models.Index(fields=('object1', 'id'), name='main_as_object1_id_idx')]
 
     OPERATION_CHOICES = [
         ('create', _('Entity Created')),

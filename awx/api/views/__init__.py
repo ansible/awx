@@ -67,7 +67,7 @@ from flags.state import flag_enabled
 # AWX
 from awx.main.utils.workload_identity import retrieve_workload_identity_jwt_with_claims
 from awx.main.tasks.system import send_notifications, update_inventory_computed_fields
-from awx.main.access import get_user_queryset
+from awx.main.access import ActivityStreamAccess, get_user_queryset
 from awx.api.generics import (
     APIView,
     BaseUsersList,
@@ -4887,6 +4887,100 @@ class ActivityStreamList(SimpleListAPIView):
     search_fields = ('changes',)
     pagination_class = ActivityStreamPagination
     resource_purpose = 'audit trail entries for tracking system changes'
+
+    def get_queryset(self):
+        if self.pagination_class().has_filter_params(self.request, self):
+            return models.ActivityStream.objects.all().select_related('actor')
+        return super().get_queryset()
+
+    def list(self, request, *args, **kwargs):
+        if not self.pagination_class().has_filter_params(request, self):
+            return super().list(request, *args, **kwargs)
+
+        # Activity Stream pagination evaluates both COUNT(*) and the result
+        # query. Keep JIT disabled for both statements without changing the
+        # setting for the connection or other requests. SQLite does not
+        # support PostgreSQL's SET LOCAL syntax and is used by unit tests.
+        if connection.vendor != 'postgresql':
+            return super().list(request, *args, **kwargs)
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                cursor.execute('SET LOCAL jit = off')
+            return super().list(request, *args, **kwargs)
+
+    def _activity_stream_object_types(self):
+        object_type_values = []
+        supported_parameters = {'or__object1__in', 'or__object2__in'}
+        if any(parameter.startswith('or__') and parameter not in supported_parameters for parameter in self.request.query_params):
+            return None
+        for parameter in ('object1', 'object2', *supported_parameters):
+            value = self.request.query_params.get(parameter)
+            if value:
+                object_type_values.extend(value.split(','))
+
+        supported_object_types = {
+            'ad_hoc_command',
+            'credential',
+            'group',
+            'host',
+            'inventory',
+            'inventory_source',
+            'inventory_update',
+            'job',
+            'job_template',
+            'label',
+            'notification',
+            'notification_template',
+            'organization',
+            'project',
+            'project_update',
+            'role',
+            'team',
+            'user',
+            'workflow_job',
+            'workflow_job_template',
+            'workflow_job_template_node',
+        }
+        object_types = set(object_type_values)
+        if not object_types or not object_types <= supported_object_types:
+            return None
+
+        # Credential association events include both the credential and its
+        # related template in the activity-stream row.
+        related_object_types = {
+            'job_template': {'credential'},
+            'workflow_job_template': {'credential'},
+            'credential': {'job_template', 'workflow_job_template'},
+        }
+        for object_type in set(object_types):
+            object_types.update(related_object_types.get(object_type, set()))
+
+        # User and team activity can be related to the other supported
+        # content-object types, so retain both sides of that visibility
+        # relationship when pruning access branches.
+        content_object_types = supported_object_types - {'user', 'team'}
+        if object_types & content_object_types:
+            object_types.update({'user', 'team'})
+        elif object_types & {'user', 'team'}:
+            object_types.update(content_object_types | {'user', 'team'})
+        return object_types
+
+    def filter_queryset(self, queryset):
+        if not self.pagination_class().has_filter_params(self.request, self):
+            return super().filter_queryset(queryset)
+
+        object_types = self._activity_stream_object_types()
+        if object_types is None:
+            # Preserve the existing visibility path for filters we cannot safely
+            # map to a bounded set of activity-stream object types.
+            return super().filter_queryset(ActivityStreamAccess(self.request.user).get_queryset())
+
+        filtered_queryset = super().filter_queryset(queryset)
+        return ActivityStreamAccess(
+            self.request.user,
+            activity_stream_queryset=filtered_queryset,
+            activity_stream_object_types=object_types,
+        ).get_queryset()
 
     @extend_schema_if_available(
         extensions={
