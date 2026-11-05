@@ -250,26 +250,36 @@ def env_flag_enabled(env, name):
 
 
 def copytree_without_metadata(src, dst, ignore_names=()):
-    """Recursively copy src to dst without copying file metadata.
+    """Recursively copy src to dst like shutil.copytree(src, dst, symlinks=True), with as few audited syscalls as possible.
 
-    Equivalent to shutil.copytree(src, dst, symlinks=True) for content, structure,
-    symlinks and permission bits, but it never calls chmod, chown or setxattr.
-    shutil.copytree uses copy2/copystat, which makes one chmod plus
-    one setxattr (security.selinux) call per file and directory. On hosts with
-    CIS-style audit rules (perm_mod) covering the AAP processes, the kernel can
-    block each of these calls for milliseconds while auditd catches up, so copying
-    a few thousand collection files took 30-50 s per job instead of < 1 s.
+    shutil.copytree uses copy2/copystat, which makes one chmod plus one setxattr
+    (security.selinux) call for every file and directory. On hosts with CIS-style
+    audit rules (perm_mod) covering the AAP processes, the kernel can block each of
+    these calls for milliseconds while auditd catches up, so copying a few thousand
+    collection files took 30-50 s per job instead of < 1 s.
 
-    Permission bits are set at create time instead (open/mkdir mode), so they are
-    subject to the process umask; owner rwx is always kept on directories so
-    that their contents can be written. Timestamps and xattrs are not copied;
-    new files get their SELinux label from policy.
+    Preserved: content, symlinks, permission bits (including setuid/setgid/sticky) and
+    access/modification times. These are the attributes that survive the private data dir
+    zip/unzip done by ansible-runner (stream_dir/unstream_dir), which AWX relies on.
+    Not copied: extended attributes. They do not survive that zip either, and new files
+    get their SELinux label from policy.
+
+    Permission bits are set when an entry is created, which avoids a chmod per entry. The
+    umask can drop bits at create time (0664 becomes 0644), writing to a file clears
+    setuid/setgid, and mkdir ignores setuid/setgid, so the resulting mode is compared with
+    the source and chmod is only called when it differs. For the usual 0644/0755 content
+    that is never. The process umask is deliberately not changed, because it is process-wide.
 
     :param str src: source directory
     :param str dst: destination directory; must not exist (like shutil.copytree)
     :param ignore_names: file/directory names to skip at every level (exact match)
     """
-    os.mkdir(dst, stat.S_IMODE(os.stat(src).st_mode) & 0o777 | stat.S_IRWXU)
+    _copytree_without_metadata(src, dst, os.stat(src), ignore_names)
+
+
+def _copytree_without_metadata(src, dst, src_stat, ignore_names):
+    dir_mode = stat.S_IMODE(src_stat.st_mode)
+    os.mkdir(dst, dir_mode | stat.S_IRWXU)  # owner rwx so that the directory can be filled
     with os.scandir(src) as entries:
         for entry in entries:
             if entry.name in ignore_names:
@@ -278,16 +288,27 @@ def copytree_without_metadata(src, dst, ignore_names=()):
             dst_path = os.path.join(dst, entry.name)
             if entry.is_symlink():
                 os.symlink(os.readlink(src_path), dst_path)
+                link_stat = entry.stat(follow_symlinks=False)
+                os.utime(dst_path, ns=(link_stat.st_atime_ns, link_stat.st_mtime_ns), follow_symlinks=False)
             elif entry.is_dir(follow_symlinks=False):
-                copytree_without_metadata(src_path, dst_path, ignore_names)
+                _copytree_without_metadata(src_path, dst_path, entry.stat(follow_symlinks=False), ignore_names)
             elif entry.is_file(follow_symlinks=False):
-                mode = stat.S_IMODE(entry.stat(follow_symlinks=False).st_mode) & 0o777
+                file_stat = entry.stat(follow_symlinks=False)
+                file_mode = stat.S_IMODE(file_stat.st_mode)
                 with open(src_path, 'rb') as fsrc:
-                    fd = os.open(dst_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, mode)
+                    fd = os.open(dst_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, file_mode)
                     with open(fd, 'wb') as fdst:
                         shutil.copyfileobj(fsrc, fdst)
+                        fdst.flush()
+                        if stat.S_IMODE(os.fstat(fd).st_mode) != file_mode:
+                            os.fchmod(fd, file_mode)
+                        os.utime(fd, ns=(file_stat.st_atime_ns, file_stat.st_mtime_ns))
             else:
                 logger.warning(f'Skipping special file {src_path} while copying {src}')
+    if stat.S_IMODE(os.stat(dst).st_mode) != dir_mode:
+        os.chmod(dst, dir_mode)
+    # last, because creating the entries above changed the directory's mtime
+    os.utime(dst, ns=(src_stat.st_atime_ns, src_stat.st_mtime_ns))
 
 
 class BaseTask(object):
