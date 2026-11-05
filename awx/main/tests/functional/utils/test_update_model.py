@@ -45,3 +45,24 @@ def test_deleted_job(normal_job):
     job_pk = normal_job.pk
     normal_job.delete()
     assert update_model(Job, job_pk) is None
+
+
+@pytest.mark.django_db
+def test_required_status_matches_proceeds(normal_job):
+    """_required_status equal to the current status: update proceeds normally."""
+    Job.objects.filter(pk=normal_job.pk).update(status='running')
+    result = update_model(Job, normal_job.pk, select_for_update=True, _required_status='running', status='successful')
+    assert result is not None
+    assert result.status == 'successful'
+
+
+@pytest.mark.django_db
+def test_required_status_mismatch_returns_none(normal_job):
+    """_required_status that does not match: update is skipped and None is returned.
+    This is the double-finalization fence: a second controller sees status != 'running'
+    inside the row lock and bails without overwriting the first controller's result."""
+    Job.objects.filter(pk=normal_job.pk).update(status='successful')
+    result = update_model(Job, normal_job.pk, select_for_update=True, _required_status='running', status='failed')
+    assert result is None
+    # The first controller's status must be preserved.
+    assert Job.objects.get(pk=normal_job.pk).status == 'successful'

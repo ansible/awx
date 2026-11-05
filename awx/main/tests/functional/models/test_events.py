@@ -114,6 +114,35 @@ class TestEvents:
             else:
                 assert latest_summary is None
 
+    def test_host_summary_generation_is_idempotent(self):
+        # A job can see its `playbook_on_stats` processed twice: when a controller is lost
+        # mid-job, the dying pod's callback receiver drains its queue while the adopting
+        # controller replays the same stream. The second pass used to blow up on the
+        # (job_id, host_name) unique constraint and abort the whole bulk_create.
+        self._generate_hosts(10)
+        stats = dict((hostname, len(hostname)) for hostname in self.hostnames)
+
+        self._create_job_event(ok=stats)
+        self._create_job_event(ok=stats, parent_uuid='abc456')
+
+        assert self.job.job_host_summaries.count() == len(self.hostnames)
+        assert sorted([s.host_name for s in self.job.job_host_summaries.all()]) == sorted(self.hostnames)
+        for s in self.job.job_host_summaries.all():
+            assert s.ok == len(s.host_name)
+
+    def test_replayed_stats_do_not_double_count_host_metrics(self):
+        # The replay must be a true no-op. A bare `ignore_conflicts` on the insert would keep
+        # the summaries correct but still run every host back through HostMetric, inflating
+        # automated_counter for an automation that only happened once.
+        self._generate_hosts(5)
+        stats = dict((hostname, len(hostname)) for hostname in self.hostnames)
+
+        self._create_job_event(ok=stats)
+        self._create_job_event(ok=stats, parent_uuid='abc456')
+
+        for hm in HostMetric.objects.all():
+            assert hm.automated_counter == 1
+
     def test_host_metrics_insert(self):
         self._generate_hosts(10)
 

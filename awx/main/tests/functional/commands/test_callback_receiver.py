@@ -9,7 +9,7 @@ from awx.main.dispatch.worker.callback import job_stats_wrapup, CallbackBrokerWo
 
 from awx.main.models.jobs import Job
 from awx.main.models.inventory import InventoryUpdate, InventorySource
-from awx.main.models.events import InventoryUpdateEvent
+from awx.main.models.events import InventoryUpdateEvent, JobEvent
 
 
 @pytest.mark.django_db
@@ -32,6 +32,16 @@ def test_wrapup_does_send_notifications(mocker):
     job.refresh_from_db()
     assert job.host_status_counts == {}
     mock.assert_called_once_with('succeeded')
+
+
+@pytest.mark.django_db
+def test_wrapup_skips_notifications_if_already_processed(mocker):
+    """Fix 2 (AAP-96718): if host_status_counts is already set, another controller already ran
+    stats_wrapup. The second call must not fire a duplicate notification."""
+    job = Job.objects.create(status='successful', host_status_counts={'ok': 3})
+    notification_mock = mocker.patch('awx.main.models.notifications.JobNotificationMixin.send_notification_templates')
+    job_stats_wrapup(job.id)
+    notification_mock.assert_not_called()
 
 
 class TestCallbackBrokerWorker(TransactionTestCase):
@@ -93,6 +103,29 @@ class TestCallbackBrokerWorker(TransactionTestCase):
         # Could not save, should be logged, and buffer should be cleared
         assert worker.buff.get(InventoryUpdateEvent, []) == []
         assert InventoryUpdateEvent.objects.filter(uuid=events[0].uuid).count() == 0  # sanity
+
+    def test_flush_ignores_duplicate_job_counter(self):
+        """Fix (AAP-96718): when two controllers stream the same receptor work unit, bulk_create
+        raises IntegrityError on the (job_id, counter, job_created) unique constraint. The worker
+        must silently discard the duplicate in the individual-save fallback, not keep it in the
+        buffer for retry."""
+        from django.db import IntegrityError as DjangoIntegrityError
+        from django.utils.timezone import now as tz_now
+
+        job = Job.objects.create(status='running')
+        created_ts = tz_now()
+
+        worker = CallbackBrokerWorker()
+        duplicate = JobEvent(job=job, counter=1, job_created=created_ts, uuid=str(uuid4()), created=created_ts)
+        worker.buff = {JobEvent: [duplicate]}
+
+        # Simulate the unique constraint firing on bulk_create and on individual save.
+        unique_error = DjangoIntegrityError('UNIQUE constraint failed: main_jobevent.job_id, main_jobevent.counter, main_jobevent.job_created')
+        with mock.patch.object(JobEvent.objects, 'bulk_create', side_effect=unique_error):
+            with mock.patch.object(duplicate, 'save', side_effect=unique_error):
+                worker.flush(force=True)
+
+        assert worker.buff.get(JobEvent, []) == [], "duplicate event must not remain in buffer"
 
     def test_flush_with_empty_buffer(self):
         worker = CallbackBrokerWorker()
