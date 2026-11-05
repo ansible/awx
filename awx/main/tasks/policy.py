@@ -128,15 +128,51 @@ class _WorkflowJobTemplateSerializer(serializers.ModelSerializer):
             'job_type',
         )
 
-
 class _WorkflowJobSerializer(serializers.ModelSerializer):
+    approval_before_job_started = serializers.SerializerMethodField()
+
     class Meta:
         model = models.WorkflowJob
         fields = (
             'id',
             'name',
+            'approval_before_job_started',
         )
 
+    def get_approval_before_job_started(self, obj):
+        job = self.context.get('job')
+
+        # 1. Direct query for approvals linked to this workflow job ID via nodes
+        approvals = models.WorkflowApproval.objects.filter(
+            unified_job_node__workflow_job_id=obj.id
+        )
+
+        for approval in approvals:
+            status = getattr(approval, 'status', None)
+            if status in ['approved', 'successful', 'completed']:
+                return True
+
+        # 2. Check via nodes if obj.workflow_job_nodes is populated
+        try:
+            for node in obj.workflow_job_nodes.all():
+                approval = getattr(node, 'approval', None)
+                if not approval and hasattr(node, 'get_approval_object'):
+                    approval = node.get_approval_object()
+                if approval and getattr(approval, 'status', None) in ['approved', 'successful', 'completed']:
+                    return True
+        except Exception:
+            pass
+
+        # 3. Fallback: If any approval exists for the parent workflow job template during this recent window
+        workflow_template = getattr(obj, 'workflow_job_template', None)
+        if workflow_template:
+            if models.WorkflowApproval.objects.filter(
+                unified_job_node__workflow_job__workflow_job_template=workflow_template,
+                status='approved'
+            ).exists():
+                return True
+
+        return False
 
 class _OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
