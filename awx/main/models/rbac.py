@@ -36,6 +36,7 @@ from ansible_base.lib.utils.models import get_type_for_model
 from awx.api.versioning import reverse
 from awx.main.migrations._dab_rbac import build_role_map, get_permissions_for_role
 from awx.main.constants import role_name_to_perm_mapping, org_role_to_permission
+from awx.main.fields import BoundedTextField
 
 __all__ = [
     'Role',
@@ -170,7 +171,7 @@ class Role(models.Model):
         ordering = ("content_type", "object_id")
 
     role_field = models.TextField(null=False)
-    singleton_name = models.TextField(null=True, default=None, db_index=True, unique=True)
+    singleton_name = BoundedTextField(null=True, default=None, db_index=True, unique=True, sql_server_max_length=255)
     parents = models.ManyToManyField('Role', related_name='children')
     implicit_parents = models.TextField(null=False, default='[]')
     ancestors = models.ManyToManyField(
@@ -508,7 +509,7 @@ class RoleAncestorEntry(models.Model):
 
     descendent = models.ForeignKey(Role, null=False, on_delete=models.CASCADE, related_name='+')
     ancestor = models.ForeignKey(Role, null=False, on_delete=models.CASCADE, related_name='+')
-    role_field = models.TextField(null=False)
+    role_field = BoundedTextField(null=False, sql_server_max_length=255)
     content_type_id = models.PositiveIntegerField(null=False)
     object_id = models.PositiveIntegerField(null=False)
 
