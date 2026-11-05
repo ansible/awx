@@ -255,6 +255,50 @@ def get_conn_type(node_name, receptor_ctl):
     return ReceptorConnectionType(node.get('ConnType'))
 
 
+def release_work_unit(receptor_ctl, unit_id, work_list):
+    """Release one work unit, force-releasing it when the remote side is gone.
+
+    ``work release`` fails differently depending on which side is missing. A plain
+    "unknown work unit" comes from the local lookup, so the proxy directory is
+    already gone and there is nothing to clean up. "error cancelling remote unit:
+    unknown work unit" means the local proxy still exists but the remote side is
+    gone; only then is the stale local directory removed with
+    ``work force-release``. The wire command is ``work force-release <unit>``
+    (the receptorctl ``--force`` flag maps to it). Other release failures are
+    left alone so a later pass can retry.
+    """
+    try:
+        receptor_ctl.simple_command(f"work release {unit_id}")
+        return True
+    except Exception as exc:
+        # Receptor reports the same "unknown work unit" text for both sides, so
+        # classify with the typed prefixes used by FuzzyError. Check the
+        # cancel/remote prefix first: it also contains "unknown work unit".
+        message = str(exc)
+        if message.startswith(WorkUnitCancelError._MESSAGE):
+            # The local proxy remains but the remote unit is gone: drop the proxy.
+            logger.warning(f"Work unit {unit_id} is gone remotely; force-releasing the local proxy")
+        elif message.startswith(WorkUnitError._MESSAGE):
+            # The local unit disappeared between listing and release; force-release
+            # would fail the same way, so treat it as already cleaned up.
+            logger.debug(f"Work unit {unit_id} is already gone locally; nothing to release")
+            return True
+        else:
+            # A transient failure must leave both sides alone so a later pass can
+            # retry, otherwise ``force-release`` orphans the remote unit's files.
+            logger.warning(f"Error releasing work unit {unit_id}", exc_info=True)
+            return False
+
+    if unit_id in work_list:
+        try:
+            receptor_ctl.simple_command(f"work force-release {unit_id}")
+            return True
+        except Exception:
+            logger.warning(f"Error force-releasing work unit {unit_id}", exc_info=True)
+
+    return False
+
+
 def administrative_workunit_reaper(work_list=None):
     """
     This releases completed work units that were spawned by actions inside of this module
@@ -264,9 +308,17 @@ def administrative_workunit_reaper(work_list=None):
     These should ordinarily be released when the method finishes, but this is a
     cleanup of last-resort, in case something went awry
     """
-    receptor_ctl = get_receptor_ctl()
+    try:
+        receptor_ctl = get_receptor_ctl()
+    except FileNotFoundError:
+        logger.info('Receptorctl sockfile not found for administrative workunit reaper, doing nothing')
+        return
     if work_list is None:
-        work_list = receptor_ctl.simple_command("work list")
+        try:
+            work_list = receptor_ctl.simple_command("work list")
+        except Exception:
+            logger.exception('Error getting work list for administrative workunit reaper')
+            return
 
     for unit_id, work_data in work_list.items():
         extra_data = work_data.get('ExtraData')
@@ -286,7 +338,7 @@ def administrative_workunit_reaper(work_list=None):
             if work_data.get('StateName') in RECEPTOR_ACTIVE_STATES:
                 continue  # do not want to touch active work units
             logger.info(f'Reaping orphaned work unit {unit_id} with params {params}')
-        receptor_ctl.simple_command(f"work release {unit_id}")
+        release_work_unit(receptor_ctl, unit_id, work_list)
 
 
 class RemoteJobError(RuntimeError):
