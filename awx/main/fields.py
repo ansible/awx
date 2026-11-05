@@ -902,9 +902,11 @@ class SQLServerMaxLengthValidator:
     """
 
     def __init__(self, sql_server_max_length):
+        """Store the bound, in UTF-16 code units, that values must fit on SQL Server."""
         self.sql_server_max_length = sql_server_max_length
 
     def __call__(self, value):
+        """Raise ValidationError if value exceeds the bound; a no-op on databases other than SQL Server."""
         if not value or connection.vendor != 'microsoft':
             return
         # nvarchar length is UTF-16 code units: surrogate pairs count as two
@@ -917,6 +919,7 @@ class SQLServerMaxLengthValidator:
             )
 
     def __repr__(self):
+        """Show the bound, which keeps the validator readable in debug output and migration diffs."""
         return f'{self.__class__.__name__}(sql_server_max_length={self.sql_server_max_length})'
 
 
@@ -932,11 +935,13 @@ class BoundedTextField(models.TextField):
     """
 
     def __init__(self, *args, sql_server_max_length, **kwargs):
+        """Require sql_server_max_length and attach the matching SQL Server length validator."""
         self.sql_server_max_length = sql_server_max_length
         super().__init__(*args, **kwargs)
         self.validators.append(SQLServerMaxLengthValidator(sql_server_max_length))
 
     def check(self, **kwargs):
+        """Add awx.E003 when sql_server_max_length is outside the 1-4000 range nvarchar(N) accepts."""
         errors = super().check(**kwargs)
         if not 1 <= self.sql_server_max_length <= 4000:
             errors.append(
@@ -950,11 +955,13 @@ class BoundedTextField(models.TextField):
         return errors
 
     def deconstruct(self):
+        """Include sql_server_max_length so migrations can reconstruct the field."""
         name, path, args, kwargs = super().deconstruct()
         kwargs['sql_server_max_length'] = self.sql_server_max_length
         return name, path, args, kwargs
 
     def db_type(self, connection):
+        """Return nvarchar(N) on SQL Server and the regular TextField column type everywhere else."""
         if connection.vendor == 'microsoft':
             return f'nvarchar({self.sql_server_max_length})'
         return super().db_type(connection)
