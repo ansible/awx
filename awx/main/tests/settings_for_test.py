@@ -3,14 +3,14 @@ import sys
 import uuid
 
 # CentOS Stream 9 ships SQLite 3.34.1; django-ansible-base needs 3.35+ (INSERT ... RETURNING).
-# pysqlite3-binary bundles a current SQLite. It only has x86_64 wheels, so fall back to the
-# system sqlite3 where it is not installed.
+# sqlean.py bundles a current SQLite (wheels for x86_64 and aarch64). Fall back to the system
+# sqlite3 in an environment built before it was added to requirements_dev.txt.
 try:
-    import pysqlite3.dbapi2  # noqa: F401
+    import sqlean
 except ImportError:
     pass
 else:
-    sys.modules['sqlite3'] = sys.modules['pysqlite3']
+    sys.modules['sqlite3'] = sqlean
 
 # Load development settings for base variables.
 from awx.settings.development import *  # NOQA
