@@ -1,5 +1,6 @@
-# Ignore generated schema (schema.json is now tracked for oasdiff baseline)
+# Ignore generated schema
 swagger.json
+schema.json
 schema.yaml
 reference-schema.json
 

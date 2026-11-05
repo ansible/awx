@@ -1,6 +1,20 @@
 ---
-# Caller workflow for oasdiff breaking change detection.
-# Consumes reusable workflow from djyasin/actions (PR #161).
+# oasdiff breaking change detection for DRF services with generated specs.
+#
+# AWX generates its OpenAPI spec dynamically via drf-spectacular — the spec
+# is not committed to the repo. This workflow handles the full pipeline:
+#   1. Build the awx_devel Docker image (required for spec generation)
+#   2. Generate the OpenAPI spec at HEAD via make genschema
+#   3. Download the baseline spec from S3 (uploaded per-branch by upload_schema.yml)
+#   4. Run oasdiff breaking change detection
+#   5. Build structured results with taxonomy classification
+#   6. Upload results artifact for the companion comment workflow
+#
+# This is the DRF caller pattern. Services with committed specs (Syntara,
+# Portal) use the simpler reusable workflow caller that needs no Docker build.
+# Both patterns produce the same artifact format, so the comment workflow
+# works identically.
+#
 # Jira: AAP-86434 (AC1, AC2, AC4)
 name: "API: Breaking Change Detection"
 
@@ -13,13 +27,271 @@ on:
       - stable-**
       - AAP-86434/**
 
-permissions:
-  contents: read
-  pull-requests: read
+env:
+  OASDIFF_VERSION: "1.18.5"
+  OASDIFF_SHA256: "9352233c1234bf5baf4d983078f7afff7bab4941abc253a14914f13ea31a3bf4"
 
 jobs:
   detect:
-    # djyasin/actions PR #161 — pinned to current HEAD
-    uses: djyasin/actions/.github/workflows/oasdiff-detect-breaking-changes.yml@feat/oasdiff-breaking-change-detection # PR #161 HEAD: 33e68a1
-    with:
-      spec-path: schema.json
+    name: "oasdiff breaking change detection"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      packages: write
+      contents: read
+      pull-requests: read
+    outputs:
+      has-breaking-changes: ${{ steps.evaluate.outputs.has-breaking-changes }}
+      was-overridden: ${{ steps.evaluate.outputs.was-overridden }}
+      breaking-count: ${{ steps.evaluate.outputs.breaking-count }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          show-progress: false
+
+      - name: Build awx_devel image
+        uses: ./.github/actions/awx_devel_image
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          private-github-key: ${{ secrets.PRIVATE_GITHUB_KEY }}
+
+      - name: Generate spec at HEAD
+        run: |
+          DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} \
+          COMPOSE_TAG=${{ github.base_ref || github.ref_name }} \
+          docker run -u $(id -u) --rm -v ${{ github.workspace }}:/awx_devel/:Z \
+            --workdir=/awx_devel $(make -s print-DEVEL_IMAGE_NAME) /start_tests.sh genschema
+        env:
+          OWNER_LC: ${{ github.repository_owner }}
+
+      - name: Download baseline spec from S3
+        id: baseline
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          BASE_URL="https://s3.amazonaws.com/awx-public-ci-files/${{ github.event.repository.name }}/${BASE_REF}/schema.json"
+          echo "Downloading baseline from ${BASE_URL}"
+          if curl -sSfL "${BASE_URL}" -o /tmp/base-spec 2>/dev/null; then
+            echo "has-baseline=true" >> "$GITHUB_OUTPUT"
+            echo "Baseline spec downloaded"
+          else
+            echo "has-baseline=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No baseline spec at ${BASE_URL} — skipping breaking change detection"
+          fi
+
+      - name: Install oasdiff
+        if: steps.baseline.outputs.has-baseline == 'true'
+        run: |
+          DOWNLOAD_URL="https://github.com/Tufin/oasdiff/releases/download/v${OASDIFF_VERSION}/oasdiff_${OASDIFF_VERSION}_linux_amd64.tar.gz"
+          curl -sSfL "${DOWNLOAD_URL}" -o /tmp/oasdiff.tar.gz
+          ACTUAL_SHA256=$(sha256sum /tmp/oasdiff.tar.gz | awk '{print $1}')
+          if [ "${ACTUAL_SHA256}" != "${OASDIFF_SHA256}" ]; then
+            echo "::error::oasdiff checksum mismatch! Expected ${OASDIFF_SHA256}, got ${ACTUAL_SHA256}"
+            exit 1
+          fi
+          tar -xzf /tmp/oasdiff.tar.gz -C /usr/local/bin oasdiff
+          chmod +x /usr/local/bin/oasdiff
+          rm /tmp/oasdiff.tar.gz
+
+      - name: Run oasdiff breaking change detection
+        id: oasdiff
+        if: steps.baseline.outputs.has-baseline == 'true'
+        run: |
+          set +e
+          oasdiff breaking /tmp/base-spec schema.json \
+            --format json \
+            --fail-on WARN \
+            > /tmp/breaking-raw.json 2>/tmp/oasdiff-stderr.log
+          OASDIFF_EXIT=$?
+          set -e
+          if [ -s /tmp/oasdiff-stderr.log ]; then
+            echo "::warning::oasdiff stderr: $(cat /tmp/oasdiff-stderr.log)"
+          fi
+          if [ "${OASDIFF_EXIT}" -eq 0 ]; then
+            echo "has-breaking=false" >> "$GITHUB_OUTPUT"
+          elif [ "${OASDIFF_EXIT}" -eq 1 ]; then
+            echo "has-breaking=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::oasdiff failed with exit code ${OASDIFF_EXIT}"
+            exit "${OASDIFF_EXIT}"
+          fi
+
+      - name: Build structured results
+        id: build-results
+        if: steps.baseline.outputs.has-baseline == 'true'
+        uses: actions/github-script@v7
+        env:
+          HAS_BREAKING: ${{ steps.oasdiff.outputs.has-breaking }}
+          SPEC_PATH: schema.json
+          BASE_REF: ${{ github.event.pull_request.base.ref || github.base_ref }}
+          HEAD_REF: ${{ github.head_ref || github.ref_name }}
+          OASDIFF_VERSION: ${{ env.OASDIFF_VERSION }}
+          OVERRIDE_LABEL: breaking-change-approved
+        with:
+          script: |
+            const fs = require('fs');
+            const hasBreaking = process.env.HAS_BREAKING === 'true';
+            const specPath = process.env.SPEC_PATH;
+            const baseRef = process.env.BASE_REF;
+            const headRef = process.env.HEAD_REF;
+            const oasdiffVersion = process.env.OASDIFF_VERSION;
+            const overrideLabel = process.env.OVERRIDE_LABEL;
+
+            const taxonomyMap = {
+              "api-removed-without-deprecation": "Category 1: Endpoint Removal",
+              "api-path-removed-without-deprecation": "Category 1: Endpoint Removal",
+              "api-removed-before-sunset": "Category 1: Endpoint Removal",
+              "response-property-removed": "Category 2: Response Field Removal",
+              "response-required-property-removed": "Category 2: Response Field Removal",
+              "response-optional-property-removed": "Category 2: Response Field Removal",
+              "request-property-removed": "Category 3: Request Contract Tightening",
+              "new-required-request-property": "Category 3: Request Contract Tightening",
+              "request-property-became-required": "Category 3: Request Contract Tightening",
+              "request-body-became-required": "Category 3: Request Contract Tightening",
+              "request-parameter-removed": "Category 3: Request Contract Tightening",
+              "request-parameter-became-required": "Category 3: Request Contract Tightening",
+              "request-property-became-not-nullable": "Category 3: Request Contract Tightening",
+              "request-property-min-length-increased": "Category 3: Request Contract Tightening",
+              "request-property-max-length-decreased": "Category 3: Request Contract Tightening",
+              "request-property-min-increased": "Category 3: Request Contract Tightening",
+              "request-property-max-decreased": "Category 3: Request Contract Tightening",
+              "request-property-pattern-added-or-changed": "Category 3: Request Contract Tightening",
+              "response-property-became-nullable": "Category 4: Response Type Changes",
+              "response-property-type-changed": "Category 4: Response Type Changes",
+              "response-property-became-optional": "Category 4: Response Type Changes",
+              "request-property-enum-value-removed": "Category 5: Enum Value Removal or Splitting",
+              "response-property-enum-value-removed": "Category 5: Enum Value Removal or Splitting",
+              "api-security-added": "Category 6: Authentication and Authorization Changes",
+              "api-security-scheme-removed": "Category 6: Authentication and Authorization Changes",
+              "response-success-status-removed": "Category 7: Status Code and Error Changes",
+              "response-mediatype-removed": "Category 7: Status Code and Error Changes",
+              "request-property-default-value-changed": "Category 8: Default Value Changes",
+              "response-header-removed": "Category 10: Header Contract Changes",
+            };
+
+            let rawChanges = [];
+            const rawJsonPath = '/tmp/breaking-raw.json';
+            if (fs.existsSync(rawJsonPath)) {
+              const rawContent = fs.readFileSync(rawJsonPath, 'utf8').trim();
+              if (rawContent) {
+                try {
+                  rawChanges = JSON.parse(rawContent);
+                  if (!Array.isArray(rawChanges)) rawChanges = [];
+                } catch (e) {
+                  core.warning(`Failed to parse oasdiff JSON: ${e.message}`);
+                }
+              }
+            }
+
+            const changes = rawChanges.map(change => ({
+              id: change.id || 'unknown',
+              level: change.level || 'error',
+              text: change.text || '',
+              taxonomy_category: taxonomyMap[change.id] || 'Uncategorized',
+              path: change.path || change.operationId || '',
+              method: change.operation || change.method || '',
+            }));
+
+            const results = {
+              has_breaking_changes: hasBreaking,
+              override_applied: false,
+              override_label: overrideLabel,
+              oasdiff_version: oasdiffVersion,
+              base_ref: baseRef,
+              head_ref: headRef,
+              spec_path: specPath,
+              changes: changes,
+            };
+
+            fs.writeFileSync('/tmp/breaking-results.json', JSON.stringify(results, null, 2));
+
+            let summary = '';
+            if (hasBreaking && changes.length > 0) {
+              summary += `## Breaking Changes Detected\n\n`;
+              summary += `oasdiff found ${changes.length} breaking change(s) in \`${specPath}\`\n`;
+              summary += `([category definitions](https://github.com/ansible/handbook/pull/1628)):\n\n`;
+              const byCategory = {};
+              for (const c of changes) {
+                const cat = c.taxonomy_category;
+                if (!byCategory[cat]) byCategory[cat] = [];
+                byCategory[cat].push(c);
+              }
+              for (const [cat, catChanges] of Object.entries(byCategory)) {
+                summary += `### ${cat}\n\n`;
+                for (const c of catChanges) {
+                  const location = [c.method, c.path].filter(Boolean).join(' ');
+                  summary += `- ${location ? `**${location}** — ` : ''}${c.text}\n`;
+                }
+                summary += '\n';
+              }
+              summary += `---\n\n`;
+              summary += `To proceed with an intentional breaking change, a member of\n`;
+              summary += `[Staff Engineering Leads](https://github.com/orgs/ansible/teams/ansible-staff-eng-leads)\n`;
+              summary += `must apply the \`${overrideLabel}\` label.\n`;
+            } else if (!hasBreaking) {
+              summary = `## No Breaking Changes\n\noasdiff found no breaking changes in \`${specPath}\`.\n`;
+            }
+            fs.writeFileSync('/tmp/breaking-summary.txt', summary);
+            core.setOutput('summary', summary);
+
+      - name: Check for override label
+        id: evaluate
+        if: "!cancelled() && steps.baseline.outputs.has-baseline == 'true'"
+        uses: actions/github-script@v7
+        env:
+          HAS_BREAKING: ${{ steps.oasdiff.outputs.has-breaking }}
+          OVERRIDE_LABEL: breaking-change-approved
+        with:
+          script: |
+            const fs = require('fs');
+            const hasBreakingRaw = process.env.HAS_BREAKING;
+            if (!hasBreakingRaw) {
+              core.setFailed('oasdiff step did not produce output');
+              return;
+            }
+            const hasBreaking = hasBreakingRaw === 'true';
+            const overrideLabel = process.env.OVERRIDE_LABEL;
+            let overrideApplied = false;
+            if (context.payload.pull_request) {
+              const labels = context.payload.pull_request.labels || [];
+              overrideApplied = labels.some(l => l.name === overrideLabel);
+            }
+            const resultsPath = '/tmp/breaking-results.json';
+            if (fs.existsSync(resultsPath)) {
+              const results = JSON.parse(fs.readFileSync(resultsPath, 'utf8'));
+              results.override_applied = overrideApplied;
+              fs.writeFileSync(resultsPath, JSON.stringify(results, null, 2));
+            }
+            let breakingCount = 0;
+            if (fs.existsSync(resultsPath)) {
+              const results = JSON.parse(fs.readFileSync(resultsPath, 'utf8'));
+              breakingCount = (results.changes || []).length;
+            }
+            core.setOutput('has-breaking-changes', String(hasBreaking));
+            core.setOutput('was-overridden', String(overrideApplied));
+            core.setOutput('breaking-count', String(breakingCount));
+            let categoryNames = [];
+            if (fs.existsSync(resultsPath)) {
+              const results = JSON.parse(fs.readFileSync(resultsPath, 'utf8'));
+              const cats = new Set((results.changes || []).map(c => c.taxonomy_category));
+              categoryNames = [...cats];
+            }
+            const categoryList = categoryNames.length > 0 ? categoryNames.join(', ') : 'Uncategorized';
+            const docsUrl = 'https://handbook.eng.ansible.com/proposals/AAP-53276-api-change-approval-process';
+            if (hasBreaking && overrideApplied) {
+              core.warning(`Breaking changes detected but "${overrideLabel}" label present — allowing merge.\nFound ${breakingCount} breaking change(s): ${categoryList}.\nGuidelines: ${docsUrl}`);
+            } else if (hasBreaking) {
+              core.setFailed(`${breakingCount} breaking change(s) detected: ${categoryList}.\nSee the job summary for details.\nTo override, apply the "${overrideLabel}" label.\nGuidelines: ${docsUrl}`);
+            }
+
+      - name: Upload results
+        if: always() && steps.baseline.outputs.has-baseline == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: breaking-change-results
+          path: |
+            /tmp/breaking-results.json
+            /tmp/breaking-summary.txt
+          retention-days: 30
