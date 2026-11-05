@@ -618,8 +618,25 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
             parent_obj = view.get_parent_object()
         if view and view.request and view.request.user:
             capabilities_cache = {}
-            # if serializer has parent, it is ListView, apply page capabilities prefetch
-            if self.parent and hasattr(self, 'capabilities_prefetch') and self.capabilities_prefetch:
+            # Superusers are unrestricted. A system auditor without
+            # organization-admin access is read-only and cannot edit or
+            # delete users, so return those capabilities directly instead of
+            # falling back to one RBAC check per user. Retain prefetching for
+            # a system auditor who is also an organization admin.
+            if 'system_auditor_read_only' not in self.context:
+                self.context['system_auditor_read_only'] = view.request.user.is_system_auditor and (
+                    not settings.MANAGE_ORGANIZATION_AUTH or not Organization.access_qs(view.request.user, 'change').exists()
+                )
+            system_auditor_read_only = self.context['system_auditor_read_only']
+            if self.Meta.model is User and system_auditor_read_only:
+                return {capability: False for capability in self.show_capabilities}
+            if (
+                self.parent
+                and hasattr(self, 'capabilities_prefetch')
+                and self.capabilities_prefetch
+                and not view.request.user.is_superuser
+                and not system_auditor_read_only
+            ):
                 qs = self.parent.instance
                 if 'capability_map' not in self.context:
                     if hasattr(self, 'polymorphic_base'):
@@ -1217,6 +1234,7 @@ class UserSerializer(CleanTextMixin, BaseSerializer):
     password = serializers.CharField(required=False, default='', allow_blank=True, help_text=_('Field used to change the password.'))
     is_system_auditor = serializers.BooleanField(default=False)
     show_capabilities = ['edit', 'delete']
+    capabilities_prefetch = [{'edit': 'change'}, {'delete': 'change'}]
 
     class Meta:
         model = User

@@ -1218,6 +1218,16 @@ class UserList(ListCreateAPIView):
     ordering = ('username',)
     resource_purpose = 'users'
 
+    def list(self, request, *args, **kwargs):
+        # User capability pagination evaluates bounded RBAC queries for the
+        # current page. Avoid JIT compilation overhead for this web request.
+        if connection.vendor != 'postgresql':
+            return super().list(request, *args, **kwargs)
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                cursor.execute('SET LOCAL jit = off')
+            return super().list(request, *args, **kwargs)
+
 
 class UserMeList(ListAPIView):
     model = models.User
