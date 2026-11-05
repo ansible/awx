@@ -9,6 +9,8 @@ from django.db.models import Count, Q
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 
+from ansible_base.lib.utils.views.deprecation import deprecated
+
 # AWX
 from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment
 from awx.main.models import (
@@ -246,6 +248,7 @@ class OrganizationAccessList(ResourceAccessList):
     resource_purpose = 'users who can access the organization'
 
 
+@deprecated(detail='Organization Object Roles is deprecated.')
 class OrganizationObjectRolesList(SubListAPIView):
     model = Role
     serializer_class = RoleSerializer

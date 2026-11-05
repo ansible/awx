@@ -388,7 +388,7 @@ REST_FRAMEWORK = {
     'DEFAULT_VERSION': 'v2',
     # For OpenAPI schema generation with drf-spectacular
     # see https://github.com/encode/django-rest-framework/pull/6532
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_SCHEMA_CLASS': 'ansible_base.lib.utils.schema.DABAutoSchema',
     # 'URL_FORMAT_OVERRIDE': None,
 }
 
@@ -1054,6 +1054,7 @@ SPECTACULAR_SETTINGS = {
     'DEFAULT_SCHEMA_CLASS': 'awx.api.schema.CustomAutoSchema',
     'COMPONENT_SPLIT_REQUEST': True,
     # Postprocessing hooks for OpenAPI schema generation
+    # DAB auto-appends deprecated_fields_detail_hook and clean_text_schema hooks
     'POSTPROCESSING_HOOKS': [
         'awx.api.schema.filter_credential_type_schema',
         'awx.api.schema.inject_ai_descriptions',

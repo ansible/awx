@@ -20,6 +20,7 @@ from rest_framework import serializers
 from awx.main.models import ActivityStream, Inventory, JobTemplate, Role, User, InstanceGroup, InventoryUpdateEvent, InventoryUpdate
 
 from ansible_base.lib.utils.schema import extend_schema_if_available
+from ansible_base.lib.utils.views.deprecation import deprecated
 
 from awx.api.generics import (
     ListCreateAPIView,
@@ -163,6 +164,7 @@ class InventoryAccessList(ResourceAccessList):
     resource_purpose = 'users who can access the inventory'
 
 
+@deprecated(detail='Inventory Object Roles is deprecated.')
 class InventoryObjectRolesList(SubListAPIView):
     model = Role
     serializer_class = RoleSerializer
