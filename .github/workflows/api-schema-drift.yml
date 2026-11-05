@@ -1,0 +1,83 @@
+---
+# Drift detection: regenerate the OpenAPI spec from code and fail if the
+# committed schema.json is out of sync. Ensures developers commit spec
+# changes alongside code changes.
+#
+# Pattern follows Metrics (ansible/metrics-service) and Syntara (AO).
+# Jira: AAP-86434
+name: "API: Schema Drift Detection"
+
+on:
+  pull_request:
+    branches:
+      - devel
+      - release_**
+      - feature_**
+      - stable-**
+      - AAP-86434/**
+  push:
+    branches:
+      - devel
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  drift:
+    name: Check schema drift
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      LC_ALL: "C.UTF-8"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Build awx_devel image
+        uses: ./.github/actions/awx_devel_image
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          private-github-key: ${{ secrets.PRIVATE_GITHUB_KEY }}
+
+      - name: Regenerate spec from code
+        run: |
+          DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} \
+          COMPOSE_TAG=${{ github.base_ref || github.ref_name }} \
+          docker run -u $(id -u) --rm -v ${{ github.workspace }}:/awx_devel/:Z \
+            --workdir=/awx_devel $(make -s print-DEVEL_IMAGE_NAME) /start_tests.sh genschema
+        env:
+          OWNER_LC: ${{ github.repository_owner }}
+
+      - name: Check for drift
+        run: |
+          if git diff --exit-code schema.json; then
+            echo "No schema drift detected."
+          else
+            echo ""
+            echo "::error::Committed schema.json is out of sync with code."
+            echo "::error::Run 'make genschema' (or 'make docker-runner AWX_DOCKER_CMD=\"make genschema\"') and commit the result."
+            echo ""
+            echo "## Schema Drift Detected" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The committed \`schema.json\` does not match what \`drf-spectacular\` generates from the current code." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**To fix:** run \`make genschema\` and commit the updated \`schema.json\`." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo '```diff' >> $GITHUB_STEP_SUMMARY
+            git diff schema.json | head -100 >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+      - name: Validate spec
+        run: |
+          DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} \
+          COMPOSE_TAG=${{ github.base_ref || github.ref_name }} \
+          docker run -u $(id -u) --rm -v ${{ github.workspace }}:/awx_devel/:Z \
+            --workdir=/awx_devel $(make -s print-DEVEL_IMAGE_NAME) \
+            bash -c "make validate-openapi-schema"
+        env:
+          OWNER_LC: ${{ github.repository_owner }}
