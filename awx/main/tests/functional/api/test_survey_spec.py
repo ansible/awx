@@ -195,6 +195,57 @@ def test_survey_spec_default_not_allowed(job_template, post, admin_user):
 
 
 @pytest.mark.django_db
+@pytest.mark.survey
+@pytest.mark.parametrize('default', [True, False])
+def test_survey_spec_boolean_default_accepts_native_boolean(job_template, workflow_job_template, post, admin_user, default):
+    survey_input_data = {
+        'description': 'A Boolean survey',
+        'spec': [
+            {
+                'question_name': 'Enabled?',
+                'variable': 'enabled',
+                'default': default,
+                'required': False,
+                'type': 'boolean',
+            }
+        ],
+        'name': 'Boolean survey',
+    }
+
+    for template in (job_template, workflow_job_template):
+        endpoint = reverse('api:{}_survey_spec'.format(get_type_for_model(template.__class__)), kwargs={'pk': template.id})
+        post(url=endpoint, data=survey_input_data, user=admin_user, expect=200)
+
+
+@pytest.mark.django_db
+@pytest.mark.survey
+@pytest.mark.parametrize('default', ['true', 'false', 0, 1, None])
+def test_survey_spec_boolean_default_rejects_non_boolean(job_template, post, admin_user, default):
+    survey_input_data = {
+        'description': 'A Boolean survey',
+        'spec': [
+            {
+                'question_name': 'Enabled?',
+                'variable': 'enabled',
+                'default': default,
+                'required': False,
+                'type': 'boolean',
+            }
+        ],
+        'name': 'Boolean survey',
+    }
+
+    response = post(
+        url=reverse('api:job_template_survey_spec', kwargs={'pk': job_template.id}),
+        data=survey_input_data,
+        user=admin_user,
+        expect=400,
+    )
+
+    assert 'expected to be a boolean' in response.data['error']
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize(
     'default, status',
     [

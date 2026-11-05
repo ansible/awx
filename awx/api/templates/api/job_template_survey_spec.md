@@ -26,6 +26,7 @@ Within each survey item `type` must be one of:
 * password: For survey questions expecting a password or other sensitive information
 * integer: For survey questions expecting a whole number answer
 * float: For survey questions expecting a decimal number
+* boolean: For survey questions expecting a true or false answer
 * multiplechoice: For survey questions where one option from a list is required
 * multiselect: For survey questions where multiple items from a presented list can be selected
 
@@ -115,6 +116,14 @@ Here is a more comprehensive example showing the various question types and thei
                 "max": 5,
                 "required": false,
                 "default": ""
+            },
+            {
+                "type": "boolean",
+                "question_name": "booleanchoice",
+                "question_description": "Should this be enabled?",
+                "variable": "enabled",
+                "required": false,
+                "default": false
             }
         ]
     }
