@@ -12,10 +12,11 @@ from jinja2 import sandbox, StrictUndefined
 from jinja2.exceptions import UndefinedError, TemplateSyntaxError, SecurityError
 
 # Django
+from django.core import checks
 from django.core import exceptions as django_exceptions
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.signals import m2m_changed, post_save
-from django.db import models
+from django.db import connection, models
 from django.db.models.fields.related_descriptors import (
     ReverseOneToOneDescriptor,
     ForwardManyToOneDescriptor,
@@ -47,6 +48,8 @@ __all__ = [
     'SmartFilterField',
     'OrderedManyToManyField',
     'is_implicit_parent',
+    'BoundedTextField',
+    'SQLServerMaxLengthValidator',
 ]
 
 
@@ -889,3 +892,76 @@ class OrderedManyToManyField(models.ManyToManyField):
             # support lazy loading of string model names
             through = '.'.join([cls._meta.app_label, through])
         m2m_changed.connect(self._update_m2m_position, sender=through)
+
+
+class SQLServerMaxLengthValidator:
+    """Reject values longer than an nvarchar bound, counting UTF-16 code units.
+
+    A standalone callable (not a field method) so that fields inherited from
+    abstract bases carry the bound with them.
+    """
+
+    def __init__(self, sql_server_max_length):
+        """Store the bound, in UTF-16 code units, that values must fit on SQL Server."""
+        self.sql_server_max_length = sql_server_max_length
+
+    def __call__(self, value):
+        """Raise ValidationError if value exceeds the bound; a no-op on databases other than SQL Server."""
+        if not value or connection.vendor != 'microsoft':
+            return
+        # nvarchar length is UTF-16 code units: surrogate pairs count as two
+        length = len(value.encode('utf-16-le', errors='surrogatepass')) // 2
+        if length > self.sql_server_max_length:
+            raise django_exceptions.ValidationError(
+                _('Ensure this value has at most %(limit)d UTF-16 code units on MS SQL Server (it has %(length)d).'),
+                code='max_length',
+                params={'limit': self.sql_server_max_length, 'length': length},
+            )
+
+    def __repr__(self):
+        """Show the bound, which keeps the validator readable in debug output and migration diffs."""
+        return f'{self.__class__.__name__}(sql_server_max_length={self.sql_server_max_length})'
+
+
+class BoundedTextField(models.TextField):
+    """TextField that SQL Server can index.
+
+    PostgreSQL: ``text``; nothing enforced anywhere, exactly as a plain TextField.
+    SQL Server: ``nvarchar(sql_server_max_length)``; the column type is the only hard
+    limit, mirrored by a validator so API writes fail cleanly instead of hitting the
+    database's truncation error.
+
+    Mirrors ansible_base.lib.fields.BoundedTextField (django-ansible-base#1272).
+    """
+
+    def __init__(self, *args, sql_server_max_length, **kwargs):
+        """Require sql_server_max_length and attach the matching SQL Server length validator."""
+        self.sql_server_max_length = sql_server_max_length
+        super().__init__(*args, **kwargs)
+        self.validators.append(SQLServerMaxLengthValidator(sql_server_max_length))
+
+    def check(self, **kwargs):
+        """Add awx.E003 when sql_server_max_length is outside the 1-4000 range nvarchar(N) accepts."""
+        errors = super().check(**kwargs)
+        if not 1 <= self.sql_server_max_length <= 4000:
+            errors.append(
+                checks.Error(
+                    f'sql_server_max_length must be between 1 and 4000, got {self.sql_server_max_length}',
+                    hint='SQL Server nvarchar accepts at most 4000 characters.',
+                    obj=self,
+                    id='awx.E003',
+                )
+            )
+        return errors
+
+    def deconstruct(self):
+        """Include sql_server_max_length so migrations can reconstruct the field."""
+        name, path, args, kwargs = super().deconstruct()
+        kwargs['sql_server_max_length'] = self.sql_server_max_length
+        return name, path, args, kwargs
+
+    def db_type(self, connection):
+        """Return nvarchar(N) on SQL Server and the regular TextField column type everywhere else."""
+        if connection.vendor == 'microsoft':
+            return f'nvarchar({self.sql_server_max_length})'
+        return super().db_type(connection)

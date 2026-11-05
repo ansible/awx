@@ -65,6 +65,8 @@ class MainConfig(AppConfig):
     def ready(self):
         super().ready()
 
+        from awx.main import checks  # noqa: F401 - registers system checks
+
         self.configure_dispatcherd()
         self.load_named_url_feature()
         pre_migrate.connect(self.check_db_requirement, sender=self)
