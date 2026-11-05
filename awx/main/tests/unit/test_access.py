@@ -10,12 +10,16 @@ from awx.main.fields import AskForField
 
 from awx.main.models import (
     Credential,
+    CredentialInputSource,
     CredentialType,
+    ExecutionEnvironment,
     Inventory,
+    InstanceGroup,
     JobTemplate,
     Project,
     Role,
     Organization,
+    UnifiedJob,
 )
 
 
@@ -279,3 +283,13 @@ def test_user_capabilities_method():
     foo = object()
     foo_capabilities = foo_access.get_user_capabilities(foo, ['edit', 'copy'])
     assert foo_capabilities == {'edit': 'bar', 'copy': 'foo'}
+
+
+@pytest.mark.parametrize('model', [User, UnifiedJob, CredentialInputSource, ExecutionEnvironment, InstanceGroup])
+def test_user_capabilities_delete_uses_can_delete_for_excluded_models(model):
+    class FooAccess(BaseAccess):
+        def can_delete(self, obj):
+            return 'delete'
+
+    user = User(username='auser')
+    assert FooAccess(user).get_user_capabilities(model(), ['delete']) == {'delete': 'delete'}
