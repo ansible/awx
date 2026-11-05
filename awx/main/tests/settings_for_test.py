@@ -2,9 +2,6 @@
 import sys
 import uuid
 
-# CentOS Stream 9 ships SQLite 3.34.1; django-ansible-base needs 3.35+ (INSERT ... RETURNING).
-# sqlean.py bundles a current SQLite (wheels for x86_64 and aarch64). Fall back to the system
-# sqlite3 in an environment built before it was added to requirements_dev.txt.
 try:
     import sqlean
 except ImportError:
