@@ -2,6 +2,7 @@
 import contextlib
 import json
 import os
+import stat
 import tarfile
 from pathlib import Path
 
@@ -2273,6 +2274,54 @@ class TestCopytreeWithoutMetadata:
         (root / '.git').mkdir()
         (root / '.git' / 'HEAD').write_text('ref')
         (root / 'plugins' / '.git').write_text('gitdir: x')
+        self._set_old_mtimes(root)
+
+    @staticmethod
+    def _set_old_mtimes(root, when=1577836800):
+        """Give every entry an old, recognisable mtime (children first, so directories keep theirs)."""
+        for dirpath, dirnames, filenames in os.walk(root, topdown=False):
+            for name in filenames + dirnames:
+                os.utime(os.path.join(dirpath, name), (when, when), follow_symlinks=False)
+        os.utime(root, (when, when))
+
+    def _make_edge_tree(self, root):
+        """Modes that the umask or a write would change: group/other write, setuid/setgid/sticky, read-only and special directories."""
+        root.mkdir()
+        for name, mode in (
+            ('gw664', 0o664),
+            ('ow666', 0o666),
+            ('gw775', 0o775),
+            ('setuid', 0o4755),
+            ('setgid', 0o2755),
+            ('sticky', 0o1755),
+            ('setuid_setgid', 0o6755),
+            ('private', 0o600),
+        ):
+            (root / name).write_bytes(b'x')
+            (root / name).chmod(mode)
+        for name, mode in (('d775', 0o775), ('dsticky', 0o1777), ('dsetgid', 0o2755), ('dro', 0o555), ('dpriv', 0o700)):
+            (root / name).mkdir()
+            (root / name / 'inner.txt').write_text('i')
+            (root / name).chmod(mode)
+        os.symlink('gw664', root / 'link')
+        self._set_old_mtimes(root)
+
+    @staticmethod
+    def _snapshot(root):
+        result = {}
+        for dirpath, dirnames, filenames in os.walk(root):
+            for name in dirnames + filenames:
+                path = os.path.join(dirpath, name)
+                rel = os.path.relpath(path, root)
+                st = os.lstat(path)
+                if stat.S_ISLNK(st.st_mode):
+                    result[rel] = ('link', os.readlink(path), st.st_mtime_ns)
+                elif stat.S_ISDIR(st.st_mode):
+                    result[rel] = ('dir', stat.S_IMODE(st.st_mode), st.st_mtime_ns)
+                else:
+                    with open(path, 'rb') as f:
+                        result[rel] = ('file', stat.S_IMODE(st.st_mode), st.st_mtime_ns, f.read())
+        return result
 
     def test_copies_content_structure_and_modes(self, tmp_path, umask_022):
         src = tmp_path / 'src'
@@ -2316,22 +2365,52 @@ class TestCopytreeWithoutMetadata:
         shutil.copytree(src, tmp_path / 'ref', symlinks=True, ignore=shutil.ignore_patterns('.git'))
         jobs.copytree_without_metadata(str(src), str(tmp_path / 'new'), ignore_names=('.git',))
 
-        def snapshot(root):
-            result = {}
-            for dirpath, dirnames, filenames in os.walk(root):
-                for name in dirnames + filenames:
-                    path = os.path.join(dirpath, name)
-                    rel = os.path.relpath(path, root)
-                    if os.path.islink(path):
-                        result[rel] = ('link', os.readlink(path))
-                    elif os.path.isdir(path):
-                        result[rel] = ('dir', os.stat(path).st_mode & 0o777)
-                    else:
-                        with open(path, 'rb') as f:
-                            result[rel] = ('file', os.stat(path).st_mode & 0o777, f.read())
-            return result
+        assert self._snapshot(tmp_path / 'new') == self._snapshot(tmp_path / 'ref')
+        assert (tmp_path / 'new').stat().st_mtime_ns == (tmp_path / 'ref').stat().st_mtime_ns
 
-        assert snapshot(tmp_path / 'new') == snapshot(tmp_path / 'ref')
+    def test_edge_case_modes_and_mtimes_match_shutil_copytree(self, tmp_path, umask_022):
+        """setuid/setgid/sticky, group/other write bits and read-only dirs must come out exactly like shutil.copytree."""
+        import shutil
+
+        src = tmp_path / 'src'
+        self._make_edge_tree(src)
+        shutil.copytree(src, tmp_path / 'ref', symlinks=True)
+        jobs.copytree_without_metadata(str(src), str(tmp_path / 'new'))
+
+        new, ref = self._snapshot(tmp_path / 'new'), self._snapshot(tmp_path / 'ref')
+        assert new == ref
+        # spot checks that the comparison above is meaningful
+        assert new['gw664'][1] == 0o664
+        assert new['setuid'][1] == 0o4755
+        assert new['setuid_setgid'][1] == 0o6755
+        assert new['dro'][1] == 0o555
+        assert new['dsetgid'][1] == 0o2755
+        assert new['gw664'][2] == 1577836800 * 10**9
+
+    def test_chmod_only_called_when_mode_differs(self, tmp_path, umask_022):
+        """The usual 0644/0755 content needs no chmod at all; only entries whose created mode differs get one."""
+        plain = tmp_path / 'plain'
+        self._make_tree(plain)
+        with mock.patch('os.chmod', wraps=os.chmod) as chmod, mock.patch('os.fchmod', wraps=os.fchmod) as fchmod:
+            jobs.copytree_without_metadata(str(plain), str(tmp_path / 'plain_copy'))
+        assert chmod.call_count == 0 and fchmod.call_count == 0
+
+        (plain / 'run.sh').chmod(0o775)  # the umask would turn this into 0755
+        with mock.patch('os.chmod', wraps=os.chmod) as chmod, mock.patch('os.fchmod', wraps=os.fchmod) as fchmod:
+            jobs.copytree_without_metadata(str(plain), str(tmp_path / 'group_write_copy'))
+        assert chmod.call_count == 0 and fchmod.call_count == 1
+        assert (tmp_path / 'group_write_copy' / 'run.sh').stat().st_mode & 0o7777 == 0o775
+
+    def test_preserves_mtime_of_files_dirs_and_symlinks(self, tmp_path, umask_022):
+        src = tmp_path / 'src'
+        self._make_tree(src)
+        dst = tmp_path / 'dst'
+        jobs.copytree_without_metadata(str(src), str(dst))
+        expected = 1577836800 * 10**9
+        assert dst.stat().st_mtime_ns == expected
+        assert (dst / 'plugins').stat().st_mtime_ns == expected  # set last, after its children were created
+        assert (dst / 'plugins' / 'modules' / 'mod.py').stat().st_mtime_ns == expected
+        assert os.lstat(dst / 'rel_link').st_mtime_ns == expected  # the link itself, not its target
 
     def test_readonly_source_dir(self, tmp_path, umask_022):
         src = tmp_path / 'src'
@@ -2343,8 +2422,9 @@ class TestCopytreeWithoutMetadata:
         finally:
             (src / 'ro').chmod(0o755)
         assert (tmp_path / 'dst' / 'ro' / 'f.txt').read_text() == 'x'
-        # owner write is kept so the directory could be filled (and later cleaned up)
-        assert (tmp_path / 'dst' / 'ro').stat().st_mode & 0o777 == 0o755
+        # the directory is writable while it is filled, then ends up with the source's exact mode
+        assert (tmp_path / 'dst' / 'ro').stat().st_mode & 0o7777 == 0o555
+        (tmp_path / 'dst' / 'ro').chmod(0o755)  # let pytest clean up
 
     def test_destination_must_not_exist(self, tmp_path):
         src = tmp_path / 'src'
