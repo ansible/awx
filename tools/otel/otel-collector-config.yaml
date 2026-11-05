@@ -2,7 +2,9 @@ receivers:
   otlp:
     protocols:
       grpc:
+        endpoint: 0.0.0.0:4317
       http:
+        endpoint: 0.0.0.0:4318
 
 exporters:
   debug:
@@ -18,17 +20,15 @@ exporters:
     format: json
     compression: zstd
 
-  loki:
-    endpoint: http://loki:3100/loki/api/v1/push
+  otlphttp/loki:
+    endpoint: http://loki:3100/otlp
     tls:
       insecure: true
-    headers:
-      "X-Scope-OrgID": "1"
-    default_labels_enabled:
-      exporter: true
-      job: true
-      instance: true
-      level: true
+
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
 
 processors:
   batch:
@@ -43,7 +43,11 @@ service:
     logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [file, loki]
+      exporters: [file, otlphttp/loki]
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/tempo]
 
   extensions:
     - health_check
