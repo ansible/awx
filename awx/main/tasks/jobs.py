@@ -9,7 +9,6 @@ import os
 from pathlib import Path
 import shutil
 import stat
-import tarfile
 import yaml
 import tempfile
 import traceback
@@ -248,6 +247,47 @@ def env_flag_enabled(env, name):
     match distutils.util.strtobool: 1, true, yes, on, y, t.
     """
     return str(env.get(name, '')).strip().lower() in ('1', 'true', 'yes', 'on', 'y', 't')
+
+
+def copytree_without_metadata(src, dst, ignore_names=()):
+    """Recursively copy src to dst without copying file metadata.
+
+    Equivalent to shutil.copytree(src, dst, symlinks=True) for content, structure,
+    symlinks and permission bits, but it never calls chmod, chown or setxattr.
+    shutil.copytree uses copy2/copystat, which makes one chmod plus
+    one setxattr (security.selinux) call per file and directory. On hosts with
+    CIS-style audit rules (perm_mod) covering the AAP processes, the kernel can
+    block each of these calls for milliseconds while auditd catches up, so copying
+    a few thousand collection files took 30-50 s per job instead of < 1 s.
+
+    Permission bits are set at create time instead (open/mkdir mode), so they are
+    subject to the process umask; owner rwx is always kept on directories so
+    that their contents can be written. Timestamps and xattrs are not copied;
+    new files get their SELinux label from policy.
+
+    :param str src: source directory
+    :param str dst: destination directory; must not exist (like shutil.copytree)
+    :param ignore_names: file/directory names to skip at every level (exact match)
+    """
+    os.mkdir(dst, stat.S_IMODE(os.stat(src).st_mode) & 0o777 | stat.S_IRWXU)
+    with os.scandir(src) as entries:
+        for entry in entries:
+            if entry.name in ignore_names:
+                continue
+            src_path = entry.path
+            dst_path = os.path.join(dst, entry.name)
+            if entry.is_symlink():
+                os.symlink(os.readlink(src_path), dst_path)
+            elif entry.is_dir(follow_symlinks=False):
+                copytree_without_metadata(src_path, dst_path, ignore_names)
+            elif entry.is_file(follow_symlinks=False):
+                mode = stat.S_IMODE(entry.stat(follow_symlinks=False).st_mode) & 0o777
+                with open(src_path, 'rb') as fsrc:
+                    fd = os.open(dst_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, mode)
+                    with open(fd, 'wb') as fdst:
+                        shutil.copyfileobj(fsrc, fdst)
+            else:
+                logger.warning(f'Skipping special file {src_path} while copying {src}')
 
 
 class BaseTask(object):
@@ -1698,7 +1738,7 @@ class RunProjectUpdate(BaseTask):
                 tmp_path = tempfile.mkdtemp(dir=base_path, prefix=f'.reqcache_{req_hash}_tmp_')
                 try:
                     tmp_dst = os.path.join(tmp_path, subfolder)
-                    shutil.copytree(src, tmp_dst, symlinks=True)
+                    copytree_without_metadata(src, tmp_dst)
                     os.makedirs(reqcache_path, exist_ok=True)
                     os.rename(tmp_dst, dst)
                     logger.debug(f'Saved {subfolder} to requirements cache {reqcache_path}')
@@ -1707,21 +1747,6 @@ class RunProjectUpdate(BaseTask):
                     raise
                 finally:
                     shutil.rmtree(tmp_path, ignore_errors=True)
-
-            # Create a cached tarball for faster per-job copies (AAP-96176)
-            tar_path = os.path.join(reqcache_path, f'{subfolder}.tar')
-            if os.path.exists(dst) and not os.path.exists(tar_path):
-                tmp_tar = tar_path + '.tmp'
-                try:
-                    with tarfile.open(tmp_tar, 'w') as tar:
-                        tar.add(dst, arcname=subfolder)
-                    os.rename(tmp_tar, tar_path)
-                    logger.debug(f'Created tarball cache {tar_path}')
-                except Exception:
-                    logger.warning(f'Failed to create tarball cache {tar_path}')
-                    if os.path.exists(tmp_tar):
-                        os.remove(tmp_tar)
-                    # Non-fatal: copytree fallback still works
 
     @staticmethod
     def make_local_copy(project, job_private_data_dir):
@@ -1732,7 +1757,8 @@ class RunProjectUpdate(BaseTask):
         """
         project_path = project.get_project_path(check_if_exists=False)
         destination_folder = os.path.join(job_private_data_dir, 'project')
-        shutil.copytree(project_path, destination_folder, ignore=shutil.ignore_patterns('.git'), symlinks=True)
+        # Avoid shutil.copytree here: its per-file chmod/setxattr calls are slow on audited hosts (AAP-101291)
+        copytree_without_metadata(project_path, destination_folder, ignore_names=('.git',))
 
         # copy over the roles and collection cache to job folder
         cache_path = os.path.join(project.get_cache_path(), project.cache_id)
@@ -1759,19 +1785,7 @@ class RunProjectUpdate(BaseTask):
                         pass
             if os.path.exists(cache_subpath):
                 dest_subpath = os.path.join(job_private_data_dir, subfolder)
-                # Prefer cached tarball for fewer file operations on SAN storage
-                tar_path = cache_subpath + '.tar'
-                if os.path.exists(tar_path):
-                    try:
-                        with tarfile.open(tar_path, 'r') as tar:
-                            tar.extractall(path=job_private_data_dir, filter='data')
-                        logger.debug('{0} {1} prepared {2} from tarball'.format(type(project).__name__, project.pk, dest_subpath))
-                        continue
-                    except Exception:
-                        logger.warning(f'Failed to extract tarball {tar_path}, falling back to copytree')
-                        if os.path.exists(dest_subpath):
-                            shutil.rmtree(dest_subpath)
-                shutil.copytree(cache_subpath, dest_subpath, symlinks=True)
+                copytree_without_metadata(cache_subpath, dest_subpath)
                 logger.debug('{0} {1} prepared {2} from cache'.format(type(project).__name__, project.pk, dest_subpath))
 
         pdd_plugins_path = os.path.join(job_private_data_dir, 'plugins_path')

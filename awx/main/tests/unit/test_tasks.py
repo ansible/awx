@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import contextlib
 import json
 import os
 import tarfile
@@ -2047,7 +2048,7 @@ class TestSyncRequirementsCache:
         (collections_dir / 'test.txt').write_text('test')
         (cache_path / '.requirements_hash').write_text('deadbeef1234')
 
-        with mock.patch('shutil.copytree', side_effect=OSError('disk full')):
+        with mock.patch('awx.main.tasks.jobs.copytree_without_metadata', side_effect=OSError('disk full')):
             try:
                 jobs.RunProjectUpdate._sync_requirements_cache(str(base_path), str(cache_path))
             except OSError:
@@ -2058,7 +2059,8 @@ class TestSyncRequirementsCache:
         tmp_dirs = [e for e in os.listdir(base_path) if e.startswith('.reqcache_')]
         assert len(tmp_dirs) == 0
 
-    def test_creates_tarball_after_sync(self, tmp_path):
+    def test_does_not_create_tarball(self, tmp_path):
+        """The AAP-96176 tarball cache was replaced by copytree_without_metadata (AAP-101291)."""
         base_path = tmp_path / 'cache'
         base_path.mkdir()
         cache_path = base_path / 'abc123'
@@ -2066,17 +2068,14 @@ class TestSyncRequirementsCache:
 
         collections_dir = cache_path / 'requirements_collections'
         collections_dir.mkdir()
-        (collections_dir / 'ansible_collections').mkdir()
-        (collections_dir / 'ansible_collections' / 'test.txt').write_text('test')
+        (collections_dir / 'test.txt').write_text('test')
         (cache_path / '.requirements_hash').write_text('deadbeef1234')
 
         jobs.RunProjectUpdate._sync_requirements_cache(str(base_path), str(cache_path))
 
-        tar_path = base_path / 'reqcache_deadbeef1234' / 'requirements_collections.tar'
-        assert tar_path.exists()
-        with tarfile.open(str(tar_path), 'r') as tar:
-            names = tar.getnames()
-            assert 'requirements_collections/ansible_collections/test.txt' in names
+        reqcache = base_path / 'reqcache_deadbeef1234'
+        assert (reqcache / 'requirements_collections' / 'test.txt').read_text() == 'test'
+        assert not (reqcache / 'requirements_collections.tar').exists()
 
     def test_skips_when_reqcache_already_exists(self, tmp_path):
         base_path = tmp_path / 'cache'
@@ -2143,7 +2142,8 @@ class TestMakeLocalCopyReqcacheFallback:
         assert dest.exists()
         assert dest.read_text() == 'collection content'
 
-    def test_uses_tarball_from_reqcache(self, tmp_path):
+    def test_ignores_legacy_tarball(self, tmp_path):
+        """Reqcache dirs created by older versions may contain a .tar; it must be ignored."""
         cache_base = tmp_path / 'cache'
         cache_base.mkdir()
 
@@ -2151,158 +2151,16 @@ class TestMakeLocalCopyReqcacheFallback:
         cache_id_dir.mkdir()
         (cache_id_dir / '.requirements_hash').write_text('deadbeef1234')
 
-        # Create reqcache with collections directory AND tarball
         reqcache = cache_base / 'reqcache_deadbeef1234'
-        reqcache.mkdir()
         reqcache_collections = reqcache / 'requirements_collections'
-        reqcache_collections.mkdir()
-        (reqcache_collections / 'community').mkdir()
-        (reqcache_collections / 'community' / 'general.txt').write_text('collection content')
-
-        tar_path = reqcache / 'requirements_collections.tar'
-        with tarfile.open(str(tar_path), 'w') as tar:
-            tar.add(str(reqcache_collections), arcname='requirements_collections')
-
-        project_path = tmp_path / 'project'
-        project_path.mkdir()
-        (project_path / 'playbook.yml').write_text('- hosts: all')
-
-        job_dir = tmp_path / 'job'
-        job_dir.mkdir()
-
-        project = mock.Mock()
-        project.get_project_path.return_value = str(project_path)
-        project.get_cache_path.return_value = str(cache_base)
-        project.cache_id = 'abc123'
-        project.pk = 1
-
-        with mock.patch('awx.main.tasks.jobs.settings') as mock_settings:
-            mock_settings.AWX_COLLECTIONS_ENABLED = True
-            mock_settings.AWX_ROLES_ENABLED = False
-            jobs.RunProjectUpdate.make_local_copy(project, str(job_dir))
-
-        dest = job_dir / 'requirements_collections' / 'community' / 'general.txt'
-        assert dest.exists()
-        assert dest.read_text() == 'collection content'
-
-    def test_direct_cache_ignores_reqcache_tarball(self, tmp_path):
-        """Direct cache hit must use copytree, not a reqcache tarball that could have stale content."""
-        cache_base = tmp_path / 'cache'
-        cache_base.mkdir()
-
-        cache_id_dir = cache_base / 'abc123'
-        cache_id_dir.mkdir()
-        direct_collections = cache_id_dir / 'requirements_collections'
-        direct_collections.mkdir()
-        (direct_collections / 'direct.txt').write_text('direct content')
-        (cache_id_dir / '.requirements_hash').write_text('deadbeef1234')
-
-        # Reqcache tarball with DIFFERENT content — must not be used
-        reqcache = cache_base / 'reqcache_deadbeef1234'
-        reqcache.mkdir()
-        stale_dir = tmp_path / '_stale'
-        stale_dir.mkdir()
-        stale_collections = stale_dir / 'requirements_collections'
-        stale_collections.mkdir()
-        (stale_collections / 'direct.txt').write_text('stale tarball content')
-        tar_path = reqcache / 'requirements_collections.tar'
-        with tarfile.open(str(tar_path), 'w') as tar:
-            tar.add(str(stale_collections), arcname='requirements_collections')
-
-        project_path = tmp_path / 'project'
-        project_path.mkdir()
-        (project_path / 'playbook.yml').write_text('- hosts: all')
-
-        job_dir = tmp_path / 'job'
-        job_dir.mkdir()
-
-        project = mock.Mock()
-        project.get_project_path.return_value = str(project_path)
-        project.get_cache_path.return_value = str(cache_base)
-        project.cache_id = 'abc123'
-        project.pk = 1
-
-        with mock.patch('awx.main.tasks.jobs.settings') as mock_settings:
-            mock_settings.AWX_COLLECTIONS_ENABLED = True
-            mock_settings.AWX_ROLES_ENABLED = False
-            jobs.RunProjectUpdate.make_local_copy(project, str(job_dir))
-
-        dest = job_dir / 'requirements_collections' / 'direct.txt'
-        assert dest.exists()
-        assert dest.read_text() == 'direct content'
-
-    def test_tarball_partial_extract_falls_back_to_copytree(self, tmp_path):
-        """If tarball extraction partially writes then fails, copytree fallback must still work."""
-        cache_base = tmp_path / 'cache'
-        cache_base.mkdir()
-
-        cache_id_dir = cache_base / 'abc123'
-        cache_id_dir.mkdir()
-        (cache_id_dir / '.requirements_hash').write_text('deadbeef1234')
-
-        reqcache = cache_base / 'reqcache_deadbeef1234'
-        reqcache.mkdir()
-        reqcache_collections = reqcache / 'requirements_collections'
-        reqcache_collections.mkdir()
-        (reqcache_collections / 'community').mkdir()
-        (reqcache_collections / 'community' / 'general.txt').write_text('collection content')
-
-        # Create a valid tarball that we'll make fail during extraction
-        tar_path = reqcache / 'requirements_collections.tar'
-        with tarfile.open(str(tar_path), 'w') as tar:
-            tar.add(str(reqcache_collections), arcname='requirements_collections')
-
-        project_path = tmp_path / 'project'
-        project_path.mkdir()
-        (project_path / 'playbook.yml').write_text('- hosts: all')
-
-        job_dir = tmp_path / 'job'
-        job_dir.mkdir()
-
-        # Simulate partial extraction: create dest dir to mimic what a failed extractall leaves behind
-        partial_dest = job_dir / 'requirements_collections'
-        partial_dest.mkdir()
-
-        project = mock.Mock()
-        project.get_project_path.return_value = str(project_path)
-        project.get_cache_path.return_value = str(cache_base)
-        project.cache_id = 'abc123'
-        project.pk = 1
-
-        original_open = tarfile.open
-
-        def failing_tarfile_open(*args, **kwargs):
-            tar = original_open(*args, **kwargs)
-
-            def raise_after_partial(*a, **kw):
-                raise OSError("Simulated extraction failure")
-
-            tar.extractall = raise_after_partial
-            return tar
-
-        with mock.patch('awx.main.tasks.jobs.settings') as mock_settings:
-            mock_settings.AWX_COLLECTIONS_ENABLED = True
-            mock_settings.AWX_ROLES_ENABLED = False
-            with mock.patch('awx.main.tasks.jobs.tarfile.open', side_effect=failing_tarfile_open):
-                jobs.RunProjectUpdate.make_local_copy(project, str(job_dir))
-
-        dest = job_dir / 'requirements_collections' / 'community' / 'general.txt'
-        assert dest.exists()
-        assert dest.read_text() == 'collection content'
-
-    def test_falls_back_to_copytree_when_no_tarball(self, tmp_path):
-        cache_base = tmp_path / 'cache'
-        cache_base.mkdir()
-
-        cache_id_dir = cache_base / 'abc123'
-        cache_id_dir.mkdir()
-        (cache_id_dir / '.requirements_hash').write_text('deadbeef1234')
-
-        # Reqcache with directory but NO tarball
-        reqcache_collections = cache_base / 'reqcache_deadbeef1234' / 'requirements_collections'
         reqcache_collections.mkdir(parents=True)
-        (reqcache_collections / 'community').mkdir()
-        (reqcache_collections / 'community' / 'general.txt').write_text('collection content')
+        (reqcache_collections / 'general.txt').write_text('directory content')
+
+        stale_dir = tmp_path / '_stale' / 'requirements_collections'
+        stale_dir.mkdir(parents=True)
+        (stale_dir / 'general.txt').write_text('stale tarball content')
+        with tarfile.open(str(reqcache / 'requirements_collections.tar'), 'w') as tar:
+            tar.add(str(stale_dir), arcname='requirements_collections')
 
         project_path = tmp_path / 'project'
         project_path.mkdir()
@@ -2322,10 +2180,7 @@ class TestMakeLocalCopyReqcacheFallback:
             mock_settings.AWX_ROLES_ENABLED = False
             jobs.RunProjectUpdate.make_local_copy(project, str(job_dir))
 
-        # Should still work via copytree fallback
-        dest = job_dir / 'requirements_collections' / 'community' / 'general.txt'
-        assert dest.exists()
-        assert dest.read_text() == 'collection content'
+        assert (job_dir / 'requirements_collections' / 'general.txt').read_text() == 'directory content'
 
     def test_uses_direct_cache_when_available(self, tmp_path):
         cache_base = tmp_path / 'cache'
@@ -2361,6 +2216,175 @@ class TestMakeLocalCopyReqcacheFallback:
         dest = job_dir / 'requirements_collections' / 'direct.txt'
         assert dest.exists()
         assert dest.read_text() == 'direct content'
+
+
+@pytest.fixture
+def umask_022():
+    old = os.umask(0o022)
+    try:
+        yield
+    finally:
+        os.umask(old)
+
+
+@contextlib.contextmanager
+def no_metadata_syscalls():
+    """Fail on any call that CIS audit rules (perm_mod) would record (AAP-101291)."""
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError('metadata call during copy')
+
+    with (
+        mock.patch.multiple(
+            'os',
+            chmod=mock.DEFAULT,
+            fchmod=mock.DEFAULT,
+            chown=mock.DEFAULT,
+            fchown=mock.DEFAULT,
+            lchown=mock.DEFAULT,
+            setxattr=mock.DEFAULT,
+            removexattr=mock.DEFAULT,
+        ) as patched,
+        mock.patch('shutil.copystat') as copystat,
+        mock.patch('shutil.copymode') as copymode,
+    ):
+        for m in list(patched.values()) + [copystat, copymode]:
+            m.side_effect = forbidden
+        yield
+
+
+class TestCopytreeWithoutMetadata:
+    def _make_tree(self, root):
+        root.mkdir(parents=True)
+        (root / 'plugins' / 'modules').mkdir(parents=True)
+        (root / 'plugins' / 'modules' / 'mod.py').write_text('print(1)')
+        script = root / 'run.sh'
+        script.write_text('#!/bin/sh')
+        script.chmod(0o755)
+        private = root / 'secret.txt'
+        private.write_text('s')
+        private.chmod(0o600)
+        (root / 'empty_dir').mkdir()
+        (root / 'empty_file').write_bytes(b'')
+        (root / 'big.bin').write_bytes(os.urandom(3 * 1024 * 1024))
+        os.symlink('plugins/modules/mod.py', root / 'rel_link')
+        os.symlink('plugins', root / 'dir_link')
+        os.symlink('does/not/exist', root / 'dangling')
+        (root / '.git').mkdir()
+        (root / '.git' / 'HEAD').write_text('ref')
+        (root / 'plugins' / '.git').write_text('gitdir: x')
+
+    def test_copies_content_structure_and_modes(self, tmp_path, umask_022):
+        src = tmp_path / 'src'
+        dst = tmp_path / 'dst'
+        self._make_tree(src)
+
+        with no_metadata_syscalls():
+            jobs.copytree_without_metadata(str(src), str(dst))
+
+        assert (dst / 'plugins' / 'modules' / 'mod.py').read_text() == 'print(1)'
+        assert (dst / 'big.bin').read_bytes() == (src / 'big.bin').read_bytes()
+        assert (dst / 'empty_file').read_bytes() == b''
+        assert (dst / 'empty_dir').is_dir()
+        assert (dst / 'run.sh').stat().st_mode & 0o777 == 0o755
+        assert (dst / 'secret.txt').stat().st_mode & 0o777 == 0o600
+        assert (dst / 'plugins').stat().st_mode & 0o777 == (src / 'plugins').stat().st_mode & 0o777
+        # symlinks are copied as symlinks, not followed
+        assert os.readlink(dst / 'rel_link') == 'plugins/modules/mod.py'
+        assert os.readlink(dst / 'dir_link') == 'plugins'
+        assert os.readlink(dst / 'dangling') == 'does/not/exist'
+        assert (dst / 'rel_link').read_text() == 'print(1)'
+        # without ignore_names nothing is skipped
+        assert (dst / '.git' / 'HEAD').exists()
+
+    def test_ignore_names_at_every_level(self, tmp_path):
+        src = tmp_path / 'src'
+        dst = tmp_path / 'dst'
+        self._make_tree(src)
+
+        jobs.copytree_without_metadata(str(src), str(dst), ignore_names=('.git',))
+
+        assert not (dst / '.git').exists()
+        assert not (dst / 'plugins' / '.git').exists()
+        assert (dst / 'plugins' / 'modules' / 'mod.py').exists()
+
+    def test_matches_shutil_copytree(self, tmp_path, umask_022):
+        import shutil
+
+        src = tmp_path / 'src'
+        self._make_tree(src)
+        shutil.copytree(src, tmp_path / 'ref', symlinks=True, ignore=shutil.ignore_patterns('.git'))
+        jobs.copytree_without_metadata(str(src), str(tmp_path / 'new'), ignore_names=('.git',))
+
+        def snapshot(root):
+            result = {}
+            for dirpath, dirnames, filenames in os.walk(root):
+                for name in dirnames + filenames:
+                    path = os.path.join(dirpath, name)
+                    rel = os.path.relpath(path, root)
+                    if os.path.islink(path):
+                        result[rel] = ('link', os.readlink(path))
+                    elif os.path.isdir(path):
+                        result[rel] = ('dir', os.stat(path).st_mode & 0o777)
+                    else:
+                        with open(path, 'rb') as f:
+                            result[rel] = ('file', os.stat(path).st_mode & 0o777, f.read())
+            return result
+
+        assert snapshot(tmp_path / 'new') == snapshot(tmp_path / 'ref')
+
+    def test_readonly_source_dir(self, tmp_path, umask_022):
+        src = tmp_path / 'src'
+        (src / 'ro').mkdir(parents=True)
+        (src / 'ro' / 'f.txt').write_text('x')
+        (src / 'ro').chmod(0o555)
+        try:
+            jobs.copytree_without_metadata(str(src), str(tmp_path / 'dst'))
+        finally:
+            (src / 'ro').chmod(0o755)
+        assert (tmp_path / 'dst' / 'ro' / 'f.txt').read_text() == 'x'
+        # owner write is kept so the directory could be filled (and later cleaned up)
+        assert (tmp_path / 'dst' / 'ro').stat().st_mode & 0o777 == 0o755
+
+    def test_destination_must_not_exist(self, tmp_path):
+        src = tmp_path / 'src'
+        src.mkdir()
+        (tmp_path / 'dst').mkdir()
+        with pytest.raises(FileExistsError):
+            jobs.copytree_without_metadata(str(src), str(tmp_path / 'dst'))
+
+    def test_make_local_copy_without_metadata_calls(self, tmp_path):
+        cache_base = tmp_path / 'cache'
+        collections = cache_base / 'abc123' / 'requirements_collections'
+        self._make_tree(collections)
+        roles = cache_base / 'abc123' / 'requirements_roles'
+        roles.mkdir()
+        (roles / 'role.yml').write_text('r')
+
+        project_path = tmp_path / 'project'
+        self._make_tree(project_path)
+
+        job_dir = tmp_path / 'job'
+        job_dir.mkdir()
+
+        project = mock.Mock()
+        project.get_project_path.return_value = str(project_path)
+        project.get_cache_path.return_value = str(cache_base)
+        project.cache_id = 'abc123'
+        project.pk = 1
+
+        with mock.patch('awx.main.tasks.jobs.settings') as mock_settings:
+            mock_settings.AWX_COLLECTIONS_ENABLED = True
+            mock_settings.AWX_ROLES_ENABLED = True
+            with no_metadata_syscalls():
+                jobs.RunProjectUpdate.make_local_copy(project, str(job_dir))
+
+        assert (job_dir / 'project' / 'run.sh').exists()
+        assert not (job_dir / 'project' / '.git').exists()
+        assert not (job_dir / 'project' / 'plugins' / '.git').exists()
+        assert (job_dir / 'requirements_collections' / 'plugins' / 'modules' / 'mod.py').exists()
+        assert (job_dir / 'requirements_roles' / 'role.yml').read_text() == 'r'
+        assert (job_dir / 'plugins_path' / 'indirect_instance_count.py').exists()
 
 
 @pytest.mark.parametrize('injector_cls', [cls for cls in ManagedCredentialType.registry.values() if cls.injectors])
