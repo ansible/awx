@@ -189,6 +189,14 @@ def test_filtered_activity_stream_superuser_uses_filtered_queryset(org_admin, se
 
 @pytest.mark.django_db
 @pytest.mark.activity_stream_access
+def test_filtered_activity_stream_visibility_builds_all_access_branches(org_admin, settings):
+    settings.ACTIVITY_STREAM_ENABLED = True
+    access = ActivityStreamAccess(org_admin)
+    assert ActivityStream.objects.filter(access._activity_stream_visibility_q()).exists() is True
+
+
+@pytest.mark.django_db
+@pytest.mark.activity_stream_access
 def test_filtered_activity_stream_evaluates_each_visibility_branch(org_admin, settings):
     settings.ACTIVITY_STREAM_ENABLED = True
     for object_type in (
@@ -310,6 +318,23 @@ def test_filtered_activity_stream_list_works_on_test_database(get, user, setting
     response = get(f'{reverse("api:activity_stream_list")}?object1=job', user('admin', True))
 
     assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_filtered_activity_stream_list_uses_transaction_local_jit_on_postgresql(mocker):
+    from django.db import connection
+    from awx.api.generics import SimpleListAPIView
+
+    view = ActivityStreamList()
+    request = SimpleNamespace(query_params=QueryDict('object1=job'))
+    cursor = mocker.MagicMock()
+    mocker.patch.object(connection, 'vendor', 'postgresql')
+    mocker.patch.object(connection, 'cursor', return_value=cursor)
+    mocker.patch.object(view.pagination_class, 'has_filter_params', return_value=True)
+    mocker.patch.object(SimpleListAPIView, 'list', return_value='response')
+
+    assert view.list(request) == 'response'
+    cursor.__enter__.return_value.execute.assert_any_call('SET LOCAL jit = off')
 
 
 @pytest.mark.django_db
