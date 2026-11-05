@@ -1,7 +1,12 @@
+from types import SimpleNamespace
+
 import pytest
+from django.http import QueryDict
 
 from awx.api.versioning import reverse
+from awx.api.views import ActivityStreamList
 from awx.main.models.activity_stream import ActivityStream
+from awx.main.models import Credential, Inventory, JobTemplate, Organization, Project, Team, WorkflowJobTemplate
 from awx.main.access import ActivityStreamAccess
 from awx.conf.models import Setting
 
@@ -88,6 +93,166 @@ def test_stream_access_cant_change(activity_stream_entry, organization, org_admi
     assert not access.can_delete(activity_stream_entry)
 
 
+def test_filtered_activity_stream_object_type_fallbacks():
+    view = ActivityStreamList()
+
+    view.request = SimpleNamespace(query_params=QueryDict())
+    assert view._activity_stream_object_types() is None
+
+    view.request = SimpleNamespace(query_params=QueryDict('object1=job&or__unsupported__in=user'))
+    assert view._activity_stream_object_types() is None
+
+    view.request = SimpleNamespace(query_params=QueryDict('object1=job'))
+    assert {'job', 'user', 'team'} <= view._activity_stream_object_types()
+
+    view.request = SimpleNamespace(query_params=QueryDict('object1=job_template'))
+    assert {'job_template', 'credential', 'user', 'team'} <= view._activity_stream_object_types()
+
+    view.request = SimpleNamespace(query_params=QueryDict('object1=user'))
+    assert view._activity_stream_object_types() == {
+        'ad_hoc_command',
+        'credential',
+        'group',
+        'host',
+        'inventory',
+        'inventory_source',
+        'inventory_update',
+        'job',
+        'job_template',
+        'label',
+        'notification',
+        'notification_template',
+        'organization',
+        'project',
+        'project_update',
+        'role',
+        'team',
+        'user',
+        'workflow_job',
+        'workflow_job_template',
+        'workflow_job_template_node',
+    }
+
+
+@pytest.mark.django_db
+def test_filtered_credential_activity_includes_template_visibility(user, job_template, org_credential, settings):
+    settings.ACTIVITY_STREAM_ENABLED = True
+    template_user = user('template-only-user', False)
+    job_template.read_role.members.add(template_user)
+    activity = ActivityStream.objects.create(
+        actor=template_user,
+        operation='associate',
+        object1='job_template',
+        object2='credential',
+    )
+    activity.job_template.add(job_template)
+    activity.credential.add(org_credential)
+
+    unfiltered = ActivityStreamAccess(template_user).get_queryset()
+    view = ActivityStreamList()
+    view.request = SimpleNamespace(query_params=QueryDict('object2=credential'))
+    object_types = view._activity_stream_object_types()
+    assert {'credential', 'job_template', 'workflow_job_template'} <= object_types
+
+    filtered = ActivityStreamAccess(
+        template_user,
+        activity_stream_queryset=ActivityStream.objects.filter(object2='credential'),
+        activity_stream_object_types=object_types,
+    ).get_queryset()
+
+    assert unfiltered.filter(pk=activity.pk).exists()
+    assert filtered.filter(pk=activity.pk).exists()
+
+
+@pytest.mark.django_db
+def test_filtered_activity_stream_superuser_uses_filtered_queryset(org_admin, settings):
+    settings.ACTIVITY_STREAM_ENABLED = True
+    org_admin.is_superuser = True
+    org_admin.save(update_fields=['is_superuser'])
+    queryset = ActivityStream.objects.filter(object1='job')
+
+    result = ActivityStreamAccess(
+        org_admin,
+        activity_stream_queryset=queryset,
+        activity_stream_object_type='job',
+    ).get_queryset()
+    assert list(result) == list(queryset)
+
+    access = ActivityStreamAccess(
+        org_admin,
+        activity_stream_queryset=queryset,
+        activity_stream_object_type='job',
+    )
+    access.prefetch_related = ('actor',)
+    assert list(access.get_queryset()) == list(queryset)
+
+
+@pytest.mark.django_db
+@pytest.mark.activity_stream_access
+def test_filtered_activity_stream_evaluates_each_visibility_branch(org_admin, settings):
+    settings.ACTIVITY_STREAM_ENABLED = True
+    for object_type in (
+        'ad_hoc_command',
+        'credential',
+        'inventory',
+        'organization',
+        'project',
+        'job_template',
+        'workflow_job_template',
+        'team',
+    ):
+        ActivityStreamAccess(
+            org_admin,
+            activity_stream_queryset=ActivityStream.objects.filter(object1=object_type),
+            activity_stream_object_type=object_type,
+        ).get_queryset().exists()
+
+
+@pytest.mark.django_db
+@pytest.mark.activity_stream_access
+def test_filtered_activity_stream_prunes_unrelated_visibility_branches(mocker, org_admin, settings):
+    settings.ACTIVITY_STREAM_ENABLED = True
+
+    for object_type, unrelated_access_methods in (
+        (
+            'job',
+            (
+                (Inventory, 'access_ids_qs'),
+                (Credential, 'access_ids_qs'),
+                (Organization, 'access_qs'),
+                (Project, 'access_ids_qs'),
+                (WorkflowJobTemplate, 'access_ids_qs'),
+                (Team, 'access_ids_qs'),
+            ),
+        ),
+        (
+            'project',
+            (
+                (Inventory, 'access_ids_qs'),
+                (Credential, 'access_ids_qs'),
+                (Organization, 'access_qs'),
+                (JobTemplate, 'access_ids_qs'),
+                (WorkflowJobTemplate, 'access_ids_qs'),
+                (Team, 'access_ids_qs'),
+            ),
+        ),
+    ):
+        patches = [
+            mocker.patch.object(model, method, side_effect=AssertionError(f'{model.__name__} branch evaluated')) for model, method in unrelated_access_methods
+        ]
+        try:
+            queryset = ActivityStreamAccess(
+                org_admin,
+                activity_stream_queryset=ActivityStream.objects.filter(object1=object_type),
+                activity_stream_object_type=object_type,
+            ).get_queryset()
+            queryset.exists()
+            for patch in patches:
+                patch.assert_not_called()
+        finally:
+            mocker.stopall()
+
+
 @pytest.mark.django_db
 @pytest.mark.activity_stream_access
 def test_stream_queryset_hides_shows_items(
@@ -137,6 +302,25 @@ def test_stream_queryset_hides_shows_items(
     assert queryset.filter(team__pk=team.pk, operation='create').count() == 1
     assert queryset.filter(notification_template__pk=notification_template.pk, operation='create').count() == 1
     assert access.can_read(activity_stream_entry)
+
+
+@pytest.mark.django_db
+def test_filtered_activity_stream_list_works_on_test_database(get, user, settings):
+    settings.ACTIVITY_STREAM_ENABLED = True
+    response = get(f'{reverse("api:activity_stream_list")}?object1=job', user('admin', True))
+
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_filtered_activity_stream_view_queryset_and_fallback(org_admin, settings):
+    settings.ACTIVITY_STREAM_ENABLED = True
+    view = ActivityStreamList()
+    view.request = SimpleNamespace(query_params=QueryDict('object1=job'), user=org_admin)
+    assert view.get_queryset().query.select_related == {'actor': {}}
+
+    view.request = SimpleNamespace(query_params=QueryDict('search=job'), user=org_admin)
+    assert view.filter_queryset(ActivityStream.objects.all()) is not None
 
 
 @pytest.mark.django_db
