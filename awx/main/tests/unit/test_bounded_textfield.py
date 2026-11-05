@@ -41,7 +41,8 @@ class TestBoundedTextField:
         assert 'validators' not in kwargs  # the bound validator is implied, not serialized into migrations
         clone = BoundedTextField(*args, **kwargs)
         assert clone.sql_server_max_length == 64
-        assert clone.unique and clone.null
+        assert clone.unique
+        assert clone.null
 
     def test_sql_server_max_length_is_required(self):
         """The field cannot be built without a bound."""
