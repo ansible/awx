@@ -71,6 +71,17 @@ from awx.main.models import (
     convert_jsonfields,
 )
 from awx.main.models.credential import CredentialType
+from awx.main.tasks.adoption_decisions import (
+    JobAction,
+    LostInstanceAction,
+    adoption_deadline_passed,
+    find_lost_instances,
+    gate_lost_instances,
+    lost_instance_disposition,
+    lost_instance_job_action,
+    running_job_action,
+    startup_job_action,
+)
 from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.main.tasks.host_indirect import save_indirect_host_entries
 from awx.main.tasks.receptor import (
@@ -771,7 +782,6 @@ def _heartbeat_instance_management():
     nowtime = now()
     instance_list = list(Instance.objects.filter(node_state__in=(Instance.States.READY, Instance.States.UNAVAILABLE, Instance.States.INSTALLED)))
     this_inst = None
-    lost_instances = []
 
     for inst in instance_list:
         if inst.hostname == settings.CLUSTER_HOST_ID:
@@ -795,12 +805,7 @@ def _heartbeat_instance_management():
 
     inspect_execution_and_hop_nodes(instance_list, mesh_status)
 
-    for inst in list(instance_list):
-        if inst == this_inst:
-            continue
-        if inst.is_lost(ref_time=nowtime):
-            lost_instances.append(inst)
-            instance_list.remove(inst)
+    lost_instances, instance_list = find_lost_instances(instance_list, settings.CLUSTER_HOST_ID, nowtime)
 
     if this_inst:
         startup_event = this_inst.is_lost(ref_time=nowtime)
@@ -823,11 +828,7 @@ def _heartbeat_instance_management():
             logger.error("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
             return None, None, None, None
 
-    if lost_instances and not _mesh_all_ready_nodes_visible(mesh_status):
-        # Mesh gate blocks cleanup, but execution and hop nodes can still be reaped
-        # (they don't depend on mesh consensus). Defer only control nodes.
-        execution_hop_lost = [inst for inst in lost_instances if inst.node_type in ('execution', 'hop')]
-        return this_inst, instance_list, execution_hop_lost, ctl
+    lost_instances = gate_lost_instances(lost_instances, lambda: _mesh_all_ready_nodes_visible(mesh_status))
 
     return this_inst, instance_list, lost_instances, ctl
 
@@ -862,19 +863,19 @@ def _reap_and_mark_lost_instance(other_inst):
             ).exclude(polymorphic_ctype_id=workflow_ctype_id)
         )
         for j in running_jobs:
-            # AAP-89602: cross-controller adoption for dispatched jobs will be added here
-            # once ansible/receptor#1564 merges. Both paths reap identically for now.
-            reaper.reap_job(j, 'failed', job_explanation='Job reaped due to instance shutdown')
+            if lost_instance_job_action(j) == JobAction.REAP:
+                reaper.reap_job(j, 'failed', job_explanation='Job reaped due to instance shutdown')
         # Any jobs that were waiting to be processed by this node will be handed back to task manager
         UnifiedJob.objects.filter(status='waiting', controller_node=other_inst.hostname).update(status='pending', controller_node='', execution_node='')
     except Exception:
         logger.exception('failed to re-process jobs for lost instance {}'.format(other_inst.hostname))
     try:
-        if settings.AWX_AUTO_DEPROVISION_INSTANCES and other_inst.node_type == "control":
+        disposition = lost_instance_disposition(other_inst, settings.AWX_AUTO_DEPROVISION_INSTANCES)
+        if disposition == LostInstanceAction.DEPROVISION:
             deprovision_hostname = other_inst.hostname
             other_inst.delete()  # FIXME: what about associated inbound links?
             logger.info("Host {} Automatically Deprovisioned.".format(deprovision_hostname))
-        elif other_inst.node_state == Instance.States.READY:
+        elif disposition == LostInstanceAction.MARK_OFFLINE:
             other_inst.mark_offline(errors=_('Another cluster node has determined this instance to be unresponsive'))
             logger.error("Host {} last checked in at {}, marked as lost.".format(other_inst.hostname, other_inst.last_seen))
 
@@ -950,7 +951,7 @@ def _process_startup_jobs(this_inst):
     reaped_ids = []
     for j in jobs:
         try:
-            if j.work_unit_id:
+            if startup_job_action(j) == JobAction.ADOPT:
                 obj, _ = adopt_job_async.apply_async(args=[j.id], queue=get_task_queuename())
                 UnifiedJob.objects.filter(pk=j.id).update(celery_task_id=obj['uuid'])
             else:
@@ -975,6 +976,7 @@ def _process_running_jobs(this_inst, active_task_ids, ref_time):
     - Undispatched or not owned by this controller → reap.
 
     Cross-controller adoption (jobs from a dead peer controller) is deferred to AAP-89602.
+    The query narrows the candidates; running_job_action makes the decision for each one.
     """
     workflow_ctype_id = ContentType.objects.get_for_model(WorkflowJob).id
     base_q = Q(status='running') & (Q(execution_node=this_inst.hostname) | Q(controller_node=this_inst.hostname))
@@ -989,12 +991,13 @@ def _process_running_jobs(this_inst, active_task_ids, ref_time):
 
     for j in jobs:
         try:
-            if j.work_unit_id and j.controller_node == this_inst.hostname:
+            action = running_job_action(j, this_inst.hostname, active_task_ids, ref_time, workflow_ctype_id)
+            if action == JobAction.ADOPT:
                 obj, _ = adopt_job_async.apply_async(args=[j.id], queue=get_task_queuename())
                 # Record the adoption task UUID so subsequent heartbeats see this job
                 # as active and skip it — preventing redundant re-adoption dispatches.
                 UnifiedJob.objects.filter(pk=j.id).update(celery_task_id=obj['uuid'])
-            else:
+            elif action == JobAction.REAP:
                 reaper.reap_job(j, 'failed')
         except Exception:
             logger.exception(f'Failed processing job {j.id} in heartbeat job loop')
@@ -1014,10 +1017,8 @@ def adopt_job_async(job_id):
         return
 
     adoption_timeout = settings.HADR_JOB_ADOPTION_TIMEOUT
-    timeout_cutoff = now() - timedelta(seconds=adoption_timeout)
     last_event_time = job.get_event_queryset().aggregate(Max('created'))['created__max']
-    orphaned_since = last_event_time or job.started
-    if orphaned_since and orphaned_since < timeout_cutoff:
+    if adoption_deadline_passed(last_event_time, job.started, now(), adoption_timeout):
         logger.error(f'Job {job.id} (unit={job.work_unit_id}) orphaned for >{adoption_timeout}s, failing')
         reaper.reap_job(job, 'failed', job_explanation='Job exceeded HADR_JOB_ADOPTION_TIMEOUT during controller restart')
         return
