@@ -502,3 +502,11 @@ jobs:
         with:
           name: awx-collection-integration-coverage-html
           path: ~/.ansible/collections/ansible_collections/awx/awx/tests/output/reports/coverage
+
+  zizmor:
+    name: 🌈 zizmor
+    permissions:
+      security-events: write
+
+    # yamllint disable-line rule:line-length
+    uses: zizmorcore/workflow/.github/workflows/reusable-zizmor.yml@1e20adb0862e932363a4d85d68c92e5cc6fcb5d4
