@@ -1,0 +1,18 @@
+name: Approval label authorization
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: write
+
+jobs:
+  approval-label-authorization:
+    uses: ansible/actions/.github/workflows/approval-label-authorization.yml@71290728ad396980ead3eb603630c20d35a9cf86
+    with:
+      app-client-id: ${{ vars.ANSIBLE_ORG_MEMBERS_READ_ONLY_APP_CLIENT_ID }}
+    secrets:
+      app-private-key: ${{ secrets.ANSIBLE_ORG_MEMBERS_READ_ONLY_APP_PRIVATE_KEY }}
