@@ -68,7 +68,7 @@ def test_send_messages_with_no_verify_ssl():
         assert sent_messages == 1
 
 
-@pytest.mark.parametrize("dashboardId", [42, 0])
+@pytest.mark.parametrize("dashboardId", [42, 'dTC0e9wZk'])
 def test_send_messages_with_dashboardid(dashboardId):
     with mock.patch('awx.main.notifications.grafana_backend.requests') as requests_mock:
         requests_mock.post.return_value.status_code = 200
