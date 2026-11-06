@@ -5820,6 +5820,16 @@ class SchedulePreviewSerializer(BaseSerializer):
             logger.error(traceback.format_exc())
             errors.append(_("rrule parsing failed validation: {}").format(e))
 
+        if not errors:
+            # Bound occurrence expansion so unsatisfiable/pathological rules fail as 400
+            # instead of hanging until a gateway/uWSGI 503 (AAP-95687).
+            from awx.main.models.schedules import ScheduleEvaluationTimeout
+
+            try:
+                Schedule.collect_occurrences(rrule_value, after=now(), count=1)
+            except ScheduleEvaluationTimeout as e:
+                errors.append(str(e))
+
         if errors:
             raise serializers.ValidationError(errors)
 

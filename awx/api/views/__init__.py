@@ -665,18 +665,12 @@ class SchedulePreview(GenericAPIView):
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            next_stamp = now()
-            schedule = []
-            gen = models.Schedule.rrulestr(serializer.validated_data['rrule']).xafter(next_stamp, count=20)
+            from awx.main.models.schedules import ScheduleEvaluationTimeout
 
-            # loop across the entire generator and grab the first 10 events
-            for event in gen:
-                if len(schedule) >= 10:
-                    break
-                if not dateutil.tz.datetime_exists(event):
-                    # skip imaginary dates, like 2:30 on DST boundaries
-                    continue
-                schedule.append(event)
+            try:
+                schedule = models.Schedule.collect_occurrences(serializer.validated_data['rrule'], after=now(), count=10)
+            except ScheduleEvaluationTimeout as e:
+                return Response({'rrule': [str(e)]}, status=status.HTTP_400_BAD_REQUEST)
 
             return Response({'local': schedule, 'utc': [s.astimezone(dt_timezone.utc) for s in schedule]})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
