@@ -34,6 +34,32 @@ def test_create_organization(run_module, admin_user):
 
 
 @pytest.mark.django_db
+def test_rename_organization_idempotent(run_module, admin_user):
+    Organization.objects.create(name='foo')
+    module_args = {
+        'name': 'foo',
+        'new_name': 'bar',
+        'state': 'present',
+        'controller_host': None,
+        'controller_username': None,
+        'controller_password': None,
+        'validate_certs': None,
+        'aap_token': None,
+        'controller_config_file': None,
+    }
+
+    result = run_module('organization', module_args, admin_user)
+    assert result.get('changed'), result
+    assert Organization.objects.filter(name='bar').count() == 1
+    assert not Organization.objects.filter(name='foo').exists()
+
+    result = run_module('organization', module_args, admin_user)
+    assert result.get('changed') is False, result
+    assert Organization.objects.filter(name='bar').count() == 1
+    assert not Organization.objects.filter(name='foo').exists()
+
+
+@pytest.mark.django_db
 def test_galaxy_credential_order(run_module, admin_user):
     org = Organization.objects.create(name='foo')
     cred_type = CredentialType.defaults['galaxy_api_token']()
