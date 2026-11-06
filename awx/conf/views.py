@@ -44,6 +44,13 @@ class SettingCategoryList(ListAPIView):
 
     @extend_schema_if_available(extensions={"x-ai-description": "Returns a paginated list of Controller setting categories."})
     def get(self, request, *args, **kwargs):
+        user = request.user
+        # If the database flag is set to True, tell the UI to block the user
+        if getattr(user, 'password_reset_required', False):
+            return Response({
+                "detail": "Password reset is required before proceeding.",
+                "password_reset_required": True
+            }, status=status.HTTP_403_FORBIDDEN)
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
