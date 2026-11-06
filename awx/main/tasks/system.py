@@ -1105,6 +1105,12 @@ def awx_k8s_reaper():
 
 @task(queue=get_task_queuename, timeout=3600 * 5, on_duplicate='discard')
 def awx_periodic_scheduler():
+    """
+    Launch due schedules and refresh computed schedule fields.
+
+    Per-schedule failures (including RRULE evaluation timeouts) are logged and
+    skipped so one bad schedule cannot stop the rest of the run.
+    """
     lock_session_timeout_milliseconds = settings.TASK_MANAGER_LOCK_TIMEOUT * 1000
     with advisory_lock('awx_periodic_scheduler_lock', lock_session_timeout_milliseconds=lock_session_timeout_milliseconds, wait=False) as acquired:
         if acquired is False:
@@ -1121,7 +1127,11 @@ def awx_periodic_scheduler():
 
         old_schedules = Schedule.objects.enabled().before(last_run)
         for schedule in old_schedules:
-            schedule.update_computed_fields()
+            try:
+                schedule.update_computed_fields()
+            except Exception:
+                # Includes ScheduleEvaluationTimeout for pathological RRULE/EXRULE (AAP-95687).
+                logger.exception("Failed to update computed fields for schedule %s.", schedule)
         schedules = Schedule.objects.enabled().between(last_run, run_now)
 
         invalid_license = False
@@ -1132,7 +1142,12 @@ def awx_periodic_scheduler():
 
         for schedule in schedules:
             template = schedule.unified_job_template
-            schedule.update_computed_fields()  # To update next_run timestamp.
+            try:
+                schedule.update_computed_fields()  # To update next_run timestamp.
+            except Exception:
+                # Includes ScheduleEvaluationTimeout for pathological RRULE/EXRULE (AAP-95687).
+                logger.exception("Failed to update computed fields for schedule %s.", schedule)
+                continue
             if template.cache_timeout_blocked:
                 logger.warning("Cache timeout is in the future, bypassing schedule for template %s" % str(template.id))
                 continue

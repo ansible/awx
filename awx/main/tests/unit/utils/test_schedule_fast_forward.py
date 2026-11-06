@@ -181,3 +181,47 @@ def test_does_not_fast_forward(freq, interval):
     rrule = dateutil.rrule.rrule(freq=freq, interval=interval, dtstart=dtstart)
 
     assert rrule == _fast_forward_rrule(rrule, ref_dt=REF_DT)
+
+
+def test_collect_occurrences_timeout():
+    """Slow occurrence expansion must raise ScheduleEvaluationTimeout."""
+    from awx.main.models.schedules import ScheduleEvaluationTimeout
+    from unittest import mock
+    import time
+
+    def slow_xafter(*args, **kwargs):
+        time.sleep(10)
+        yield REF_DT
+
+    rrulestr = 'DTSTART;TZID=America/New_York:20201118T200000 RRULE:FREQ=MINUTELY;INTERVAL=5'
+    with mock.patch.object(Schedule, 'rrulestr') as mock_rrulestr:
+        ruleset = mock.Mock()
+        ruleset.xafter.side_effect = slow_xafter
+        mock_rrulestr.return_value = ruleset
+        with pytest.raises(ScheduleEvaluationTimeout, match='could not be evaluated in time'):
+            Schedule.collect_occurrences(rrulestr, after=REF_DT, count=1, timeout=0.2)
+
+
+def test_collect_occurrences_skips_many_imaginary_dst():
+    """Keep scanning past many imaginary stamps until a valid occurrence is found."""
+    from unittest import mock
+
+    imaginary = [REF_DT + datetime.timedelta(minutes=i) for i in range(1, 21)]
+    valid = REF_DT + datetime.timedelta(minutes=90)
+
+    def many_xafter(*args, **kwargs):
+        yield from imaginary
+        yield valid
+
+    rrulestr = 'DTSTART;TZID=America/New_York:20201118T200000 RRULE:FREQ=MINUTELY;INTERVAL=1'
+    with mock.patch.object(Schedule, 'rrulestr') as mock_rrulestr:
+        ruleset = mock.Mock()
+        ruleset.xafter.side_effect = many_xafter
+        mock_rrulestr.return_value = ruleset
+        with mock.patch('awx.main.models.schedules.datetime_exists', side_effect=lambda dt: dt is valid):
+            result = Schedule.collect_occurrences(rrulestr, after=REF_DT, count=1, timeout=2.0)
+
+    assert result == [valid]
+    # Uncapped xafter: no candidate count argument (timeout is the safety limit).
+    _args, kwargs = ruleset.xafter.call_args
+    assert 'count' not in kwargs
