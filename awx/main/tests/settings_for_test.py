@@ -1,5 +1,13 @@
 # Python
+import sys
 import uuid
+
+try:
+    import sqlean
+except ImportError:
+    pass
+else:
+    sys.modules['sqlite3'] = sqlean
 
 # Load development settings for base variables.
 from awx.settings.development import *  # NOQA
