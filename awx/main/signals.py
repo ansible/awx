@@ -391,6 +391,9 @@ def emit_activity_stream_change(instance):
     if instance.actor_id:
         actor = instance.actor.username
     summary_fields = ActivityStreamSerializer(instance).get_summary_fields(instance)
+    actor_summary = summary_fields.get('actor')
+    if actor_summary and actor_summary.get('type') == 'schedule':
+        actor = actor_summary.get('name')
     analytics_logger.info(
         'Activity Stream update entry for %s' % str(instance.object1),
         extra=dict(
