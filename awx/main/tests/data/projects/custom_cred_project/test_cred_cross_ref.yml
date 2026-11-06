@@ -1,0 +1,44 @@
+---
+- hosts: localhost
+  gather_facts: false
+  connection: local
+  tasks:
+    - name: Assert OCI_CONFIG_FILE env var is not empty
+      assert:
+        that:
+          - lookup('env', 'OCI_CONFIG_FILE') | length > 0
+        fail_msg: "OCI_CONFIG_FILE environment variable is not set"
+
+    - name: Assert OCI_USER_KEY_FILE env var is not empty
+      assert:
+        that:
+          - lookup('env', 'OCI_USER_KEY_FILE') | length > 0
+        fail_msg: "OCI_USER_KEY_FILE environment variable is not set"
+
+    - name: Read the config file
+      slurp:
+        src: "{{ lookup('env', 'OCI_CONFIG_FILE') }}"
+      register: config_content
+
+    - name: Display config file content
+      debug:
+        msg: "Config content: {{ config_content['content'] | b64decode }}"
+
+    - name: Assert config file contains the key file path (cross-reference works)
+      assert:
+        that:
+          - "'key_file=' in config_content['content'] | b64decode"
+          - "lookup('env', 'OCI_USER_KEY_FILE') in config_content['content'] | b64decode"
+        fail_msg: >-
+          Config file does not contain the key file path.
+          The key_file= line is blank, meaning tower.filename.ssh_keyfile
+          was not available when the config file template was rendered.
+
+    - name: Assert other OCI env vars are set
+      assert:
+        that:
+          - lookup('env', 'OCI_REGION') == 'us-ashburn-1'
+          - lookup('env', 'OCI_TENANCY') == 'ocid1.tenancy.oc1..test'
+          - lookup('env', 'OCI_USER_ID') == 'ocid1.user.oc1..test'
+          - lookup('env', 'OCI_ANSIBLE_AUTH_TYPE') == 'api_key'
+        fail_msg: "OCI environment variables are not set correctly"

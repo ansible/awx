@@ -1,0 +1,30 @@
+---
+- hosts: localhost
+  gather_facts: false
+  connection: local
+  tasks:
+    - name: Check that CUSTOM_FILE_PATH env var is set
+      debug:
+        msg: "File path from env: {{ lookup('env', 'CUSTOM_FILE_PATH') }}"
+      register: env_path
+
+    - name: Assert env var is not empty
+      assert:
+        that:
+          - lookup('env', 'CUSTOM_FILE_PATH') | length > 0
+        fail_msg: "CUSTOM_FILE_PATH environment variable is not set"
+
+    - name: Read the injected file
+      slurp:
+        src: "{{ lookup('env', 'CUSTOM_FILE_PATH') }}"
+      register: file_content
+
+    - name: Assert file contains expected content
+      assert:
+        that:
+          - "'Hello from custom credential type!' in file_content['content'] | b64decode"
+        fail_msg: "File does not contain expected content"
+
+    - name: Display file content
+      debug:
+        msg: "File content: {{ file_content['content'] | b64decode }}"
