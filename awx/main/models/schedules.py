@@ -298,15 +298,16 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         def _collect():
             """Expand occurrences after ``after``, skipping imaginary DST datetimes."""
             rruleset = cls.rrulestr(rrule_str, ref_dt=ref_dt)
-            # Request extra candidates so DST-skipped stamps do not shrink the result.
-            gen = rruleset.xafter(after, count=max(count * 2, count + 10))
+            # Do not cap xafter candidates: spring-forward gaps can yield many imaginary
+            # stamps in a row. Keep iterating until ``count`` valid events (or exhaustion);
+            # the wall-clock timeout remains the safety limit.
             schedule = []
-            for event in gen:
-                if len(schedule) >= count:
-                    break
+            for event in rruleset.xafter(after):
                 if not datetime_exists(event):
                     continue
                 schedule.append(event)
+                if len(schedule) >= count:
+                    break
             return schedule
 
         return cls._run_with_timeout(_collect, timeout)
