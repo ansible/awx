@@ -23,7 +23,7 @@ from ansible_base.lib.utils.models import prevent_search
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.constants import HOST_FACTS_FIELDS
+from awx.main.constants import HOST_FACTS_FIELDS, CLEANUP_JOBS_RESOURCE_FLAGS
 from awx.main.models.base import (
     BaseModel,
     CreatedModifiedModel,
@@ -1222,6 +1222,9 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
         """
         rejected = {}
         allowed_vars = set(['days', 'older_than', 'granularity'])
+        # cleanup_jobs can optionally target a subset of resource types.
+        if self.job_type == 'cleanup_jobs':
+            allowed_vars.add('resources')
         given_vars = set(data.keys())
         unallowed_vars = given_vars - (allowed_vars & given_vars)
         errors_list = []
@@ -1229,6 +1232,17 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
             errors_list.append(_('Variables {list_of_keys} are not allowed for system jobs.').format(list_of_keys=', '.join(unallowed_vars)))
             for key in unallowed_vars:
                 rejected[key] = data.pop(key)
+
+        if self.job_type == 'cleanup_jobs' and 'resources' in data:
+            valid_resources = set(CLEANUP_JOBS_RESOURCE_FLAGS.keys())
+            resources = data['resources']
+            if not isinstance(resources, list) or any(not isinstance(r, str) or r not in valid_resources for r in resources):
+                errors_list.append(
+                    _('resources must be a list containing any of: {list_of_resources}.').format(
+                        list_of_resources=', '.join(sorted(valid_resources))
+                    )
+                )
+                rejected['resources'] = data.pop('resources')
 
         if self.job_type in ('cleanup_jobs', 'cleanup_activitystream'):
             if 'days' in data:
