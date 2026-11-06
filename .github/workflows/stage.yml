@@ -45,20 +45,20 @@ jobs:
           exit 0
 
       - name: Checkout awx
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           show-progress: false
           path: awx
 
       - name: Checkout awx-operator
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           show-progress: false
           repository: ${{ github.repository_owner }}/awx-operator
           path: awx-operator
 
       - name: Checkout awx-logos
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           show-progress: false
           repository: ansible/awx-logos
@@ -73,7 +73,7 @@ jobs:
           python3 -m pip install docker
 
       - name: Log into registry ghcr.io
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -85,7 +85,7 @@ jobs:
           cp ../awx-logos/awx/ui/client/assets/* awx/ui/public/static/media/
 
       - name: Setup node and npm for new UI build
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '18'
           cache: 'npm'
