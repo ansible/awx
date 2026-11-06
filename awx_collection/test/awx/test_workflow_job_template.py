@@ -4,7 +4,7 @@ __metaclass__ = type
 
 import pytest
 
-from awx.main.models import WorkflowJobTemplate, WorkflowJob, NotificationTemplate
+from awx.main.models import WorkflowJobTemplate, WorkflowJob, WorkflowJobTemplateNode, NotificationTemplate
 
 
 @pytest.mark.django_db
@@ -174,3 +174,34 @@ def test_delete_with_spec(run_module, admin_user, organization, survey_spec):
     assert result.get('changed', True), result
 
     assert WorkflowJobTemplate.objects.filter(name='foo-workflow', organization=organization).count() == 0
+
+
+@pytest.mark.django_db
+def test_approval_node_unchanged_on_rerun(run_module, admin_user, organization):
+    workflow = {
+        'name': 'foo-workflow',
+        'organization': organization.name,
+        'workflow_nodes': [
+            {
+                'identifier': 'approve',
+                'unified_job_template': {
+                    'name': 'foo-approval',
+                    'type': 'workflow_approval',
+                    'description': 'Approve the change',
+                    'timeout': 600,
+                },
+            }
+        ],
+    }
+    result = run_module('workflow_job_template', workflow, admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+    assert result.get('changed', False), result
+
+    approval = WorkflowJobTemplateNode.objects.get(identifier='approve').unified_job_template
+    assert approval.name == 'foo-approval'
+    assert approval.description == 'Approve the change'
+    assert approval.timeout == 600
+
+    result = run_module('workflow_job_template', workflow, admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+    assert not result.get('changed', True), result
