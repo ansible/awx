@@ -1,0 +1,241 @@
+import logging
+from pathlib import Path
+
+import pytest
+from django.utils.timezone import now
+
+import awx.api.serializers  # noqa: F401 — register CleanTextMixin models
+
+from ansible_base.lib.utils.bulk_validation_audit import audit_bulk_model_instances
+
+from awx.main.models import Host, Inventory, Job, Organization, WorkflowJob, WorkflowJobNode
+from awx.main.utils.db import bulk_update_sorted_by_id
+from awx.main.utils.validation_bypass_observability import (
+    audit_workflow_job_nodes_for_bulk_create,
+    configure_validation_bypass_observability,
+)
+
+LOGGER = 'ansible_base.lib.utils.validation_signals'
+
+
+@pytest.fixture
+def capture_validation_signal_logs(caplog):
+    """Match DAB test_app caplog setup (pytest + xdist safe)."""
+    caplog.set_level(logging.DEBUG)
+    caplog.set_level(logging.WARNING, logger=LOGGER)
+
+
+@pytest.mark.django_db
+def test_configure_validation_bypass_observability_wires_dab(mocker):
+    mocker.patch('awx.main.utils.validation_bypass_observability.register_validation_signals')
+    allow = mocker.patch('awx.main.utils.validation_bypass_observability.extend_caller_allowlist_prefixes')
+    deny = mocker.patch('awx.main.utils.validation_bypass_observability.extend_internal_caller_prefixes')
+
+    configure_validation_bypass_observability()
+
+    allow.assert_called_once()
+    prefixes = allow.call_args[0][0]
+    assert 'awx.api.serializers' in prefixes
+    assert 'awx.main.scheduler' in prefixes
+    assert 'awx.main.utils' not in prefixes
+    deny.assert_called_once()
+    internal = deny.call_args[0][0]
+    assert 'awx.main.models' in internal
+    assert 'awx.main.utils.validation_bypass_observability' in internal
+    assert 'awx.main.utils.db' in internal
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures('capture_validation_signal_logs')
+def test_audit_bulk_model_instances_skips_host_description_when_serializer_already_logged(caplog):
+    from ansible_base.lib.utils.validation_signals import (
+        get_validation_context_token,
+        register_serializer_validation_rejection,
+        reset_validation_context,
+    )
+
+    org = Organization.objects.create(name='org-bulk-host-dedupe')
+    inv = Inventory.objects.create(name='inv-bulk-host-dedupe', organization=org)
+    host = Host(name='host-bulk-dedupe', description='<script>x</script>', inventory=inv)
+    register_serializer_validation_rejection('main.Host', 'description')
+    token = get_validation_context_token()
+    try:
+        audit_bulk_model_instances([host], operation='bulk_create')
+    finally:
+        reset_validation_context(token)
+    assert 'ORM bypass' not in caplog.text
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures('capture_validation_signal_logs')
+def test_audit_bulk_model_instances_logs_host_description_on_bulk_create(caplog):
+    org = Organization.objects.create(name='org-bulk-host-audit')
+    inv = Inventory.objects.create(name='inv-bulk-host-audit', organization=org)
+    host = Host(name='host-bulk', description='<script>x</script>', inventory=inv)
+    audit_bulk_model_instances([host], operation='bulk_create')
+    assert 'ORM bypass (bulk_create)' in caplog.text
+    assert 'description' in caplog.text
+    assert 'main.Host' in caplog.text
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures('capture_validation_signal_logs')
+def test_audit_workflow_job_nodes_skips_when_serializer_already_logged(caplog):
+    from ansible_base.lib.utils.validation_signals import (
+        get_validation_context_token,
+        register_serializer_validation_rejection,
+        reset_validation_context,
+    )
+
+    wfj = WorkflowJob.objects.create(name='wf-audit-limit-dedupe')
+    node = WorkflowJobNode(workflow_job=wfj, identifier='wf-node-1')
+    node.limit = '<script>x</script>'
+    register_serializer_validation_rejection('main.WorkflowJobNode', 'limit')
+    token = get_validation_context_token()
+    try:
+        audit_workflow_job_nodes_for_bulk_create([node])
+    finally:
+        reset_validation_context(token)
+    assert 'ORM bypass' not in caplog.text
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures('capture_validation_signal_logs')
+def test_audit_workflow_job_nodes_logs_limit_pseudo_field(caplog):
+    wfj = WorkflowJob.objects.create(name='wf-audit-limit')
+    node = WorkflowJobNode(workflow_job=wfj, identifier='wf-node-1')
+    node.limit = '<script>x</script>'
+    audit_workflow_job_nodes_for_bulk_create([node])
+    assert 'ORM bypass (bulk_create)' in caplog.text
+    assert 'limit' in caplog.text
+    assert 'WorkflowJobNode' in caplog.text
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures('capture_validation_signal_logs')
+def test_audit_workflow_job_nodes_no_op_for_empty_list(caplog):
+    audit_workflow_job_nodes_for_bulk_create([])
+    assert 'ORM bypass' not in caplog.text
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures('capture_validation_signal_logs')
+def test_audit_bulk_model_instances_logs_registered_text_field_on_bulk_update(caplog):
+    job = Job.objects.create(job_explanation='<script>x</script>')
+    audit_bulk_model_instances([job], operation='bulk_update', update_fields=['job_explanation'])
+    assert 'ORM bypass (bulk_update)' in caplog.text
+    assert 'job_explanation' in caplog.text
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures('capture_validation_signal_logs')
+def test_audit_bulk_model_instances_skips_unregistered_instance_on_bulk_update(caplog):
+    from ansible_base.resource_registry.models import Resource
+
+    unregistered = Resource.__new__(Resource)
+    audit_bulk_model_instances([unregistered], operation='bulk_update', update_fields=['name'])
+    assert 'ORM bypass (bulk_update)' not in caplog.text
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures('capture_validation_signal_logs')
+def test_audit_bulk_model_instances_logs_workflow_job_job_explanation_on_bulk_update(caplog):
+    """WorkflowJob is registered via BulkJobLaunchSerializer (PromptFieldCleanTextMixin)."""
+    wj = WorkflowJob.objects.create(name='wf-job', job_explanation='<script>x</script>')
+    audit_bulk_model_instances([wj], operation='bulk_update', update_fields=['job_explanation'])
+    assert 'ORM bypass (bulk_update)' in caplog.text
+    assert 'job_explanation' in caplog.text
+    assert 'main.WorkflowJob' in caplog.text
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures('capture_validation_signal_logs')
+def test_audit_bulk_model_instances_bulk_update_no_op_when_update_fields_empty(caplog):
+    job = Job.objects.create(job_explanation='<script>x</script>')
+    audit_bulk_model_instances([job], operation='bulk_update', update_fields=[])
+    assert 'ORM bypass (bulk_update)' not in caplog.text
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures('capture_validation_signal_logs')
+def test_bulk_update_sorted_by_id_skips_audit_when_fields_are_not_text(caplog):
+    org = Organization.objects.create(name='org-bulk-update-audit')
+    inv = Inventory.objects.create(name='inv-bulk-update-audit', organization=org)
+    host = Host.objects.create(name='host-1', description='<script>x</script>', inventory=inv)
+    host.ansible_facts = {'k': 'v'}
+    bulk_update_sorted_by_id(Host, [host], fields=['ansible_facts'])
+    assert 'ORM bypass (bulk_update)' not in caplog.text
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures('capture_validation_signal_logs')
+def test_bulk_update_sorted_by_id_audits_text_fields_in_fields_list(caplog):
+    org = Organization.objects.create(name='org-bulk-update-desc')
+    inv = Inventory.objects.create(name='inv-bulk-update-desc', organization=org)
+    host = Host.objects.create(name='host-desc', description='clean', inventory=inv)
+    host.description = '<script>x</script>'
+    bulk_update_sorted_by_id(Host, [host], fields=['description'])
+    assert 'ORM bypass (bulk_update)' in caplog.text
+    assert 'description' in caplog.text
+
+
+def test_task_manager_audits_before_job_explanation_bulk_update():
+    """Regression: scheduler must not bulk_update job_explanation without audit."""
+    task_manager_py = Path(__file__).resolve().parents[3] / 'scheduler' / 'task_manager.py'
+    source = task_manager_py.read_text()
+    audit_marker = "audit_bulk_model_instances(tasks_to_update_job_explanation, operation='bulk_update', update_fields=['job_explanation'])"
+    bulk_marker = "UnifiedJob.objects.bulk_update(tasks_to_update_job_explanation, ['job_explanation'])"
+    assert audit_marker in source
+    assert bulk_marker in source
+    assert source.index('audit_bulk_model_instances') < source.index(bulk_marker)
+
+
+def test_db_bulk_update_sorted_by_id_audits_before_orm_bulk_update():
+    """Regression: shared bulk_update helper must audit before Django bulk_update."""
+    db_py = Path(__file__).resolve().parents[3] / 'utils' / 'db.py'
+    source = db_py.read_text()
+    assert "audit_bulk_model_instances(sorted_objects, operation='bulk_update', update_fields=fields)" in source
+    assert source.index('audit_bulk_model_instances') < source.index('model.objects.bulk_update')
+
+
+def test_host_manager_audits_before_bulk_create():
+    """Regression: Host bulk_create must audit via HostManager, not only serializers."""
+    managers_py = Path(__file__).resolve().parents[3] / 'managers.py'
+    source = managers_py.read_text()
+    assert "audit_bulk_model_instances(objs, operation='bulk_create')" in source
+    assert 'class HostManager' in source
+    bulk_create_idx = source.index('def bulk_create', source.index('class HostManager'))
+    audit_idx = source.index("audit_bulk_model_instances(objs, operation='bulk_create')", bulk_create_idx)
+    super_idx = source.index('super().bulk_create', audit_idx)
+    assert audit_idx < super_idx
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures('capture_validation_signal_logs')
+def test_host_manager_bulk_create_logs_registered_text_violations(caplog):
+    """HostManager.bulk_create runs DAB audit before persisting (not only via serializers)."""
+    org = Organization.objects.create(name='org-host-mgr-bulk')
+    inv = Inventory.objects.create(name='inv-host-mgr-bulk', organization=org)
+    _now = now()
+    host = Host(
+        name='host-mgr-bulk',
+        description='<script>x</script>',
+        inventory=inv,
+        created=_now,
+        modified=_now,
+    )
+    Host.objects.bulk_create([host])
+    assert 'ORM bypass (bulk_create)' in caplog.text
+    assert 'description' in caplog.text
+    assert 'main.Host' in caplog.text
+
+
+def test_bulk_host_create_serializer_does_not_call_audit_bulk():
+    """Bulk host API relies on HostManager.bulk_create for ORM bypass logging."""
+    serializers_py = Path(__file__).resolve().parents[3] / 'api' / 'serializers.py'
+    source = serializers_py.read_text()
+    start = source.index('def _create_bulk_hosts')
+    end = source.index('class BulkHostDeleteSerializer')
+    block = source[start:end]
+    assert 'audit_bulk_model_instances' not in block
+    assert 'Host.objects.bulk_create' in block
