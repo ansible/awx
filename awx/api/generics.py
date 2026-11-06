@@ -120,6 +120,9 @@ class LoggedLoginView(auth_views.LoginView):
                 'userLoggedIn', 'true', secure=getattr(settings, 'SESSION_COOKIE_SECURE', False), samesite=getattr(settings, 'USER_COOKIE_SAMESITE', 'Lax')
             )
             ret.setdefault('X-API-Session-Cookie-Name', getattr(settings, 'SESSION_COOKIE_NAME', 'awx_sessionid'))
+            # Signal clients/UI that a forced password change is required (session is established).
+            if getattr(request.user, 'password_reset_required', False):
+                ret['X-API-Password-Reset-Required'] = 'true'
 
             return ret
         else:
