@@ -17,7 +17,7 @@ permissions:
 jobs:
   authorize:
     # djyasin/actions PR #164 — pinned to current HEAD
-    uses: djyasin/actions/.github/workflows/approval-label-authorization.yml@AAP-91965_approvers-team-label # PR #164 HEAD: f05241d
+    uses: djyasin/actions/.github/workflows/approval-label-authorization.yml@approvers-team-label # PR #164
     with:
       approval-label: breaking-change-approved
       team-slug: ansible-staff-eng-leads
