@@ -7,7 +7,7 @@ from django.db.utils import IntegrityError
 from unittest import mock
 import pytest
 
-from awx.main.models import JobTemplate, Schedule, ActivityStream
+from awx.main.models import Inventory, JobTemplate, Schedule, ActivityStream
 
 from crum import impersonate
 
@@ -539,3 +539,88 @@ def test_skip_sundays():
 def test_get_end_date(rrule, expected_result):
     ruleset = Schedule.rrulestr(rrule)
     assert expected_result == Schedule.get_end_date(ruleset)
+
+
+def _future_schedule(job_template, name, inventory=None):
+    return Schedule.objects.create(
+        name=name,
+        rrule='DTSTART:20300112T210000Z RRULE:FREQ=DAILY;INTERVAL=1',
+        unified_job_template=job_template,
+        inventory=inventory,
+    )
+
+
+@pytest.mark.django_db
+def test_scheduled_job_errors_when_saved_inventory_no_longer_prompts(job_template, inventory):
+    other = Inventory.objects.create(name='schedule-inv', organization=inventory.organization)
+    job_template.inventory = None
+    job_template.ask_inventory_on_launch = True
+    job_template.save()
+    schedule = _future_schedule(job_template, 'override-inv', inventory=other)
+
+    job_template.ask_inventory_on_launch = False
+    job_template.inventory = inventory
+    job_template.save()
+
+    job, start = schedule.create_scheduled_job()
+
+    assert start is False
+    assert job.status == 'error'
+    assert job.failed is True
+    assert job.finished is not None
+    assert 'schedule-inv' in job.job_explanation
+    assert inventory.name in job.job_explanation
+    assert 'was not run' in job.job_explanation
+    assert job.inventory_id == inventory.id
+    assert job.emitted_events == 1
+    event = job.job_events.get()
+    assert event.event == 'error'
+    assert event.failed is True
+    assert 'schedule-inv' in event.stdout
+    assert inventory.name in event.stdout
+
+
+@pytest.mark.django_db
+def test_scheduled_job_starts_when_saved_inventory_matches_template(job_template, inventory):
+    job_template.ask_inventory_on_launch = False
+    job_template.inventory = inventory
+    job_template.save()
+    schedule = _future_schedule(job_template, 'same-inv', inventory=inventory)
+
+    job, start = schedule.create_scheduled_job()
+
+    assert start is True
+    assert job.status == 'new'
+    assert job.job_explanation == ''
+    assert job.inventory_id == inventory.id
+
+
+@pytest.mark.django_db
+def test_scheduled_job_starts_when_schedule_has_no_inventory(job_template, inventory):
+    job_template.ask_inventory_on_launch = False
+    job_template.inventory = inventory
+    job_template.save()
+    schedule = _future_schedule(job_template, 'no-inv')
+
+    job, start = schedule.create_scheduled_job()
+
+    assert start is True
+    assert job.status == 'new'
+    assert job.job_explanation == ''
+    assert job.inventory_id == inventory.id
+
+
+@pytest.mark.django_db
+def test_scheduled_job_uses_prompted_inventory(job_template, inventory):
+    other = Inventory.objects.create(name='prompted-inv', organization=inventory.organization)
+    job_template.ask_inventory_on_launch = True
+    job_template.inventory = inventory
+    job_template.save()
+    schedule = _future_schedule(job_template, 'prompted-inv', inventory=other)
+
+    job, start = schedule.create_scheduled_job()
+
+    assert start is True
+    assert job.status == 'new'
+    assert job.job_explanation == ''
+    assert job.inventory_id == other.id

@@ -1137,21 +1137,21 @@ def awx_periodic_scheduler():
                 logger.warning("Cache timeout is in the future, bypassing schedule for template %s" % str(template.id))
                 continue
             try:
-                job_kwargs = schedule.get_job_kwargs()
-                new_unified_job = schedule.unified_job_template.create_unified_job(**job_kwargs)
+                new_unified_job, can_start = schedule.create_scheduled_job()
                 logger.debug('Spawned {} from schedule {}-{}.'.format(new_unified_job.log_format, schedule.name, schedule.pk))
 
-                if invalid_license:
+                if can_start and invalid_license:
                     new_unified_job.status = 'failed'
                     new_unified_job.job_explanation = str(invalid_license)
                     new_unified_job.save(update_fields=['status', 'job_explanation'])
                     new_unified_job.websocket_emit_status("failed")
                     raise invalid_license
-                can_start = new_unified_job.signal_start()
+                if can_start:
+                    can_start = new_unified_job.signal_start()
             except Exception:
                 logger.exception('Error spawning scheduled job.')
                 continue
-            if not can_start:
+            if not can_start and not new_unified_job.job_explanation:
                 new_unified_job.status = 'failed'
                 new_unified_job.job_explanation = gettext_noop(
                     "Scheduled job could not start because it \
