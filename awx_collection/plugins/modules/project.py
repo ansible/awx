@@ -104,6 +104,12 @@ options:
       type: int
       aliases:
         - job_timeout
+    proxy:
+      description:
+        - HTTP, HTTPS, or SOCKS proxy URL used for SCM sync requests.
+        - When set, the proxy is injected as http_proxy / https_proxy environment variables for the sync task.
+        - The value is encrypted at rest. To clear, pass an empty string.
+      type: str
     default_environment:
       description:
         - Default Execution Environment name, ID, or named URL to use for jobs relating to the project.
@@ -266,6 +272,7 @@ def main():
         scm_update_cache_timeout=dict(type='int'),
         allow_override=dict(type='bool', aliases=['scm_allow_override']),
         timeout=dict(type='int', aliases=['job_timeout']),
+        proxy=dict(type='str'),
         default_environment=dict(),
         custom_virtualenv=dict(),
         organization=dict(),
