@@ -39,7 +39,7 @@ options:
       description:
         - Query used to further filter the list of jobs. C({"foo":"bar"}) will be passed at C(?foo=bar)
       type: dict
-extends_documentation_fragment: awx.awx.auth
+extends_documentation_fragment: awx.awx.auth_session_id, awx.awx.auth
 '''
 
 
