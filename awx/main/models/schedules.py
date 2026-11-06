@@ -4,6 +4,7 @@
 import datetime
 import logging
 import re
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 
 import dateutil.rrule
 import dateutil.parser
@@ -26,7 +27,14 @@ from awx.main.consumers import emit_channel_notification
 
 logger = logging.getLogger('awx.main.models.schedule')
 
-__all__ = ['Schedule']
+__all__ = ['Schedule', 'ScheduleEvaluationTimeout']
+
+# Wall-clock budget for expanding RRULE/EXRULE occurrences (preview, validation, computed fields).
+RRULE_EVALUATION_TIMEOUT = 2.0
+
+
+class ScheduleEvaluationTimeout(Exception):
+    """RRULE/EXRULE occurrence expansion exceeded time budget."""
 
 
 UTC_TIMEZONES = {x: tzutc() for x in dateutil.parser.parserinfo().UTCZONE}
@@ -275,6 +283,61 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
 
         return rruleset
 
+    @classmethod
+    def collect_occurrences(cls, rrule_str, after, count, timeout=RRULE_EVALUATION_TIMEOUT, ref_dt=None):
+        """
+        Return up to ``count`` occurrences after ``after``, within ``timeout`` seconds.
+
+        Skips imaginary DST datetimes. Raises ScheduleEvaluationTimeout if expansion
+        exceeds the wall-clock budget (pathological RRULE/EXRULE combinations).
+        """
+
+        def _collect():
+            rruleset = cls.rrulestr(rrule_str, ref_dt=ref_dt)
+            # Request extra candidates so DST-skipped stamps do not shrink the result.
+            gen = rruleset.xafter(after, count=max(count * 2, count + 10))
+            schedule = []
+            for event in gen:
+                if len(schedule) >= count:
+                    break
+                if not datetime_exists(event):
+                    continue
+                schedule.append(event)
+            return schedule
+
+        return cls._run_with_timeout(_collect, timeout)
+
+    @classmethod
+    def get_end_date_bounded(cls, rrule_str, timeout=RRULE_EVALUATION_TIMEOUT, ref_dt=None):
+        """Like get_end_date, but abort if ruleset[-1] takes longer than ``timeout``."""
+
+        def _end():
+            ruleset = cls.rrulestr(rrule_str, ref_dt=ref_dt)
+            return cls.get_end_date(ruleset)
+
+        return cls._run_with_timeout(_end, timeout)
+
+    @staticmethod
+    def _run_with_timeout(fn, timeout):
+        """
+        Run ``fn`` in a worker thread and enforce a wall-clock timeout.
+
+        Do not use ThreadPoolExecutor as a context manager here: its __exit__
+        calls shutdown(wait=True), which would block until a timed-out worker
+        finishes (defeating the timeout for CPU-bound dateutil work).
+        """
+        executor = ThreadPoolExecutor(max_workers=1)
+        try:
+            future = executor.submit(fn)
+            try:
+                return future.result(timeout=timeout)
+            except FuturesTimeoutError:
+                raise ScheduleEvaluationTimeout(
+                    'RRULE/EXRULE could not be evaluated in time; the recurrence may be invalid or too complex (check BYSETPOS against FREQ/INTERVAL).'
+                ) from None
+        finally:
+            executor.shutdown(wait=False, cancel_futures=True)
+
     def __str__(self):
         return '%s_t%s_%s_%s' % (self.name, self.unified_job_template.id, self.id, self.next_run)
 
@@ -311,25 +374,19 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         for field_name in affects_fields:
             starting_values[field_name] = getattr(self, field_name)
 
-        future_rs = Schedule.rrulestr(self.rrule)
-
         if self.enabled:
-            next_run_actual = future_rs.after(now())
-            if next_run_actual is not None:
-                if not datetime_exists(next_run_actual):
-                    # skip imaginary dates, like 2:30 on DST boundaries
-                    next_run_actual = future_rs.after(next_run_actual)
-                next_run_actual = next_run_actual.astimezone(datetime.timezone.utc)
+            occurrences = Schedule.collect_occurrences(self.rrule, after=now(), count=1)
+            next_run_actual = occurrences[0].astimezone(datetime.timezone.utc) if occurrences else None
         else:
             next_run_actual = None
 
         self.next_run = next_run_actual
         if not self.dtstart:
-            try:
-                self.dtstart = future_rs[0].astimezone(datetime.timezone.utc)
-            except IndexError:
-                self.dtstart = None
-        self.dtend = Schedule.get_end_date(future_rs)
+            # First occurrence from the start of the recurrence (not relative to now).
+            epoch = datetime.datetime(1970, 1, 1, tzinfo=datetime.timezone.utc)
+            first = Schedule.collect_occurrences(self.rrule, after=epoch, count=1)
+            self.dtstart = first[0].astimezone(datetime.timezone.utc) if first else None
+        self.dtend = Schedule.get_end_date_bounded(self.rrule)
 
         changed = any(getattr(self, field_name) != starting_values[field_name] for field_name in affects_fields)
         return changed

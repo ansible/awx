@@ -232,6 +232,40 @@ def test_utc_preview(post, admin_user):
 
 
 @pytest.mark.django_db
+def test_preview_minutely_exrule_bysetpos_one(post, admin_user):
+    """AAP-95687 control: BYSETPOS=1 EXRULE remains previewable."""
+    url = reverse('api:schedule_rrule')
+    rrule = (
+        'DTSTART;TZID=America/Los_Angeles:20260929T160000 '
+        'RRULE:FREQ=MINUTELY;INTERVAL=10 '
+        'EXRULE:FREQ=MINUTELY;INTERVAL=10;BYSETPOS=1;BYDAY=FR;BYHOUR=0,1,2,3;BYMINUTE=0,10,20,30,40,50;BYSECOND=0'
+    )
+    started = datetime.datetime.now(datetime.timezone.utc)
+    r = post(url, {'rrule': rrule}, admin_user, expect=200)
+    elapsed = (datetime.datetime.now(datetime.timezone.utc) - started).total_seconds()
+    assert elapsed < 5
+    assert len(r.data['local']) == 10
+    assert len(r.data['utc']) == 10
+
+
+@pytest.mark.django_db
+def test_preview_minutely_exrule_bysetpos_two_rejected(post, admin_user):
+    """AAP-95687: unsatisfiable BYSETPOS=2 EXRULE must 400 quickly, not hang/503."""
+    url = reverse('api:schedule_rrule')
+    rrule = (
+        'DTSTART;TZID=America/Los_Angeles:20260929T203000 '
+        'RRULE:FREQ=MINUTELY;INTERVAL=10 '
+        'EXRULE:FREQ=MINUTELY;INTERVAL=10;BYSETPOS=2;BYDAY=FR;BYHOUR=0,1,2,3;BYMINUTE=0,10,20,30,40,50;BYSECOND=0'
+    )
+    started = datetime.datetime.now(datetime.timezone.utc)
+    r = post(url, {'rrule': rrule}, admin_user, expect=400)
+    elapsed = (datetime.datetime.now(datetime.timezone.utc) - started).total_seconds()
+    assert elapsed < 5
+    assert 'rrule' in r.data
+    assert 'could not be evaluated in time' in smart_str(r.data['rrule'])
+
+
+@pytest.mark.django_db
 def test_nyc_with_dst(post, admin_user):
     url = reverse('api:schedule_rrule')
     r = post(url, {'rrule': get_rrule('America/New_York')}, admin_user, expect=200)
