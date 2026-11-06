@@ -584,6 +584,41 @@ def get_capacity_type(uj):
     raise RuntimeError(f'Capacity type does not apply to {model_name} model')
 
 
+def _prefetch_job_capabilities(page, user):
+    """Batch-compute delete/start capabilities for a page of Job objects.
+
+    Matches the display-path logic used by get_user_capabilities:
+    - delete: JobAccess.can_delete (superuser check, then org admin)
+    - start: JobAccess.get_method_capability simplified check
+             (no JT → True, otherwise JT execute permission)
+    Full can_start validation happens on actual relaunch POST.
+    """
+    from awx.main.models import JobTemplate, Organization
+
+    mapping = {obj.id: {} for obj in page}
+
+    if user.is_superuser:
+        for obj_id in mapping:
+            mapping[obj_id] = {'delete': True, 'start': True}
+        return mapping
+
+    admin_org_ids = set(Organization.access_qs(user, 'change').values_list('pk', flat=True))
+    execute_jt_ids = set(JobTemplate.access_qs(user, 'execute').values_list('pk', flat=True))
+
+    for obj in page:
+        if not obj.organization_id:
+            mapping[obj.id]['delete'] = False
+        else:
+            mapping[obj.id]['delete'] = obj.organization_id in admin_org_ids
+
+        if not obj.job_template_id:
+            mapping[obj.id]['start'] = True
+        else:
+            mapping[obj.id]['start'] = obj.job_template_id in execute_jt_ids
+
+    return mapping
+
+
 def prefetch_page_capabilities(model, page, prefetch_list, user):
     """
     Given a `page` list of objects, a nested dictionary of user_capabilities
@@ -605,6 +640,9 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
       --> prefetch logical combination of use permission to inventory AND
           project, put into cache dictionary as 'copy'
     """
+    if model._meta.model_name == 'job':
+        return _prefetch_job_capabilities(page, user)
+
     page_ids = [obj.id for obj in page]
     mapping = {}
     for obj in page:
