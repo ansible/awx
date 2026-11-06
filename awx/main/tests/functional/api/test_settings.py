@@ -179,6 +179,46 @@ def test_logging_aggregator_valid_settings(put, post, admin, type, host, port, u
         assert '$encrypted$' in response.data.get('LOG_AGGREGATOR_PASSWORD')
 
 
+@pytest.mark.parametrize(
+    'key, lowest, highest',
+    [
+        # the kernel's own limits (MAX_TCP_KEEPIDLE, MAX_TCP_KEEPINTVL, MAX_TCP_KEEPCNT); outside them
+        # rsyslog's setsockopt fails, it logs and ignores it, and the two-hour kernel default comes back
+        ['LOG_AGGREGATOR_TCP_KEEPALIVE_TIME', 1, 32767],
+        ['LOG_AGGREGATOR_TCP_KEEPALIVE_INTERVAL', 1, 32767],
+        ['LOG_AGGREGATOR_TCP_KEEPALIVE_PROBES', 1, 127],
+    ],
+)
+@pytest.mark.django_db
+def test_logging_aggregator_tcp_keepalive_bounds(get, patch, admin, key, lowest, highest):
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
+    for value in (lowest, highest):
+        patch(url, user=admin, data={key: value}, expect=200)
+        assert get(url, user=admin, expect=200).data[key] == value
+    for value in (lowest - 1, highest + 1, 99999999999):
+        response = patch(url, user=admin, data={key: value}, expect=400)
+        assert key in response.data
+    # a rejected value is not stored
+    assert get(url, user=admin, expect=200).data[key] == highest
+
+
+@pytest.mark.django_db
+def test_logging_aggregator_tcp_keepalive_listed_after_revert(patch, delete, admin):
+    # run_rsyslog_configurer clears the cached LOG_AGGREGATOR_* values it finds in dir(settings), which lists
+    # database rows and file defaults only; without a file default a reverted setting would keep its cached value
+    from django.conf import settings
+
+    from awx.conf.models import Setting
+
+    keys = ['LOG_AGGREGATOR_TCP_KEEPALIVE', 'LOG_AGGREGATOR_TCP_KEEPALIVE_TIME', 'LOG_AGGREGATOR_TCP_KEEPALIVE_INTERVAL', 'LOG_AGGREGATOR_TCP_KEEPALIVE_PROBES']
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
+    patch(url, user=admin, data={'LOG_AGGREGATOR_TCP_KEEPALIVE': False, 'LOG_AGGREGATOR_TCP_KEEPALIVE_TIME': 600}, expect=200)
+    delete(url, user=admin, expect=204)
+    assert not Setting.objects.filter(key__in=keys).exists()
+    listed = dir(settings)
+    assert [key for key in keys if key not in listed] == []
+
+
 @pytest.mark.django_db
 def test_logging_aggregator_connection_test_valid(put, post, admin):
     _, mock_settings = _mock_logging_defaults()
