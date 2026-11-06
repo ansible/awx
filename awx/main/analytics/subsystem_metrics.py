@@ -72,8 +72,13 @@ class BaseM:
         value = conn.hget(root_key, self.field)
         return self.decode_value(value)
 
-    def to_prometheus(self, instance_data, namespace=None):
-        output_text = f"# HELP {self.field} {self.help_text}\n# TYPE {self.field} gauge\n"
+    def to_prometheus(self, instance_data, namespace=None, include_meta=True):
+        # Prometheus text format allows only one HELP/TYPE per metric family name.
+        # Shared operational metrics are emitted once per subsystem; only the first
+        # call for a given field should include metadata headers (AAP-84834).
+        output_text = ''
+        if include_meta:
+            output_text += f"# HELP {self.field} {self.help_text}\n# TYPE {self.field} gauge\n"
         for instance in instance_data:
             if self.field in instance_data[instance]:
                 # Build label string
@@ -174,8 +179,10 @@ class HistogramM(BaseM):
         self.sum.store_value(conn)
         self.inf.store_value(conn)
 
-    def to_prometheus(self, instance_data, namespace=None):
-        output_text = f"# HELP {self.field} {self.help_text}\n# TYPE {self.field} histogram\n"
+    def to_prometheus(self, instance_data, namespace=None, include_meta=True):
+        output_text = ''
+        if include_meta:
+            output_text += f"# HELP {self.field} {self.help_text}\n# TYPE {self.field} histogram\n"
         for instance in instance_data:
             # Build label string
             node_label = f'node="{instance}"'
@@ -357,9 +364,13 @@ class Metrics(MetricsNamespace):
                     instance_data[instance] = json.loads(instance_data_from_redis.decode('UTF-8'))
         return instance_data
 
-    def generate_metrics(self, request):
+    def generate_metrics(self, request, emitted_meta=None):
         # takes the api request, filters, and generates prometheus data
         # if additional filtering is added, update metrics_view.md
+        # emitted_meta tracks metric names that already have HELP/TYPE so shared
+        # operational metrics across subsystems stay Prometheus-compliant (AAP-84834).
+        if emitted_meta is None:
+            emitted_meta = set()
         instance_data = self.load_other_metrics(request)
         metrics_filter = request.query_params.getlist("metric")
         output_text = ''
@@ -372,7 +383,12 @@ class Metrics(MetricsNamespace):
                         if field in ['subsystem_metrics_pipe_execute_seconds', 'subsystem_metrics_pipe_execute_calls', 'subsystem_metrics_send_metrics_seconds']
                         else None
                     )
-                    output_text += self.METRICS[field].to_prometheus(instance_data, namespace)
+                    include_meta = field not in emitted_meta
+                    output_text += self.METRICS[field].to_prometheus(
+                        instance_data, namespace, include_meta=include_meta
+                    )
+                    if include_meta:
+                        emitted_meta.add(field)
         return output_text
 
 
@@ -441,10 +457,13 @@ class CallbackReceiverMetrics(Metrics):
 
 
 def metrics(request):
+    # Share emitted_meta across subsystem collectors so HELP/TYPE appear once
+    # per metric family when the same field is exported for each subsystem.
+    emitted_meta = set()
     output_text = ''
-    output_text += DispatcherMetrics().generate_metrics(request)
-    output_text += CallbackReceiverMetrics().generate_metrics(request)
-    output_text += IndirectCountingMetrics().generate_metrics(request)
+    output_text += DispatcherMetrics().generate_metrics(request, emitted_meta=emitted_meta)
+    output_text += CallbackReceiverMetrics().generate_metrics(request, emitted_meta=emitted_meta)
+    output_text += IndirectCountingMetrics().generate_metrics(request, emitted_meta=emitted_meta)
 
     dispatcherd_metrics = get_dispatcherd_metrics(request)
     if dispatcherd_metrics:
