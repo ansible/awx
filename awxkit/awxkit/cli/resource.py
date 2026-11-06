@@ -121,6 +121,18 @@ class Export(CustomCommand):
             # 3) the resource flag is used with an argument, and the attr will be that argument's value
             resources.add_argument('--{}'.format(resource), nargs='*')
 
+        options = parser.add_argument_group('options')
+        options.add_argument(
+            '--exclude-inventory-children',
+            nargs='*',
+            help='names or IDs of inventories whose hosts and groups will be left out of the export',
+        )
+        options.add_argument(
+            '--exclude-dynamic-inventory-children',
+            action='store_true',
+            help='leave the hosts and groups of every inventory that has an inventory source out of the export',
+        )
+
     def handle(self, client, parser):
         self.extend_parser(parser)
         parser.usage = 'awx export > exportfile'
@@ -132,6 +144,8 @@ class Export(CustomCommand):
 
         parsed = parser.parse_known_args()[0]
         kwargs = {resource: getattr(parsed, resource, None) for resource in EXPORTABLE_RESOURCES}
+        kwargs['exclude_inventory_children'] = getattr(parsed, 'exclude_inventory_children', None)
+        kwargs['exclude_dynamic_inventory_children'] = getattr(parsed, 'exclude_dynamic_inventory_children', False)
 
         client.authenticate()
         data = client.v2.export_assets(**kwargs)
