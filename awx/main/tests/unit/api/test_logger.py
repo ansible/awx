@@ -1,7 +1,14 @@
+import os
+import pathlib
+import shutil
+import subprocess
+import types
+
 import pytest
 
 from django.conf import settings
 
+from awx.main.utils import external_logging
 from awx.main.utils.external_logging import construct_rsyslog_conf_template
 from awx.main.tests.functional.api.test_settings import _mock_logging_defaults
 
@@ -200,6 +207,152 @@ def test_rsyslog_conf_template(enabled, log_type, host, port, protocol, errorfil
 
     # check validity of created template
     assert expected_config in tmpl
+
+
+STATS_ENABLED = 'config.enabled=`echo $AWX_QUEUE_STATS`'
+STATS_MODULE = 'module(load="impstats" interval="{}" format="json" resetCounters="off" ruleset="awx_queue_stats" ' + STATS_ENABLED + ')'
+STATS_RULESET = 'ruleset(name="awx_queue_stats" queue.type="Direct" ' + STATS_ENABLED + ') { action(type="omfile" file="/dev/stdout") }'
+RUN_RSYSLOGD = pathlib.Path(__file__).parents[5] / 'tools' / 'scripts' / 'run-rsyslogd'
+
+
+def _rsyslog_conf(enabled, stats_interval):
+    mock_settings, _ = _mock_logging_defaults()
+
+    logging_defaults = getattr(settings, 'LOGGING')
+    setattr(mock_settings, 'LOGGING', logging_defaults)
+    setattr(mock_settings, 'LOG_AGGREGATOR_ENABLED', enabled)
+    setattr(mock_settings, 'LOG_AGGREGATOR_TYPE', 'other')
+    setattr(mock_settings, 'LOG_AGGREGATOR_HOST', 'localhost')
+    setattr(mock_settings, 'LOG_AGGREGATOR_PORT', 9000)
+    setattr(mock_settings, 'LOG_AGGREGATOR_PROTOCOL', 'tcp')
+    if stats_interval is not None:
+        setattr(mock_settings, 'LOG_AGGREGATOR_ACTION_QUEUE_STATS_INTERVAL', stats_interval)
+
+    return construct_rsyslog_conf_template(mock_settings)
+
+
+def _queue_stats_lines(enabled, stats_interval):
+    lines = _rsyslog_conf(enabled, stats_interval).split('\n')
+    return [line for line in lines if 'impstats' in line or 'awx_queue_stats' in line]
+
+
+@pytest.mark.parametrize(
+    'enabled, stats_interval, expected_interval',
+    [
+        (True, None, None),  # registered default (0): no impstats, configuration unchanged
+        (True, 0, None),
+        (True, 60, 60),
+        (True, 1, 1),
+        (True, 2147483647, 2147483647),  # the largest impstats can hold
+        (False, 60, None),  # no external action, so no queue to report on
+    ],
+)
+def test_rsyslog_conf_queue_stats(enabled, stats_interval, expected_interval):
+    stats = _queue_stats_lines(enabled, stats_interval)
+    assert stats == ([] if expected_interval is None else [STATS_MODULE.format(expected_interval), STATS_RULESET])
+
+
+IMPSTATS_DROP_IN = 'module(load="impstats" interval="5" log.syslog="off" log.file="/tmp/impstats.log")'  # the review's reproducer
+
+
+@pytest.fixture
+def rsyslog(tmp_path):
+    """The generated config at tmp_path/rsyslog.conf, its drop-ins in tmp_path/conf.d, and run-rsyslogd -N1 on them."""
+    if not shutil.which('rsyslogd'):
+        pytest.skip('rsyslogd is not installed')
+    conf, conf_d = tmp_path / 'rsyslog.conf', tmp_path / 'conf.d'
+    conf_d.mkdir()
+
+    def generate(stats_interval=60):
+        conf.write_text(_rsyslog_conf(True, stats_interval).replace(external_logging.CONF_D_DIRECTORY, str(conf_d)) + '\n')
+
+    def drop_in(name, body):
+        path = conf_d / name
+        path.parent.mkdir(exist_ok=True)
+        path.write_text(body.replace('{conf_d}', str(conf_d)) + '\n')
+
+    def start():
+        env = dict(os.environ, AWX_RSYSLOG_CONF=str(conf))
+        return subprocess.run(['bash', str(RUN_RSYSLOGD), '-N1'], env=env, capture_output=True, text=True)
+
+    return types.SimpleNamespace(conf_d=conf_d, generate=generate, drop_in=drop_in, start=start)
+
+
+@pytest.mark.parametrize(
+    'drop_ins',
+    [
+        {},
+        {'impstats.conf': '# ' + IMPSTATS_DROP_IN},
+        {'impstats.conf.disabled': IMPSTATS_DROP_IN},  # outside the include's *.conf
+        {'other.conf': 'module(load="omprog")'},
+    ],
+)
+def test_run_rsyslogd_keeps_queue_stats_on_without_an_impstats_drop_in(rsyslog, drop_ins):
+    rsyslog.generate()
+    for name, body in drop_ins.items():
+        rsyslog.drop_in(name, body)
+
+    result = rsyslog.start()
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert 'is ignored' not in result.stdout
+
+
+@pytest.mark.parametrize(
+    'drop_ins',
+    [
+        {'impstats.conf': IMPSTATS_DROP_IN},
+        {'impstats.conf': '$ModLoad impstats'},
+        # nested, which only rsyslog's own parser follows
+        {'outer.conf': 'include(file="{conf_d}/nested/*.conf")', 'nested/impstats.conf': IMPSTATS_DROP_IN},
+    ],
+)
+def test_run_rsyslogd_defers_to_an_impstats_drop_in(rsyslog, drop_ins):
+    # rsyslog refuses a second impstats load, so the drop-in's stands and ours is off for this start.
+    rsyslog.generate()
+    for name, body in drop_ins.items():
+        rsyslog.drop_in(name, body)
+
+    result = rsyslog.start()
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert 'LOG_AGGREGATOR_ACTION_QUEUE_STATS_INTERVAL is ignored' in result.stdout
+    assert "module 'impstats' already in this config" in result.stdout
+
+
+def test_run_rsyslogd_decides_at_each_start_not_when_the_config_was_generated(rsyslog):
+    # A drop-in added or removed after the config was written must not leave the two disagreeing.
+    rsyslog.generate()
+    rsyslog.drop_in('impstats.conf', IMPSTATS_DROP_IN)
+    added = rsyslog.start()
+    (rsyslog.conf_d / 'impstats.conf').unlink()
+    removed = rsyslog.start()
+
+    assert added.returncode == 0, added.stdout + added.stderr
+    assert 'is ignored' in added.stdout
+    assert removed.returncode == 0, removed.stdout + removed.stderr
+    assert 'is ignored' not in removed.stdout
+
+
+def test_run_rsyslogd_with_queue_stats_off_leaves_an_impstats_drop_in_alone(rsyslog):
+    rsyslog.generate(stats_interval=0)
+    rsyslog.drop_in('impstats.conf', IMPSTATS_DROP_IN)
+
+    result = rsyslog.start()
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert result.stdout == ''
+
+
+def test_run_rsyslogd_leaves_other_errors_to_rsyslogd(rsyslog):
+    # Broken in its own right, the config fails with the statistics off too: they stay on and rsyslogd reports it.
+    rsyslog.generate()
+    rsyslog.drop_in('broken.conf', 'action(type="omfile"')
+
+    result = rsyslog.start()
+
+    assert result.returncode != 0
+    assert 'is ignored' not in result.stdout
 
 
 def test_splunk_auth():
