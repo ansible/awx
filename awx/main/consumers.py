@@ -40,6 +40,11 @@ class WebsocketSecretAuthHelper:
 
     @classmethod
     def verify_secret(cls, s, nonce_tolerance=300):
+        if not settings.BROADCAST_WEBSOCKET_SECRET:
+            logger.warning(
+                "BROADCAST_WEBSOCKET_SECRET is empty. WebSocket relay authentication is insecure. " "Set BROADCAST_WEBSOCKET_SECRET to a random value."
+            )
+
         try:
             prefix, payload = s.split(' ')
             if prefix != 'HMAC-SHA256':
@@ -59,7 +64,7 @@ class WebsocketSecretAuthHelper:
 
         secret_serialized = hmac.new(force_bytes(settings.BROADCAST_WEBSOCKET_SECRET), msg=force_bytes(payload_serialized), digestmod='sha256').hexdigest()
 
-        if secret_serialized != secret_parsed:
+        if not hmac.compare_digest(secret_serialized, secret_parsed):
             raise ValueError("Invalid secret")
 
         # Avoid timing attack and check the nonce after all the heavy lifting
