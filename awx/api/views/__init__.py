@@ -663,6 +663,12 @@ class SchedulePreview(GenericAPIView):
 
     @extend_schema_if_available(extensions={"x-ai-description": "Preview schedule recurrence rule occurrences"})
     def post(self, request):
+        """
+        Preview the next local/UTC occurrences for a submitted RRULE.
+
+        Returns HTTP 400 when occurrence expansion exceeds the evaluation time budget
+        (pathological RRULE/EXRULE combinations; AAP-95687).
+        """
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             from awx.main.models.schedules import ScheduleEvaluationTimeout

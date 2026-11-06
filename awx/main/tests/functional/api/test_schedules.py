@@ -249,8 +249,10 @@ def test_preview_minutely_exrule_bysetpos_one(post, admin_user):
 
 
 @pytest.mark.django_db
-def test_preview_minutely_exrule_bysetpos_two_rejected(post, admin_user):
+def test_preview_minutely_exrule_bysetpos_two_rejected(post, admin_user, mocker):
     """AAP-95687: unsatisfiable BYSETPOS=2 EXRULE must 400 quickly, not hang/503."""
+    # Keep the wall-clock budget short so this test does not wait on the default 2s timeout.
+    mocker.patch('awx.main.models.schedules.RRULE_EVALUATION_TIMEOUT', 0.2)
     url = reverse('api:schedule_rrule')
     rrule = (
         'DTSTART;TZID=America/Los_Angeles:20260929T203000 '
@@ -260,7 +262,7 @@ def test_preview_minutely_exrule_bysetpos_two_rejected(post, admin_user):
     started = datetime.datetime.now(datetime.timezone.utc)
     r = post(url, {'rrule': rrule}, admin_user, expect=400)
     elapsed = (datetime.datetime.now(datetime.timezone.utc) - started).total_seconds()
-    assert elapsed < 5
+    assert elapsed < 2
     assert 'rrule' in r.data
     assert 'could not be evaluated in time' in smart_str(r.data['rrule'])
 

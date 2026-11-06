@@ -5763,18 +5763,15 @@ class SchedulePreviewSerializer(BaseSerializer):
         model = Schedule
         fields = ('rrule',)
 
-    # We reject rrules if:
-    # - DTSTART is not include
-    # - Multiple DTSTART
-    # - At least one of RRULE is not included
-    # - EXDATE or RDATE is included
-    # For any rule in the ruleset:
-    #   - INTERVAL is not included
-    #   - SECONDLY is used
-    #   - BYDAY prefixed with a number (MO is good but not 20MO)
-    #   - Can't contain both COUNT and UNTIL
-    #   - COUNT > 999
     def validate_rrule(self, value):
+        """
+        Validate RRULE/EXRULE syntax and reject rules that cannot be evaluated in time.
+
+        Rejects missing/naive/multiple DTSTART, missing RRULE, EXDATE/RDATE, missing
+        INTERVAL, SECONDLY, numeric-prefixed BYDAY, COUNT+UNTIL, and COUNT > 999.
+        After parse succeeds, probes occurrence expansion so pathological combinations
+        fail as ValidationError (HTTP 400) instead of hanging (AAP-95687).
+        """
         rrule_value = value
         by_day_with_numeric_prefix = r".*?BYDAY[\:\=][0-9]+[a-zA-Z]{2}"
         match_multiple_dtstart = re.findall(r".*?(DTSTART(;[^:]+)?\:[0-9]+T[0-9]+Z?)", rrule_value)

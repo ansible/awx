@@ -284,15 +284,19 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         return rruleset
 
     @classmethod
-    def collect_occurrences(cls, rrule_str, after, count, timeout=RRULE_EVALUATION_TIMEOUT, ref_dt=None):
+    def collect_occurrences(cls, rrule_str, after, count, timeout=None, ref_dt=None):
         """
         Return up to ``count`` occurrences after ``after``, within ``timeout`` seconds.
 
         Skips imaginary DST datetimes. Raises ScheduleEvaluationTimeout if expansion
         exceeds the wall-clock budget (pathological RRULE/EXRULE combinations).
+        ``timeout`` defaults to ``RRULE_EVALUATION_TIMEOUT`` (looked up at call time).
         """
+        if timeout is None:
+            timeout = RRULE_EVALUATION_TIMEOUT
 
         def _collect():
+            """Expand occurrences after ``after``, skipping imaginary DST datetimes."""
             rruleset = cls.rrulestr(rrule_str, ref_dt=ref_dt)
             # Request extra candidates so DST-skipped stamps do not shrink the result.
             gen = rruleset.xafter(after, count=max(count * 2, count + 10))
@@ -308,10 +312,13 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         return cls._run_with_timeout(_collect, timeout)
 
     @classmethod
-    def get_end_date_bounded(cls, rrule_str, timeout=RRULE_EVALUATION_TIMEOUT, ref_dt=None):
+    def get_end_date_bounded(cls, rrule_str, timeout=None, ref_dt=None):
         """Like get_end_date, but abort if ruleset[-1] takes longer than ``timeout``."""
+        if timeout is None:
+            timeout = RRULE_EVALUATION_TIMEOUT
 
         def _end():
+            """Parse the ruleset and return its bounded end date."""
             ruleset = cls.rrulestr(rrule_str, ref_dt=ref_dt)
             return cls.get_end_date(ruleset)
 
@@ -369,6 +376,13 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
             return None
 
     def update_computed_fields_no_save(self):
+        """
+        Recompute ``next_run``, ``dtstart``, and ``dtend`` without saving.
+
+        Uses wall-clock bounded occurrence expansion so pathological RRULE/EXRULE
+        combinations raise ScheduleEvaluationTimeout instead of hanging.
+        Returns True when any of those fields changed.
+        """
         affects_fields = ['next_run', 'dtstart', 'dtend']
         starting_values = {}
         for field_name in affects_fields:
