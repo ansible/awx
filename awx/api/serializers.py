@@ -4653,6 +4653,10 @@ class SystemJobListSerializer(SystemJobSerializer, UnifiedJobListSerializer):
         model = SystemJob
         fields = ('*', '-controller_node')  # field removal undone by UJ serializer
 
+    def get_field_names(self, declared_fields, info):
+        field_names = super().get_field_names(declared_fields, info)
+        return tuple(x for x in field_names if x != 'result_stdout')
+
 
 class JobHostSummarySerializer(BaseSerializer):
     class Meta:
