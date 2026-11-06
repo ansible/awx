@@ -4654,6 +4654,7 @@ class SystemJobListSerializer(SystemJobSerializer, UnifiedJobListSerializer):
         fields = ('*', '-controller_node')  # field removal undone by UJ serializer
 
     def get_field_names(self, declared_fields, info):
+        """Omit result_stdout from system job list payloads (kept on detail)."""
         field_names = super().get_field_names(declared_fields, info)
         return tuple(x for x in field_names if x != 'result_stdout')
 
