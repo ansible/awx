@@ -36,6 +36,7 @@ from dispatcherd.publish import task
 from dispatcherd.utils import serialize_task
 
 # AWX
+from awx.main.conf import _is_dangerous_task_env_key
 from awx.main.dispatch import get_task_queuename
 from awx.main.constants import (
     PRIVILEGE_ESCALATION_METHODS,
@@ -520,7 +521,8 @@ class BaseTask(object):
                 env[attr] = str(getattr(settings, attr))
         # Also set environment variables configured in AWX_TASK_ENV setting.
         for key, value in settings.AWX_TASK_ENV.items():
-            env[key] = str(value)
+            if not _is_dangerous_task_env_key(key):
+                env[key] = str(value)
 
         env['AWX_PRIVATE_DATA_DIR'] = private_data_dir
 
@@ -1553,6 +1555,9 @@ class RunProjectUpdate(BaseTask):
         elif not scm_branch:
             scm_branch = 'HEAD'
 
+        if scm_branch.lstrip().startswith('-'):
+            raise RuntimeError('Rejected scm_branch value starting with "-": potential argument injection')
+
         galaxy_creds_are_defined = project_update.project.organization and project_update.project.organization.galaxy_credentials.exists()
         if not galaxy_creds_are_defined and (settings.AWX_ROLES_ENABLED or settings.AWX_COLLECTIONS_ENABLED):
             logger.warning(f'Galaxy role/collection syncing is enabled, but no credentials are configured for {project_update.project.organization}.')
@@ -1571,7 +1576,7 @@ class RunProjectUpdate(BaseTask):
                 'scm_track_submodules': project_update.scm_track_submodules,
                 'roles_enabled': galaxy_creds_are_defined and settings.AWX_ROLES_ENABLED,
                 'collections_enabled': galaxy_creds_are_defined and settings.AWX_COLLECTIONS_ENABLED,
-                'galaxy_task_env': settings.GALAXY_TASK_ENV,
+                'galaxy_task_env': {k: v for k, v in settings.GALAXY_TASK_ENV.items() if not _is_dangerous_task_env_key(k)},
             }
         )
         # apply custom refspec from user for PR refs and the like
@@ -1580,6 +1585,9 @@ class RunProjectUpdate(BaseTask):
         elif project_update.project.allow_override:
             # If branch is override-able, do extra fetch for all branches
             extra_vars['scm_refspec'] = '+refs/heads/*:refs/remotes/origin/*'
+
+        if extra_vars.get('scm_refspec', '').lstrip().startswith('-'):
+            raise RuntimeError('Rejected scm_refspec value starting with "-": potential argument injection')
 
         if project_update.scm_type == 'archive':
             # for raw archive, prevent error moving files between volumes
@@ -2244,9 +2252,8 @@ class RunAdHocCommand(BaseTask):
             args.append('-%s' % ('v' * min(5, ad_hoc_command.verbosity)))
 
         if ad_hoc_command.limit:
-            args.append(ad_hoc_command.limit)
-        else:
-            args.append('all')
+            args.extend(['-l', ad_hoc_command.limit])
+        args.append('all')
 
         return args
 
@@ -2304,9 +2311,9 @@ class RunSystemJob(BaseTask):
                 json_vars = json.loads(system_job.extra_vars)
             if system_job.job_type in ('cleanup_jobs', 'cleanup_activitystream'):
                 if 'days' in json_vars:
-                    args.extend(['--days', str(json_vars.get('days', 60))])
+                    args.extend(['--days', str(int(json_vars.get('days', 60)))])
                 if 'batch_size' in json_vars:
-                    args.extend(['--batch-size', str(json_vars['batch_size'])])
+                    args.extend(['--batch-size', str(int(json_vars['batch_size']))])
                 if 'dry_run' in json_vars and json_vars['dry_run']:
                     args.extend(['--dry-run'])
             if system_job.job_type == 'cleanup_jobs':
@@ -2318,7 +2325,7 @@ class RunSystemJob(BaseTask):
         return args
 
     def write_args_file(self, private_data_dir, args):
-        return self.write_private_data_file(private_data_dir, 'args', ' '.join(args))
+        return self.write_private_data_file(private_data_dir, 'args', ansible_runner.utils.args2cmdline(*args))
 
     def build_env(self, instance, private_data_dir, private_data_files=None):
         base_env = super(RunSystemJob, self).build_env(instance, private_data_dir, private_data_files=private_data_files)

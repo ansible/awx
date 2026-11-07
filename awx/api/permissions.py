@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+import hmac
 import logging
 
 # Django REST Framework
@@ -154,7 +155,7 @@ class JobTemplateCallbackPermission(ModelAccessPermission):
             raise PermissionDenied()
         elif not host_config_key:
             raise PermissionDenied()
-        elif obj and obj.host_config_key != host_config_key:
+        elif obj and not hmac.compare_digest(obj.host_config_key, host_config_key):
             raise PermissionDenied()
         else:
             return True

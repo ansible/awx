@@ -15,8 +15,19 @@ from awx.conf import fields, register, register_validate
 from awx.main.models import ExecutionEnvironment
 from awx.main.constants import SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS
 from awx.main.tasks.policy import OPA_AUTH_TYPES
+from awx.main.utils.common import is_blocked_task_env_key
 
 logger = logging.getLogger('awx.main.conf')
+
+_RSYSLOG_UNSAFE_RE = re.compile(r'["\\\(\)\x00-\x1f]')
+
+
+def validate_rsyslog_safe(value):
+    if value and _RSYSLOG_UNSAFE_RE.search(str(value)):
+        raise serializers.ValidationError(
+            'Value contains characters not allowed in rsyslog configuration (quotes, backslashes, parentheses, or control characters).'
+        )
+
 
 register(
     'ACTIVITY_STREAM_ENABLED',
@@ -430,6 +441,30 @@ register(
     placeholder={'HTTP_PROXY': 'myproxy.local:8080'},
 )
 
+
+def _is_dangerous_task_env_key(key):
+    key = key.upper()
+    return key.startswith('LD_') or key.startswith('DYLD_') or key.startswith('PYTHON') or key == 'PERL5OPT'
+
+
+def jobs_validate(serializer, attrs):
+    errors = []
+    for setting_name in ('AWX_TASK_ENV', 'GALAXY_TASK_ENV'):
+        task_env = attrs.get(setting_name)
+        if not task_env:
+            continue
+        blocked_keys = {key for key in task_env if _is_dangerous_task_env_key(key)}
+        if setting_name == 'AWX_TASK_ENV':
+            blocked_keys |= {key for key in task_env if is_blocked_task_env_key(key)}
+        if blocked_keys:
+            errors.append('{} contains prohibited environment variable keys: {}'.format(setting_name, ', '.join(sorted(blocked_keys))))
+    if errors:
+        raise serializers.ValidationError(_('\n'.join(errors)))
+    return attrs
+
+
+register_validate('jobs', jobs_validate)
+
 register(
     'INSIGHTS_TRACKING_STATE',
     field_class=fields.BooleanField,
@@ -650,6 +685,7 @@ register(
     field_class=fields.CharField,
     allow_null=True,
     default=None,
+    validators=[validate_rsyslog_safe],
     label=_('Logging Aggregator'),
     help_text=_('Hostname/IP where external logs will be sent to.'),
     category=_('Logging'),
@@ -681,6 +717,7 @@ register(
     field_class=fields.CharField,
     allow_blank=True,
     default='',
+    validators=[validate_rsyslog_safe],
     label=_('Logging Aggregator Username'),
     help_text=_('Username for external log aggregator (if required; HTTP/s only).'),
     category=_('Logging'),
@@ -835,6 +872,7 @@ register(
     'LOG_AGGREGATOR_MAX_DISK_USAGE_PATH',
     field_class=fields.CharField,
     default='/var/lib/awx',
+    validators=[validate_rsyslog_safe],
     label=_('File system location for rsyslogd disk persistence'),
     help_text=_(
         'Location to persist logs that should be retried after an outage '

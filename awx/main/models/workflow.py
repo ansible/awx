@@ -258,10 +258,12 @@ class WorkflowJobNode(WorkflowNodeBase):
         default=None,
         on_delete=models.CASCADE,
     )
-    ancestor_artifacts = JSONBlob(
-        default=dict,
-        blank=True,
-        editable=False,
+    ancestor_artifacts = prevent_search(
+        JSONBlob(
+            default=dict,
+            blank=True,
+            editable=False,
+        )
     )
     do_not_run = models.BooleanField(
         default=False,

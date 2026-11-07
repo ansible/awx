@@ -28,7 +28,7 @@ from ansible_base.lib.utils.db import advisory_lock
 from dispatcherd.publish import task
 
 # AWX
-from awx.main.utils.execution_environments import get_default_pod_spec
+from awx.main.utils.execution_environments import get_default_pod_spec, sanitize_pod_spec
 from awx.main.exceptions import ReceptorNodeNotFound
 from awx.main.utils.common import (
     deepmerge,
@@ -802,6 +802,8 @@ class AWXReceptorJob:
                 pod_spec.get('metadata', {}),
                 dict(name=self.pod_name, labels={'ansible-awx': settings.INSTALL_UUID, 'ansible-awx-job-id': str(self.task.instance.id)}),
             )
+
+        pod_spec = sanitize_pod_spec(pod_spec)
 
         return pod_spec
 

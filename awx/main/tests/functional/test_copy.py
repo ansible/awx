@@ -6,7 +6,8 @@ from awx.main.utils import decrypt_field
 from awx.main.models.workflow import WorkflowJobTemplate, WorkflowJobTemplateNode, WorkflowApprovalTemplate
 from awx.main.models.jobs import JobTemplate
 from awx.main.tasks.system import deep_copy_model_obj
-from awx.main.models import Label, ExecutionEnvironment, InstanceGroup
+from awx.main.models import Label, ExecutionEnvironment, InstanceGroup, Organization
+from awx.api.views import WorkflowJobTemplateCopy
 
 
 @pytest.mark.django_db
@@ -319,3 +320,72 @@ def test_job_template_copy_rejects_unsafe_name(post, job_template, admin):
             expect=400,
         )
     assert 'name' in response.data
+
+
+@pytest.mark.django_db
+def test_wfjt_deep_copy_permission_check_strips_unpermitted_node_resources(organization, alice):
+    """Regression: WorkflowJobTemplateCopy.deep_copy_permission_check_func
+    must strip per-node instance_groups, execution_environment, and labels
+    that the copying user lacks access to, and preserve resources the user
+    can access."""
+    # alice is org admin — can view resources in this org
+    organization.admin_role.members.add(alice)
+
+    # a second org alice has no access to
+    hidden_org = Organization.objects.create(name='hidden-org')
+
+    wfjt = WorkflowJobTemplate.objects.create(name='perm-check-wfjt', organization=organization)
+
+    # --- resources alice CAN access ---
+    ig_allowed = InstanceGroup.objects.create(name='ig-allowed')
+    ig_allowed.use_role.members.add(alice)
+
+    ee_allowed = ExecutionEnvironment.objects.create(name='ee-allowed', organization=organization)
+
+    label_allowed = Label.objects.create(name='label-allowed', organization=organization)
+
+    # --- resources alice CANNOT access ---
+    ig_denied = InstanceGroup.objects.create(name='ig-denied')
+    # no use_role membership for alice
+
+    ee_denied = ExecutionEnvironment.objects.create(name='ee-denied', organization=hidden_org)
+
+    label_denied = Label.objects.create(name='label-denied', organization=hidden_org)
+
+    # Node with a mix of allowed and denied M2M items + denied EE
+    node_mixed = WorkflowJobTemplateNode.objects.create(
+        workflow_job_template=wfjt,
+        execution_environment=ee_denied,
+    )
+    node_mixed.instance_groups.add(ig_allowed)
+    node_mixed.instance_groups.add(ig_denied)
+    node_mixed.labels.add(label_allowed)
+    node_mixed.labels.add(label_denied)
+
+    # Node with only allowed resources (covers the EE permit branch)
+    node_ok = WorkflowJobTemplateNode.objects.create(
+        workflow_job_template=wfjt,
+        execution_environment=ee_allowed,
+    )
+    node_ok.instance_groups.add(ig_allowed)
+    node_ok.labels.add(label_allowed)
+
+    # --- Run the guard ---
+    WorkflowJobTemplateCopy.deep_copy_permission_check_func(alice, [node_mixed, node_ok])
+
+    node_mixed.refresh_from_db()
+    node_ok.refresh_from_db()
+
+    # REJECT: unpermitted resources stripped from node_mixed
+    assert ig_denied not in node_mixed.instance_groups.all(), "instance_group without use access must be removed"
+    assert node_mixed.execution_environment is None, "execution_environment without read access must be cleared"
+    assert label_denied not in node_mixed.labels.all(), "label without read access must be removed"
+
+    # PERMIT: permitted resources survive on node_mixed
+    assert ig_allowed in node_mixed.instance_groups.all(), "instance_group with use access must be preserved"
+    assert label_allowed in node_mixed.labels.all(), "label with read access must be preserved"
+
+    # PERMIT: fully-permitted node_ok is unchanged
+    assert node_ok.execution_environment == ee_allowed, "execution_environment with read access must be preserved"
+    assert ig_allowed in node_ok.instance_groups.all()
+    assert label_allowed in node_ok.labels.all()

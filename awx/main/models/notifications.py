@@ -5,14 +5,13 @@ from copy import deepcopy
 import datetime
 import logging
 import json
-import traceback
 
 from django.db import models
 from django.conf import settings
 from django.core.mail.message import EmailMessage
 from django.db import connection
 from django.utils.translation import gettext_lazy as _
-from django.utils.encoding import smart_str, force_str
+from django.utils.encoding import smart_str
 from jinja2 import sandbox, ChainableUndefined
 from jinja2.exceptions import TemplateSyntaxError, UndefinedError, SecurityError
 
@@ -135,6 +134,16 @@ class NotificationTemplate(CommonModelNameNotUnique):
                         merge_messages(old_messages, new_messages, event)
                     new_messages.setdefault(event, None)
 
+        stale_keys = [
+            k
+            for k in list(self.notification_configuration.keys())
+            if k not in self.notification_class.init_parameters
+            and isinstance(self.notification_configuration.get(k), str)
+            and self.notification_configuration[k].startswith('$encrypted$')
+        ]
+        for k in stale_keys:
+            del self.notification_configuration[k]
+
         for field in filter(lambda x: self.notification_class.init_parameters[x]['type'] == "password", self.notification_class.init_parameters):
             if self.notification_configuration[field].startswith("$encrypted$"):
                 continue
@@ -188,9 +197,9 @@ class NotificationTemplate(CommonModelNameNotUnique):
 
     def display_notification_configuration(self):
         field_val = self.notification_configuration.copy()
-        for field in self.notification_class.init_parameters:
-            if field in field_val and force_str(field_val[field]).startswith('$encrypted$'):
-                field_val[field] = '$encrypted$'
+        for key in field_val:
+            if isinstance(field_val[key], str) and field_val[key].startswith('$encrypted$'):
+                field_val[key] = '$encrypted$'
         return field_val
 
 
@@ -216,10 +225,12 @@ class Notification(CreatedModifiedModel):
         default='pending',
         editable=False,
     )
-    error = models.TextField(
-        blank=True,
-        default='',
-        editable=False,
+    error = prevent_search(
+        models.TextField(
+            blank=True,
+            default='',
+            editable=False,
+        )
     )
     notifications_sent = models.IntegerField(
         default=0,
@@ -229,17 +240,21 @@ class Notification(CreatedModifiedModel):
         max_length=32,
         choices=NotificationTemplate.NOTIFICATION_TYPE_CHOICES,
     )
-    recipients = models.TextField(
-        blank=True,
-        default='',
-        editable=False,
+    recipients = prevent_search(
+        models.TextField(
+            blank=True,
+            default='',
+            editable=False,
+        )
     )
-    subject = models.TextField(
-        blank=True,
-        default='',
-        editable=False,
+    subject = prevent_search(
+        models.TextField(
+            blank=True,
+            default='',
+            editable=False,
+        )
     )
-    body = models.JSONField(default=dict, blank=True)
+    body = prevent_search(models.JSONField(default=dict, blank=True))
 
     def get_absolute_url(self, request=None):
         return reverse('api:notification_detail', kwargs={'pk': self.pk}, request=request)
@@ -487,13 +502,15 @@ class JobNotificationMixin(object):
             try:
                 msg = env.from_string(msg_template).render(**context)
             except (TemplateSyntaxError, UndefinedError, SecurityError) as e:
-                msg = '\r\n'.join([e.message, ''.join(traceback.format_exception(None, e, e.__traceback__).replace('\n', '\r\n'))])
+                logger.warning('Error rendering custom notification message template for notification %s: %s', nt.pk, e.message, exc_info=True)
+                msg = 'Error rendering custom notification template.'
 
         if body_template:
             try:
                 body = env.from_string(body_template).render(**context)
             except (TemplateSyntaxError, UndefinedError, SecurityError) as e:
-                body = '\r\n'.join([e.message, ''.join(traceback.format_exception(None, e, e.__traceback__).replace('\n', '\r\n'))])
+                logger.warning('Error rendering custom notification body template for notification %s: %s', nt.pk, e.message, exc_info=True)
+                body = 'Error rendering custom notification template.'
 
         # https://datatracker.ietf.org/doc/html/rfc2822#section-2.2
         # Body should have at least 2 CRLF, some clients will interpret

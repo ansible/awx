@@ -138,6 +138,8 @@ class WebhookReceiverBase(APIView):
         request.body
 
         logger.debug("headers: {}\ndata: {}\n".format(request.headers, request.data))
+        if not self.must_check_signature() and self.is_ignored_request():
+            return Response({'message': _('Webhook ignored')}, status=status.HTTP_200_OK)
         obj = self.get_object()
         self.check_signature(obj)
 

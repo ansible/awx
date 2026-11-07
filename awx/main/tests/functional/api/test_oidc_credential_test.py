@@ -244,6 +244,76 @@ def test_credential_test_job_template_id_not_passed_to_backend(mock_flag, post, 
     assert 'workload_identity_token' in call_kwargs
 
 
+# --- Tests for CredentialExternalTest input-override authorisation gate ---
+
+
+@pytest.mark.django_db
+@override_settings(FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED=False)
+def test_credential_test_use_only_user_cannot_override_inputs(post, alice, external_credential):
+    """A user with only use_role cannot override credential inputs via the
+    request body.  Before the fix, any user with use permission could inject
+    custom ``inputs`` (e.g. server_url) enabling SSRF.  After the fix, input
+    overrides are gated on ``can_access(..., 'change', ...)``."""
+    external_credential.use_role.members.add(alice)
+
+    url = reverse(
+        'api:credential_external_test',
+        kwargs={'pk': external_credential.pk},
+    )
+    data = {
+        'inputs': {'url': 'http://evil.com'},
+        'metadata': {'key': 'some-key'},
+    }
+
+    with mock.patch(
+        'awx.main.models.credential.CredentialType.plugin',
+        new_callable=mock.PropertyMock,
+    ) as mock_plugin:
+        mock_backend = mock.MagicMock()
+        mock_backend.backend.return_value = 'secret'
+        mock_plugin.return_value = mock_backend
+
+        response = post(url, data, alice)
+        assert response.status_code == 202
+
+        # The backend must be called with the STORED url, not the
+        # attacker-supplied one.
+        call_kwargs = mock_backend.backend.call_args[1]
+        assert call_kwargs['url'] == 'http://testhost.com'
+
+
+@pytest.mark.django_db
+@override_settings(FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED=False)
+def test_credential_test_change_user_can_override_inputs(post, admin, external_credential):
+    """A user with change permission can override credential inputs.
+
+    The fix gates input overrides on ``can_access(..., 'change', ...)``, so
+    privileged users must still be able to supply custom inputs for testing."""
+    url = reverse(
+        'api:credential_external_test',
+        kwargs={'pk': external_credential.pk},
+    )
+    data = {
+        'inputs': {'url': 'http://new-url.com'},
+        'metadata': {'key': 'some-key'},
+    }
+
+    with mock.patch(
+        'awx.main.models.credential.CredentialType.plugin',
+        new_callable=mock.PropertyMock,
+    ) as mock_plugin:
+        mock_backend = mock.MagicMock()
+        mock_backend.backend.return_value = 'secret'
+        mock_plugin.return_value = mock_backend
+
+        response = post(url, data, admin)
+        assert response.status_code == 202
+
+        # The backend must be called with the OVERRIDDEN url.
+        call_kwargs = mock_backend.backend.call_args[1]
+        assert call_kwargs['url'] == 'http://new-url.com'
+
+
 # --- Tests for CredentialTypeExternalTest endpoint ---
 
 

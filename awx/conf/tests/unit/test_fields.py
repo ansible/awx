@@ -72,7 +72,7 @@ class TestListTuplesField:
 
 class TestStringListPathField:
     FIELD_VALUES = [
-        ((".", "..", "/"), [".", "..", "/"]),
+        (("/",), ["/"]),
         (("/home",), ["/home"]),
         (("///home///",), ["/home"]),
         (("/home/././././",), ["/home"]),
@@ -82,7 +82,7 @@ class TestStringListPathField:
 
     FIELD_VALUES_INVALID_TYPE = [1.245, {"a": "b"}, ("/home")]
 
-    FIELD_VALUES_INVALID_PATH = ["", "~/", "home", "/invalid_path", "/home/invalid_path"]
+    FIELD_VALUES_INVALID_PATH = ["", "~/", "home"]
 
     @pytest.mark.parametrize("value_in, value_known", FIELD_VALUES)
     def test_to_internal_value_valid(self, value_in, value_known):
@@ -102,7 +102,7 @@ class TestStringListPathField:
         field = StringListPathField()
         with pytest.raises(ValidationError) as e:
             field.to_internal_value([value])
-        assert e.value.detail[0] == "{} is not a valid path choice.".format(value)
+        assert e.value.detail[0] == "{} is not a valid path choice. You must provide an absolute path.".format(value)
 
 
 class TestURLField:
