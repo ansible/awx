@@ -5,6 +5,7 @@ import pytest
 
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.test import override_settings
 from django.test.utils import isolate_apps
 
 from rest_framework import serializers
@@ -51,9 +52,9 @@ class TestBoundedTextField:
         with pytest.raises(TypeError):
             BoundedTextField()
 
-    @pytest.mark.parametrize('bound', [0, 4001])
+    @pytest.mark.parametrize('bound', [0, 4001, None, True, 1.5, '255'])
     def test_bound_out_of_range_is_e003(self, bound):
-        """Bounds outside 1-4000 report ansible_base.E003."""
+        """Invalid bounds report ansible_base.E003 instead of crashing checks."""
         field = BoundedTextField(sql_server_max_length=bound)
         field.name = 'f'
         with mock.patch.object(models.TextField, 'check', return_value=[]):
@@ -184,7 +185,7 @@ class TestChecks:
             """Model with bounded keys on both sides of the SQL Server index-size budget."""
 
             too_wide = BoundedTextField(unique=True, sql_server_max_length=851)
-            fits = BoundedTextField(db_index=True, sql_server_max_length=850)
+            fits = BoundedTextField(db_index=True, sql_server_max_length=848)
             a = BoundedTextField(sql_server_max_length=800)
             b = models.CharField(max_length=50)
             c = models.BigIntegerField()
@@ -200,7 +201,7 @@ class TestChecks:
         assert {e.id for e in errors} == {'awx.E004'}
         msgs = sorted(e.msg for e in errors)
         assert msgs == [
-            'contenttypes.Wide key wide_idx needs 1708 bytes of SQL Server index key',
+            'contenttypes.Wide key wide_idx needs 1712 bytes of SQL Server index key',
             'contenttypes.Wide.too_wide needs 1702 bytes of SQL Server index key',
         ]
 
@@ -209,3 +210,130 @@ class TestChecks:
         labels = {m._meta.app_label for m in awx_checks._awx_models()}
         assert 'main' in labels
         assert not labels & {'dab_rbac', 'dab_resource_registry', 'auth', 'contenttypes'}
+
+    @pytest.mark.parametrize(
+        'key',
+        [models.Index('role_field', name='plain_string_idx'), models.UniqueConstraint(models.F('role_field'), name='plain_f_unique')],
+    )
+    def test_e002_root_f_expression(self, key):
+        """Positional strings and root F expressions are checked without flatten()."""
+        with (
+            mock.patch.object(awx_checks, '_awx_models', return_value=[Role]),
+            mock.patch.object(Role._meta, 'indexes', [key] if isinstance(key, models.Index) else []),
+            mock.patch.object(Role._meta, 'constraints', [key] if isinstance(key, models.UniqueConstraint) else []),
+        ):
+            errors = awx_checks.check_textfield_indexed_is_bounded(None)
+            assert [error.id for error in errors] == ['awx.E002']
+            assert 'Role.role_field' in errors[0].msg
+            assert awx_checks.check_bounded_textfield_index_key_size(None) == []
+
+    @pytest.mark.parametrize('bound', [None, True, 1.5, '255'])
+    def test_e004_invalid_bound_does_not_crash(self, bound):
+        """DAB's E003 owns malformed bounds; AWX's width check still completes."""
+        with (
+            mock.patch.object(awx_checks, '_awx_models', return_value=[Role]),
+            mock.patch.object(Role._meta.get_field('singleton_name'), 'sql_server_max_length', bound),
+            mock.patch.object(Role._meta, 'indexes', [models.Index('singleton_name', name='invalid_bound_idx')]),
+        ):
+            assert awx_checks.check_bounded_textfield_index_key_size(None) == []
+
+    @pytest.mark.parametrize('use_tz, expected_datetime_width', [(True, 10), (False, 8)])
+    def test_widths_match_mssql_django(self, use_tz, expected_datetime_width):
+        """Account for char(32), datetimeoffset/datetime2, and double precision."""
+        with override_settings(USE_TZ=use_tz):
+            assert awx_checks._index_key_width(models.UUIDField()) == 32
+            assert awx_checks._index_key_width(models.DateTimeField()) == expected_datetime_width
+            assert awx_checks._index_key_width(models.DateField()) == 3
+            assert awx_checks._index_key_width(models.FloatField()) == 8
+
+    @pytest.mark.parametrize('field, bound', [(models.UUIDField(), 835), (models.DateTimeField(), 846), (models.FloatField(), 847)])
+    @isolate_apps('django.contrib.contenttypes')
+    def test_e004_mixed_column_widths(self, field, bound):
+        """An oversized mixed key is rejected even when the text column fits alone."""
+
+        class Mixed(models.Model):
+            """A unique key avoids adding the clustered key to the width."""
+
+            name = BoundedTextField(sql_server_max_length=bound)
+            other = field
+
+            class Meta:
+                """Combine text and a fixed-width column in a unique constraint."""
+
+                app_label = 'contenttypes'
+                constraints = [models.UniqueConstraint(fields=['name', 'other'], name='mixed_unique')]
+
+        with override_settings(USE_TZ=True), mock.patch.object(awx_checks, '_awx_models', return_value=[Mixed]):
+            errors = awx_checks.check_bounded_textfield_index_key_size(None)
+        assert [error.id for error in errors] == ['awx.E004']
+        assert 'mixed_unique needs 1702 bytes' in errors[0].msg
+
+    @pytest.mark.parametrize('bound, expected_errors', [(848, 0), (849, 1)])
+    def test_e004_nonunique_index_includes_primary_key(self, bound, expected_errors):
+        """A non-unique index carries Role's four-byte clustered primary key."""
+        with (
+            mock.patch.object(awx_checks, '_awx_models', return_value=[Role]),
+            mock.patch.object(Role._meta.get_field('singleton_name'), 'sql_server_max_length', bound),
+            mock.patch.object(Role._meta, 'indexes', [models.Index('singleton_name', name='nonunique_idx')]),
+        ):
+            errors = awx_checks.check_bounded_textfield_index_key_size(None)
+        assert len(errors) == expected_errors
+        if errors:
+            assert errors[0].id == 'awx.E004'
+            assert 'nonunique_idx needs 1702 bytes' in errors[0].msg
+
+    def test_e004_field_index_includes_primary_key(self):
+        """Field-level db_index follows the same clustered-key accounting."""
+        field = Role._meta.get_field('singleton_name')
+        with (
+            mock.patch.object(awx_checks, '_awx_models', return_value=[Role]),
+            mock.patch.object(field, 'sql_server_max_length', 849),
+            mock.patch.object(field, 'unique', False),
+        ):
+            errors = awx_checks.check_bounded_textfield_index_key_size(None)
+        assert [error.id for error in errors] == ['awx.E004']
+        assert 'Role.singleton_name needs 1702 bytes' in errors[0].msg
+
+    @pytest.mark.parametrize('key_type', ['field', 'constraint', 'together'])
+    def test_e004_unique_key_excludes_primary_key(self, key_type):
+        """Unique keys keep the clustered key in included columns outside the budget."""
+        with (
+            mock.patch.object(awx_checks, '_awx_models', return_value=[Role]),
+            mock.patch.object(Role._meta.get_field('singleton_name'), 'sql_server_max_length', 850),
+            mock.patch.object(Role._meta, 'constraints', [models.UniqueConstraint('singleton_name', name='unique_name')] if key_type == 'constraint' else []),
+            mock.patch.object(Role._meta, 'unique_together', [('singleton_name',)] if key_type == 'together' else []),
+        ):
+            assert awx_checks.check_bounded_textfield_index_key_size(None) == []
+
+    @pytest.mark.parametrize('bound, expected_errors', [(448, 0), (449, 1)])
+    def test_e004_composite_primary_key_uses_clustered_budget(self, bound, expected_errors):
+        """A composite primary key has a 900-byte budget and counts each column once."""
+        with (
+            mock.patch.object(awx_checks, '_awx_models', return_value=[Role]),
+            mock.patch.object(Role._meta, 'pk', models.CompositePrimaryKey('singleton_name', 'id')),
+            mock.patch.object(Role._meta.get_field('singleton_name'), 'sql_server_max_length', bound),
+            mock.patch.object(Role._meta, 'indexes', [models.Index('singleton_name', 'id', name='pk_index')]),
+        ):
+            errors = awx_checks.check_bounded_textfield_index_key_size(None)
+        assert len(errors) == expected_errors
+        if errors:
+            assert errors[0].id == 'awx.E004'
+            assert 'primary key needs 902 bytes' in errors[0].msg
+
+    def test_e002_composite_primary_key(self):
+        """Plain text columns in a composite primary key must also be bounded."""
+        with (
+            mock.patch.object(awx_checks, '_awx_models', return_value=[Role]),
+            mock.patch.object(Role._meta, 'pk', models.CompositePrimaryKey('role_field', 'id')),
+        ):
+            errors = awx_checks.check_textfield_indexed_is_bounded(None)
+        assert [error.id for error in errors] == ['awx.E002']
+        assert 'Role.role_field' in errors[0].msg
+
+    def test_mssql_tag_registration(self):
+        """AWX checks run both by default and with --tag mssql, like DAB's checks."""
+        from django.core.checks.registry import registry
+
+        for check in [awx_checks.check_textfield_indexed_is_bounded, awx_checks.check_bounded_textfield_index_key_size]:
+            assert check in registry.registered_checks
+            assert 'mssql' in check.tags
