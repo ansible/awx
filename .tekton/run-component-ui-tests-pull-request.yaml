@@ -89,7 +89,7 @@ spec:
     - name: ui-revision
       value: "beef31580bd07996e6ac212b868f34e1076807f0"
     - name: test-mapping-image
-      value: "quay.io/aap-ci/test-mapping@sha256:96fd4cf98ceebbe6551d21afc04bc6bd631438bc8f96074c1a2e16ec52668e72"
+      value: "quay.io/aap-ci/test-mapping@sha256:906afcda1ed4c9ced696024583de75c02aa9435b2947d15831e6e88df6a0e9f3"
     - name: dependency-source-overrides
       value: '[{"name":"gateway","repo":"https://github.com/ansible/jewel.git","ref":"a39b016d5bc6846a4d6262d4820dbcc91daf355a"}]'
     - name: gateway-proxy-preflight
