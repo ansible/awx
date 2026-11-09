@@ -87,7 +87,12 @@ spec:
     - name: aap-dev-revision
       value: "c2e01aa56831543a7134cd75487eb0085f8d0587"
     - name: ui-revision
-      value: "beef31580bd07996e6ac212b868f34e1076807f0"
+      value: "342e3bfcb7fa17841394422b0ccb840ef205d25e"
+    # Temporary tagging-validation mode: incomplete per-test resource tags skip UI
+    # execution and produce a diagnostic PR comment. The pipeline default remains the
+    # production-safe fallback that runs all selected specs.
+    - name: tag-coverage-policy
+      value: "skip"
     - name: test-mapping-image
       value: "quay.io/aap-ci/test-mapping@sha256:906afcda1ed4c9ced696024583de75c02aa9435b2947d15831e6e88df6a0e9f3"
     - name: dependency-source-overrides
