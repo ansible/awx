@@ -189,8 +189,6 @@ jobs:
           show-progress: false
 
       - uses: ./.github/actions/setup-python
-        with:
-          python-version: '3.13'
 
       - uses: ./.github/actions/run_awx_devel
         id: awx
@@ -233,7 +231,7 @@ jobs:
       - name: Setup python, referencing action at awx relative path
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
-          python-version: '3.12'
+          python-version-file: awx/.github/python-version
 
       - name: Install playbook dependencies
         run: |
@@ -379,8 +377,6 @@ jobs:
           show-progress: false
 
       - uses: ./.github/actions/setup-python
-        with:
-          python-version: '3.13'
 
       - name: Remove system ansible to avoid conflicts
         run: |
@@ -463,8 +459,6 @@ jobs:
           show-progress: false
 
       - uses: ./.github/actions/setup-python
-        with:
-          python-version: '3.13'
 
       - name: Remove system ansible to avoid conflicts
         run: |
