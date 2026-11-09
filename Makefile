@@ -28,8 +28,9 @@ TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests
 PARALLEL_TESTS ?= -n auto
 # collection integration test directories (defaults to all)
 COLLECTION_TEST_TARGET ?=
-# Python version for ansible-test (must be 3.11, 3.12, or 3.13)
-ANSIBLE_TEST_PYTHON_VERSION ?= 3.13
+# Python version, declared once in .github/python-version (must be 3.11, 3.12, or 3.13 for ansible-test)
+PYTHON_VERSION_TARGET := $(shell cat .github/python-version)
+ANSIBLE_TEST_PYTHON_VERSION ?= $(PYTHON_VERSION_TARGET)
 # args for collection install
 COLLECTION_PACKAGE ?= awx
 COLLECTION_NAMESPACE ?= awx
@@ -671,7 +672,7 @@ VERSION:
 	@echo "awx: $(VERSION)"
 
 PYTHON_VERSION:
-	@echo "$(subst python,,$(PYTHON))"
+	@echo "$(PYTHON_VERSION_TARGET)"
 
 .PHONY: version-for-buildyml
 version-for-buildyml:
