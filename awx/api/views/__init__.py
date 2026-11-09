@@ -663,20 +663,20 @@ class SchedulePreview(GenericAPIView):
 
     @extend_schema_if_available(extensions={"x-ai-description": "Preview schedule recurrence rule occurrences"})
     def post(self, request):
+        """
+        Preview the next local/UTC occurrences for a submitted RRULE.
+
+        Returns HTTP 400 when occurrence expansion exceeds the evaluation time budget
+        (pathological RRULE/EXRULE combinations; AAP-95687).
+        """
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            next_stamp = now()
-            schedule = []
-            gen = models.Schedule.rrulestr(serializer.validated_data['rrule']).xafter(next_stamp, count=20)
+            from awx.main.models.schedules import ScheduleEvaluationTimeout
 
-            # loop across the entire generator and grab the first 10 events
-            for event in gen:
-                if len(schedule) >= 10:
-                    break
-                if not dateutil.tz.datetime_exists(event):
-                    # skip imaginary dates, like 2:30 on DST boundaries
-                    continue
-                schedule.append(event)
+            try:
+                schedule = models.Schedule.collect_occurrences(serializer.validated_data['rrule'], after=now(), count=10)
+            except ScheduleEvaluationTimeout as e:
+                return Response({'rrule': [str(e)]}, status=status.HTTP_400_BAD_REQUEST)
 
             return Response({'local': schedule, 'utc': [s.astimezone(dt_timezone.utc) for s in schedule]})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
