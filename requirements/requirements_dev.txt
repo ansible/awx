@@ -14,6 +14,7 @@ pytest-django
 pytest-mock
 pytest-timeout
 pytest-xdist
+sqlean.py
 tox  # for awxkit
 logutils
 jupyter
