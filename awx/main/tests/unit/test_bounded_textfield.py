@@ -1,3 +1,4 @@
+from importlib import import_module
 from unittest import mock
 
 import pytest
@@ -8,8 +9,9 @@ from django.test.utils import isolate_apps
 
 from rest_framework import serializers
 
+from ansible_base.lib.fields import BoundedTextField, SQLServerMaxLengthValidator
+
 from awx.main import checks as awx_checks
-from awx.main.fields import BoundedTextField, SQLServerMaxLengthValidator
 from awx.main.models.rbac import Role, RoleAncestorEntry
 
 
@@ -36,7 +38,7 @@ class TestBoundedTextField:
         """deconstruct() keeps the bound and leaves out the implied validator."""
         field = BoundedTextField(null=True, unique=True, sql_server_max_length=64)
         name, path, args, kwargs = field.deconstruct()
-        assert path == 'awx.main.fields.BoundedTextField'
+        assert path == 'ansible_base.lib.fields.BoundedTextField'
         assert kwargs['sql_server_max_length'] == 64
         assert 'validators' not in kwargs  # the bound validator is implied, not serialized into migrations
         clone = BoundedTextField(*args, **kwargs)
@@ -51,12 +53,12 @@ class TestBoundedTextField:
 
     @pytest.mark.parametrize('bound', [0, 4001])
     def test_bound_out_of_range_is_e003(self, bound):
-        """Bounds outside 1-4000 report awx.E003."""
+        """Bounds outside 1-4000 report ansible_base.E003."""
         field = BoundedTextField(sql_server_max_length=bound)
         field.name = 'f'
         with mock.patch.object(models.TextField, 'check', return_value=[]):
             errors = field.check()
-        assert [e.id for e in errors] == ['awx.E003']
+        assert [e.id for e in errors] == ['ansible_base.E003']
 
     @pytest.mark.parametrize('bound', [1, 4000])
     def test_bound_in_range_is_clean(self, bound):
@@ -71,13 +73,13 @@ class TestSQLServerMaxLengthValidator:
 
     def test_not_enforced_on_postgres(self):
         """Over-length values are accepted on PostgreSQL."""
-        with mock.patch('awx.main.fields.connection', _vendor('postgresql')):
+        with mock.patch('ansible_base.lib.fields.connection', _vendor('postgresql')):
             SQLServerMaxLengthValidator(3)('x' * 100)
 
     def test_enforced_on_mssql(self):
         """Over-length values are rejected on SQL Server with code max_length."""
         validator = SQLServerMaxLengthValidator(3)
-        with mock.patch('awx.main.fields.connection', _vendor('microsoft')):
+        with mock.patch('ansible_base.lib.fields.connection', _vendor('microsoft')):
             validator('abc')
             with pytest.raises(ValidationError) as exc:
                 validator('abcd')
@@ -86,7 +88,7 @@ class TestSQLServerMaxLengthValidator:
     def test_counts_utf16_code_units(self):
         """Characters outside the BMP count as two UTF-16 code units."""
         validator = SQLServerMaxLengthValidator(2)
-        with mock.patch('awx.main.fields.connection', _vendor('microsoft')):
+        with mock.patch('ansible_base.lib.fields.connection', _vendor('microsoft')):
             validator('éé')  # two BMP characters fit
             with pytest.raises(ValidationError):
                 validator('\U0001f600x')  # a surrogate pair is two code units, plus one
@@ -124,6 +126,17 @@ class TestAdoptedFields:
         field = RoleAncestorEntry._meta.get_field('role_field')
         assert isinstance(field, BoundedTextField)
         assert field.db_type(_vendor('microsoft')) == 'nvarchar(255)'
+
+    @pytest.mark.parametrize('model_name, field_name', [('Role', 'singleton_name'), ('RoleAncestorEntry', 'role_field')])
+    def test_migration_uses_dab_field(self, model_name, field_name):
+        """Historical and live fields use DAB's class and serialize identically."""
+        migration = import_module('awx.main.migrations.0002_squashed_v300_release')
+        operation = next(op for op in migration.Migration.operations if getattr(op, 'name', None) == model_name)
+        field = dict(operation.fields)[field_name]
+        model = {'Role': Role, 'RoleAncestorEntry': RoleAncestorEntry}[model_name]
+        live_field = model._meta.get_field(field_name)
+        assert type(field) is BoundedTextField
+        assert field.deconstruct()[1:] == live_field.deconstruct()[1:]
 
 
 class TestChecks:

@@ -10,7 +10,7 @@ from django.core.checks import Error, register
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models
 
-from awx.main.fields import BoundedTextField
+from ansible_base.lib.fields import BoundedTextField
 
 # SQL Server limits index keys to 1700 bytes for the nonclustered indexes Django creates
 # for Index, UniqueConstraint, and unique_together. The budget is shared by every column
@@ -91,7 +91,7 @@ def check_textfield_indexed_is_bounded(app_configs, **kwargs):
                 errors.append(
                     Error(
                         f'{model._meta.label}.{field.name} is an indexed or unique TextField',
-                        hint=f"Use awx.main.fields.BoundedTextField for '{field.name}' in {model._meta.label}; SQL Server cannot index nvarchar(max).",
+                        hint=f"Use ansible_base.lib.fields.BoundedTextField for '{field.name}' in {model._meta.label}; SQL Server cannot index nvarchar(max).",
                         obj=model,
                         id='awx.E002',
                     )

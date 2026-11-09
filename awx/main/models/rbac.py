@@ -26,6 +26,7 @@ from django.apps import apps
 from django.conf import settings
 
 # Ansible_base app
+from ansible_base.lib.fields import BoundedTextField
 from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment, RoleTeamAssignment
 from ansible_base.rbac.sync import maybe_reverse_sync_assignment, maybe_reverse_sync_unassignment, maybe_reverse_sync_role_definition
 from ansible_base.rbac import permission_registry
@@ -36,7 +37,6 @@ from ansible_base.lib.utils.models import get_type_for_model
 from awx.api.versioning import reverse
 from awx.main.migrations._dab_rbac import build_role_map, get_permissions_for_role
 from awx.main.constants import role_name_to_perm_mapping, org_role_to_permission
-from awx.main.fields import BoundedTextField
 
 __all__ = [
     'Role',
