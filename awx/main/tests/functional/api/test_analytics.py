@@ -1,5 +1,6 @@
 import pytest
 import requests
+
 from unittest import mock
 from awx.api.views.analytics import AnalyticsGenericView, MissingSettings, AUTOMATION_ANALYTICS_API_URL_PATH, ERROR_MISSING_USER, ERROR_MISSING_PASSWORD
 from django.test.utils import override_settings
@@ -28,6 +29,25 @@ class TestAnalyticsGenericView:
         request = requests.session()
         request.headers.update(existing_headers)
         assert set(expected_headers.items()).issubset(set(AnalyticsGenericView._request_headers(request).items()))
+
+    def test__base_auth_request_passes_process_proxy(self, monkeypatch):
+        monkeypatch.setenv('HTTPS_PROXY', 'http://proxy.example:3128')
+        monkeypatch.setenv('https_proxy', 'http://proxy.example:3128')
+        monkeypatch.delenv('NO_PROXY', raising=False)
+        monkeypatch.delenv('no_proxy', raising=False)
+        request = RequestFactory().get('/api/v2/analytics/report/automation_calculator/')
+        with mock.patch('awx.api.views.analytics.requests.request') as mock_request:
+            mock_request.return_value = mock.Mock(status_code=200)
+            AnalyticsGenericView._base_auth_request(
+                request,
+                'GET',
+                'https://cloud.redhat.com/api/tower-analytics/v1/report/automation_calculator/',
+                'user',
+                'pw',
+                {},
+            )
+
+        assert mock_request.call_args.kwargs['proxies']['https'] == 'http://proxy.example:3128'
 
     @pytest.mark.parametrize(
         "path,expected_path",
