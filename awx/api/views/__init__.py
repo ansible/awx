@@ -59,6 +59,7 @@ from drf_spectacular.utils import extend_schema_view, extend_schema
 from ansible_base.lib.utils.requests import get_remote_hosts
 from ansible_base.rbac.models import RoleEvaluation
 from ansible_base.lib.utils.schema import extend_schema_if_available
+from ansible_base.lib.utils.views.deprecation import DeprecatedFieldsViewMixin, deprecated
 from ansible_base.lib.workload_identity.controller import AutomationControllerJobScope
 
 # flags
@@ -171,6 +172,7 @@ def api_exception_handler(exc, context):
     return exception_handler(exc, context)
 
 
+@deprecated(detail='The Dashboard endpoint is deprecated.')
 class DashboardView(APIView):
     deprecated = True
 
@@ -601,6 +603,7 @@ class InstanceGroupAccessList(ResourceAccessList):
     resource_purpose = 'users who can access the instance group'
 
 
+@deprecated(detail='Instance Group Object Roles has been deprecated.')
 class InstanceGroupObjectRolesList(SubListAPIView):
     deprecated = True
     model = models.Role
@@ -771,6 +774,7 @@ class TeamUsersList(BaseUsersList):
     resource_purpose = 'users of a team'
 
 
+@deprecated(detail='Team Roles is deprecated.')
 class TeamRolesList(SubListAttachDetachAPIView):
     deprecated = True
     model = models.Role
@@ -812,6 +816,7 @@ class TeamRolesList(SubListAttachDetachAPIView):
         return super(TeamRolesList, self).post(request, *args, **kwargs)
 
 
+@deprecated(detail='Team Object Roles is deprecated.')
 class TeamObjectRolesList(SubListAPIView):
     deprecated = True
     model = models.Role
@@ -1190,6 +1195,7 @@ class ProjectAccessList(ResourceAccessList):
     resource_purpose = 'users who can access the project'
 
 
+@deprecated(detail='Project Object Roles is deprecated.')
 class ProjectObjectRolesList(SubListAPIView):
     deprecated = True
     model = models.Role
@@ -1243,6 +1249,7 @@ class UserTeamsList(SubListAPIView):
         return models.Team.access_qs(self.request.user, 'view').filter(Q(member_role__members=u) | Q(admin_role__members=u)).distinct()
 
 
+@deprecated(detail='User Roles is deprecated.')
 class UserRolesList(SubListAttachDetachAPIView):
     deprecated = True
     model = models.Role
@@ -1566,6 +1573,7 @@ class CredentialAccessList(ResourceAccessList):
     resource_purpose = 'users who can access the credential'
 
 
+@deprecated(detail='Credential Object Roles is deprecated.')
 class CredentialObjectRolesList(SubListAPIView):
     deprecated = True
     model = models.Role
@@ -2468,7 +2476,7 @@ class InventorySourceList(ListCreateAPIView):
     resource_purpose = 'inventory sources'
 
 
-class InventorySourceDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
+class InventorySourceDetail(DeprecatedFieldsViewMixin, RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
     model = models.InventorySource
     serializer_class = serializers.InventorySourceSerializer
     resource_purpose = 'inventory source detail'
@@ -2644,7 +2652,7 @@ class InventoryUpdateList(ListAPIView):
     resource_purpose = 'inventory updates'
 
 
-class InventoryUpdateDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
+class InventoryUpdateDetail(DeprecatedFieldsViewMixin, UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
     model = models.InventoryUpdate
     serializer_class = serializers.InventoryUpdateDetailSerializer
     resource_purpose = 'inventory update detail'
@@ -3279,6 +3287,7 @@ class JobTemplateAccessList(ResourceAccessList):
     resource_purpose = 'users who can access a job template'
 
 
+@deprecated(detail='Job Template Object Roles is deprecated.')
 class JobTemplateObjectRolesList(SubListAPIView):
     deprecated = True
     model = models.Role
@@ -3737,6 +3746,7 @@ class WorkflowJobTemplateAccessList(ResourceAccessList):
     resource_purpose = 'users who can access a workflow job template'
 
 
+@deprecated(detail='Workflow Job Template Object Roles is deprecated.')
 class WorkflowJobTemplateObjectRolesList(SubListAPIView):
     deprecated = True
     model = models.Role
@@ -4903,6 +4913,7 @@ class ActivityStreamDetail(RetrieveAPIView):
     resource_purpose = 'activity stream entry detail'
 
 
+@deprecated(detail='Role is deprecated.')
 class RoleList(ListAPIView):
     deprecated = True
     model = models.Role
@@ -4912,6 +4923,7 @@ class RoleList(ListAPIView):
     resource_purpose = 'roles'
 
 
+@deprecated(detail='Role Detail is deprecated')
 class RoleDetail(RetrieveAPIView):
     deprecated = True
     model = models.Role
@@ -4919,6 +4931,7 @@ class RoleDetail(RetrieveAPIView):
     resource_purpose = 'role detail'
 
 
+@deprecated(detail='Role Users List is deprecated')
 class RoleUsersList(SubListAttachDetachAPIView):
     deprecated = True
     model = models.User
@@ -4950,6 +4963,7 @@ class RoleUsersList(SubListAttachDetachAPIView):
         return super(RoleUsersList, self).post(request, *args, **kwargs)
 
 
+@deprecated(detail='Role Teams is deprecated.')
 class RoleTeamsList(SubListAttachDetachAPIView):
     deprecated = True
     model = models.Team

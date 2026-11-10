@@ -37,6 +37,7 @@ from awx_plugins.interfaces._temporary_private_licensing_api import detect_serve
 from ansible_base.rest_filters.rest_framework.field_lookup_backend import FieldLookupBackend
 from ansible_base.lib.utils.models import get_all_field_names
 from ansible_base.lib.utils.requests import get_remote_host, is_proxied_request
+from ansible_base.lib.utils.views.deprecation import deprecated, mark_deprecated
 from ansible_base.rbac.models import RoleEvaluation, RoleDefinition
 from ansible_base.rbac.permission_registry import permission_registry
 from ansible_base.jwt_consumer.common.util import validate_x_trusted_proxy_header
@@ -297,6 +298,15 @@ class APIView(views.APIView):
 
         if getattr(self, 'deprecated', False):
             response['Warning'] = '299 awx "This resource has been deprecated and will be removed in a future release."'
+
+        deprecation = getattr(self, 'deprecation', None)
+        if deprecation or getattr(self, 'deprecated', False):
+            if deprecation:
+                detail = deprecation['detail']
+            else:
+                detail = 'This resource has been deprecated and will be removed in a future release.'
+
+            mark_deprecated(response, detail)
 
         return response
 
@@ -837,6 +847,7 @@ class RetrieveUpdateDestroyAPIView(RetrieveUpdateAPIView, DestroyAPIView):
     pass
 
 
+@deprecated(detail='Resource Access List has been deprecated.')
 class ResourceAccessList(ParentMixin, ListAPIView):
     deprecated = True
     serializer_class = ResourceAccessListElementSerializer

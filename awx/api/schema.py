@@ -2,6 +2,7 @@ import json
 import os
 import warnings
 
+from ansible_base.lib.utils.schema import DeprecationAutoSchemaMixin
 from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.openapi import AutoSchema
 from drf_spectacular.views import (
@@ -155,7 +156,7 @@ def inject_clean_text_pattern_components(
     return result
 
 
-class CustomAutoSchema(AutoSchema):
+class CustomAutoSchema(DeprecationAutoSchemaMixin, AutoSchema):
     """Custom AutoSchema to add swagger_topic to tags and handle deprecated endpoints."""
 
     def get_tags(self):
@@ -187,10 +188,6 @@ class CustomAutoSchema(AutoSchema):
             tags = ['api']  # Fallback to default value
 
         return tags
-
-    def is_deprecated(self):
-        """Return `True` if this operation is to be marked as deprecated."""
-        return getattr(self.view, 'deprecated', False)
 
 
 class AuthenticatedSpectacularAPIView(SpectacularAPIView):

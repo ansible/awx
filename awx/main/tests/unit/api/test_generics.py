@@ -209,3 +209,53 @@ def test_related_search_reverse_FK_field():
     view = ListAPIView()
     view.model = Credential
     assert 'unifiedjobtemplates__search' in view.related_search_fields
+
+
+class TestFinalizeResponseDeprecation:
+    """Unit tests for deprecation header logic in APIView.finalize_response."""
+
+    def _make_view(self, mocker, deprecated=False, deprecation=None):
+        from awx.api.generics import APIView
+
+        view = APIView()
+        view.request = mocker.MagicMock()
+        view.request.query_params = {}
+        view.headers = {}
+        view.kwargs = {}
+        view.format_kwarg = None
+        if deprecated:
+            view.deprecated = True
+        if deprecation:
+            view.deprecation = deprecation
+        return view
+
+    def test_deprecated_flag_sets_warning_header(self, mocker):
+        view = self._make_view(mocker, deprecated=True)
+        response = Response(status=200)
+        result = view.finalize_response(view.request, response)
+        result.render()
+        assert '299 awx' in result['Warning']
+
+    def test_deprecated_flag_sets_new_headers(self, mocker):
+        view = self._make_view(mocker, deprecated=True)
+        response = Response(status=200)
+        result = view.finalize_response(view.request, response)
+        result.render()
+        assert result['X-API-Deprecated'] == 'true'
+        assert 'X-API-Deprecated-Detail' in result
+
+    def test_deprecation_dict_sets_custom_detail(self, mocker):
+        view = self._make_view(mocker, deprecation={'detail': 'Use /api/v2/new/ instead.'})
+        response = Response(status=200)
+        result = view.finalize_response(view.request, response)
+        result.render()
+        assert result['X-API-Deprecated'] == 'true'
+        assert 'Use /api/v2/new/ instead.' in result['X-API-Deprecated-Detail']
+
+    def test_no_deprecation_no_headers(self, mocker):
+        view = self._make_view(mocker)
+        response = Response(status=200)
+        result = view.finalize_response(view.request, response)
+        result.render()
+        assert 'Warning' not in result
+        assert 'X-API-Deprecated' not in result
