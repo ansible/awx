@@ -53,7 +53,7 @@ spec:
     - name: git-resolver-token-key
       value: password
     - name: quay-push-secret
-      value: quay-ui-test-mapping-credential
+      value: quay-aap-ci-test-mapping-publisher
     # Generate this trial artifact from the tag-prototype branch.
     - name: ui-repo-revision
       value: feat/aap-component-ui-tags-prototype
