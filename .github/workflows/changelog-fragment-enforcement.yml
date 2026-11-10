@@ -11,7 +11,7 @@ on:
       - release_**
       - feature_**
       - stable-**
-      - AAP-86434/**
+      - AAP-86434-*
     paths:
       - 'schema.json'
       - 'changelogs/fragments/**'
