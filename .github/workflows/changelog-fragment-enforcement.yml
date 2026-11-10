@@ -12,6 +12,9 @@ on:
       - feature_**
       - stable-**
       - AAP-86434/**
+    paths:
+      - 'schema.json'
+      - 'changelogs/fragments/**'
 
 permissions:
   contents: read
