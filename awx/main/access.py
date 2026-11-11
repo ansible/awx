@@ -1142,11 +1142,15 @@ class CredentialAccess(BaseAccess):
             team_obj = get_object_from_data('team', Team, data)
             if not check_user_access(self.user, Team, 'change', team_obj, None):
                 return False
-        if data and data.get('organization', None):
-            organization_obj = get_object_from_data('organization', Organization, data)
-            if not any([check_user_access(self.user, Organization, 'change', organization_obj, None), self.user in organization_obj.credential_admin_role]):
-                return False
-        if not any(data.get(key, None) for key in ('user', 'team', 'organization')):
+        if not self.check_related('organization', Organization, data, role_field='credential_admin_role'):
+            return False
+        reference_obj = data.get('reference_obj', None)
+        if reference_obj:
+            # user and team are write-only and not stored on the credential, so a copy can only inherit organization
+            has_owner = reference_obj.organization_id is not None
+        else:
+            has_owner = any(data.get(key, None) for key in ('user', 'team', 'organization'))
+        if not has_owner:
             return False  # you have to provide 1 owner field
         return True
 
@@ -1166,11 +1170,6 @@ class CredentialAccess(BaseAccess):
         # if obj.user is None and obj.team is None:
         #    return True
         return self.can_change(obj, None)
-
-    def can_copy(self, obj):
-        if obj.organization_id:
-            return self.can_add({'organization': obj.organization_id})
-        return self.can_add({'reference_obj': obj})
 
     def get_user_capabilities(self, obj, **kwargs):
         user_capabilities = super(CredentialAccess, self).get_user_capabilities(obj, **kwargs)
