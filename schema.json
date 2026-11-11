@@ -32555,7 +32555,14 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "No response body"
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServiceIndexMetadata"
+                                }
+                            }
+                        },
+                        "description": ""
                     }
                 },
                 "x-ai-description": "Retrieve single service index metadatum"
@@ -47480,6 +47487,22 @@
                     "name",
                     "rrule",
                     "unified_job_template"
+                ]
+            },
+            "ServiceIndexMetadata": {
+                "type": "object",
+                "properties": {
+                    "service_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "service_type": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "service_id",
+                    "service_type"
                 ]
             },
             "ServiceRoleTeamAssignment": {
