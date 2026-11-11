@@ -183,7 +183,6 @@ class TestOrphanJobTemplate:
         assert access.can_read(job_template)
 
     def test_system_admin_orphan_capabilities(self, job_template, admin_user):
-        job_template.capabilities_cache = {'edit': False}
         access = JobTemplateAccess(admin_user)
         capabilities = access.get_user_capabilities(job_template, method_list=['edit'])
         assert capabilities['edit']

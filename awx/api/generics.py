@@ -1005,8 +1005,9 @@ class CopyAPIView(GenericAPIView):
         create_kwargs_check = {}
         for key in create_kwargs:
             create_kwargs_check[key] = getattr(create_kwargs[key], 'pk', None) or create_kwargs[key]
-        if not request.user.can_access(self.model, 'add', create_kwargs_check):
-            raise PermissionDenied()
+        can_add, messages = request.user.can_access_with_errors(self.model, 'add', create_kwargs_check)
+        if not can_add:
+            raise PermissionDenied(messages or None)
         if not request.user.can_access(self.model, 'copy_related', obj):
             raise PermissionDenied()
         serializer = self.get_serializer(data=request.data)

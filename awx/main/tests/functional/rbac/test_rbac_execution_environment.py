@@ -101,12 +101,13 @@ def test_give_object_permission_to_ee(setup_managed_roles, org_ee, ee_rd, org_me
     access = ExecutionEnvironmentAccess(org_member)
     assert access.can_read(org_ee)  # by virtue of being an org member
     assert not access.can_change(org_ee, {'name': 'new'})
-    check_user_capabilities(org_member, org_ee, {'edit': False, 'delete': False, 'copy': False})
+    # Copy capability defers the related organization policy to the copy request.
+    check_user_capabilities(org_member, org_ee, {'edit': False, 'delete': False, 'copy': True})
 
     ee_rd.give_permission(org_member, org_ee)
     assert access.can_change(org_ee, {'name': 'new', 'organization': org_ee.organization.id})
 
-    check_user_capabilities(org_member, org_ee, {'edit': True, 'delete': True, 'copy': False})
+    check_user_capabilities(org_member, org_ee, {'edit': True, 'delete': True, 'copy': True})
 
 
 @pytest.mark.django_db
@@ -156,7 +157,7 @@ def test_need_related_organization_access(org_ee, ee_rd, org_member):
 def test_give_org_permission_to_ee(setup_managed_roles, org_ee, organization, org_member, check_user_capabilities, style, org_ee_rd):
     access = ExecutionEnvironmentAccess(org_member)
     assert not access.can_change(org_ee, {'name': 'new'})
-    check_user_capabilities(org_member, org_ee, {'edit': False, 'delete': False, 'copy': False})
+    check_user_capabilities(org_member, org_ee, {'edit': False, 'delete': False, 'copy': True})
 
     if style == 'new':
         org_ee_rd.give_permission(org_member, organization)
