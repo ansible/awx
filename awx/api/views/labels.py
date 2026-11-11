@@ -68,7 +68,7 @@ class LabelSubListCreateAttachDetachView(SubListCreateAttachDetachAPIView):
                 )
                 if label_counts['total'] >= 100 and not label_counts['requested']:
                     return Response(
-                        dict(msg=_(f'Maximum number of labels for {self.parent_model._meta.verbose_name_raw} reached.')), status=HTTP_400_BAD_REQUEST
+                        {'msg': _(f'Maximum number of labels for {self.parent_model._meta.verbose_name_raw} reached.')}, status=HTTP_400_BAD_REQUEST
                     )
 
         return super().post(request, *args, **kwargs)
