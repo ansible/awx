@@ -12,6 +12,7 @@ from awx.api.views import JobTemplateLabelList, InventoryInventorySourcesUpdate,
 
 from awx.main.views import handle_error
 
+from rest_framework.response import Response
 from rest_framework.test import APIRequestFactory
 
 
@@ -92,6 +93,26 @@ class TestJobTemplateLabelList:
 
         assert response.status_code == 400
         attach.assert_not_called()
+
+    def test_reattach_at_label_limit_is_forwarded(self):
+        """At 100 labels, reattaching an existing label is a no-op (204).
+
+        A >= 100 guard would reject the request before the attach handler can
+        preserve this idempotent behavior.
+        """
+        view = JobTemplateLabelList()
+        view.kwargs = {'pk': 1}
+        request = mock.MagicMock(data={'id': 1})
+
+        with (
+            mock.patch.object(view, 'attach', return_value=Response(status=204)) as attach,
+            mock.patch('awx.api.views.labels.Label.objects.filter') as label_filter,
+        ):
+            label_filter.return_value.count.return_value = 100
+            response = view.post(request)
+
+        assert response.status_code == 204
+        attach.assert_called_once_with(request)
 
 
 class TestInventoryInventorySourcesUpdate:
