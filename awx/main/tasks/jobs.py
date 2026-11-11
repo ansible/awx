@@ -969,12 +969,12 @@ class SourceControlMixin(BaseTask):
                 self.instance = self.update_model(self.instance.pk, source_project_update=local_project_sync)
 
             try:
-                # the job private_data_dir is passed so sync can download roles and collections there
-                sync_task = RunProjectUpdate(job_private_data_dir=private_data_dir)
+                sync_task = RunProjectUpdate()
                 sync_task.instance = local_project_sync  # avoids "waiting" status check, performance
                 sync_task.run(local_project_sync.id)
                 local_project_sync.refresh_from_db()
                 self.instance = self.update_model(self.instance.pk, scm_revision=local_project_sync.scm_revision)
+                RunProjectUpdate.make_local_copy(local_project_sync, private_data_dir)
             except Exception:
                 local_project_sync.refresh_from_db()
                 if local_project_sync.status != 'canceled':
@@ -1414,10 +1414,6 @@ class RunProjectUpdate(BaseTask):
     event_model = ProjectUpdateEvent
     callback_class = RunnerCallbackForProjectUpdate
 
-    def __init__(self, *args, job_private_data_dir=None, **kwargs):
-        super(RunProjectUpdate, self).__init__(*args, **kwargs)
-        self.job_private_data_dir = job_private_data_dir
-
     def build_private_data(self, project_update, private_data_dir):
         """
         Return SSH private key data needed for this project update.
@@ -1809,11 +1805,6 @@ class RunProjectUpdate(BaseTask):
                 self._sync_requirements_cache(base_path, cache_path)
             elif os.path.exists(stage_path):
                 shutil.rmtree(stage_path)  # cannot trust content update produced
-
-            if self.job_private_data_dir:
-                if status == 'successful':
-                    # copy project folder before resetting to default branch
-                    self.make_local_copy(instance, self.job_private_data_dir)
         finally:
             if instance.launch_type != 'sync':
                 self.release_lock(instance.project)

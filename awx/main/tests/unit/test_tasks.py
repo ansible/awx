@@ -1927,6 +1927,33 @@ def test_sync_and_copy_get_sync_needs_called_under_shared_lock(get_sync_needs, s
     assert call_order[1] == 'get_sync_needs'
 
 
+@mock.patch('awx.main.tasks.jobs.RunProjectUpdate.make_local_copy')
+@mock.patch('awx.main.tasks.jobs.RunProjectUpdate.run')
+@mock.patch('awx.main.tasks.jobs.RunProjectUpdate.__init__', return_value=None)
+@mock.patch('awx.main.tasks.jobs.SourceControlMixin.spawn_project_sync')
+@mock.patch('awx.main.tasks.jobs.SourceControlMixin.get_sync_needs')
+def test_sync_and_copy_without_lock_calls_make_local_copy(get_sync_needs, spawn_sync, pu_init, pu_run, make_copy, mock_me):
+    """make_local_copy must be called in sync_and_copy_without_lock after a successful sync,
+    not deferred to post_run_hook where cache-management errors could silently prevent it."""
+    get_sync_needs.return_value = ['update_insights']
+
+    local_sync = mock.Mock()
+    local_sync.scm_revision = 'abc123'
+    spawn_sync.return_value = local_sync
+
+    project = mock.Mock()
+    project.scm_type = 'insights'
+
+    task = jobs.RunJob()
+    task.instance = mock.Mock(spec=Job)
+    task.instance.pk = 1
+    task.update_model = mock.Mock(return_value=task.instance)
+
+    task.sync_and_copy_without_lock(project, '/fake/private_data_dir')
+
+    make_copy.assert_called_once_with(local_sync, '/fake/private_data_dir')
+
+
 class TestClearProjectCachePreservesReqcache:
     def test_reqcache_entries_preserved(self, tmp_path):
         cache_dir = tmp_path / 'cache'
