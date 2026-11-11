@@ -1939,6 +1939,7 @@ def test_sync_and_copy_without_lock_calls_make_local_copy(get_sync_needs, spawn_
 
     local_sync = mock.Mock()
     local_sync.scm_revision = 'abc123'
+    local_sync.status = 'successful'
     spawn_sync.return_value = local_sync
 
     project = mock.Mock()
@@ -1952,6 +1953,36 @@ def test_sync_and_copy_without_lock_calls_make_local_copy(get_sync_needs, spawn_
     task.sync_and_copy_without_lock(project, '/fake/private_data_dir')
 
     make_copy.assert_called_once_with(local_sync, '/fake/private_data_dir')
+
+
+@mock.patch('awx.main.tasks.jobs.RunProjectUpdate.make_local_copy')
+@mock.patch('awx.main.tasks.jobs.RunProjectUpdate.run')
+@mock.patch('awx.main.tasks.jobs.RunProjectUpdate.__init__', return_value=None)
+@mock.patch('awx.main.tasks.jobs.SourceControlMixin.spawn_project_sync')
+@mock.patch('awx.main.tasks.jobs.SourceControlMixin.get_sync_needs')
+def test_sync_and_copy_without_lock_skips_copy_on_non_successful_sync(get_sync_needs, spawn_sync, pu_init, pu_run, make_copy, mock_me):
+    """make_local_copy must not be called when the sync status is not successful,
+    e.g. when receptor returns early due to quota exhaustion."""
+    get_sync_needs.return_value = ['update_insights']
+
+    local_sync = mock.Mock()
+    local_sync.status = 'pending'
+    local_sync.name = 'Test Sync'
+    local_sync.id = 42
+    spawn_sync.return_value = local_sync
+
+    project = mock.Mock()
+    project.scm_type = 'insights'
+
+    task = jobs.RunJob()
+    task.instance = mock.Mock(spec=Job)
+    task.instance.pk = 1
+    task.update_model = mock.Mock(return_value=task.instance)
+
+    with pytest.raises(RuntimeError, match='Project sync failed with status: pending'):
+        task.sync_and_copy_without_lock(project, '/fake/private_data_dir')
+
+    make_copy.assert_not_called()
 
 
 class TestClearProjectCachePreservesReqcache:

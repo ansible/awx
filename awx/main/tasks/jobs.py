@@ -973,6 +973,8 @@ class SourceControlMixin(BaseTask):
                 sync_task.instance = local_project_sync  # avoids "waiting" status check, performance
                 sync_task.run(local_project_sync.id)
                 local_project_sync.refresh_from_db()
+                if local_project_sync.status != 'successful':
+                    raise RuntimeError(f'Project sync failed with status: {local_project_sync.status}')
                 self.instance = self.update_model(self.instance.pk, scm_revision=local_project_sync.scm_revision)
                 RunProjectUpdate.make_local_copy(local_project_sync, private_data_dir)
             except Exception:
