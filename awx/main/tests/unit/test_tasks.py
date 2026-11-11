@@ -2393,12 +2393,14 @@ class TestCopytreeWithoutMetadata:
         self._make_tree(plain)
         with mock.patch('os.chmod', wraps=os.chmod) as chmod, mock.patch('os.fchmod', wraps=os.fchmod) as fchmod:
             jobs.copytree_without_metadata(str(plain), str(tmp_path / 'plain_copy'))
-        assert chmod.call_count == 0 and fchmod.call_count == 0
+        assert chmod.call_count == 0
+        assert fchmod.call_count == 0
 
         (plain / 'run.sh').chmod(0o775)  # the umask would turn this into 0755
         with mock.patch('os.chmod', wraps=os.chmod) as chmod, mock.patch('os.fchmod', wraps=os.fchmod) as fchmod:
             jobs.copytree_without_metadata(str(plain), str(tmp_path / 'group_write_copy'))
-        assert chmod.call_count == 0 and fchmod.call_count == 1
+        assert chmod.call_count == 0
+        assert fchmod.call_count == 1
         assert (tmp_path / 'group_write_copy' / 'run.sh').stat().st_mode & 0o7777 == 0o775
 
     def test_preserves_mtime_of_files_dirs_and_symlinks(self, tmp_path, umask_022):
