@@ -32,6 +32,14 @@
           <span class="icon-bar"></span>
         </button>
         <a class="navbar-brand" href="{% url 'api:api_root_view' %}">
+          {% is_proxied_request as proxied %}
+          {% if proxied %}
+            {# The trusted proxy may only forward /api/, not /static/, so inline the logo SVG #}
+            {# the same way api.css/api.js are inlined above instead of linking to a static URL #}
+            {% inline_file "ui/public/static/media/logo-header.svg" True %}
+          {% else %}
+            <img class="logo" src="{% static 'media/logo-header.svg' %}">
+          {% endif %}
           <span>{% trans 'REST API' %}</span>
         </a>
         <a class="navbar-title" href="{{ request.get_full_path }}">
