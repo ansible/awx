@@ -1927,6 +1927,199 @@ def test_sync_and_copy_get_sync_needs_called_under_shared_lock(get_sync_needs, s
     assert call_order[1] == 'get_sync_needs'
 
 
+class TestGetSyncNeedsRevisionMarker:
+    """Tests for non-git SCM types (insights, svn, archive) using .scm_revision marker files."""
+
+    def _make_task(self, instance_type='Job'):
+        task = jobs.RunJob()
+        task.instance = mock.Mock(spec=Job)
+        task.instance.id = 42
+        task.update_model = mock.Mock(return_value=task.instance)
+        return task
+
+    def test_insights_skips_sync_when_marker_matches(self, tmp_path):
+        project_path = str(tmp_path / 'project')
+        os.makedirs(project_path)
+        with open(os.path.join(project_path, '.scm_revision'), 'w') as f:
+            f.write('abc123')
+
+        project = mock.Mock()
+        project.scm_type = 'insights'
+        project.scm_revision = 'abc123'
+        project.scm_branch = 'main'
+        project.get_project_path.return_value = project_path
+        project.get_cache_path.return_value = str(tmp_path / 'cache')
+        project.cache_id = 'abc123'
+
+        task = self._make_task()
+        sync_needs = task.get_sync_needs(project)
+        assert 'update_insights' not in sync_needs
+
+    def test_insights_syncs_when_marker_mismatch(self, tmp_path):
+        project_path = str(tmp_path / 'project')
+        os.makedirs(project_path)
+        with open(os.path.join(project_path, '.scm_revision'), 'w') as f:
+            f.write('old_revision')
+
+        project = mock.Mock()
+        project.scm_type = 'insights'
+        project.scm_revision = 'new_revision'
+        project.scm_branch = 'main'
+        project.get_project_path.return_value = project_path
+        project.get_cache_path.return_value = str(tmp_path / 'cache')
+        project.cache_id = 'new_revision'
+
+        task = self._make_task()
+        sync_needs = task.get_sync_needs(project)
+        assert 'update_insights' in sync_needs
+
+    def test_insights_syncs_when_no_marker(self, tmp_path):
+        project_path = str(tmp_path / 'project')
+        os.makedirs(project_path)
+
+        project = mock.Mock()
+        project.scm_type = 'insights'
+        project.scm_revision = 'abc123'
+        project.scm_branch = 'main'
+        project.get_project_path.return_value = project_path
+        project.get_cache_path.return_value = str(tmp_path / 'cache')
+        project.cache_id = 'abc123'
+
+        task = self._make_task()
+        sync_needs = task.get_sync_needs(project)
+        assert 'update_insights' in sync_needs
+
+    def test_insights_syncs_when_no_scm_revision(self, tmp_path):
+        project_path = str(tmp_path / 'project')
+        os.makedirs(project_path)
+
+        project = mock.Mock()
+        project.scm_type = 'insights'
+        project.scm_revision = ''
+        project.scm_branch = 'main'
+        project.get_project_path.return_value = project_path
+        project.get_cache_path.return_value = str(tmp_path / 'cache')
+        project.cache_id = ''
+
+        task = self._make_task()
+        sync_needs = task.get_sync_needs(project)
+        assert 'update_insights' in sync_needs
+
+    def test_insights_syncs_on_branch_override(self, tmp_path):
+        project_path = str(tmp_path / 'project')
+        os.makedirs(project_path)
+        with open(os.path.join(project_path, '.scm_revision'), 'w') as f:
+            f.write('abc123')
+
+        project = mock.Mock()
+        project.scm_type = 'insights'
+        project.scm_revision = 'abc123'
+        project.scm_branch = 'main'
+        project.get_project_path.return_value = project_path
+        project.get_cache_path.return_value = str(tmp_path / 'cache')
+        project.cache_id = 'abc123'
+
+        task = self._make_task()
+        sync_needs = task.get_sync_needs(project, scm_branch='other-branch')
+        assert 'update_insights' in sync_needs
+
+    def test_archive_skips_sync_when_marker_matches(self, tmp_path):
+        project_path = str(tmp_path / 'project')
+        os.makedirs(project_path)
+        with open(os.path.join(project_path, '.scm_revision'), 'w') as f:
+            f.write('sha1checksum')
+
+        project = mock.Mock()
+        project.scm_type = 'archive'
+        project.scm_revision = 'sha1checksum'
+        project.scm_branch = 'main'
+        project.get_project_path.return_value = project_path
+        project.get_cache_path.return_value = str(tmp_path / 'cache')
+        project.cache_id = 'sha1checksum'
+
+        task = self._make_task()
+        sync_needs = task.get_sync_needs(project)
+        assert 'update_archive' not in sync_needs
+
+    def test_svn_skips_sync_when_marker_matches(self, tmp_path):
+        project_path = str(tmp_path / 'project')
+        os.makedirs(project_path)
+        with open(os.path.join(project_path, '.scm_revision'), 'w') as f:
+            f.write('12345')
+
+        project = mock.Mock()
+        project.scm_type = 'svn'
+        project.scm_revision = '12345'
+        project.scm_branch = 'main'
+        project.get_project_path.return_value = project_path
+        project.get_cache_path.return_value = str(tmp_path / 'cache')
+        project.cache_id = '12345'
+
+        task = self._make_task()
+        sync_needs = task.get_sync_needs(project)
+        assert 'update_svn' not in sync_needs
+
+
+class TestWriteRevisionMarker:
+    """Tests that RunProjectUpdate.post_run_hook writes .scm_revision marker for non-git types."""
+
+    @mock.patch('awx.main.tasks.jobs.RunProjectUpdate.release_lock')
+    @mock.patch('awx.main.tasks.jobs.BaseTask.post_run_hook')
+    def test_writes_marker_for_insights(self, mock_super_hook, mock_release, tmp_path):
+        project_path = str(tmp_path / 'project')
+        os.makedirs(project_path)
+
+        instance = mock.Mock()
+        instance.scm_type = 'insights'
+        instance.launch_type = 'sync'
+        instance.job_type = 'run'
+        instance.job_tags = 'update_insights'
+        instance.get_project_path.return_value = project_path
+        instance.get_cache_path.return_value = str(tmp_path / 'cache')
+        instance.project = mock.Mock()
+        instance.project.scm_type = 'insights'
+        instance.log_format = 'test'
+
+        task = jobs.RunProjectUpdate()
+        task.runner_callback = mock.Mock()
+        task.runner_callback.playbook_new_revision = 'new_rev_123'
+        task.job_private_data_dir = None
+
+        task.post_run_hook(instance, 'successful')
+
+        marker_path = os.path.join(project_path, '.scm_revision')
+        assert os.path.exists(marker_path)
+        with open(marker_path) as f:
+            assert f.read() == 'new_rev_123'
+
+    @mock.patch('awx.main.tasks.jobs.RunProjectUpdate.release_lock')
+    @mock.patch('awx.main.tasks.jobs.BaseTask.post_run_hook')
+    def test_does_not_write_marker_for_git(self, mock_super_hook, mock_release, tmp_path):
+        project_path = str(tmp_path / 'project')
+        os.makedirs(project_path)
+
+        instance = mock.Mock()
+        instance.scm_type = 'git'
+        instance.launch_type = 'sync'
+        instance.job_type = 'run'
+        instance.job_tags = 'update_git'
+        instance.get_project_path.return_value = project_path
+        instance.get_cache_path.return_value = str(tmp_path / 'cache')
+        instance.project = mock.Mock()
+        instance.project.scm_type = 'git'
+        instance.log_format = 'test'
+
+        task = jobs.RunProjectUpdate()
+        task.runner_callback = mock.Mock()
+        task.runner_callback.playbook_new_revision = 'abc123'
+        task.job_private_data_dir = None
+
+        task.post_run_hook(instance, 'successful')
+
+        marker_path = os.path.join(project_path, '.scm_revision')
+        assert not os.path.exists(marker_path)
+
+
 class TestClearProjectCachePreservesReqcache:
     def test_reqcache_entries_preserved(self, tmp_path):
         cache_dir = tmp_path / 'cache'

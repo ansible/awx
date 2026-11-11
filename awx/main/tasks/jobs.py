@@ -918,6 +918,18 @@ class SourceControlMixin(BaseTask):
             except (ValueError, BadGitName, git.exc.InvalidGitRepositoryError):
                 logger.debug(f'Needed commit for {self.instance.id} not in local source tree, will sync with remote')
                 sync_needs.append(source_update_tag)
+        elif project.scm_revision and (not branch_override):
+            marker_path = os.path.join(project_path, '.scm_revision')
+            try:
+                with open(marker_path) as f:
+                    local_revision = f.read().strip()
+                if job_revision == local_revision:
+                    logger.debug(f'Skipping project sync for {self.instance.id} because revision marker matches')
+                else:
+                    sync_needs.append(source_update_tag)
+            except (FileNotFoundError, IOError):
+                logger.debug(f'No revision marker for {self.instance.id}, will sync with remote')
+                sync_needs.append(source_update_tag)
         else:
             logger.debug(f'Project not available locally, {self.instance.id} will sync with remote')
             sync_needs.append(source_update_tag)
@@ -1790,6 +1802,15 @@ class RunProjectUpdate(BaseTask):
             if self.runner_callback.playbook_new_revision:
                 instance.scm_revision = self.runner_callback.playbook_new_revision
                 instance.save(update_fields=['scm_revision'])
+                if instance.scm_type and instance.scm_type != 'git':
+                    project_path = instance.get_project_path(check_if_exists=False)
+                    if project_path:
+                        marker_path = os.path.join(project_path, '.scm_revision')
+                        try:
+                            with open(marker_path, 'w') as f:
+                                f.write(instance.scm_revision)
+                        except OSError:
+                            logger.warning(f'Could not write revision marker at {marker_path}')
 
             # Roles and collection folders copy to durable cache
             base_path = instance.get_cache_path()
