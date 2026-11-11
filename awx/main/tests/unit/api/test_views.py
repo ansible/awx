@@ -88,7 +88,7 @@ class TestJobTemplateLabelList:
         request = mock.MagicMock(data={'id': 1})
 
         with mock.patch.object(view, 'attach') as attach, mock.patch('awx.api.views.labels.Label.objects.filter') as label_filter:
-            label_filter.return_value.count.return_value = 101
+            label_filter.return_value.aggregate.return_value = {'total': 101, 'requested': 0}
             response = view.post(request)
 
         assert response.status_code == 400
@@ -108,7 +108,7 @@ class TestJobTemplateLabelList:
             mock.patch.object(view, 'attach', return_value=Response(status=204)) as attach,
             mock.patch('awx.api.views.labels.Label.objects.filter') as label_filter,
         ):
-            label_filter.return_value.count.return_value = 100
+            label_filter.return_value.aggregate.return_value = {'total': 100, 'requested': 1}
             response = view.post(request)
 
         assert response.status_code == 204

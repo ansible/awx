@@ -6,6 +6,7 @@ from ansible_base.lib.utils.schema import extend_schema_if_available
 
 # Django
 from django.utils.translation import gettext_lazy as _
+from django.db.models import Count, Q
 
 # Django REST Framework
 from rest_framework.response import Response
@@ -58,8 +59,17 @@ class LabelSubListCreateAttachDetachView(SubListCreateAttachDetachAPIView):
         # so an object over the limit can be recovered.
         if 'disassociate' not in request.data:
             label_filter = self.parent_model._meta.get_field(self.relationship).remote_field.name
-            if Label.objects.filter(**{label_filter: self.kwargs['pk']}).count() > 100:
-                return Response(dict(msg=_(f'Maximum number of labels for {self.parent_model._meta.verbose_name_raw} reached.')), status=HTTP_400_BAD_REQUEST)
+            label_id = request.data.get('id')
+            # Let the generic attach validator return its normal 400 response
+            # for malformed IDs before they are used in an ORM filter.
+            if label_id is None or isinstance(label_id, int):
+                label_counts = Label.objects.filter(**{label_filter: self.kwargs['pk']}).aggregate(
+                    total=Count('pk'), requested=Count('pk', filter=Q(pk=label_id))
+                )
+                if label_counts['total'] >= 100 and not label_counts['requested']:
+                    return Response(
+                        dict(msg=_(f'Maximum number of labels for {self.parent_model._meta.verbose_name_raw} reached.')), status=HTTP_400_BAD_REQUEST
+                    )
 
         return super().post(request, *args, **kwargs)
 
