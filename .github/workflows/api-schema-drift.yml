@@ -44,10 +44,12 @@ jobs:
 
       - name: Regenerate spec from code
         run: |
-          DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} \
-          COMPOSE_TAG=${{ github.base_ref || github.ref_name }} \
+          DEVEL_IMAGE=$(make -s \
+            DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} \
+            COMPOSE_TAG=${{ github.base_ref || github.ref_name }} \
+            print-DEVEL_IMAGE_NAME)
           docker run -u $(id -u) --rm -v ${{ github.workspace }}:/awx_devel/:Z \
-            --workdir=/awx_devel $(make -s print-DEVEL_IMAGE_NAME) /start_tests.sh genschema
+            --workdir=/awx_devel "${DEVEL_IMAGE}" /start_tests.sh genschema
         env:
           OWNER_LC: ${{ github.repository_owner }}
 
@@ -74,10 +76,12 @@ jobs:
 
       - name: Validate spec
         run: |
-          DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} \
-          COMPOSE_TAG=${{ github.base_ref || github.ref_name }} \
+          DEVEL_IMAGE=$(make -s \
+            DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} \
+            COMPOSE_TAG=${{ github.base_ref || github.ref_name }} \
+            print-DEVEL_IMAGE_NAME)
           docker run -u $(id -u) --rm -v ${{ github.workspace }}:/awx_devel/:Z \
-            --workdir=/awx_devel $(make -s print-DEVEL_IMAGE_NAME) \
+            --workdir=/awx_devel "${DEVEL_IMAGE}" \
             bash -c "make validate-openapi-schema"
         env:
           OWNER_LC: ${{ github.repository_owner }}
