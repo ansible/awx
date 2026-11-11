@@ -1,6 +1,6 @@
-# Ignore generated schema (schema.json is committed for oasdiff baseline)
+# Ignore generated artifacts (openapi.yaml is committed for oasdiff baseline)
 swagger.json
-schema.yaml
+schema.json
 reference-schema.json
 
 # Tags

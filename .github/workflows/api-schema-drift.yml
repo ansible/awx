@@ -1,6 +1,6 @@
 ---
 # Drift detection: regenerate the OpenAPI spec from code and fail if the
-# committed schema.json is out of sync. Ensures developers commit spec
+# committed openapi.yaml is out of sync. Ensures developers commit spec
 # changes alongside code changes.
 #
 # Pattern follows Metrics (ansible/metrics-service) and Syntara (AO).
@@ -55,21 +55,21 @@ jobs:
 
       - name: Check for drift
         run: |
-          if git diff --exit-code schema.json; then
+          if git diff --exit-code openapi.yaml; then
             echo "No schema drift detected."
           else
             echo ""
-            echo "::error::Committed schema.json is out of sync with code."
+            echo "::error::Committed openapi.yaml is out of sync with code."
             echo "::error::Run 'make genschema' (or 'make docker-runner AWX_DOCKER_CMD=\"make genschema\"') and commit the result."
             echo ""
             echo "## Schema Drift Detected" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "The committed \`schema.json\` does not match what \`drf-spectacular\` generates from the current code." >> $GITHUB_STEP_SUMMARY
+            echo "The committed \`openapi.yaml\` does not match what \`drf-spectacular\` generates from the current code." >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**To fix:** run \`make genschema\` and commit the updated \`schema.json\`." >> $GITHUB_STEP_SUMMARY
+            echo "**To fix:** run \`make genschema\` and commit the updated \`openapi.yaml\`." >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo '```diff' >> $GITHUB_STEP_SUMMARY
-            git diff schema.json | head -100 >> $GITHUB_STEP_SUMMARY
+            git diff openapi.yaml | head -100 >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
             exit 1
           fi

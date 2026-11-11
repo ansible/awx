@@ -13,7 +13,7 @@ on:
       - stable-**
       - AAP-86434-*
     paths:
-      - 'schema.json'
+      - 'openapi.yaml'
       - 'changelogs/fragments/**'
 
 permissions:
@@ -25,5 +25,5 @@ jobs:
     # djyasin/actions PR #167 — pinned to current HEAD
     uses: djyasin/actions/.github/workflows/openapi-changelog-fragment.yml@feat/changelog-fragment-enforcement # PR #167 HEAD: c420d10
     with:
-      spec-paths: "schema.json"
+      spec-paths: "openapi.yaml"
       fragment-dir: "changelogs/fragments"

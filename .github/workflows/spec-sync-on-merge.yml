@@ -54,7 +54,7 @@ jobs:
 
       - name: Verify spec file exists
         run: |
-          SPEC_FILE="./schema.json"
+          SPEC_FILE="./openapi.yaml"
           if [ ! -f "$SPEC_FILE" ]; then
             echo "❌ Spec file not found at $SPEC_FILE"
             echo "Contents of workspace:"
@@ -86,8 +86,8 @@ jobs:
       - name: Compare specs
         id: compare
         run: |
-          COMPONENT_SPEC="./schema.json"
-          SPEC_REPO_FILE="spec-repo/controller.json"
+          COMPONENT_SPEC="./openapi.yaml"
+          SPEC_REPO_FILE="spec-repo/controller.yaml"
 
           # Check if spec file exists in spec repo
           if [ ! -f "$SPEC_REPO_FILE" ]; then
@@ -109,8 +109,8 @@ jobs:
       - name: Update spec file
         if: steps.compare.outputs.has_diff == 'true'
         run: |
-          cp "./schema.json" "spec-repo/controller.json"
-          echo "✅ Updated spec-repo/controller.json"
+          cp "./openapi.yaml" "spec-repo/controller.yaml"
+          echo "✅ Updated spec-repo/controller.yaml"
 
       - name: Create or update PR in spec repo
         if: steps.compare.outputs.has_diff == 'true'
