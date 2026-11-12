@@ -944,10 +944,12 @@ class InventorySourceOptions(BaseModel):
         blank=True,
         default='',
     )
-    source_vars = models.TextField(
-        blank=True,
-        default='',
-        help_text=_('Inventory source variables in YAML or JSON format.'),
+    source_vars = prevent_search(
+        models.TextField(
+            blank=True,
+            default='',
+            help_text=_('Inventory source variables in YAML or JSON format.'),
+        )
     )
     scm_branch = models.CharField(
         max_length=1024,

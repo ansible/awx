@@ -509,6 +509,20 @@ class TestWorkflowJobTemplatePrompts:
 
 
 @pytest.mark.django_db
+def test_ancestor_artifacts_search_is_prevented(get, admin):
+    """Verify that prevent_search on ancestor_artifacts blocks filtering
+    on that column, while other WorkflowJobNode fields remain filterable."""
+    url = reverse('api:workflow_job_node_list')
+    # Guard rejects: filtering on ancestor_artifacts must be blocked
+    response = get(url, {'ancestor_artifacts__contains': 'secret'}, admin)
+    assert response.status_code == 403
+    assert response.data == {"detail": "Filtering on ancestor_artifacts is not allowed."}
+    # Guard permits: filtering on a non-prevented field still works
+    response = get(url, {'do_not_run': 'true'}, admin)
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
 def test_workflow_ancestors(organization):
     # Spawn order of templates grandparent -> parent -> child
     # create child WFJT and workflow job

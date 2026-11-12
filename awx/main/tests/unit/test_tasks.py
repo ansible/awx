@@ -27,6 +27,7 @@ from awx.main.models import (
     Organization,
     Project,
     ProjectUpdate,
+    SystemJob,
     UnifiedJob,
     User,
     build_safe_env,
@@ -780,6 +781,42 @@ class TestAdhocRun(TestJobExecution):
         for name in get_job_variable_prefixes():
             assert extra_vars['{}_user_id'.format(name)] == 123
             assert extra_vars['{}_user_name'.format(name)] == "angry-spud"
+
+
+class TestAdHocBuildArgsLimitHandling(object):
+    """The limit value must be passed as the value of -l (not a bare
+    positional arg) and 'all' must always be appended."""
+
+    def test_limit_passed_as_flag_value(self):
+        adhoc = AdHocCommand(pk=1, id=1, inventory=Inventory())
+        adhoc.limit = 'webservers'
+        task = jobs.RunAdHocCommand()
+        args = task.build_args(adhoc, '/tmp/pdd', {})
+        idx = args.index('-l')
+        assert args[idx + 1] == 'webservers'
+        assert 'all' in args
+
+    def test_no_limit_still_appends_all(self):
+        adhoc = AdHocCommand(pk=1, id=1, inventory=Inventory())
+        adhoc.limit = ''
+        task = jobs.RunAdHocCommand()
+        args = task.build_args(adhoc, '/tmp/pdd', {})
+        assert '-l' not in args
+        assert 'all' in args
+
+    def test_limit_not_bare_positional(self):
+        adhoc = AdHocCommand(pk=1, id=1, inventory=Inventory())
+        adhoc.limit = '--version'
+        task = jobs.RunAdHocCommand()
+        args = task.build_args(adhoc, '/tmp/pdd', {})
+        # --version must appear only as the value of -l, not standalone
+        idx = args.index('-l')
+        assert args[idx + 1] == '--version'
+        # It must not appear anywhere else in args as a standalone element
+        for i, arg in enumerate(args):
+            if arg == '--version' and i != idx + 1:
+                raise AssertionError('--version appears as standalone arg')
+        assert 'all' in args
 
 
 class TestJobCredentials(TestJobExecution):
@@ -2533,3 +2570,72 @@ def test_administrative_workunit_reaper(work_unit_data, expected_function_call):
         simple_command.assert_called()
     else:
         simple_command.assert_not_called()
+
+
+class TestRunSystemJob:
+    """Tests for RunSystemJob.build_args and write_args_file."""
+
+    def test_build_args_valid_days(self):
+        """build_args correctly handles valid integer days."""
+        system_job = mock.MagicMock(spec=SystemJob)
+        system_job.job_type = 'cleanup_activitystream'
+        system_job.extra_vars = json.dumps({'days': 30})
+
+        task = jobs.RunSystemJob()
+        args = task.build_args(system_job, '/tmp/fake', {})
+        assert '--days' in args
+        assert '30' in args
+
+    def test_build_args_valid_batch_size(self):
+        """build_args correctly handles valid integer batch_size."""
+        system_job = mock.MagicMock(spec=SystemJob)
+        system_job.job_type = 'cleanup_activitystream'
+        system_job.extra_vars = json.dumps({'batch_size': 500})
+
+        task = jobs.RunSystemJob()
+        args = task.build_args(system_job, '/tmp/fake', {})
+        assert '--batch-size' in args
+        assert '500' in args
+
+    def test_build_args_prevents_injection_in_days(self):
+        """build_args coerces days with int(), so injection strings raise
+        ValueError which is caught, preventing injected tokens in args."""
+        system_job = mock.MagicMock(spec=SystemJob)
+        system_job.job_type = 'cleanup_activitystream'
+        system_job.extra_vars = json.dumps({'days': '99999 --dry-run --pythonpath /tmp'})
+        system_job.log_format = 'system_job 1'
+
+        task = jobs.RunSystemJob()
+        args = task.build_args(system_job, '/tmp/fake', {})
+        for arg in args:
+            assert '--pythonpath' not in arg
+
+    def test_build_args_prevents_injection_in_batch_size(self):
+        """build_args coerces batch_size with int(), so injection strings
+        raise ValueError which is caught, preventing injected tokens."""
+        system_job = mock.MagicMock(spec=SystemJob)
+        system_job.job_type = 'cleanup_activitystream'
+        system_job.extra_vars = json.dumps({'batch_size': '500 --pythonpath /tmp'})
+        system_job.log_format = 'system_job 1'
+
+        task = jobs.RunSystemJob()
+        args = task.build_args(system_job, '/tmp/fake', {})
+        for arg in args:
+            assert '--pythonpath' not in arg
+
+    def test_write_args_file_quotes_args_with_spaces(self):
+        """write_args_file uses args2cmdline so arguments containing spaces
+        are properly quoted, not split into separate tokens."""
+        import shlex
+
+        task = jobs.RunSystemJob()
+        task.write_private_data_file = mock.MagicMock()
+
+        args = ['awx-manage', 'cleanup_activitystream', '--days', 'value with spaces']
+        task.write_args_file('/tmp/fake', args)
+
+        call_args = task.write_private_data_file.call_args
+        content = call_args[0][2]
+        tokens = shlex.split(content)
+        assert len(tokens) == 4
+        assert tokens[-1] == 'value with spaces'

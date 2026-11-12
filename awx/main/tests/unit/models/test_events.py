@@ -41,3 +41,27 @@ def test_playbook_event_strip_invalid_keys(job_identifier, cls):
 def test_really_long_event_fields(field):
     event = JobEvent.create_from_data(**{'job_id': 123, 'event_data': {field: 'X' * 4096}})
     assert event.event_data[field] == 'X' * 1023 + '…'
+
+
+@pytest.mark.parametrize(
+    'cls',
+    [JobEvent, ProjectUpdateEvent, AdHocCommandEvent, InventoryUpdateEvent, SystemJobEvent],
+    ids=lambda c: c.__name__,
+)
+@pytest.mark.parametrize('field_name', ['event_data', 'stdout'])
+def test_sensitive_fields_are_prevented_from_search(cls, field_name):
+    """event_data and stdout may contain secrets and must not be searchable."""
+    field = cls._meta.get_field(field_name)
+    assert getattr(field, '__prevent_search__', False) is True, f"{cls.__name__}.{field_name} must be wrapped with prevent_search()"
+
+
+@pytest.mark.parametrize(
+    'cls',
+    [JobEvent, ProjectUpdateEvent, AdHocCommandEvent, InventoryUpdateEvent, SystemJobEvent],
+    ids=lambda c: c.__name__,
+)
+@pytest.mark.parametrize('field_name', ['uuid', 'counter', 'verbosity'])
+def test_non_sensitive_fields_remain_searchable(cls, field_name):
+    """Fields that never hold secrets should stay searchable."""
+    field = cls._meta.get_field(field_name)
+    assert getattr(field, '__prevent_search__', False) is False, f"{cls.__name__}.{field_name} should remain searchable"
