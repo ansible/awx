@@ -6,6 +6,7 @@ from django.utils.timezone import now
 from django.db.models import Q
 
 from awx.main.models import Job, JobEvent, Inventory, Host, JobHostSummary, HostMetric
+from awx.main.models import events as events_module
 
 
 @pytest.mark.django_db
@@ -144,11 +145,10 @@ class TestEvents:
             assert hm.automated_counter == 1
 
     def test_concurrent_stats_do_not_double_count_host_metrics(self):
-        # The sequential replay above is skipped by reading the recorded summaries up front. Two
-        # writers can also both read nothing recorded and then both insert: the loser's insert is
-        # dropped by ignore_conflicts, so it must not count the hosts it did not record.
-        from awx.main.models import events as events_module
-
+        # 5.9 Concurrent stats insert. The sequential replay above is skipped by reading the
+        # recorded summaries up front. Two writers can also both read nothing recorded and
+        # then both insert: the loser's insert is dropped by ignore_conflicts, so it must
+        # not count the hosts it did not record.
         self._generate_hosts(5)
         stats = dict((hostname, len(hostname)) for hostname in self.hostnames)
         real_advisory_lock = events_module.advisory_lock

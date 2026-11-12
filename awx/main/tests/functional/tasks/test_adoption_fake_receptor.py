@@ -124,6 +124,8 @@ def test_stream_broken_mid_replay_fails_a_successful_unit(running_job):
 
 @pytest.mark.django_db
 def test_workunit_reaper_releases_units_of_finished_jobs(me_inst, settings):
+    # 3.10 Returning owner's work-unit reaper. It must release the finished job's unit but
+    # leave the running job's unit alone: a unit whose job is still active is never touched.
     settings.RECEPTOR_RELEASE_WORK = True
     finished = Job.objects.create(controller_node=me_inst.hostname, status='successful', work_unit_id='done')
     running = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='live')

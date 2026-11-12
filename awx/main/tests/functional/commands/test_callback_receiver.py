@@ -1,13 +1,17 @@
 import pytest
 import time
+from types import SimpleNamespace
 from unittest import mock
 from uuid import uuid4
 
-from django.db import connection
+import redis
+
+from django.db import connection, DatabaseError, IntegrityError as DjangoIntegrityError
 from django.test import TransactionTestCase
 from django.test.utils import CaptureQueriesContext
+from django.utils.timezone import now as tz_now
 
-from awx.main.dispatch.worker.callback import job_stats_wrapup, CallbackBrokerWorker
+from awx.main.dispatch.worker.callback import job_stats_wrapup, CallbackBrokerWorker, _null_missing_host_ids
 
 from awx.main.models import Organization
 from awx.main.models.jobs import Job
@@ -52,8 +56,6 @@ def test_read_survives_a_redis_connection_error():
     # 5.17 Redis restart across the cluster. A worker mid-blpop when Redis restarts must not
     # crash: it logs, backs off, and returns FLUSH so the dispatcher's main loop keeps running
     # and retries on the next read instead of losing the whole callback receiver.
-    import redis
-
     worker = CallbackBrokerWorker.__new__(CallbackBrokerWorker)
     worker.queue_name = 'callback_tasks'
     worker.redis = mock.Mock()
@@ -107,8 +109,6 @@ class TestCallbackBrokerWorker(TransactionTestCase):
 
     def test_host_check_error_raises_out_of_flush_and_keeps_the_buffer(self):
         """perform_work retries a flush that raises, so the events must still be buffered."""
-        from django.db import DatabaseError
-
         job = Job.objects.create(status='running')
         worker = CallbackBrokerWorker()
         events = [JobEvent(job=job, counter=1, job_created=job.created, uuid=str(uuid4()), created=job.created, host_id=1, host_name='h')]
@@ -120,9 +120,6 @@ class TestCallbackBrokerWorker(TransactionTestCase):
         assert JobEvent.objects.filter(uuid=events[0].uuid).count() == 0
 
     def test_null_missing_host_ids_ignores_ids_that_are_not_integers(self):
-        from types import SimpleNamespace
-        from awx.main.dispatch.worker.callback import _null_missing_host_ids
-
         events = [
             SimpleNamespace(host_id=''),
             SimpleNamespace(host_id=None),
@@ -187,9 +184,6 @@ class TestCallbackBrokerWorker(TransactionTestCase):
         raises IntegrityError on the (job_id, counter, job_created) unique constraint. The worker
         must silently discard the duplicate in the individual-save fallback, not keep it in the
         buffer for retry."""
-        from django.db import IntegrityError as DjangoIntegrityError
-        from django.utils.timezone import now as tz_now
-
         job = Job.objects.create(status='running')
         created_ts = tz_now()
 

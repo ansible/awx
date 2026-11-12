@@ -4,19 +4,27 @@ import logging
 import os
 import tempfile
 import shutil
+from collections import deque
 from contextlib import contextmanager
 from types import SimpleNamespace
 from unittest import mock
 from unittest.mock import MagicMock, patch
+from uuid import uuid4
 
 import pytest
+from kubernetes.client.rest import ApiException
 
+from awx.main.tasks import host_trust
 from awx.main.tasks.adoption_decisions import JobAction
+from awx.main.tasks.callback import RunnerCallback
+from awx.main.tasks.jobs import _finalize_job_run
+from awx.main.tasks.receptor import _compute_adoption_dedup
 from awx.main.tasks.system import (
     CleanupImagesAndFiles,
     execution_node_health_check,
     inspect_established_receptor_connections,
     clear_setting_cache,
+    delete_inventory,
     _batched_delete_inventory,
     _mesh_all_ready_nodes_visible,
     _heartbeat_handle_lost_instances,
@@ -45,18 +53,18 @@ from awx.main.tasks.system import (
 from awx.main.dispatch.reaper import reap
 from awx.main.management.commands.dispatcherd import Command
 from django.conf import settings as django_settings
+from django.core.cache import cache
 from django.db import DatabaseError
+from django.utils.functional import Promise
 from django.utils.timezone import now, timedelta
 
-from awx.main.models import Instance, Inventory, Job, Organization, ReceptorAddress, InstanceLink, WorkflowJob
+from awx.main.models import Instance, Inventory, Job, JobEvent, Organization, ReceptorAddress, InstanceLink, WorkflowJob
 from awx.main.models.inventory import Group, Host
 
 
 @pytest.fixture(autouse=True)
 def _clear_adoption_stall_clocks():
     # Adoption stall clocks live in the cache, which outlives a test's DB transaction.
-    from django.core.cache import cache
-
     cache.clear()
     yield
     cache.clear()
@@ -157,13 +165,11 @@ def test_folder_cleanup_multiple_running_jobs(job_folder_factory, me_inst):
 @pytest.mark.django_db
 class TestBatchedDeleteInventory:
     def _make_inventory_with_hosts(self, count):
-        from django.utils import timezone
-
-        now = timezone.now()
+        created_at = now()
         org = Organization.objects.create(name='test-org')
         inv = Inventory.objects.create(name='test-inv', organization=org)
         group = Group.objects.create(name='test-group', inventory=inv)
-        hosts = [Host(name=f'host-{i}', inventory=inv, created=now, modified=now) for i in range(count)]
+        hosts = [Host(name=f'host-{i}', inventory=inv, created=created_at, modified=created_at) for i in range(count)]
         Host.objects.bulk_create(hosts)
         group.hosts.set(Host.objects.filter(inventory=inv))
         return inv
@@ -208,8 +214,6 @@ class TestBatchedDeleteInventory:
 
     def test_delete_inventory_retries_on_database_error(self):
         """DatabaseError during deletion triggers a retry."""
-        from awx.main.tasks.system import delete_inventory
-
         inv = self._make_inventory_with_hosts(3)
         inv_id = inv.id
 
@@ -477,9 +481,6 @@ class TestReapAndMarkLostInstance:
         whole function, so the only safe way to keep `_()` working here is to not use `_`
         as the throwaway name.
         """
-        from django.utils.functional import Promise
-        from unittest.mock import MagicMock
-
         settings.AWX_AUTO_DEPROVISION_INSTANCES = False
         inst = self._inst(hostname='ctrl-i18n')
         Job.objects.create(controller_node=inst.hostname, status='running', work_unit_id='unit-i18n', execution_node='remote-ee')
@@ -501,8 +502,6 @@ class TestReapAndMarkLostInstance:
 
     def test_reap_queues_cross_controller_adoption_for_dispatched_jobs(self, settings):
         """Jobs with work_unit_id are queued for cross-controller adoption, not reaped."""
-        from unittest.mock import MagicMock
-
         settings.AWX_AUTO_DEPROVISION_INSTANCES = False
         inst = self._inst(hostname='ctrl-lost')
         # Dispatched job (work_unit_id set) — should be adopted, not reaped
@@ -539,10 +538,6 @@ class TestReapAndMarkLostInstance:
         # on one job's claim aborts the rest of this pass, but it is not a permanent stall:
         # the instance still gets marked UNAVAILABLE, so the next heartbeat's orphan sweep
         # (the designed fallback for "a failed adopter") picks up every job this pass missed.
-        from unittest.mock import MagicMock
-
-        from awx.main.tasks.system import _sweep_orphaned_jobs
-
         settings.AWX_AUTO_DEPROVISION_INSTANCES = False
         inst = self._inst(hostname='ctrl-db-blip')
         job_a = Job.objects.create(controller_node=inst.hostname, status='running', work_unit_id='unit-a', execution_node='remote-ee')
@@ -1120,8 +1115,6 @@ def test_dispatch_adoption_records_the_task_id_before_publishing(me_inst):
     seen = {}
 
     def _publish(args=None, kwargs=None, queue=None, uuid=None, **_unused):
-        from uuid import uuid4
-
         seen['uuid'] = uuid
         seen['on_row_at_publish'] = Job.objects.get(pk=job.id).celery_task_id
         # dispatcherd invents one when the caller does not supply it
@@ -1328,9 +1321,6 @@ def test_process_startup_jobs_skips_workflow_jobs(me_inst, settings):
 @pytest.mark.django_db
 def test_the_adoption_host_map_resolves_real_hosts(me_inst):
     """Against a real inventory, the adoption path maps host name to the id events are stamped with."""
-    from awx.main.tasks import host_trust
-    from awx.main.models import Organization, Inventory, Host
-
     org = Organization.objects.first()
     inv = Inventory.objects.create(name='cb-hostmap-inv', organization=org)
     host = Host.objects.create(name='myhost', inventory=inv)
@@ -1344,7 +1334,6 @@ def test_the_adoption_host_map_resolves_real_hosts(me_inst):
 @pytest.mark.django_db
 def test_compute_adoption_dedup_no_events(me_inst):
     """_compute_adoption_dedup returns (0, set()) when job has no events in DB."""
-    from awx.main.tasks.receptor import _compute_adoption_dedup
 
     job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-1')
     threshold, collision_zone, persisted_ct = _compute_adoption_dedup(job)
@@ -1356,8 +1345,6 @@ def test_compute_adoption_dedup_no_events(me_inst):
 @pytest.mark.django_db
 def test_compute_adoption_dedup_contiguous_events(me_inst):
     """_compute_adoption_dedup returns (max_counter, empty set) for contiguous events."""
-    from awx.main.tasks.receptor import _compute_adoption_dedup
-    from awx.main.models import JobEvent
 
     job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-1')
     for ctr in [1, 2, 3, 4, 5]:
@@ -1376,8 +1363,6 @@ def test_compute_adoption_dedup_gap_produces_collision_zone(me_inst):
     Stage 1 detects gap and continues to Stage 2, which loads all counters above safe_threshold.
     For events [1, 2, 3, 5, 6]: gap at 4 sets safe_threshold=3, then collision_zone={5, 6}.
     """
-    from awx.main.tasks.receptor import _compute_adoption_dedup
-    from awx.main.models import JobEvent
 
     job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-1')
     # Events 1-3 contiguous, then gap at 4, then 5 and 6 committed out of order
@@ -1394,8 +1379,6 @@ def test_compute_adoption_dedup_gap_produces_collision_zone(me_inst):
 @pytest.mark.django_db
 def test_compute_adoption_dedup_requires_prefix_anchored_at_one(me_inst):
     """A missing counter 1 means nothing is contiguous, so the whole tail is collision zone."""
-    from awx.main.tasks.receptor import _compute_adoption_dedup
-    from awx.main.models import JobEvent
 
     job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-nogap1')
     # Counter 1 never committed; 2-5 did. Treating 5 as contiguous would skip real events.
@@ -1415,8 +1398,6 @@ def test_compute_adoption_dedup_counts_events_beyond_the_cap(me_inst, settings, 
     event_ct is seeded from this, so using the capped set would undercount exactly when
     truncation happens and leave emitted_events / the EOF final_counter inconsistent.
     """
-    from awx.main.tasks.receptor import _compute_adoption_dedup
-    from awx.main.models import JobEvent
 
     settings.JOB_EVENT_WORKERS = 1
     settings.JOB_EVENT_CALLBACK_BUFFER_SIZE = 2  # cap == 2
@@ -1445,7 +1426,6 @@ def test_adoption_counter_skip_dedup():
     persisted_counters (collision_zone) handles out-of-order committed events above
     the threshold — bounded by worker concurrency, not total event count.
     """
-    from awx.main.tasks.callback import RunnerCallback
 
     cb = RunnerCallback()
     # Simulate: events 1-8 committed contiguously (threshold=8),
@@ -1456,8 +1436,6 @@ def test_adoption_counter_skip_dedup():
     dispatched = []
     cb.dispatcher = MagicMock()
     cb.dispatcher.dispatch.side_effect = dispatched.append
-
-    from collections import deque
 
     cb.instance = MagicMock()
     cb.instance.event_class.WRAPUP_EVENT = 'playbook_on_stats'
@@ -1492,8 +1470,6 @@ def test_adoption_counter_skip_dedup():
 @pytest.mark.django_db
 def test_finalize_job_run_with_extra_fields(me_inst):
     """_finalize_job_run includes extra_fields in the update."""
-    from awx.main.tasks.jobs import _finalize_job_run
-    from awx.main.tasks.callback import RunnerCallback
 
     job = Job.objects.create(controller_node=me_inst.hostname, status='running')
     callback = RunnerCallback(model=Job)
@@ -1510,8 +1486,6 @@ def test_finalize_job_run_with_extra_fields(me_inst):
 @pytest.mark.django_db
 def test_finalize_job_run_update_model_returns_none(me_inst):
     """_finalize_job_run returns None when update_model fails."""
-    from awx.main.tasks.jobs import _finalize_job_run
-    from awx.main.tasks.callback import RunnerCallback
 
     callback = RunnerCallback(model=Job)
     callback.wrapup_event_dispatched = True
@@ -1525,8 +1499,6 @@ def test_finalize_job_run_update_model_returns_none(me_inst):
 @pytest.mark.django_db
 def test_finalize_job_run_with_blocked_jobs(me_inst):
     """_finalize_job_run schedules task manager when job has blocked dependents."""
-    from awx.main.tasks.jobs import _finalize_job_run
-    from awx.main.tasks.callback import RunnerCallback
 
     job = Job.objects.create(controller_node=me_inst.hostname, status='running')
     callback = RunnerCallback(model=Job)
@@ -1546,9 +1518,6 @@ def test_finalize_job_run_with_blocked_jobs(me_inst):
 @pytest.mark.django_db
 def test_finalize_job_run_with_inventory_update(me_inst):
     """_finalize_job_run schedules inventory computed fields update for jobs with inventory."""
-    from awx.main.tasks.jobs import _finalize_job_run
-    from awx.main.tasks.callback import RunnerCallback
-    from awx.main.models import Organization, Inventory
 
     org = Organization.objects.first()
     inv = Inventory.objects.create(name='test-inv', organization=org)
@@ -1566,9 +1535,6 @@ def test_finalize_job_run_with_inventory_update(me_inst):
 @pytest.mark.django_db
 def test_finalize_job_run_inventory_update_exception_logged(me_inst):
     """_finalize_job_run logs exception from inventory computed fields update."""
-    from awx.main.tasks.jobs import _finalize_job_run
-    from awx.main.tasks.callback import RunnerCallback
-    from awx.main.models import Organization, Inventory
 
     org = Organization.objects.first()
     inv = Inventory.objects.create(name='test-inv-err', organization=org)
@@ -1759,6 +1725,9 @@ class TestOrphanSweep:
         queue.assert_called_once_with(job.id, Job.objects.get(pk=job.pk).celery_task_id)
 
     def test_job_owned_by_a_non_live_instance_is_adopted(self, me_inst):
+        # 3.3 Adopter dies mid-adoption. The sweep does not special-case "the original
+        # controller died" versus "its adopter died before streaming": either way the job's
+        # controller_node is a non-live instance, so the same reconciler claims it again.
         Instance.objects.create(hostname='offline-node', node_type='control', node_state=Instance.States.UNAVAILABLE)
         job = self._orphan(controller_node='offline-node')
 
@@ -1869,8 +1838,9 @@ class TestOrphanSweep:
         queue.assert_not_called()
 
     def test_sweep_stops_when_this_controller_is_full(self, me_inst):
-        """Capacity is what splits the work between peers: this pod takes what it can hold and
-        leaves the rest claimable, rather than claiming all N and starving (register item 4b)."""
+        """4.4 Many orphans at once. Capacity is what splits the work between peers: this pod
+        takes what it can hold and leaves the rest claimable, rather than claiming all N and
+        starving (register item 4b)."""
         jobs = [self._orphan(work_unit_id=f'unit-{i}') for i in range(4)]
 
         with (
@@ -1918,8 +1888,9 @@ class TestOrphanSweep:
         assert _exclude_unreachable_execution_nodes(orphans, lambda: None) == orphans
 
     def test_oldest_jobs_are_swept_first(self, me_inst):
-        """When capacity is short, the job that has been stranded longest is the one closest to
-        its adoption deadline, so it is the one that must not wait another cycle."""
+        """4.4 Many orphans at once. When capacity is short, the job that has been stranded
+        longest is the one closest to its adoption deadline, so it is the one that must not
+        wait another cycle."""
         newest = self._orphan(work_unit_id='unit-new', started=now() - timedelta(seconds=60))
         oldest = self._orphan(work_unit_id='unit-old', started=now() - timedelta(seconds=9000))
 
@@ -1952,8 +1923,9 @@ class TestOrphanSweep:
         assert Job.objects.get(pk=job.pk).controller_node == 'live-peer', 'must not overwrite the winner'
 
     def test_per_heartbeat_cap_is_honored(self, me_inst, settings):
-        """The heartbeat carries expires=50 in DISPATCHER_SCHEDULE; an unbounded loop with a
-        capacity query per iteration could outlive its own schedule slot and be dropped."""
+        """4.4 Many orphans at once. The heartbeat carries expires=50 in DISPATCHER_SCHEDULE;
+        an unbounded loop with a capacity query per iteration could outlive its own schedule
+        slot and be dropped."""
         settings.HADR_ORPHAN_SWEEP_MAX_PER_HEARTBEAT = 2
         for i in range(5):
             self._orphan(work_unit_id=f'unit-cap-{i}')
@@ -2592,7 +2564,6 @@ class TestControlPodIsGone:
             yield api
 
     def test_a_404_is_the_only_thing_that_means_gone(self):
-        from kubernetes.client.rest import ApiException
 
         with self._api(side_effect=ApiException(status=404, reason='Not Found')):
             assert _control_pod_is_gone('aap-controller-task-dead') is True
@@ -2602,7 +2573,6 @@ class TestControlPodIsGone:
             assert _control_pod_is_gone('aap-controller-task-live') is False
 
     def test_a_server_error_means_cannot_tell(self):
-        from kubernetes.client.rest import ApiException
 
         with self._api(side_effect=ApiException(status=503, reason='Service Unavailable')):
             assert _control_pod_is_gone('aap-controller-task-x') is None
