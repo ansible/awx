@@ -16,5 +16,4 @@ permissions:
 
 jobs:
   comment:
-    # djyasin/actions PR #161 — pinned to current HEAD
-    uses: djyasin/actions/.github/workflows/oasdiff-post-breaking-change-comment.yml@feat/oasdiff-breaking-change-detection # PR #161 HEAD: 33e68a1
+    uses: ansible/actions/.github/workflows/oasdiff-post-breaking-change-comment.yml@main

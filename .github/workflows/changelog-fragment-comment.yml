@@ -16,5 +16,4 @@ permissions:
 
 jobs:
   comment:
-    # djyasin/actions PR #167 — pinned to current HEAD
-    uses: djyasin/actions/.github/workflows/openapi-post-changelog-comment.yml@feat/changelog-fragment-enforcement # PR #167 HEAD: c420d10
+    uses: ansible/actions/.github/workflows/openapi-post-changelog-comment.yml@main

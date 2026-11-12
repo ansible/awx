@@ -1,7 +1,7 @@
 ---
 # Caller workflow for breaking-change-approved label authorization.
 # Ensures only ansible-staff-eng-leads members can apply the override label.
-# Consumes reusable workflow from djyasin/actions (PR #164).
+# Consumes reusable workflow from ansible/actions.
 # Jira: AAP-86434 (AC2), AAP-91965
 name: "API: Approval Label Authorization"
 
@@ -16,8 +16,7 @@ permissions:
 
 jobs:
   authorize:
-    # djyasin/actions PR #164 — pinned to current HEAD
-    uses: djyasin/actions/.github/workflows/approval-label-authorization.yml@approvers-team-label # PR #164
+    uses: ansible/actions/.github/workflows/approval-label-authorization.yml@main
     with:
       approval-label: breaking-change-approved
       team-slug: ansible-staff-eng-leads
