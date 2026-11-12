@@ -531,6 +531,48 @@ class TestReapAndMarkLostInstance:
         )
         mock_reaper.reap_job.assert_not_called()
 
+    def test_a_database_error_claiming_one_job_delays_the_rest_to_the_next_sweep(self, settings, me_inst):
+        # 2.6, 3.8 Controller cut off from the database / database restart during adoption.
+        # claim_for_adoption has no try/except of its own here; only the whole running_jobs
+        # loop does (unlike _sweep_orphaned_jobs, which isolates each job's claim on purpose
+        # — see test_a_failure_on_one_job_does_not_abort_the_sweep). A transient DatabaseError
+        # on one job's claim aborts the rest of this pass, but it is not a permanent stall:
+        # the instance still gets marked UNAVAILABLE, so the next heartbeat's orphan sweep
+        # (the designed fallback for "a failed adopter") picks up every job this pass missed.
+        from unittest.mock import MagicMock
+
+        from awx.main.tasks.system import _sweep_orphaned_jobs
+
+        settings.AWX_AUTO_DEPROVISION_INSTANCES = False
+        inst = self._inst(hostname='ctrl-db-blip')
+        job_a = Job.objects.create(controller_node=inst.hostname, status='running', work_unit_id='unit-a', execution_node='remote-ee')
+        job_b = Job.objects.create(controller_node=inst.hostname, status='running', work_unit_id='unit-b', execution_node='remote-ee')
+
+        mock_result = MagicMock()
+        mock_result.__getitem__.return_value = 'task-uuid'
+        with (
+            mock.patch('awx.main.tasks.system.claim_for_adoption', side_effect=[DatabaseError('server closed the connection'), 'task-b']),
+            mock.patch('awx.main.tasks.system.adopt_job_async') as mock_adopt,
+            mock.patch('awx.main.tasks.system.reaper'),
+        ):
+            mock_adopt.apply_async.return_value = (mock_result, None)
+            _reap_and_mark_lost_instance(inst)
+
+        # Neither job is claimed on this pass: job_a's own DatabaseError aborts the loop
+        # before job_b, even though job_b's claim would have succeeded.
+        mock_adopt.apply_async.assert_not_called()
+        inst.refresh_from_db()
+        assert inst.node_state == Instance.States.UNAVAILABLE, 'the instance must still be marked offline despite the claim error'
+
+        # The next heartbeat's orphan sweep recovers both, because ctrl-db-blip is no longer live.
+        with mock.patch('awx.main.tasks.system._publish_adoption') as queue:
+            _sweep_orphaned_jobs(me_inst)
+        assert queue.call_count == 2
+        job_a.refresh_from_db()
+        job_b.refresh_from_db()
+        assert job_a.controller_node == me_inst.hostname
+        assert job_b.controller_node == me_inst.hostname
+
     def test_reap_claims_ownership_before_publishing_adoption(self, settings):
         """The conditional UPDATE is the mutual-exclusion point, so it has to land before publish."""
         settings.AWX_AUTO_DEPROVISION_INSTANCES = False

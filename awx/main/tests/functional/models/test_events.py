@@ -172,6 +172,27 @@ class TestEvents:
         for hm in HostMetric.objects.all():
             assert hm.automated_counter == 1
 
+    def test_two_jobs_on_the_same_hosts_keep_separate_summaries(self):
+        # 4.6 Two playbooks on the same hosts, one orphaned. Adoption replays a job's stats
+        # through this same path, so two jobs of one inventory must each get their own
+        # summaries even though every host_name collides: JobHostSummary is unique per
+        # (job_id, host_name), not per host_name alone.
+        self._generate_hosts(5)
+        job_a = self.job
+        job_b = Job(inventory=self.inventory)
+        job_b.save()
+        stats_a = dict((hostname, len(hostname)) for hostname in self.hostnames)
+        stats_b = dict((hostname, len(hostname) * 2) for hostname in self.hostnames)
+
+        self._create_job_event(ok=stats_a)
+        self.job = job_b
+        self._create_job_event(ok=stats_b, parent_uuid='job-b-stats')
+
+        assert {s.host_name: s.ok for s in job_a.job_host_summaries.all()} == stats_a
+        assert {s.host_name: s.ok for s in job_b.job_host_summaries.all()} == stats_b
+        for hm in HostMetric.objects.all():
+            assert hm.automated_counter == 2  # each host ran once per job, two jobs
+
     def test_host_metrics_insert(self):
         self._generate_hosts(10)
 
