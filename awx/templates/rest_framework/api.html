@@ -58,7 +58,7 @@
 {% block content %}
   {% if deprecated %}
     <div class="breadcrumb" style="background: #FCC;">
-        <b>This resource has been deprecated and will be removed in a future release.</b>
+        <b>{{ deprecated_message }}</b>
     </div>
   {% endif %}
 {{ block.super }}
