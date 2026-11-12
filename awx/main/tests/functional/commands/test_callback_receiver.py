@@ -47,6 +47,24 @@ def test_wrapup_skips_notifications_if_already_processed(mocker):
     notification_mock.assert_not_called()
 
 
+@pytest.mark.django_db
+def test_read_survives_a_redis_connection_error():
+    # 5.17 Redis restart across the cluster. A worker mid-blpop when Redis restarts must not
+    # crash: it logs, backs off, and returns FLUSH so the dispatcher's main loop keeps running
+    # and retries on the next read instead of losing the whole callback receiver.
+    import redis
+
+    worker = CallbackBrokerWorker.__new__(CallbackBrokerWorker)
+    worker.queue_name = 'callback_tasks'
+    worker.redis = mock.Mock()
+    worker.redis.blpop.side_effect = redis.exceptions.ConnectionError('Connection refused')
+
+    with mock.patch('time.sleep'), mock.patch.object(CallbackBrokerWorker, 'record_statistics') as record_stats:
+        assert worker.read() == {'event': 'FLUSH'}
+
+    record_stats.assert_not_called()  # has_redis_error skips the statistics path
+
+
 class TestCallbackBrokerWorker(TransactionTestCase):
     @pytest.fixture(autouse=True)
     def turn_off_websockets_and_redis(self, fake_redis):
