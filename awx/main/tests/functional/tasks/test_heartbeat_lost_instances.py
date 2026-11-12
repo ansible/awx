@@ -1,0 +1,85 @@
+"""The heartbeat's handling of instances it judges lost.
+
+Each test sets the time on an injected clock instead of sleeping, so the grace period and clock
+skew between controllers are checked exactly and in milliseconds.
+
+``GRACE`` is CLUSTER_NODE_HEARTBEAT_PERIOD * CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE.
+"""
+
+from unittest import mock
+
+import pytest
+from django.utils.timezone import now, timedelta
+
+from awx.main.models import Instance
+from awx.main.tasks.system import _heartbeat_instance_management
+from awx.main.tests.fake_clock import FakeClock
+
+GRACE = 120
+
+
+@pytest.fixture
+def heartbeat_settings(settings):
+    settings.CLUSTER_HOST_ID = 'ctrl-0'
+    settings.AWX_AUTO_DEPROVISION_INSTANCES = False
+    settings.CLUSTER_NODE_HEARTBEAT_PERIOD = 60
+    settings.CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE = 2
+    return settings
+
+
+def control_node(hostname, last_seen):
+    return Instance.objects.create(hostname=hostname, node_type='control', node_state='ready', last_seen=last_seen)
+
+
+def lost_hostnames(clock):
+    """Run ctrl-0's heartbeat at clock() and return the peers it judges lost.
+
+    ctrl-0 is alive: its own last heartbeat was written by its own clock.
+    """
+    Instance.objects.filter(hostname='ctrl-0').update(last_seen=clock())
+    ctl = mock.MagicMock()
+    ctl.simple_command.return_value = {'KnownConnectionCosts': {'ctrl-0': {'ctrl-1': 1}}, 'Advertisements': []}
+    with (
+        mock.patch('awx.main.tasks.system.get_receptor_ctl', return_value=ctl),
+        mock.patch('awx.main.tasks.system.inspect_execution_and_hop_nodes'),
+        mock.patch.object(Instance, 'local_health_check'),
+    ):
+        _, _, lost, _ = _heartbeat_instance_management(clock)
+    return sorted(inst.hostname for inst in lost)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    'peer_clock_ahead, lost_after',
+    [
+        pytest.param(timedelta(0), GRACE, id='peer-clock-in-sync'),
+        pytest.param(timedelta(minutes=5), 5 * 60 + GRACE, id='peer-clock-fast-then-died'),
+    ],
+)
+def test_peer_is_lost_only_after_the_grace_period(heartbeat_settings, peer_clock_ahead, lost_after):
+    """A silent peer is lost one second past its last_seen plus the grace period.
+
+    ``peer-clock-fast-then-died``: ctrl-1 ran five minutes fast and then died. Its last_seen is in the
+    future, so a correct judge only finds it lost once real time passes last_seen plus the grace period.
+    """
+    t = now()
+    control_node('ctrl-0', t)
+    control_node('ctrl-1', t + peer_clock_ahead)
+    clock = FakeClock(t)
+
+    clock.advance(lost_after)
+    assert lost_hostnames(clock) == []
+    clock.advance(1)
+    assert lost_hostnames(clock) == ['ctrl-1']
+
+
+@pytest.mark.django_db
+def test_judge_with_a_fast_clock_finds_a_healthy_peer_lost(heartbeat_settings):
+    """ctrl-0's clock runs five minutes fast, so its own last_seen is five minutes ahead. ctrl-1
+    heartbeated just now by the correct clock and is healthy.
+    """
+    t = now()
+    control_node('ctrl-0', t + timedelta(minutes=5))
+    control_node('ctrl-1', t)
+
+    assert lost_hostnames(FakeClock(t + timedelta(minutes=5))) == ['ctrl-1']
