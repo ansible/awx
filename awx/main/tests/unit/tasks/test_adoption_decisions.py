@@ -67,10 +67,12 @@ class TestFindLostInstances:
     )
     def test_lost(self, heartbeat_settings, hostname, node_type, seconds_since_seen, judge_ahead, expected_lost):
         """``slow-controller-is-judged-lost-while-still-running``: A controller whose heartbeat is delayed past
-        the grace period looks exactly like a dead one. The decision has only last_seen to go on.
+        the grace period looks exactly like a dead one. The decision has only last_seen to go on (AAP-96824;
+        the expected behavior is in test_scenarios_liveness.py).
 
         ``clock-skew-on-the-judge-makes-a-healthy-peer-look-lost``: The peer heartbeated just now by its own
-        clock, but this instance's clock runs five minutes ahead.
+        clock, but this instance's clock runs five minutes ahead (AAP-96827; the expected behavior is in
+        test_adoption_clock.py).
         """
         inst = make_instance(hostname, node_type=node_type, seconds_since_seen=seconds_since_seen)
         lost, remaining = find_lost_instances([inst], ME, NOW + timedelta(seconds=judge_ahead))
@@ -188,6 +190,7 @@ class TestAdoptionDeadline:
         its age.
 
         ``quiet-job-is-past-deadline-even-while-healthy``: A playbook task that runs silently longer than
-        the timeout (a long pause, a slow package install) looks the same as a dead one.
+        the timeout (a long pause, a slow package install) looks the same as a dead one (AAP-96829; the
+        expected behavior is in test_scenarios_adoption.py).
         """
         assert adoption_deadline_passed(seconds_ago(last_event_age), seconds_ago(started_age), NOW, TIMEOUT) == expected_passed
