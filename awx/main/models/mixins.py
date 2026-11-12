@@ -232,6 +232,9 @@ class SurveyJobTemplateMixin(models.Model):
                         "'%s' value %s is too large (must be no more than %s)."
                         % (survey_element['variable'], data[survey_element['variable']], survey_element['max'])
                     )
+        elif survey_element['type'] == 'boolean':
+            if survey_element['variable'] in data and type(data[survey_element['variable']]) is not bool:
+                errors.append("Value %s for '%s' expected to be a boolean." % (data[survey_element['variable']], survey_element['variable']))
         elif survey_element['type'] == 'multiselect':
             if survey_element['variable'] in data:
                 if type(data[survey_element['variable']]) != list:

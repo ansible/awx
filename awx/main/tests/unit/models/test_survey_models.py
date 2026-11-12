@@ -19,6 +19,46 @@ class DistinctParametrize(object):
 
 @pytest.mark.survey
 class TestSurveyVariableValidation:
+    @pytest.mark.parametrize('value', [True, False])
+    def test_boolean_survey_variable_validation_accepts_native_boolean(self, job_template_factory, value):
+        objects = job_template_factory('job-template-with-boolean-survey', persisted=False)
+        obj = objects.job_template
+        element = {
+            'required': False,
+            'default': False,
+            'variable': 'enabled',
+            'question_name': 'Enabled?',
+            'type': 'boolean',
+        }
+        obj.survey_spec = {'name': 'Boolean survey', 'description': '', 'spec': [element]}
+        obj.survey_enabled = True
+
+        accepted, rejected, errors = obj.accept_or_ignore_variables({'enabled': value})
+
+        assert accepted == {'enabled': value}
+        assert rejected == {}
+        assert errors == {}
+
+    @pytest.mark.parametrize('value', ['true', 'false', 0, 1])
+    def test_boolean_survey_variable_validation_rejects_non_boolean(self, job_template_factory, value):
+        objects = job_template_factory('job-template-with-boolean-survey', persisted=False)
+        obj = objects.job_template
+        element = {
+            'required': False,
+            'default': False,
+            'variable': 'enabled',
+            'question_name': 'Enabled?',
+            'type': 'boolean',
+        }
+        obj.survey_spec = {'name': 'Boolean survey', 'description': '', 'spec': [element]}
+        obj.survey_enabled = True
+
+        accepted, rejected, errors = obj.accept_or_ignore_variables({'enabled': value})
+
+        assert accepted == {}
+        assert rejected == {'enabled': value}
+        assert "expected to be a boolean" in str(errors)
+
     def test_survey_answers_as_string(self, job_template_factory):
         objects = job_template_factory('job-template-with-survey', survey=[{'variable': 'var1', 'type': 'text'}], persisted=False)
         jt = objects.job_template
