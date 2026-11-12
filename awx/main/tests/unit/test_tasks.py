@@ -514,8 +514,38 @@ class TestGenericRun:
         task.runner_callback.status_handler({'status': 'starting'}, runner_config)
 
         task.runner_callback.update_model.assert_called_with(
-            1, job_args=json.dumps({'foo': 'bar'}), job_cwd='/foobar', job_env={'switch': 'blade', 'foot': 'ball', 'secret_key': 'redacted_value'}
+            1,
+            job_args=json.dumps({'foo': 'bar'}),
+            job_cwd='/foobar',
+            job_env={'switch': 'blade', 'foot': 'ball', 'secret_key': 'redacted_value'},
         )
+
+    @pytest.mark.parametrize(
+        'host_count, existing_job_env, stored',
+        [
+            (3, {}, {'host_count': 3}),
+            (None, {'host_count': 5}, {'host_count': 5}),  # an adopter replaying 'starting' keeps the original
+            (3, {'host_count': 5}, {'host_count': 3}),
+            (None, {}, {}),
+        ],
+    )
+    def test_save_job_metadata_stores_the_host_count(self, job, update_model_wrapper, mock_me, host_count, existing_job_env, stored):
+        class MockMe:
+            pass
+
+        task = jobs.RunJob()
+        job.job_env = existing_job_env
+        task.runner_callback.instance = job
+        task.runner_callback.host_count = host_count
+        task.runner_callback.update_model = mock.Mock(wraps=update_model_wrapper)
+        runner_config = MockMe()
+        runner_config.command = {}
+        runner_config.cwd = '/foobar'
+        runner_config.env = {}
+        task.runner_callback.status_handler({'status': 'starting'}, runner_config)
+
+        saved_env = task.runner_callback.update_model.call_args.kwargs['job_env']
+        assert {k: v for k, v in saved_env.items() if k == 'host_count'} == stored
 
     def test_created_by_extra_vars(self, mock_me):
         job = Job(created_by=User(pk=123, username='angry-spud'))
@@ -2533,3 +2563,55 @@ def test_administrative_workunit_reaper(work_unit_data, expected_function_call):
         simple_command.assert_called()
     else:
         simple_command.assert_not_called()
+
+
+def test_administrative_workunit_reaper_continues_past_a_forgotten_unit():
+    """Same wedge as `awx_receptor_workunit_reaper`: receptor lists a cleanup unit whose remote
+    has forgotten it, `work release` raises, and `work_list.items()` iterates in insertion order,
+    so the units behind the first failure are never reaped on any later pass either."""
+    work_list = {
+        'forgotten': {'ExtraData': {'RemoteWorkType': 'ansible-runner', 'RemoteParams': {'params': '--worker-info'}}, 'StateName': 'Succeeded'},
+        'healthy': {'ExtraData': {'RemoteWorkType': 'ansible-runner', 'RemoteParams': {'params': '--worker-info'}}, 'StateName': 'Succeeded'},
+    }
+    calls = []
+
+    def simple_command(command):
+        calls.append(command)
+        if command == 'work release forgotten':
+            raise RuntimeError('error releasing remote unit:  unknown work unit forgotten')
+
+    with mock.patch('awx.main.tasks.receptor.get_receptor_ctl') as mock_get_receptor_ctl:
+        mock_get_receptor_ctl.return_value = mock.MagicMock(simple_command=mock.MagicMock(side_effect=simple_command))
+        receptor.administrative_workunit_reaper(work_list=work_list)
+
+    assert 'work release healthy' in calls
+
+
+def test_administrative_workunit_reaper_resets_the_connection_after_a_failure():
+    """Guarding the release is not enough: an `ERROR:` reply leaves receptorctl's socket one line
+    behind, so the next release reads the previous reply and fails on garbage. Measured on the
+    cluster as `Expecting value: line 1 column 1 (char 0)` for every unit after the first failure.
+    """
+    work_list = {
+        'forgotten': {'ExtraData': {'RemoteWorkType': 'ansible-runner', 'RemoteParams': {'params': '--worker-info'}}, 'StateName': 'Succeeded'},
+        'healthy': {'ExtraData': {'RemoteWorkType': 'ansible-runner', 'RemoteParams': {'params': '--worker-info'}}, 'StateName': 'Succeeded'},
+    }
+    released = []
+    state = {'desynced': False}
+
+    def simple_command(command):
+        unit_id = command.rsplit(' ', 1)[1]
+        if state['desynced']:
+            raise ValueError('Expecting value: line 1 column 1 (char 0)')
+        if unit_id == 'forgotten':
+            state['desynced'] = True
+            raise RuntimeError('error releasing remote unit:  unknown work unit forgotten')
+        released.append(unit_id)
+
+    ctl = mock.MagicMock(simple_command=mock.MagicMock(side_effect=simple_command))
+    ctl.close.side_effect = lambda: state.update(desynced=False)
+
+    with mock.patch('awx.main.tasks.receptor.get_receptor_ctl', return_value=ctl):
+        receptor.administrative_workunit_reaper(work_list=work_list)
+
+    assert released == ['healthy']

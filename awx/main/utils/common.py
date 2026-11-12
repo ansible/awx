@@ -1164,8 +1164,15 @@ def table_exists(cursor, table_name):
     return False
 
 
-def create_partition(tblname, start=None):
-    """Creates new partition table for events.  By default it covers the current hour."""
+def create_partition(event_class, start=None):
+    """Creates new partition table for events.  By default it covers the current hour.
+
+    The partition gets a unique (job, job_created, counter) index while it is still empty, so a
+    job's events stay unique (adoption can stream one work unit twice) with no migration over
+    existing partitions. job_created is the partition key, so no duplicate can span partitions.
+    Partitions created before this index existed have none.
+    """
+    tblname = event_class._meta.db_table
     if start is None:
         start = now()
 
@@ -1185,6 +1192,8 @@ def create_partition(tblname, start=None):
 
                 cursor.execute(
                     f'CREATE TABLE {tblname}_{partition_label} (LIKE {tblname} INCLUDING DEFAULTS INCLUDING CONSTRAINTS); '
+                    f'CREATE UNIQUE INDEX {tblname}_{partition_label}_counter_uniq '
+                    f'ON {tblname}_{partition_label} ({event_class.JOB_REFERENCE}, job_created, counter); '
                     f'ALTER TABLE {tblname} ATTACH PARTITION {tblname}_{partition_label} '
                     f'FOR VALUES FROM (\'{start_timestamp}\') TO (\'{end_timestamp}\');'
                 )

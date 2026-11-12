@@ -43,6 +43,12 @@ STANDARD_INVENTORY_UPDATE_ENV = {
 CAN_CANCEL = ('new', 'pending', 'waiting', 'running')
 ACTIVE_STATES = CAN_CANCEL
 ERROR_STATES = ('error',)
+# job_env keys that belong to adoption, not to the job's environment: hidden from the API
+ADOPTION_JOB_ENV_KEYS = frozenset({'host_count', 'host_map', 'receptor_submit_started'})
+# job_env key written just before the work is submitted to receptor; a job that has it may not be requeued
+RECEPTOR_SUBMIT_STARTED = 'receptor_submit_started'
+# Start of the job_explanation of an adopted job whose host results cannot be matched to its inventory
+HOST_RESULTS_UNMATCHED = 'Job failed because its host results could not be matched to the inventory after its controller was lost'
 MINIMAL_EVENTS = set(['playbook_on_play_start', 'playbook_on_task_start', 'playbook_on_stats', 'EOF'])
 CENSOR_VALUE = '************'
 ENV_BLOCKLIST = frozenset(

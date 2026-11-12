@@ -68,6 +68,8 @@ from awx.main.tasks.callback import (
     RunnerCallbackForProjectUpdate,
     RunnerCallbackForSystemJob,
 )
+from awx.main.tasks import host_trust
+from awx.main.tasks.adoption_decisions import is_requeueable
 from awx.main.tasks.policy import evaluate_policy
 from awx.main.tasks.signals import with_signal_handling, signal_callback
 from awx.main.tasks.receptor import AWXReceptorJob
@@ -87,7 +89,7 @@ from awx.main.utils.common import (
 )
 from awx.conf.license import get_license
 from awx.main.utils.handlers import SpecialInventoryHandler
-from awx.main.utils.update_model import update_model
+from awx.main.utils.update_model import NotOwner, update_model
 
 # Django flags
 from flags.state import flag_enabled
@@ -205,16 +207,24 @@ def dispatch_waiting_jobs(binder):
         UnifiedJob.objects.filter(pk=uj.pk, status='waiting').update(status='running', start_args='')
 
 
-def _finalize_job_run(model, pk, runner_callback, status, extra_fields=None):
+def _finalize_job_run(model, pk, runner_callback, status, extra_fields=None, owner_task_id=None, _required_status=None):
     """Commit terminal status, trigger notifications, and emit websocket status.
 
     Shared by BaseTask.run() (normal path) and adoption (reattach_to_work_unit path).
     Uses duck typing on the instance to schedule dependent task/workflow managers.
+
+    With owner_task_id, nothing is written and NotOwner is raised if another task has
+    taken the job over (adoption records its own task id in celery_task_id).
+
+    _required_status: when set, the write is skipped and None is returned if the row's
+    current status does not match. Both final status paths, BaseTask.run() and adoption,
+    pass 'running', so a job that something else already ended, such as a reap, keeps that
+    one terminal status and sends no second notification.
     """
     all_fields = runner_callback.get_delayed_update_fields()
     if extra_fields:
         all_fields.update(extra_fields)
-    instance = update_model(model, pk, status=status, select_for_update=True, **all_fields)
+    instance = update_model(model, pk, status=status, select_for_update=True, owner_task_id=owner_task_id, _required_status=_required_status, **all_fields)
     if not instance:
         return None
     if (instance.host_status_counts is not None) or (not runner_callback.wrapup_event_dispatched):
@@ -531,16 +541,18 @@ class BaseTask(object):
 
     def write_inventory_file(self, inventory, private_data_dir, file_name, script_params):
         script_data = inventory.get_script_data(**script_params)
+        # Reuse the script_data we are about to write rather than making the callback fetch
+        # its own copy, which is what the adoption path has to do.
+        self.runner_callback.host_map = host_trust.host_map_from(script_data)
         file_content = '#! /usr/bin/env python3\n# -*- coding: utf-8 -*-\nprint(%r)\n' % json.dumps(script_data)
         return self.write_private_data_file(private_data_dir, file_name, file_content, sub_dir='inventory', file_permissions=0o700)
 
     def build_inventory(self, instance, private_data_dir):
-        script_params = {"hostvars": True, "towervars": True}
-        if hasattr(instance, 'job_slice_number'):
-            script_params['slice_number'] = instance.job_slice_number
-            script_params['slice_count'] = instance.job_slice_count
-
-        return self.write_inventory_file(instance.inventory, private_data_dir, 'hosts', script_params)
+        host_count = self.runner_callback.host_count = host_trust.count_hosts(instance)
+        if host_count is not None:
+            # Saved now, not only at 'starting': a controller lost before that save still leaves the adopter a count.
+            self.instance = self.update_model(instance.pk, job_env={**(instance.job_env or {}), 'host_count': host_count})
+        return self.write_inventory_file(instance.inventory, private_data_dir, 'hosts', host_trust.script_params(instance))
 
     def build_args(self, instance, private_data_dir, passwords):
         raise NotImplementedError
@@ -645,7 +657,7 @@ class BaseTask(object):
         instance.log_lifecycle("pre_run")
 
         # Before task is started, ensure that job_event partitions exist
-        create_partition(instance.event_class._meta.db_table, start=instance.created)
+        create_partition(instance.event_class, start=instance.created)
 
     def post_run_hook(self, instance, status):
         """
@@ -655,6 +667,31 @@ class BaseTask(object):
 
     def should_use_fact_cache(self):
         return False
+
+    def _finalize_and_release(self, pk, status, receptor_job, owner_task_id):
+        """Write the job's final status, then release its work unit.
+
+        Return False when another task adopted the job while it ran; its final status
+        and work unit are then that task's, so neither is touched here.
+        """
+        release_work = True
+        try:
+            # owner_task_id refuses the write if an adoption claimed the job (NotOwner below).
+            # _required_status='running' skips it if something that took no ownership, such as a
+            # reap, already ended the job; self.instance is then None, and run() stops without a
+            # second terminal notification.
+            self.instance = _finalize_job_run(self.model, pk, self.runner_callback, status, owner_task_id=owner_task_id, _required_status='running')
+        except NotOwner as exc:
+            logger.warning(f'{self.instance.log_format} was taken over by task {exc.current_task_id}; not writing status {status} or releasing its work unit')
+            release_work = False
+        finally:
+            # Guarantee work unit release even if finalization throws
+            if release_work and receptor_job and getattr(receptor_job, 'work', None):
+                try:
+                    receptor_job._receptor_release_work(receptor_job.work, status)
+                except Exception:
+                    logger.exception(f'Failed to release work unit {getattr(receptor_job, "unit_id", "unknown")}')
+        return release_work
 
     @with_path_cleanup
     @with_signal_handling
@@ -683,6 +720,9 @@ class BaseTask(object):
             return
 
         self.instance.websocket_emit_status("running")
+        # The task id this run was dispatched under. If adoption records a different one,
+        # this run no longer owns the job and must not write its final status.
+        owner_task_id = self.instance.celery_task_id or None
         status, rc = 'error', None
         self.runner_callback.event_ct = 0
 
@@ -708,8 +748,15 @@ class BaseTask(object):
             self.build_project_dir(self.instance, private_data_dir)
             self.instance.log_lifecycle("preparing_playbook")
             if self.instance.cancel_flag or signal_callback():
-                logger.debug(f'detected pre-run cancel flag for {self.instance.log_format}')
-                self.instance = self.update_model(self.instance.pk, status='canceled')
+                if self.instance.cancel_flag:
+                    logger.debug(f'detected pre-run cancel flag for {self.instance.log_format}')
+                    self.instance = self.update_model(self.instance.pk, status='canceled')
+                else:
+                    # Signal without cancel_flag is a controller shutdown, not a user cancel.
+                    # Reset to pending so any controller can re-dispatch the job.
+                    logger.info(f'{self.instance.log_format} received shutdown signal before reaching EE; resetting to pending')
+                    self.instance = self.update_model(self.instance.pk, status='pending', controller_node='', execution_node='')
+                    return
 
             if self.instance.status != 'running':
                 # Stop the task chain and prevent starting the job if it has
@@ -822,12 +869,21 @@ class BaseTask(object):
                 res = receptor_job.run()
                 self.unit_id = receptor_job.unit_id
 
+                if receptor_job.detached:
+                    # This controller is shutting down while the EE keeps working. Leave the
+                    # job 'running' with its work_unit_id: that pair is the only thing the
+                    # orphan scan matches on, so finalizing it, running post-run hooks or
+                    # releasing the unit here would each on their own strand a live EE that
+                    # nothing can ever reach again.
+                    logger.info(f'{self.instance.log_format} detached from work unit {receptor_job.unit_id} on shutdown, leaving it to be adopted')
+                    return
+
                 if not res:
                     # res is None when quota exceeded or other early-return condition.
                     # Must release work unit here before returning, or it will leak.
-                    if receptor_job and getattr(receptor_job, 'receptor_ctl', None):
+                    if receptor_job and getattr(receptor_job, 'work', None):
                         try:
-                            receptor_job._receptor_release_work(receptor_job.receptor_ctl, 'error')
+                            receptor_job._receptor_release_work(receptor_job.work, 'error')
                         except Exception:
                             logger.exception(f'Failed to release work unit {getattr(receptor_job, "unit_id", "unknown")} on early return')
                     return
@@ -850,6 +906,30 @@ class BaseTask(object):
         except ReceptorNodeNotFound as exc:
             self.runner_callback.delay_update(job_explanation=str(exc))
         except Exception:
+            if receptor_job is not None and receptor_job.detached:
+                # The decision to walk away from a still-running EE was already made; an
+                # exception after that point is the shutdown taking the sockets down with
+                # it, not a failed job. Recording 'error' here would clear the 'running' +
+                # work_unit_id pair that is the only thing the orphan scan matches on, so
+                # the same reasoning as the clean detach above applies — leave it alone.
+                logger.info(
+                    f'{self.instance.log_format} detached from work unit {receptor_job.unit_id} during shutdown and then errored, leaving it to be adopted',
+                    exc_info=True,
+                )
+                return
+            if signal_callback() and not isinstance(self.instance, SystemJob) and (receptor_job is None or receptor_job.unit_id is None):
+                # The pod stops all its containers at once, so receptor can die after the pre-EE
+                # signal check and before a work unit exists. Nothing reached an EE and no
+                # work_unit_id was saved, so the orphan scan can never find this job: re-dispatch
+                # it like the pre-EE check does. System jobs are excluded: they run ansible-runner
+                # inside this pod, so they may already have done work. A user cancel arrives as the
+                # same signal, so re-read cancel_flag, which was set after this task loaded the job.
+                # The re-read also brings the submit marker: receptor may have started a unit whose id never came back.
+                self.instance = self.update_model(pk)
+                if not self.instance.cancel_flag and is_requeueable(self.instance):
+                    logger.info(f'{self.instance.log_format} lost receptor to a shutdown before reaching EE; resetting to pending', exc_info=True)
+                    self.instance = self.update_model(pk, status='pending', controller_node='', execution_node='')
+                    return
             # this could catch programming or file system errors
             self.runner_callback.delay_update(result_traceback=traceback.format_exc())
             logger.exception('%s Exception occurred while running task', self.instance.log_format)
@@ -868,18 +948,11 @@ class BaseTask(object):
             logger.exception('{} Post run hook errored.'.format(self.instance.log_format))
 
         self.private_data_dir = private_data_dir
-        try:
-            self.instance = _finalize_job_run(self.model, pk, self.runner_callback, status)
-        finally:
-            # Guarantee work unit release even if finalization throws
-            if receptor_job and getattr(receptor_job, 'receptor_ctl', None):
-                try:
-                    receptor_job._receptor_release_work(receptor_job.receptor_ctl, status)
-                except Exception:
-                    logger.exception(f'Failed to release work unit {getattr(receptor_job, "unit_id", "unknown")}')
+        if not self._finalize_and_release(pk, status, receptor_job, owner_task_id):
+            return
 
         if not self.instance:
-            logger.error(f'Unified job pk={pk} appears to be deleted while running')
+            logger.info(f'Job {pk} finalization skipped: already finalized by another controller or job was deleted')
             return
 
         if status != 'successful':
@@ -1385,8 +1458,11 @@ class RunJob(SourceControlMixin, BaseTask):
 
     def post_run_hook(self, job, status):
         super(RunJob, self).post_run_hook(job, status)
-        job.refresh_from_db(fields=['job_env'])
-        private_data_dir = job.job_env.get('AWX_PRIVATE_DATA_DIR')
+        # Adoption sets self.private_data_dir; a normal run only sets it after this hook.
+        private_data_dir = getattr(self, 'private_data_dir', None)
+        if not private_data_dir:
+            job.refresh_from_db(fields=['job_env'])
+            private_data_dir = job.job_env.get('AWX_PRIVATE_DATA_DIR')
         if not private_data_dir:
             # If there's no private data dir, that means we didn't get into the
             # actual `run()` call; this _usually_ means something failed in
@@ -2066,7 +2142,7 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
             return  # nothing to save, step out of the way to allow error reporting
 
         inventory_update.refresh_from_db()
-        private_data_dir = inventory_update.job_env['AWX_PRIVATE_DATA_DIR']
+        private_data_dir = getattr(self, 'private_data_dir', None) or inventory_update.job_env['AWX_PRIVATE_DATA_DIR']
         expected_output = os.path.join(private_data_dir, 'artifacts', str(inventory_update.id), 'output.json')
         with open(expected_output) as f:
             data = json.load(f)

@@ -218,9 +218,13 @@ def mock_me():
 
 
 @pytest.fixture
-def me_inst():
-    "Inserts an instance to the database for Instance.objects.me(), and goes ahead and mocks it in"
-    inst = Instance.objects.create(hostname='local_node', uuid='00000000-0000-0000-0000-000000000000')
+def me_inst(settings):
+    """Inserts an instance to the database for Instance.objects.me(), and goes ahead and mocks it in.
+
+    Its hostname is settings.CLUSTER_HOST_ID, as it is outside tests, where me() looks the row up
+    by CLUSTER_HOST_ID. Code that compares a job's controller_node with CLUSTER_HOST_ID relies on it.
+    """
+    inst = Instance.objects.create(hostname=settings.CLUSTER_HOST_ID, uuid='00000000-0000-0000-0000-000000000000')
     me_mock = mock.MagicMock(return_value=inst)
     with mock.patch.object(Instance.objects, 'me', me_mock):
         yield inst

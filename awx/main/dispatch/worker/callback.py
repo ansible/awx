@@ -10,7 +10,7 @@ from django.conf import settings
 from django.utils.functional import cached_property
 from django.utils.timezone import now as tz_now
 from django import db
-from django.db import transaction, connection as django_connection
+from django.db import transaction, IntegrityError, connection as django_connection
 from django_guid import set_guid
 
 import psutil
@@ -20,7 +20,7 @@ import redis
 from awx.main.utils.redis import get_redis_client
 from awx.main.utils.db import set_connection_name
 from awx.main.consumers import emit_channel_notification
-from awx.main.models import JobEvent, AdHocCommandEvent, ProjectUpdateEvent, InventoryUpdateEvent, SystemJobEvent, UnifiedJob
+from awx.main.models import Host, JobEvent, AdHocCommandEvent, ProjectUpdateEvent, InventoryUpdateEvent, SystemJobEvent, UnifiedJob
 from awx.main.constants import ACTIVE_STATES
 from awx.main.models.events import emit_event_detail
 from awx.main.utils.profiling import AWXProfiler
@@ -28,6 +28,31 @@ from awx.main.tasks.system import events_processed_hook
 import awx.main.analytics.subsystem_metrics as s_metrics
 
 logger = logging.getLogger('awx.main.commands.run_callback_receiver')
+
+
+def _is_unique_constraint_violation(exc):
+    """Return True if exc is a unique-key IntegrityError (already stored, safe to skip)."""
+    cause = getattr(exc, '__cause__', None)
+    if getattr(cause, 'sqlstate', None) == '23505':
+        return True
+    return 'UNIQUE constraint failed' in str(exc)
+
+
+def _null_missing_host_ids(events):
+    """Null host_id on events whose host no longer exists.
+
+    The event host FKs have no DB constraint (lost in the bigint migration), so a host deleted
+    mid-job leaves a dangling id. JobHostSummary already nulls these.
+    """
+    # Only real ids are checked: anything else ('' for an unmapped host) is left to the save, so
+    # one malformed id cannot make the whole batch fail here.
+    ids = {e.host_id for e in events if isinstance(getattr(e, 'host_id', None), int)}
+    if not ids:
+        return
+    live = set(Host.objects.filter(id__in=ids).values_list('id', flat=True))
+    for e in events:
+        if isinstance(getattr(e, 'host_id', None), int) and e.host_id not in live:
+            e.host_id = None
 
 
 def job_stats_wrapup(job_identifier, event=None):
@@ -42,14 +67,20 @@ def job_stats_wrapup(job_identifier, event=None):
         # Update host_status_counts while holding the row lock
         with transaction.atomic():
             uj = UnifiedJob.objects.select_for_update().get(pk=job_identifier)
+            # If host_status_counts is already set, another controller already ran stats_wrapup
+            # for this job. Capturing this before the save lets us avoid sending a duplicate
+            # notification below when both controllers process playbook_on_stats concurrently.
+            already_processed = uj.host_status_counts is not None
             uj.host_status_counts = host_status_counts
             uj.save(update_fields=['host_status_counts'])
 
         uj.log_lifecycle("stats_wrapup_finished")
 
         # If the status was a finished state before this update was made, send notifications
-        # If not, we will send notifications when the status changes
-        if uj.status not in ACTIVE_STATES:
+        # If not, we will send notifications when the status changes.
+        # Guard on already_processed: if another controller ran stats_wrapup first and the job
+        # is already terminal, that controller's finalization already sent the notification.
+        if uj.status not in ACTIVE_STATES and not already_processed:
             events_processed_hook(uj)
 
     except Exception:
@@ -217,6 +248,9 @@ class CallbackBrokerWorker:
                         metrics_events_missing_created += 1
                     else:  # only calculate the seconds if the created time already has been set
                         metrics_total_job_event_processing_seconds += e.modified - e.created
+                # Before the try below: a database error here raises out of flush() and perform_work
+                # retries it like any other, where the per-event fallback would skip the check.
+                _null_missing_host_ids(events)
                 metrics_duration_to_save = time.perf_counter()
                 saved_events = []
                 try:
@@ -240,6 +274,11 @@ class CallbackBrokerWorker:
                             events.remove(e)
                             saved_events.append(e)  # Importantly, remove successfully saved events from the buffer
                         except Exception as exc_indv:
+                            if isinstance(exc_indv, IntegrityError) and _is_unique_constraint_violation(exc_indv):
+                                # Duplicate event from concurrent adoption stream — already stored.
+                                events.remove(e)
+                                continue
+
                             retry_count = getattr(e, '_retry_count', 0) + 1
                             e._retry_count = retry_count
 
