@@ -15,6 +15,7 @@ adoption and finalize code runs without a mesh.
 """
 
 import contextlib
+import uuid
 from unittest import mock
 
 import redis
@@ -79,6 +80,8 @@ def heartbeat(hostname, mesh_status, running_task_ids=(), startup=False, redis_u
     among them is not orphaned. startup runs the heartbeat a starting dispatcher runs.
     redis_up=False makes the node's Redis ping fail once, as in a one-second Redis blip.
     The node's own health check runs for real, so its state and capacity follow from it.
+    Each queued adoption gets a new task id, as the dispatcher would give it, which the
+    heartbeat records on the job.
     """
     binder = None
     if not startup:
@@ -97,6 +100,7 @@ def heartbeat(hostname, mesh_status, running_task_ids=(), startup=False, redis_u
         mock.patch('awx.main.tasks.system.adopt_job_async') as adopt_job_async,
         mock.patch('awx.main.tasks.jobs.dispatch_waiting_jobs'),
     ):
+        adopt_job_async.apply_async.side_effect = lambda **kwargs: ({'uuid': str(uuid.uuid4())}, None)
         cluster_node_heartbeat(binder)
     return [call.kwargs['args'][0] for call in adopt_job_async.apply_async.call_args_list]
 
