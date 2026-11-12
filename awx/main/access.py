@@ -90,6 +90,8 @@ __all__ = [
 
 logger = logging.getLogger('awx.main.access')
 
+EXECUTION_ENVIRONMENT_READ_DENIED = _('You do not have read access to the execution environment.')
+
 access_registry = {
     # <model_class>: <access_class>,
     # ...
@@ -1459,7 +1461,7 @@ class ProjectAccess(NotificationAttachMixin, BaseAccess):
             ee = get_object_from_data('default_environment', ExecutionEnvironment, data)
             if not self.user.can_access(ExecutionEnvironment, 'read', ee):
                 if self.save_messages:
-                    self.messages['default_environment'] = [_('You do not have read access to the execution environment.')]
+                    self.messages['default_environment'] = [EXECUTION_ENVIRONMENT_READ_DENIED]
                 return False
 
         return self.check_related('organization', Organization, data, permission='add_project', mandatory=True) and self.check_related(
@@ -1583,14 +1585,13 @@ class JobTemplateAccess(NotificationAttachMixin, UnifiedCredentialsMixin, BaseAc
 
         # If an inventory is provided, the user should have use access.
         inventory = get_value(Inventory, 'inventory')
-        if inventory:
-            if not self.has_permission_with_prefetch(inventory, 'use'):
-                if self.save_messages:
-                    self.messages['inventory'] = [_('You do not have use permission on Inventory')]
-                return False
+        if inventory and not self.has_permission_with_prefetch(inventory, 'use'):
+            if self.save_messages:
+                self.messages['inventory'] = [_('You do not have use permission on Inventory')]
+            return False
 
         if not self.check_related('execution_environment', ExecutionEnvironment, data, permission='view'):
-            raise PermissionDenied({'execution_environment': [_('You do not have read access to the execution environment.')]})
+            raise PermissionDenied({'execution_environment': [EXECUTION_ENVIRONMENT_READ_DENIED]})
 
         project = get_value(Project, 'project')
         # If the user has admin access to the project (as an org admin), should
@@ -2107,7 +2108,7 @@ class WorkflowJobTemplateAccess(NotificationAttachMixin, BaseAccess):
 
         if not self.check_related('execution_environment', ExecutionEnvironment, data, permission='view'):
             if self.save_messages:
-                self.messages['execution_environment'] = [_('You do not have read access to the execution environment.')]
+                self.messages['execution_environment'] = [EXECUTION_ENVIRONMENT_READ_DENIED]
             return False
 
         return True
@@ -3003,7 +3004,7 @@ class WorkflowApprovalTemplateAccess(BaseAccess):
         if data is None:  # Hide direct creation in API browser
             return False
         else:
-            return self.check_related('workflow_approval_template', UnifiedJobTemplate, permission='change')
+            return self.check_related('workflow_approval_template', UnifiedJobTemplate, data, permission='change')
 
     def can_change(self, obj, data):
         return self.user.can_access(WorkflowJobTemplate, 'change', obj.workflow_job_template, data={})

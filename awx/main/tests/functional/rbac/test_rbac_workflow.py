@@ -2,6 +2,7 @@ import pytest
 
 from awx.main.access import (
     UnifiedJobAccess,
+    WorkflowApprovalTemplateAccess,
     WorkflowJobTemplateAccess,
     WorkflowJobTemplateNodeAccess,
     WorkflowJobAccess,
@@ -12,6 +13,16 @@ from awx.main.models import JobTemplate, WorkflowJobTemplateNode
 from rest_framework.exceptions import PermissionDenied
 
 from awx.main.models import InventorySource, JobLaunchConfig
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('can_change_template', [False, True])
+def test_approval_template_add_checks_related_template(workflow_job_template, alice, can_change_template):
+    workflow_job_template.read_role.members.add(alice)
+    if can_change_template:
+        workflow_job_template.admin_role.members.add(alice)
+    access = WorkflowApprovalTemplateAccess(alice)
+    assert access.can_add({'workflow_approval_template': workflow_job_template.pk}) is can_change_template
 
 
 @pytest.mark.django_db
