@@ -8,6 +8,7 @@ from django.conf import settings
 from django.db.models import OuterRef, Subquery
 from django.db.models.functions import Lower
 
+from ansible_base.lib.utils.bulk_validation_audit import audit_bulk_model_instances
 from ansible_base.lib.utils.db import advisory_lock
 
 from awx.main.utils.common import memoize
@@ -85,6 +86,10 @@ class HostLatestSummaryQuerySet(models.QuerySet):
 
 class HostManager(models.Manager.from_queryset(HostLatestSummaryQuerySet)):
     """Custom manager class for Hosts model."""
+
+    def bulk_create(self, objs, *args, **kwargs):
+        materialized = audit_bulk_model_instances(objs, operation='bulk_create')
+        return super().bulk_create(materialized, *args, **kwargs)
 
     @memoize(ttl=60, cache_key='host_active_count')
     def active_count(self):
