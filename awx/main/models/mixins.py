@@ -9,7 +9,6 @@ import requests
 # Django
 from django.apps import apps
 from django.conf import settings
-
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.query import QuerySet
@@ -19,7 +18,6 @@ from django.utils.translation import gettext_lazy as _
 from ansible_base.lib.utils.models import prevent_search
 
 # AWX
-
 from awx.main.utils import parse_yaml_or_json, get_custom_venv_choices, get_licenser, polymorphic
 from awx.main.utils.execution_environments import get_default_execution_environment
 from awx.main.utils.encryption import decrypt_value, get_encryption_key, is_encrypted
