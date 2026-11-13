@@ -440,16 +440,50 @@ class CallbackReceiverMetrics(Metrics):
         super().__init__(settings.METRICS_SERVICE_CALLBACK_RECEIVER, *args, **kwargs)
 
 
-def metrics(request):
-    output_text = ''
-    output_text += DispatcherMetrics().generate_metrics(request)
-    output_text += CallbackReceiverMetrics().generate_metrics(request)
-    output_text += IndirectCountingMetrics().generate_metrics(request)
+def merge_metric_families(*texts):
+    """
+    Merge prometheus exposition text from several collectors so that each metric
+    family has exactly one HELP/TYPE header, with all of its samples grouped
+    directly beneath it.
 
-    dispatcherd_metrics = get_dispatcherd_metrics(request)
-    if dispatcherd_metrics:
-        output_text += dispatcherd_metrics
-    return output_text
+    Some metrics (e.g. subsystem_metrics_pipe_execute_seconds) are exported by
+    more than one subsystem, distinguished by a ``subsystem`` label. Simply
+    concatenating each subsystem's output repeats the HELP/TYPE lines, which the
+    text format does not allow and which strict parsers reject. It also splits a
+    family's samples apart, whereas the format expects them to be contiguous.
+
+    Families keep the order in which they were first seen. Lines belonging to a
+    repeated family (samples, including histogram _bucket/_sum/_count) are
+    appended to the first occurrence.
+    """
+    families = {}  # insertion ordered: family name -> list of lines
+    for text in texts:
+        current = None
+        skip_header = False
+        for line in text.splitlines():
+            if not line:
+                continue
+            if line.startswith('# HELP '):
+                current = line.split(' ', 3)[2]
+                skip_header = current in families
+                if not skip_header:
+                    families[current] = [line]
+            elif line.startswith('# TYPE ') and skip_header:
+                continue
+            else:
+                # append the line to the current family. If this is the first entry,
+                # insert an empty list first
+                families.setdefault(current, []).append(line)
+    return ''.join(f'{line}\n' for lines in families.values() for line in lines)
+
+
+def metrics(request):
+    return merge_metric_families(
+        DispatcherMetrics().generate_metrics(request),
+        CallbackReceiverMetrics().generate_metrics(request),
+        IndirectCountingMetrics().generate_metrics(request),
+        get_dispatcherd_metrics(request),
+    )
 
 
 class CustomToPrometheusMetricsCollector(prometheus_client.registry.Collector):
