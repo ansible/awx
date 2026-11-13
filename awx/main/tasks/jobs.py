@@ -1805,10 +1805,19 @@ class RunProjectUpdate(BaseTask):
                     if project_path:
                         marker_path = os.path.join(project_path, '.scm_revision')
                         try:
-                            with open(marker_path, 'w') as f:
+                            fd = os.open(marker_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o644)
+                            with os.fdopen(fd, 'w') as f:
                                 f.write(instance.scm_revision)
                         except OSError:
                             logger.warning(f'Could not write revision marker at {marker_path}')
+            elif instance.scm_type and instance.scm_type != 'git' and status != 'successful':
+                project_path = instance.get_project_path(check_if_exists=False)
+                if project_path:
+                    marker_path = os.path.join(project_path, '.scm_revision')
+                    try:
+                        os.remove(marker_path)
+                    except FileNotFoundError:
+                        pass
 
             # Roles and collection folders copy to durable cache
             base_path = instance.get_cache_path()
