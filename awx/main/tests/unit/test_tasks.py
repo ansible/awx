@@ -2179,6 +2179,30 @@ class TestWriteRevisionMarker:
 
         assert not os.path.exists(marker_path)
 
+    @mock.patch('awx.main.tasks.jobs.RunProjectUpdate.release_lock')
+    @mock.patch('awx.main.tasks.jobs.BaseTask.post_run_hook')
+    def test_no_error_removing_marker_when_none_exists(self, mock_super_hook, mock_release, tmp_path):
+        project_path = str(tmp_path / 'project')
+        os.makedirs(project_path)
+
+        instance = mock.Mock()
+        instance.scm_type = 'insights'
+        instance.launch_type = 'sync'
+        instance.job_type = 'run'
+        instance.job_tags = 'update_insights'
+        instance.get_project_path.return_value = project_path
+        instance.get_cache_path.return_value = str(tmp_path / 'cache')
+        instance.project = mock.Mock()
+        instance.project.scm_type = 'insights'
+        instance.log_format = 'test'
+
+        task = jobs.RunProjectUpdate()
+        task.runner_callback = mock.Mock()
+        task.runner_callback.playbook_new_revision = None
+        task.job_private_data_dir = None
+
+        task.post_run_hook(instance, 'failed')
+
 
 @mock.patch('awx.main.tasks.jobs.RunProjectUpdate.make_local_copy')
 @mock.patch('awx.main.tasks.jobs.RunProjectUpdate.run')

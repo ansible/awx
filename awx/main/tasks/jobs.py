@@ -45,6 +45,8 @@ from awx.main.constants import (
     CONTAINER_VOLUMES_MOUNT_TYPES,
     HOST_FACTS_FIELDS,
 )
+
+SCM_REVISION_FILE = '.scm_revision'
 from awx.main.models import (
     Instance,
     InventorySource,
@@ -892,6 +894,23 @@ class BaseTask(object):
 class SourceControlMixin(BaseTask):
     """Utility methods for tasks that run use content from source control"""
 
+    def _git_revision_matches(self, project_path, job_revision):
+        try:
+            git_repo = git.Repo(project_path)
+            return job_revision == git_repo.head.commit.hexsha
+        except (ValueError, BadGitName, git.exc.InvalidGitRepositoryError):
+            return False
+
+    def _marker_revision_matches(self, project_path, job_revision):
+        marker_path = os.path.join(project_path, SCM_REVISION_FILE)
+        try:
+            fd = os.open(marker_path, os.O_RDONLY | os.O_NOFOLLOW)
+            with os.fdopen(fd) as f:
+                local_revision = f.read(256).strip()
+            return job_revision == local_revision
+        except OSError:
+            return False
+
     def get_sync_needs(self, project, scm_branch=None):
         project_path = project.get_project_path(check_if_exists=False)
         job_revision = project.scm_revision
@@ -908,26 +927,15 @@ class SourceControlMixin(BaseTask):
             logger.debug(f'Performing fresh clone of {project.id} for unified job {self.instance.id} on this instance.')
             sync_needs.append(source_update_tag)
         elif project.scm_type == 'git' and project.scm_revision and (not branch_override):
-            try:
-                git_repo = git.Repo(project_path)
-
-                if job_revision == git_repo.head.commit.hexsha:
-                    logger.debug(f'Skipping project sync for {self.instance.id} because commit is locally available')
-                else:
-                    sync_needs.append(source_update_tag)
-            except (ValueError, BadGitName, git.exc.InvalidGitRepositoryError):
+            if self._git_revision_matches(project_path, job_revision):
+                logger.debug(f'Skipping project sync for {self.instance.id} because commit is locally available')
+            else:
                 logger.debug(f'Needed commit for {self.instance.id} not in local source tree, will sync with remote')
                 sync_needs.append(source_update_tag)
         elif project.scm_revision and (not branch_override):
-            marker_path = os.path.join(project_path, '.scm_revision')
-            try:
-                with open(marker_path) as f:
-                    local_revision = f.read().strip()
-                if job_revision == local_revision:
-                    logger.debug(f'Skipping project sync for {self.instance.id} because revision marker matches')
-                else:
-                    sync_needs.append(source_update_tag)
-            except (FileNotFoundError, IOError):
+            if self._marker_revision_matches(project_path, job_revision):
+                logger.debug(f'Skipping project sync for {self.instance.id} because revision marker matches')
+            else:
                 logger.debug(f'No revision marker for {self.instance.id}, will sync with remote')
                 sync_needs.append(source_update_tag)
         else:
@@ -1803,7 +1811,7 @@ class RunProjectUpdate(BaseTask):
                 if instance.scm_type and instance.scm_type != 'git':
                     project_path = instance.get_project_path(check_if_exists=False)
                     if project_path:
-                        marker_path = os.path.join(project_path, '.scm_revision')
+                        marker_path = os.path.join(project_path, SCM_REVISION_FILE)
                         try:
                             fd = os.open(marker_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o644)
                             with os.fdopen(fd, 'w') as f:
@@ -1813,7 +1821,7 @@ class RunProjectUpdate(BaseTask):
             elif instance.scm_type and instance.scm_type != 'git' and status != 'successful':
                 project_path = instance.get_project_path(check_if_exists=False)
                 if project_path:
-                    marker_path = os.path.join(project_path, '.scm_revision')
+                    marker_path = os.path.join(project_path, SCM_REVISION_FILE)
                     try:
                         os.remove(marker_path)
                     except FileNotFoundError:
