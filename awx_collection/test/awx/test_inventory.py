@@ -17,6 +17,7 @@ def test_inventory_create(run_module, admin_user, organization):
             'name': 'foo-inventory',
             'organization': organization.name,
             'variables': {'foo': 'bar', 'another-foo': {'barz': 'bar2'}},
+            'opa_query_path': 'foo/bar',
             'state': 'present',
         },
         admin_user,
@@ -25,6 +26,7 @@ def test_inventory_create(run_module, admin_user, organization):
 
     inv = Inventory.objects.get(name='foo-inventory')
     assert inv.variables == '{"foo": "bar", "another-foo": {"barz": "bar2"}}'
+    assert inv.opa_query_path == 'foo/bar'
 
     result.pop('module_args', None)
     result.pop('invocation', None)
@@ -58,3 +60,24 @@ def test_valid_smart_inventory_create(run_module, admin_user, organization):
     assert inv.host_filter == 'name=my_host'
     assert inv.kind == 'smart'
     assert inv.organization_id == organization.id
+
+@pytest.mark.django_db
+def test_inventory_create_with_opa(run_module, admin_user, organization):
+    result = run_module(
+        'inventory',
+        {
+            'name': 'foo-inventory-opa',
+            'organization': organization.name,
+            'opa_query_path': 'foo/baz',
+            'state': 'present',
+        },
+        admin_user,
+    )
+    assert not result.get('failed', False), result.get('msg', result)
+
+    inv = Inventory.objects.get(name='foo-inventory-opa')
+    assert inv.opa_query_path == 'foo/baz'
+
+    result.pop('module_args', None)
+    result.pop('invocation', None)
+    assert result == {"name": "foo-inventory-opa", "id": inv.id, "changed": True}
