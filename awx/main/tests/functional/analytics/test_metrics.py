@@ -171,3 +171,106 @@ def test_subsystem_metrics_function_includes_indirect_counting(mock_dispatcherd,
     request = mock.MagicMock()
     subsystem_metrics_module.metrics(request)
     mock_indirect.return_value.generate_metrics.assert_called_once_with(request)
+
+
+def _family_of(sample_name, known_families):
+    """Map a sample name (e.g. foo_bucket) back to its metric family (foo)."""
+    for suffix in ('_bucket', '_sum', '_count'):
+        if sample_name.endswith(suffix) and sample_name[: -len(suffix)] in known_families:
+            return sample_name[: -len(suffix)]
+    return sample_name
+
+
+def assert_valid_exposition(text):
+    """
+    Check the rules of the prometheus text format that strict parsers enforce:
+    one HELP and one TYPE per family, TYPE directly after HELP, and all of a
+    family's samples contiguous, directly beneath its header.
+    """
+    helps, types, current, closed = set(), set(), None, set()
+    families = {line.split()[2] for line in text.splitlines() if line.startswith('# HELP ')}
+    for line in filter(None, text.splitlines()):
+        if line.startswith('# HELP '):
+            name = line.split()[2]
+            assert name not in helps, f'duplicate HELP for {name}'
+            helps.add(name)
+            if current:
+                closed.add(current)
+            current = name
+        elif line.startswith('# TYPE '):
+            name = line.split()[2]
+            assert name not in types, f'duplicate TYPE for {name}'
+            assert name == current, f'TYPE for {name} does not follow its HELP'
+            types.add(name)
+        else:
+            name = _family_of(line.split('{')[0].split(' ')[0], families)
+            assert name == current, f'sample for {name} found under {current}'
+            assert name not in closed, f'samples for {name} are not contiguous'
+
+
+def test_merge_metric_families_groups_shared_families():
+    """A family emitted by two collectors gets one header with both samples directly beneath it."""
+    dispatcher = (
+        '# HELP shared_seconds Shared metric\n# TYPE shared_seconds gauge\nshared_seconds{subsystem="dispatcherd"} 1\n'
+        '# HELP only_dispatcher Only here\n# TYPE only_dispatcher gauge\nonly_dispatcher 2\n'
+    )
+    callback = (
+        '# HELP only_callback Only there\n# TYPE only_callback gauge\nonly_callback 3\n'
+        '# HELP shared_seconds Shared metric\n# TYPE shared_seconds gauge\nshared_seconds{subsystem="callback_receiver"} 4\n'
+    )
+    merged = subsystem_metrics_module.merge_metric_families(dispatcher, callback)
+
+    assert merged == (
+        '# HELP shared_seconds Shared metric\n# TYPE shared_seconds gauge\n'
+        'shared_seconds{subsystem="dispatcherd"} 1\nshared_seconds{subsystem="callback_receiver"} 4\n'
+        '# HELP only_dispatcher Only here\n# TYPE only_dispatcher gauge\nonly_dispatcher 2\n'
+        '# HELP only_callback Only there\n# TYPE only_callback gauge\nonly_callback 3\n'
+    )
+    assert_valid_exposition(merged)
+
+
+def test_merge_metric_families_edge_cases():
+    """Empty inputs, histograms and non-metric lines are handled."""
+    assert subsystem_metrics_module.merge_metric_families() == ''
+    assert subsystem_metrics_module.merge_metric_families('', '') == ''
+
+    histogram = '# HELP h Some histogram\n# TYPE h histogram\nh_bucket{le="1"} 1\nh_bucket{le="+Inf"} 2\nh_count 2\nh_sum 3\n'
+    merged = subsystem_metrics_module.merge_metric_families(histogram, '# HELP g Gauge\n# TYPE g gauge\ng 1\n', histogram)
+    assert merged.count('# HELP h ') == 1
+    assert merged.count('# TYPE h ') == 1
+    # the repeated histogram's samples were appended under the single header
+    assert merged.count('h_bucket{le="+Inf"} 2') == 2
+    assert_valid_exposition(merged)
+
+
+@mock.patch.object(subsystem_metrics_module, 'get_dispatcherd_metrics')
+@mock.patch.object(subsystem_metrics_module, 'get_redis_client')
+def test_subsystem_metrics_output_is_valid_with_shared_families(mock_redis, mock_dispatcherd):
+    """
+    The metrics exported by every subsystem (pipe_execute_seconds etc.) must be
+    valid prometheus text once all subsystems have reported (AAP-102021).
+    """
+    mock_dispatcherd.return_value = '# HELP dispatcher_messages_received_total Number of messages\n# TYPE dispatcher_messages_received_total counter\ndispatcher_messages_received_total 1.0\n'
+
+    def fake_load_other_metrics(self, request):
+        data = {}
+        for field, metric in self.METRICS.items():
+            if isinstance(metric, subsystem_metrics_module.HistogramM):
+                data[field] = {'counts': [0] * len(metric.buckets), 'sum': 0, 'inf': 0}
+            else:
+                data[field] = 1
+        return {'awx-1': data}
+
+    request = mock.MagicMock()
+    request.query_params.getlist.return_value = []
+    with mock.patch.object(subsystem_metrics_module.Metrics, 'load_other_metrics', autospec=True, side_effect=fake_load_other_metrics):
+        output = subsystem_metrics_module.metrics(request)
+
+    assert_valid_exposition(output)
+    for field in ('subsystem_metrics_pipe_execute_seconds', 'subsystem_metrics_pipe_execute_calls', 'subsystem_metrics_send_metrics_seconds'):
+        assert output.count(f'# HELP {field} ') == 1
+        assert output.count(f'# TYPE {field} ') == 1
+        # one sample per subsystem that exports the metric
+        for subsystem in ('dispatcherd', 'callback_receiver', 'indirect_counting'):
+            assert f'{field}{{node="awx-1",subsystem="{subsystem}"}} 1' in output
+    assert 'dispatcher_messages_received_total 1.0' in output
