@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   approval-label-authorization:
-    uses: ansible/actions/.github/workflows/approval-label-authorization.yml@71290728ad396980ead3eb603630c20d35a9cf86
+    uses: ansible/actions/.github/workflows/approval-label-authorization.yml@88a8f7b6c7d5cd318062b87c61254a780e421600
     with:
       app-client-id: ${{ vars.ANSIBLE_ORG_MEMBERS_READ_ONLY_APP_CLIENT_ID }}
     secrets:
