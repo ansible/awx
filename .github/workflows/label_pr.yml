@@ -17,7 +17,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Label PR
-        uses: actions/labeler@v3
+        uses: actions/labeler@26546f6c4d63b6c0623e8e39bde7869e3c2b1d7b # v3
         with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
           configuration-path: .github/pr_labeler.yml
@@ -30,7 +30,7 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           show-progress: false
 
