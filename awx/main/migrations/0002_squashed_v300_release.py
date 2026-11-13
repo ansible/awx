@@ -6,6 +6,7 @@
 from __future__ import unicode_literals
 
 import awx.main.fields
+import ansible_base.lib.fields
 
 from django.db import migrations, models
 import django.db.models.deletion
@@ -457,7 +458,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('role_field', models.TextField()),
-                ('singleton_name', models.TextField(default=None, unique=True, null=True, db_index=True)),
+                ('singleton_name', ansible_base.lib.fields.BoundedTextField(default=None, unique=True, null=True, db_index=True, sql_server_max_length=255)),
                 ('members', models.ManyToManyField(related_name='roles', to=settings.AUTH_USER_MODEL)),
                 ('parents', models.ManyToManyField(related_name='children', to='main.Role')),
                 ('implicit_parents', models.TextField(default='[]')),
@@ -473,7 +474,7 @@ class Migration(migrations.Migration):
             name='RoleAncestorEntry',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('role_field', models.TextField()),
+                ('role_field', ansible_base.lib.fields.BoundedTextField(sql_server_max_length=255)),
                 ('content_type_id', models.PositiveIntegerField()),
                 ('object_id', models.PositiveIntegerField()),
                 ('ancestor', models.ForeignKey(on_delete=models.CASCADE, related_name='+', to='main.Role')),

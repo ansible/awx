@@ -26,6 +26,7 @@ from django.apps import apps
 from django.conf import settings
 
 # Ansible_base app
+from ansible_base.lib.fields import BoundedTextField
 from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment, RoleTeamAssignment
 from ansible_base.rbac.sync import maybe_reverse_sync_assignment, maybe_reverse_sync_unassignment, maybe_reverse_sync_role_definition
 from ansible_base.rbac import permission_registry
@@ -170,7 +171,7 @@ class Role(models.Model):
         ordering = ("content_type", "object_id")
 
     role_field = models.TextField(null=False)
-    singleton_name = models.TextField(null=True, default=None, db_index=True, unique=True)
+    singleton_name = BoundedTextField(null=True, default=None, db_index=True, unique=True, sql_server_max_length=255)
     parents = models.ManyToManyField('Role', related_name='children')
     implicit_parents = models.TextField(null=False, default='[]')
     ancestors = models.ManyToManyField(
@@ -508,7 +509,7 @@ class RoleAncestorEntry(models.Model):
 
     descendent = models.ForeignKey(Role, null=False, on_delete=models.CASCADE, related_name='+')
     ancestor = models.ForeignKey(Role, null=False, on_delete=models.CASCADE, related_name='+')
-    role_field = models.TextField(null=False)
+    role_field = BoundedTextField(null=False, sql_server_max_length=255)
     content_type_id = models.PositiveIntegerField(null=False)
     object_id = models.PositiveIntegerField(null=False)
 
