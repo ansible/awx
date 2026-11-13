@@ -1,4 +1,4 @@
-aiohttp>=3.14.3
+aiohttp>=3.14.4 # CVE-2026-111064
 ansi2html  # Used to format the stdout from jobs into html for display
 jq  # used for indirect host counting feature
 asn1
