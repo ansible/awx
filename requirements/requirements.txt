@@ -6,7 +6,7 @@ aiofiles==24.1.0
     # via opa-python-client
 aiohappyeyeballs==2.6.1
     # via aiohttp
-aiohttp[speedups]==3.14.3
+aiohttp[speedups]==3.14.5
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   aiohttp-retry
@@ -546,7 +546,7 @@ wheel==0.46.3
     # via -r /awx_devel/requirements/requirements.in
 wrapt==1.17.3
     # via opentelemetry-instrumentation
-yarl==1.22.0
+yarl==1.25.1
     # via aiohttp
 zipp==3.23.0
     # via importlib-metadata
