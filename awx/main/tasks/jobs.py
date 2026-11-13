@@ -9,7 +9,6 @@ import os
 from pathlib import Path
 import shutil
 import stat
-import tarfile
 import yaml
 import tempfile
 import traceback
@@ -248,6 +247,68 @@ def env_flag_enabled(env, name):
     match distutils.util.strtobool: 1, true, yes, on, y, t.
     """
     return str(env.get(name, '')).strip().lower() in ('1', 'true', 'yes', 'on', 'y', 't')
+
+
+def copytree_without_metadata(src, dst, ignore_names=()):
+    """Recursively copy src to dst like shutil.copytree(src, dst, symlinks=True), with as few audited syscalls as possible.
+
+    shutil.copytree uses copy2/copystat, which makes one chmod plus one setxattr
+    (security.selinux) call for every file and directory. On hosts with CIS-style
+    audit rules (perm_mod) covering the AAP processes, the kernel can block each of
+    these calls for milliseconds while auditd catches up, so copying a few thousand
+    collection files took 30-50 s per job instead of < 1 s.
+
+    Preserved: content, symlinks, permission bits (including setuid/setgid/sticky) and
+    access/modification times. These are the attributes that survive the private data dir
+    zip/unzip done by ansible-runner (stream_dir/unstream_dir), which AWX relies on.
+    Not copied: extended attributes. They do not survive that zip either, and new files
+    get their SELinux label from policy.
+
+    Permission bits are set when an entry is created, which avoids a chmod per entry. The
+    umask can drop bits at create time (0664 becomes 0644), writing to a file clears
+    setuid/setgid, and mkdir ignores setuid/setgid, so the resulting mode is compared with
+    the source and chmod is only called when it differs. For the usual 0644/0755 content
+    that is never. The process umask is deliberately not changed, because it is process-wide.
+
+    :param str src: source directory
+    :param str dst: destination directory; must not exist (like shutil.copytree)
+    :param ignore_names: file/directory names to skip at every level (exact match)
+    """
+    _copytree_without_metadata(src, dst, os.stat(src), ignore_names)
+
+
+def _copytree_without_metadata(src, dst, src_stat, ignore_names):
+    dir_mode = stat.S_IMODE(src_stat.st_mode)
+    os.mkdir(dst, dir_mode | stat.S_IRWXU)  # owner rwx so that the directory can be filled
+    with os.scandir(src) as entries:
+        for entry in entries:
+            if entry.name in ignore_names:
+                continue
+            src_path = entry.path
+            dst_path = os.path.join(dst, entry.name)
+            if entry.is_symlink():
+                os.symlink(os.readlink(src_path), dst_path)
+                link_stat = entry.stat(follow_symlinks=False)
+                os.utime(dst_path, ns=(link_stat.st_atime_ns, link_stat.st_mtime_ns), follow_symlinks=False)
+            elif entry.is_dir(follow_symlinks=False):
+                _copytree_without_metadata(src_path, dst_path, entry.stat(follow_symlinks=False), ignore_names)
+            elif entry.is_file(follow_symlinks=False):
+                file_stat = entry.stat(follow_symlinks=False)
+                file_mode = stat.S_IMODE(file_stat.st_mode)
+                with open(src_path, 'rb') as fsrc:
+                    fd = os.open(dst_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, file_mode)
+                    with open(fd, 'wb') as fdst:
+                        shutil.copyfileobj(fsrc, fdst)
+                        fdst.flush()
+                        if stat.S_IMODE(os.fstat(fd).st_mode) != file_mode:
+                            os.fchmod(fd, file_mode)
+                        os.utime(fd, ns=(file_stat.st_atime_ns, file_stat.st_mtime_ns))
+            else:
+                logger.warning(f'Skipping special file {src_path} while copying {src}')
+    if stat.S_IMODE(os.stat(dst).st_mode) != dir_mode:
+        os.chmod(dst, dir_mode)
+    # last, because creating the entries above changed the directory's mtime
+    os.utime(dst, ns=(src_stat.st_atime_ns, src_stat.st_mtime_ns))
 
 
 class BaseTask(object):
@@ -1698,7 +1759,7 @@ class RunProjectUpdate(BaseTask):
                 tmp_path = tempfile.mkdtemp(dir=base_path, prefix=f'.reqcache_{req_hash}_tmp_')
                 try:
                     tmp_dst = os.path.join(tmp_path, subfolder)
-                    shutil.copytree(src, tmp_dst, symlinks=True)
+                    copytree_without_metadata(src, tmp_dst)
                     os.makedirs(reqcache_path, exist_ok=True)
                     os.rename(tmp_dst, dst)
                     logger.debug(f'Saved {subfolder} to requirements cache {reqcache_path}')
@@ -1707,21 +1768,6 @@ class RunProjectUpdate(BaseTask):
                     raise
                 finally:
                     shutil.rmtree(tmp_path, ignore_errors=True)
-
-            # Create a cached tarball for faster per-job copies (AAP-96176)
-            tar_path = os.path.join(reqcache_path, f'{subfolder}.tar')
-            if os.path.exists(dst) and not os.path.exists(tar_path):
-                tmp_tar = tar_path + '.tmp'
-                try:
-                    with tarfile.open(tmp_tar, 'w') as tar:
-                        tar.add(dst, arcname=subfolder)
-                    os.rename(tmp_tar, tar_path)
-                    logger.debug(f'Created tarball cache {tar_path}')
-                except Exception:
-                    logger.warning(f'Failed to create tarball cache {tar_path}')
-                    if os.path.exists(tmp_tar):
-                        os.remove(tmp_tar)
-                    # Non-fatal: copytree fallback still works
 
     @staticmethod
     def make_local_copy(project, job_private_data_dir):
@@ -1732,7 +1778,8 @@ class RunProjectUpdate(BaseTask):
         """
         project_path = project.get_project_path(check_if_exists=False)
         destination_folder = os.path.join(job_private_data_dir, 'project')
-        shutil.copytree(project_path, destination_folder, ignore=shutil.ignore_patterns('.git'), symlinks=True)
+        # Avoid shutil.copytree here: its per-file chmod/setxattr calls are slow on audited hosts (AAP-101291)
+        copytree_without_metadata(project_path, destination_folder, ignore_names=('.git',))
 
         # copy over the roles and collection cache to job folder
         cache_path = os.path.join(project.get_cache_path(), project.cache_id)
@@ -1759,19 +1806,7 @@ class RunProjectUpdate(BaseTask):
                         pass
             if os.path.exists(cache_subpath):
                 dest_subpath = os.path.join(job_private_data_dir, subfolder)
-                # Prefer cached tarball for fewer file operations on SAN storage
-                tar_path = cache_subpath + '.tar'
-                if os.path.exists(tar_path):
-                    try:
-                        with tarfile.open(tar_path, 'r') as tar:
-                            tar.extractall(path=job_private_data_dir, filter='data')
-                        logger.debug('{0} {1} prepared {2} from tarball'.format(type(project).__name__, project.pk, dest_subpath))
-                        continue
-                    except Exception:
-                        logger.warning(f'Failed to extract tarball {tar_path}, falling back to copytree')
-                        if os.path.exists(dest_subpath):
-                            shutil.rmtree(dest_subpath)
-                shutil.copytree(cache_subpath, dest_subpath, symlinks=True)
+                copytree_without_metadata(cache_subpath, dest_subpath)
                 logger.debug('{0} {1} prepared {2} from cache'.format(type(project).__name__, project.pk, dest_subpath))
 
         pdd_plugins_path = os.path.join(job_private_data_dir, 'plugins_path')
