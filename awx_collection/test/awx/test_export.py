@@ -5,6 +5,7 @@ __metaclass__ = type
 import pytest
 
 from awx.main.models.execution_environments import ExecutionEnvironment
+from awx.main.models.inventory import Inventory, InventorySource
 from awx.main.models.jobs import JobTemplate
 
 from awx.main.tests.functional.conftest import user, system_auditor  # noqa: F401  # pylint: disable=unused-import
@@ -38,6 +39,28 @@ def job_template(project, inventory, organization, machine_credential):
 @pytest.fixture
 def execution_environment(organization):
     return ExecutionEnvironment.objects.create(name="test-ee", description="test-ee", managed=False, organization=organization)
+
+
+@pytest.fixture
+def static_inventory(organization):
+    inv = Inventory.objects.create(name='test-static-inv', organization=organization)
+    inv.groups.create(name='static-group').hosts.create(name='static-host', inventory=inv)
+    return inv
+
+
+@pytest.fixture
+def dynamic_inventory(organization):
+    inv = Inventory.objects.create(name='test-dynamic-inv', organization=organization)
+    InventorySource.objects.create(name='test-dynamic-inv-source', inventory=inv, source='ec2')
+    inv.groups.create(name='dynamic-group').hosts.create(name='dynamic-host', inventory=inv)
+    # has_inventory_sources is a computed field, and it is what marks an inventory as dynamic
+    inv.update_computed_fields()
+    inv.refresh_from_db()
+    return inv
+
+
+def child_names(exported_inventory, key):
+    return [child['name'] for child in exported_inventory.get('related', {}).get(key, [])]
 
 
 def find_by(result, name, key, value):
@@ -147,3 +170,64 @@ def test_export_system_auditor(run_module, organization, system_auditor):  # noq
     assert 'assets' in result
 
     find_by(result['assets'], 'organizations', 'name', 'Default')
+
+
+@pytest.mark.django_db
+def test_export_inventory_children_by_default(run_module, admin_user, dynamic_inventory):
+    """Without either exclusion the hosts and groups of a dynamic inventory are still exported."""
+    result = run_module('export', dict(inventory='all'), admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+
+    inv = find_by(result['assets'], 'inventory', 'name', 'test-dynamic-inv')
+    assert child_names(inv, 'hosts') == ['dynamic-host']
+    assert child_names(inv, 'groups') == ['dynamic-group']
+
+
+@pytest.mark.django_db
+def test_export_exclude_inventory_children_by_name(run_module, admin_user, dynamic_inventory, static_inventory):
+    result = run_module('export', dict(inventory='all', exclude_inventory_children=['test-dynamic-inv']), admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+
+    excluded = find_by(result['assets'], 'inventory', 'name', 'test-dynamic-inv')
+    assert child_names(excluded, 'hosts') == []
+    assert child_names(excluded, 'groups') == []
+
+    # an inventory that was not named keeps its children
+    kept = find_by(result['assets'], 'inventory', 'name', 'test-static-inv')
+    assert child_names(kept, 'hosts') == ['static-host']
+    assert child_names(kept, 'groups') == ['static-group']
+
+
+@pytest.mark.django_db
+def test_export_exclude_inventory_children_by_id(run_module, admin_user, dynamic_inventory):
+    result = run_module('export', dict(inventory='all', exclude_inventory_children=[str(dynamic_inventory.id)]), admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+
+    excluded = find_by(result['assets'], 'inventory', 'name', 'test-dynamic-inv')
+    assert child_names(excluded, 'hosts') == []
+    assert child_names(excluded, 'groups') == []
+
+
+@pytest.mark.django_db
+def test_export_exclude_dynamic_inventory_children(run_module, admin_user, dynamic_inventory, static_inventory):
+    """Only the inventories that have an inventory source lose their children."""
+    result = run_module('export', dict(inventory='all', exclude_dynamic_inventory_children=True), admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+
+    excluded = find_by(result['assets'], 'inventory', 'name', 'test-dynamic-inv')
+    assert child_names(excluded, 'hosts') == []
+    assert child_names(excluded, 'groups') == []
+
+    kept = find_by(result['assets'], 'inventory', 'name', 'test-static-inv')
+    assert child_names(kept, 'hosts') == ['static-host']
+    assert child_names(kept, 'groups') == ['static-group']
+
+
+@pytest.mark.django_db
+def test_export_inventory_source_still_exported_when_children_excluded(run_module, admin_user, dynamic_inventory):
+    """The inventory and its source survive the exclusion, so the children can be rebuilt on import."""
+    result = run_module('export', dict(inventory='all', inventory_sources='all', exclude_dynamic_inventory_children=True), admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+
+    find_by(result['assets'], 'inventory', 'name', 'test-dynamic-inv')
+    find_by(result['assets'], 'inventory_sources', 'name', 'test-dynamic-inv-source')
