@@ -4653,7 +4653,7 @@ class WorkflowJobTemplateNodeCreateApprovalSerializer(CleanTextMixin, BaseSerial
 
 
 class JobListSerializer(JobSerializer, UnifiedJobListSerializer):
-    pass
+    capabilities_prefetch = [{'delete': 'organization.change'}, {'start': 'job_template.execute'}]
 
 
 class AdHocCommandListSerializer(AdHocCommandSerializer, UnifiedJobListSerializer):
