@@ -1,3 +1,4 @@
+import logging
 import os
 import shutil
 import tempfile
@@ -7,6 +8,15 @@ from django.conf import settings
 from dispatcherd.publish import task
 
 from awx.main.utils.reload import supervisor_service_command
+
+logger = logging.getLogger('awx.main.utils.external_logging')
+
+# Operator drop-ins, read by the generated config's $IncludeConfig.
+CONF_D_DIRECTORY = '/var/lib/awx/rsyslog/conf.d'
+
+# run-rsyslogd sets it at every rsyslogd start: off when a conf.d drop-in already loads impstats,
+# which rsyslog refuses to load twice.
+QUEUE_STATS_ENABLED = 'config.enabled=`echo $AWX_QUEUE_STATS`'
 
 
 def construct_rsyslog_conf_template(settings=settings):
@@ -21,6 +31,7 @@ def construct_rsyslog_conf_template(settings=settings):
     max_disk_space_action_queue = getattr(settings, 'LOG_AGGREGATOR_ACTION_MAX_DISK_USAGE_GB', 1)
     spool_directory = getattr(settings, 'LOG_AGGREGATOR_MAX_DISK_USAGE_PATH', '/var/lib/awx').rstrip('/')
     error_log_file = getattr(settings, 'LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE', '')
+    stats_interval = getattr(settings, 'LOG_AGGREGATOR_ACTION_QUEUE_STATS_INTERVAL', 0)
 
     queue_options = [
         f'queue.spoolDirectory="{spool_directory}"',
@@ -47,12 +58,22 @@ def construct_rsyslog_conf_template(settings=settings):
         [
             '$WorkDirectory /var/lib/awx/rsyslog',
             f'$MaxMessageSize {max_bytes}',
-            '$IncludeConfig /var/lib/awx/rsyslog/conf.d/*.conf',
+            f'$IncludeConfig {CONF_D_DIRECTORY}/*.conf',
             'module(load="imuxsock" SysSock.Use="off")',
             'input(type="imuxsock" Socket="' + settings.LOGGING['handlers']['external_logger']['address'] + '" unlink="on" RateLimit.Burst="0")',
             'template(name="awx" type="string" string="%rawmsg-after-pri%")',
         ]
     )
+    # impstats counters (queue size, discarded.nf, discarded.full) go to rsyslogd's stdout, the
+    # container log. Their own ruleset keeps them out of the external action in the default ruleset,
+    # and its Direct queue keeps them off the main queue, which stalls while the action queue is full.
+    if enabled and stats_interval > 0:
+        parts.extend(
+            [
+                f'module(load="impstats" interval="{stats_interval}" format="json" resetCounters="off" ruleset="awx_queue_stats" {QUEUE_STATS_ENABLED})',
+                f'ruleset(name="awx_queue_stats" queue.type="Direct" {QUEUE_STATS_ENABLED}) {{ action(type="omfile" file="/dev/stdout") }}',
+            ]
+        )
 
     def escape_quotes(x):
         if x is None:
