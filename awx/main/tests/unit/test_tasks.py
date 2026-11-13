@@ -6,6 +6,7 @@ from pathlib import Path
 
 import fcntl
 from unittest import mock
+import git
 import pytest
 import yaml
 
@@ -2058,6 +2059,79 @@ class TestGetSyncNeedsRevisionMarker:
         task = self._make_task()
         sync_needs = task.get_sync_needs(project)
         assert 'update_svn' not in sync_needs
+
+
+class TestNeedsSourceUpdate:
+    """Tests for _needs_source_update covering git, inventory update, manual, and missing project paths."""
+
+    def _make_task(self):
+        task = jobs.RunJob()
+        task.instance = mock.Mock(spec=Job)
+        task.instance.id = 42
+        task.update_model = mock.Mock(return_value=task.instance)
+        return task
+
+    def test_inventory_update_always_needs_sync(self, tmp_path):
+        task = jobs.RunJob()
+        task.instance = mock.Mock(spec=InventoryUpdate)
+        task.instance.id = 42
+        task.update_model = mock.Mock(return_value=task.instance)
+
+        project = mock.Mock()
+        project.scm_type = 'insights'
+        assert task._needs_source_update(project, str(tmp_path), False) is True
+
+    def test_manual_project_skips_sync(self, tmp_path):
+        task = self._make_task()
+        project = mock.Mock()
+        project.scm_type = ''
+        assert task._needs_source_update(project, str(tmp_path), False) is False
+
+    def test_missing_project_path_needs_sync(self):
+        task = self._make_task()
+        project = mock.Mock()
+        project.scm_type = 'git'
+        project.id = 1
+        assert task._needs_source_update(project, '/nonexistent/path', False) is True
+
+    def test_branch_override_needs_sync(self, tmp_path):
+        task = self._make_task()
+        project = mock.Mock()
+        project.scm_type = 'insights'
+        assert task._needs_source_update(project, str(tmp_path), True) is True
+
+    def test_no_scm_revision_needs_sync(self, tmp_path):
+        task = self._make_task()
+        project = mock.Mock()
+        project.scm_type = 'insights'
+        project.scm_revision = ''
+        assert task._needs_source_update(project, str(tmp_path), False) is True
+
+    @mock.patch('awx.main.tasks.jobs.git.Repo')
+    def test_git_matching_revision_skips_sync(self, mock_repo, tmp_path):
+        mock_repo.return_value.head.commit.hexsha = 'abc123'
+        task = self._make_task()
+        project = mock.Mock()
+        project.scm_type = 'git'
+        project.scm_revision = 'abc123'
+        assert task._needs_source_update(project, str(tmp_path), False) is False
+
+    @mock.patch('awx.main.tasks.jobs.git.Repo')
+    def test_git_mismatched_revision_needs_sync(self, mock_repo, tmp_path):
+        mock_repo.return_value.head.commit.hexsha = 'abc123'
+        task = self._make_task()
+        project = mock.Mock()
+        project.scm_type = 'git'
+        project.scm_revision = 'def456'
+        assert task._needs_source_update(project, str(tmp_path), False) is True
+
+    @mock.patch('awx.main.tasks.jobs.git.Repo', side_effect=git.exc.InvalidGitRepositoryError)
+    def test_git_invalid_repo_needs_sync(self, mock_repo, tmp_path):
+        task = self._make_task()
+        project = mock.Mock()
+        project.scm_type = 'git'
+        project.scm_revision = 'abc123'
+        assert task._needs_source_update(project, str(tmp_path), False) is True
 
 
 class TestWriteRevisionMarker:
