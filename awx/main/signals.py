@@ -9,7 +9,7 @@ import json
 import sys
 
 # Django
-from django.db import connection, models
+from django.db import connection
 from django.conf import settings
 from django.db.models.signals import (
     pre_save,
@@ -26,9 +26,6 @@ from django.utils import timezone
 # Django-CRUM
 from crum import get_current_request, get_current_user
 from crum.signals import current_user_getter
-
-# Ansible_base app
-from ansible_base.rbac.models import RoleUserAssignment, RoleTeamAssignment
 
 # AWX
 from awx.main.models import (
@@ -153,85 +150,10 @@ def sync_rbac_to_superuser_status(instance, sender, **kwargs):
                 user.save(update_fields=['is_superuser'])
 
 
-def _record_role_assignment_activity_stream(instance, operation):
-    if not activity_stream_enabled:
-        return
-    # Avoid flooding the activity stream when assignments are cascade-deleted as part
-    # of setup_managed_role_definitions() pruning stale managed RoleDefinitions on migrate.
-    if 'migrate' in sys.argv:
-        return
-
-    if isinstance(instance, RoleUserAssignment):
-        actor_field = 'user'
-        actor_obj = instance.user
-    else:
-        actor_field = 'team'
-        actor_obj = instance.team
-
-    content_object = None
-    if instance.object_id:
-        content_object = instance.content_object
-        if content_object is None and operation == 'disassociate':
-            # The target object is unresolvable, e.g. cascade-deleted along with its
-            # parent object, or a federated/remote content type. Skip recording a
-            # contentless entry rather than guessing at what changed.
-            # Note: FederatedForeignKey swallows ObjectDoesNotExist and returns None
-            # rather than raising, so there's no exception to catch here.
-            return
-
-    changes = {'role_definition': instance.role_definition.name, actor_field: getattr(actor_obj, 'username', None) or str(actor_obj)}
-
-    # object1 is the role's content object and object2 the associated user/team, matching
-    # the convention used for legacy Role.members association entries (rbac_activity_stream
-    # below), so this reads e.g. "disassociated organization X from user Y".
-    object1 = ''
-    activity_stream_cls = get_activity_stream_class()
-    if content_object is not None:
-        object1 = camelcase_to_underscore(content_object.__class__.__name__)
-        changes['object_type'] = object1
-        changes['object_id'] = content_object.pk
-        changes['object_name'] = str(content_object)
-        obj_rel = f'{content_object.__class__.__module__}.{content_object.__class__.__name__}.{instance.role_definition_id}'
-        if not hasattr(activity_stream_cls, object1):
-            logger.warning('ActivityStream has no relation field for object type %r; role assignment entry will not be linked to it', object1)
-            object1 = ''
-    else:
-        obj_rel = str(instance.role_definition_id)
-
-    activity_entry = activity_stream_cls(
-        operation=operation,
-        object1=object1,
-        object2=actor_field,
-        object_relationship_type=obj_rel,
-        changes=json.dumps(changes),
-        actor=get_current_user_or_none(),
-    )
-    activity_entry.save()
-    getattr(activity_entry, actor_field).add(actor_obj.pk)
-    if object1:
-        getattr(activity_entry, object1).add(content_object.pk)
-    connection.on_commit(lambda: emit_activity_stream_change(activity_entry))
-
-
-@receiver(post_save, sender=RoleUserAssignment)
-@receiver(post_save, sender=RoleTeamAssignment)
-def record_role_assignment_activity_stream(instance, created, **kwargs):
-    if created:
-        _record_role_assignment_activity_stream(instance, 'associate')
-
-
-@receiver(post_delete, sender=RoleUserAssignment)
-@receiver(post_delete, sender=RoleTeamAssignment)
-def record_role_unassignment_activity_stream(instance, origin=None, **kwargs):
-    # Skip cascade deletes from non-assignment origins, same reasoning as
-    # sync_assignments_to_old_rbac_delete: the actor or content object is itself
-    # being deleted in the same cascade, so linking a new activity stream entry
-    # to it would leave a dangling foreign key once the cascade completes.
-    if isinstance(origin, models.Model) and origin._meta.app_label != 'dab_rbac':
-        return
-    if isinstance(origin, models.QuerySet) and origin.model is not type(instance):
-        return
-    _record_role_assignment_activity_stream(instance, 'disassociate')
+# Activity-stream recording for role assignments lives in awx.main.models.rbac, driven by
+# the DAB bulk signals (dab_rbac_assignments_created / dab_rbac_assignments_pre_delete) and
+# handled together with the old-RBAC Role.members mirror. It is no longer connected to per-row
+# post_save / post_delete, which the bulk assignment pipeline does not emit.
 
 
 def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):

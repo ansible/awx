@@ -12,7 +12,7 @@ from awx.main.models import ActivityStream
 class TestNewToOld:
     '''
     Tests that the DAB RBAC system is correctly translated to the old RBAC system
-    Namely, tests functionality of the _sync_assignments_to_old_rbac signal handler
+    Namely, tests functionality of the _sync_assignment_to_old_role signal handler
     '''
 
     def test_new_to_old_rbac_addition(self, admin, post, inventory, bob, setup_managed_roles):
@@ -184,7 +184,7 @@ class TestNewToOld:
 
         post_delete.connect(capture_origin)
         try:
-            with mock.patch('awx.main.models.rbac._sync_assignments_to_old_rbac') as mck:
+            with mock.patch('awx.main.models.rbac._sync_assignment_to_old_role') as mck:
                 # This is what cleanup_deleted_team_roles does:
                 ObjectRole.objects.filter(
                     role_definition=rd,
@@ -211,7 +211,7 @@ class TestNewToOld:
         rd.give_permission(bob, inventory)
         assert bob in inventory.admin_role.members.all()
 
-        with mock.patch('awx.main.models.rbac._sync_assignments_to_old_rbac') as mck:
+        with mock.patch('awx.main.models.rbac._sync_assignment_to_old_role') as mck:
             organization.delete()
 
         mck.assert_not_called()
@@ -225,7 +225,7 @@ class TestNewToOld:
         rd.give_permission(team, inventory)
         assert RoleTeamAssignment.objects.filter(team=team, role_definition=rd, object_id=inventory.pk).exists()
 
-        with mock.patch('awx.main.models.rbac._sync_assignments_to_old_rbac') as mck:
+        with mock.patch('awx.main.models.rbac._sync_assignment_to_old_role') as mck:
             organization.delete()
 
         mck.assert_not_called()
