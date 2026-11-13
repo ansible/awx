@@ -111,7 +111,7 @@ options:
       default: "present"
       type: str
 
-extends_documentation_fragment: awx.awx.auth
+extends_documentation_fragment: awx.awx.auth_session_id, awx.awx.auth
 
 notes:
   - Values `inputs` and the other deprecated fields (such as `tenant`) are replacements of existing values.

@@ -43,7 +43,7 @@ options:
         - Not specifying means the task will wait until the controller cancels the command.
       type: int
       default: 0
-extends_documentation_fragment: awx.awx.auth
+extends_documentation_fragment: awx.awx.auth_session_id, awx.awx.auth
 '''
 
 EXAMPLES = '''
