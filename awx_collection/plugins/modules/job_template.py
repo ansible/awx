@@ -368,7 +368,6 @@ EXAMPLES = '''
 '''
 
 from ..module_utils.controller_api import ControllerAPIModule
-import json
 
 
 def update_survey(module, last_request):
@@ -551,7 +550,7 @@ def main():
     # Special treatment of extra_vars parameter
     extra_vars = module.params.get('extra_vars')
     if extra_vars is not None:
-        new_fields['extra_vars'] = json.dumps(extra_vars)
+        new_fields['extra_vars'] = extra_vars
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     inventory = module.params.get('inventory')
