@@ -164,10 +164,71 @@ def test_indirect_counting_metrics_init():
 @mock.patch.object(subsystem_metrics_module, 'CallbackReceiverMetrics')
 @mock.patch.object(subsystem_metrics_module, 'DispatcherMetrics')
 @mock.patch.object(subsystem_metrics_module, 'get_dispatcherd_metrics', return_value='')
-def test_subsystem_metrics_function_includes_indirect_counting(mock_dispatcherd, mock_dispatcher, mock_callback, mock_indirect):
+@mock.patch.object(subsystem_metrics_module, '_generate_shared_operational_metrics', return_value='')
+def test_subsystem_metrics_function_includes_indirect_counting(
+    mock_shared, mock_dispatcherd, mock_dispatcher, mock_callback, mock_indirect
+):
     """subsystem_metrics.metrics() calls generate_metrics on IndirectCountingMetrics."""
     for m in (mock_dispatcher, mock_callback, mock_indirect):
         m.return_value.generate_metrics.return_value = ''
     request = mock.MagicMock()
     subsystem_metrics_module.metrics(request)
-    mock_indirect.return_value.generate_metrics.assert_called_once_with(request)
+    mock_indirect.return_value.generate_metrics.assert_called_once()
+    assert mock_indirect.return_value.generate_metrics.call_args.args[0] is request
+    assert mock_indirect.return_value.generate_metrics.call_args.kwargs.get('include_shared') is False
+    assert 'instance_data' in mock_indirect.return_value.generate_metrics.call_args.kwargs
+    mock_shared.assert_called_once()
+
+
+def test_shared_subsystem_metrics_emit_help_type_once():
+    """Shared operational metrics emit HELP/TYPE once with all subsystem samples grouped."""
+    shared_fields = [m.field for m in subsystem_metrics_module.Metrics._METRICSLIST]
+    instance_data = {
+        'awx-1': {
+            'subsystem_metrics_pipe_execute_seconds': 1.5,
+            'subsystem_metrics_pipe_execute_calls': 3,
+            'subsystem_metrics_send_metrics_seconds': 0.25,
+            'task_manager__schedule_calls': 9,
+            'callback_receiver_events_insert_db': 8,
+        }
+    }
+    request = mock.MagicMock()
+    request.query_params.getlist.return_value = []
+
+    dispatcher = subsystem_metrics_module.DispatcherMetrics(metrics_have_changed=False)
+    callback = subsystem_metrics_module.CallbackReceiverMetrics(metrics_have_changed=False)
+    collectors = [dispatcher, callback]
+
+    with (
+        mock.patch.object(dispatcher, 'load_other_metrics', return_value=instance_data),
+        mock.patch.object(callback, 'load_other_metrics', return_value=instance_data),
+    ):
+        unique_dispatcher = dispatcher.generate_metrics(
+            request, include_shared=False, instance_data=instance_data
+        )
+        unique_callback = callback.generate_metrics(
+            request, include_shared=False, instance_data=instance_data
+        )
+        loaded = [(dispatcher, instance_data), (callback, instance_data)]
+        shared = subsystem_metrics_module._generate_shared_operational_metrics(request, loaded)
+
+    for field in shared_fields:
+        assert field not in unique_dispatcher
+        assert field not in unique_callback
+        assert shared.count(f'# HELP {field}') == 1
+        assert shared.count(f'# TYPE {field}') == 1
+        assert f'{field}{{node="awx-1",subsystem="dispatcherd"}}' in shared
+        assert f'{field}{{node="awx-1",subsystem="callback_receiver"}}' in shared
+
+        lines = shared.splitlines()
+        indexes = [
+            i
+            for i, line in enumerate(lines)
+            if line.startswith(f'# HELP {field} ')
+            or line.startswith(f'# TYPE {field} ')
+            or line.startswith(f'{field}{{')
+        ]
+        assert indexes == list(range(indexes[0], indexes[0] + len(indexes)))
+
+    assert 'task_manager__schedule_calls{' in unique_dispatcher
+    assert 'callback_receiver_events_insert_db{' in unique_callback
