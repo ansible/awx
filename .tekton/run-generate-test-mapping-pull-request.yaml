@@ -1,0 +1,69 @@
+---
+# One-time development trigger for the mapping generator.  This is intentionally
+# separate from run-component-ui-tests-pull-request.yaml so running it cannot
+# alter the component UI test trigger.
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: awx-generate-test-mapping-pull-request
+  annotations:
+    build.appstudio.openshift.io/repo: https://github.com/{{repo_owner}}/{{repo_name}}?rev={{revision}}
+    build.appstudio.redhat.com/commit_sha: '{{revision}}'
+    build.appstudio.redhat.com/pull_request_number: '{{pull_request_number}}'
+    build.appstudio.redhat.com/target_branch: '{{target_branch}}'
+    pipelinesascode.tekton.dev/cancel-in-progress: "false"
+    pipelinesascode.tekton.dev/max-keep-runs: "3"
+    pipelinesascode.tekton.dev/on-comment: "^/run-generate-test-mapping$"
+    pipelinesascode.tekton.dev/target-namespace: ansible-ci-tenant
+  labels:
+    appstudio.openshift.io/application: '{{repo_owner}}'
+    appstudio.openshift.io/component: '{{repo_owner}}-{{repo_name}}'
+    pipelines.appstudio.openshift.io/type: build
+spec:
+  timeouts:
+    pipeline: "2h"
+    tasks: "1h30m"
+
+  pipelineRef:
+    resolver: git
+    params:
+      - name: org
+        value: ansible-automation-platform
+      - name: repo
+        value: aap-konflux-pipelines
+      - name: revision
+        value: feat/aap-component-ui-tests
+      - name: pathInRepo
+        value: pipelines/infrastructure/generate-test-mapping/0.1/pipeline.yaml
+      - name: token
+        value: github-aap-pde-ci-bot-credentials-ansible-automation-platform
+      - name: tokenKey
+        value: password
+      - name: scmType
+        value: github
+
+  taskRunTemplate:
+    serviceAccountName: konflux-integration-runner
+
+  params:
+    - name: pipeline-source-revision
+      value: feat/aap-component-ui-tests
+    - name: git-resolver-token-secret
+      value: github-aap-pde-ci-bot-credentials-ansible-automation-platform
+    - name: git-resolver-token-key
+      value: password
+    - name: quay-push-secret
+      value: quay-aap-ci-test-mapping-publisher
+    # Generate this trial artifact from the tag-prototype branch.
+    - name: ui-repo-revision
+      value: feat/aap-component-ui-tags-prototype
+
+  workspaces:
+    - name: workspace
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 5Gi
