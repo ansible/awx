@@ -3,6 +3,9 @@
 Tests the full hook condition evaluation and artifact validation with database objects.
 """
 
+import os
+from unittest.mock import patch
+
 import pytest
 from django.utils import timezone
 
@@ -207,8 +210,6 @@ def test_should_invoke_adoption_hook_all_failed_statuses():
 @pytest.mark.django_db
 def test_validate_adoption_artifacts_inventory_update_unreadable(tmp_path):
     """Artifact validation fails for InventoryUpdate with unreadable output.json."""
-    import os
-
     org = Organization.objects.create(name='test_org')
     inventory = Inventory.objects.create(name='test_inv', organization=org)
     inv_source = InventorySource.objects.create(
@@ -227,16 +228,12 @@ def test_validate_adoption_artifacts_inventory_update_unreadable(tmp_path):
     output_file = artifacts_dir / 'output.json'
     output_file.write_text('{"all": {"hosts": {}}}')
 
-    # Make it unreadable
-    os.chmod(str(output_file), 0o000)
-
-    try:
+    # Not a chmod: root and CAP_DAC_OVERRIDE read a 0o000 file, so the test would depend on who runs it
+    real_access = os.access
+    with patch('awx.main.tasks.adoption.os.access', side_effect=lambda path, mode: False if str(path) == str(output_file) else real_access(path, mode)):
         valid, error = _validate_adoption_artifacts(iu, str(tmp_path))
-        assert valid is False
-        assert 'not readable' in error
-    finally:
-        # Restore permissions for cleanup
-        os.chmod(str(output_file), 0o644)
+    assert valid is False
+    assert 'not readable' in error
 
 
 @pytest.mark.django_db

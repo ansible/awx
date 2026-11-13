@@ -4,6 +4,7 @@ What counts as a change is pinned in test_inventory_change_check.py; these tests
 """
 
 import dataclasses
+from datetime import timedelta
 from unittest import mock
 
 import pytest
@@ -37,6 +38,23 @@ def test_an_unchanged_inventory_proceeds_with_the_map(job, inv):
 def test_a_changed_inventory_fails_the_job_when_done(job, inv):
     inv.hosts.create(name='h3')
     assert host_trust.assess(job) == host_trust.Verdict('hosts were added or removed', {}, host_trust.FAIL_WHEN_DONE)
+
+
+@pytest.mark.django_db
+def test_an_update_still_running_from_before_the_job_started_fails_the_job_when_done(job, inv):
+    # It can edit a host with save(update_fields=...), which moves neither Host.modified nor the count.
+    source = inv.inventory_sources.create(name='src', source='ec2')
+    update = InventoryUpdate.objects.create(inventory_source=source, source='ec2', status='running')
+    InventoryUpdate.objects.filter(pk=update.pk).update(created=job.started - timedelta(hours=1))
+    assert host_trust.assess(job) == host_trust.Verdict('the inventory was updated', {}, host_trust.FAIL_WHEN_DONE)
+
+
+@pytest.mark.django_db
+def test_an_update_that_finished_before_the_job_started_does_not_count(job, inv):
+    source = inv.inventory_sources.create(name='src', source='ec2')
+    update = InventoryUpdate.objects.create(inventory_source=source, source='ec2', status='successful')
+    InventoryUpdate.objects.filter(pk=update.pk).update(created=job.started - timedelta(hours=2), finished=job.started - timedelta(hours=1))
+    assert host_trust.assess(job).action == host_trust.PROCEED
 
 
 @pytest.mark.django_db

@@ -157,9 +157,10 @@ def test_receptor_work_adopts_a_unit_from_its_execution_node(mock_adopt_remote):
 @patch('awx.main.tasks.receptor.adopt_remote_work', side_effect=RuntimeError('no route to remote-ee'))
 def test_receptor_work_drops_the_connection_after_a_failed_adopt(_mock_adopt_remote):
     ctl = Mock()
+    work = ReceptorWork(ctl)
 
     with pytest.raises(RuntimeError):
-        ReceptorWork(ctl).adopt('remote-ee', 'unit-1')
+        work.adopt('remote-ee', 'unit-1')
 
     ctl.close.assert_called_once()
 
@@ -544,7 +545,7 @@ def test_handle_work_error_exceeded_quota():
     result = rj._handle_work_error(ReceptorWork(ctl), err_res)
 
     assert result is None
-    rj.task.update_model.assert_called_once_with(1, status='pending')
+    rj.task.update_model.assert_called_once_with(1, status='pending', work_unit_id='')
 
 
 # ---------------------------------------------------------------------------
@@ -1042,6 +1043,26 @@ def test_finalize_adopted_job_cancel_outranks_the_host_counts_correction(mock_fi
     _finalize_adopted_job(job, callback, exit_code=1, process_phase_failed=True)
 
     assert mock_finalize.call_args[0][3] == 'canceled'
+
+
+@override_settings(CLUSTER_HOST_ID='surviving-controller')
+@pytest.mark.parametrize('hook_failed, expected', [(True, 'failed'), (False, 'successful')])
+@patch('awx.main.tasks.jobs._finalize_job_run')
+def test_finalize_adopted_job_failed_hook_outranks_the_host_counts_correction(mock_finalize, hook_failed, expected):
+    """Clean host_status_counts rescue a failed *stream*, but not a job a post-run hook failed."""
+    job = Mock()
+    job.status = 'running'
+    job.cancel_flag = False
+    job.host_status_counts = {'ok': 1}
+    job.started = None
+    job.execution_node = None
+    _stub_last_event(job)
+    callback = Mock(wrapup_event_created=None, host_verdict=None, extra_update_fields={'job_explanation': 'hook broke'})
+
+    _finalize_adopted_job(job, callback, exit_code=1, process_phase_failed=False, final_status='failed', hook_failed=hook_failed)
+
+    assert mock_finalize.call_args[0][3] == expected
+    assert ('job_explanation' in callback.extra_update_fields) is hook_failed
 
 
 @override_settings(CLUSTER_HOST_ID='surviving-controller')

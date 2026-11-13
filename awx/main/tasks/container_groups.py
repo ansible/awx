@@ -43,6 +43,7 @@ from awx.main.tasks.receptor import (
     _build_adoption_callback,
     _compute_adoption_dedup,
     _finalize_adopted_job,
+    check_still_owner,
     _get_or_create_private_data_dir,
     failed_by_inventory_change,
     get_receptor_ctl,
@@ -174,12 +175,12 @@ def find_job_pod(job):
         return None
 
     # A relaunch that reused the job id, or a pod receptor recreated, can leave two. The
-    # newest is the one whose log we want; sort defensively since ordering is not guaranteed.
+    # newest is the one whose log we want; ordering is not guaranteed, so pick by timestamp.
     def _sort_key(pod):
         ts = _pod_timestamp(pod)
         return (ts is not None, ts)
 
-    return sorted(items, key=_sort_key)[-1]
+    return max(items, key=_sort_key)
 
 
 def pod_has_output(job, pod_name):
@@ -224,11 +225,15 @@ def open_pod_log_stream(job, pod_name, follow):
     ``follow=True`` it would never return at all.
     """
     pm = PodManager(job)
+    # A followed stream is idle for as long as the playbook is quiet, so only a finished pod's
+    # static log gets a request timeout.
+    timeout = {} if follow else {'_request_timeout': settings.AWX_CONTAINER_GROUP_K8S_API_TIMEOUT}
     return pm.kube_api.read_namespaced_pod_log(
         name=pod_name,
         namespace=pm.namespace,
         follow=follow,
         _preload_content=False,
+        **timeout,
     )
 
 
@@ -257,7 +262,7 @@ def delete_job_pod(job, pod_name):
 # ---------------------------------------------------------------------------
 
 
-def requeue_wedged_job(job, reason='pod never received its private data dir'):
+def requeue_wedged_job(job, reason='pod never received its private data dir', owner_task_id=None):
     """Hand a wedged job back to the task manager for a clean re-dispatch.
 
     Safe precisely because a wedged worker never got its private data dir and therefore never
@@ -267,9 +272,10 @@ def requeue_wedged_job(job, reason='pod never received its private data dir'):
     on, so a requeued job that kept it would be picked up as orphaned again and sent back here
     to adopt a work unit that no longer exists. Mirrors how _reap_and_mark_lost_instance hands
     'waiting' jobs back. The status filter keeps this a no-op if another controller finalized
-    the job between triage and now.
+    the job between triage and now, and owner_task_id does the same for a later claim.
     """
-    updated = UnifiedJob.objects.filter(pk=job.pk, status='running').update(
+    owned = {'celery_task_id': owner_task_id} if owner_task_id else {}
+    updated = UnifiedJob.objects.filter(pk=job.pk, status='running', **owned).update(
         status='pending',
         work_unit_id='',
         controller_node='',
@@ -315,6 +321,12 @@ def harvest_terminal_pod(job, pod_name, pod, owner_task_id=None, clock=None):
 
         status, exit_code = failed_by_inventory_change(job, callback) or _terminal_status(job, pod, res)
 
+        try:
+            check_still_owner(job, owner_task_id)
+        except NotOwner as exc:
+            logger.warning(f'{job.log_format} was claimed by task {exc.current_task_id} while its pod was harvested; not running hooks or finalizing it')
+            return True
+
         hook_succeeded, hook_error = invoke_adoption_hooks(job, callback, private_data_dir, status)
         if not hook_succeeded:
             status = hook_error.get('status_override', 'failed')
@@ -326,7 +338,15 @@ def harvest_terminal_pod(job, pod_name, pod, owner_task_id=None, clock=None):
 
         try:
             _finalize_adopted_job(
-                job, callback, exit_code, process_phase_failed=False, final_status=status, pod_name=pod_name, clock=clock, owner_task_id=owner_task_id
+                job,
+                callback,
+                exit_code,
+                process_phase_failed=False,
+                final_status=status,
+                pod_name=pod_name,
+                clock=clock,
+                owner_task_id=owner_task_id,
+                hook_failed=not hook_succeeded,
             )
         except NotOwner as exc:
             logger.warning(f'{job.log_format} was claimed by task {exc.current_task_id} while its pod was harvested; not finalizing it')
@@ -426,7 +446,12 @@ def attach_to_streaming_pod(job, pod_name, pod, receptor_ctl=None, owner_task_id
             return False
 
         logger.info(f'{job.log_format}: attached work unit {unit_id} to running pod {pod_name} in {namespace}, streaming live')
-        UnifiedJob.objects.filter(pk=job.pk).update(work_unit_id=unit_id)
+        owned = {'celery_task_id': owner_task_id} if owner_task_id else {}
+        if not UnifiedJob.objects.filter(pk=job.pk, status='running', **owned).update(work_unit_id=unit_id):
+            # Claimed or finished since triage. Not released: releasing an attach unit cancels
+            # it, and cancel deletes the pod the new owner may be streaming.
+            logger.warning(f'{job.log_format}: no longer owned by this adoption, not recording work unit {unit_id}')
+            return True
         job.work_unit_id = unit_id
 
         return bool(reattach_to_work_unit(job, work, clock=clock, owner_task_id=owner_task_id, unit_status=unit_status, pod_name=pod_name))
@@ -436,6 +461,38 @@ def attach_to_streaming_pod(job, pod_name, pod, receptor_ctl=None, owner_task_id
                 receptor_ctl.close()
             except Exception:
                 pass
+
+
+def _triage_job_pod(job, clock):
+    """Return (pod, state) for the job's pod, or None when the Kubernetes API could not be asked."""
+    try:
+        pod = find_job_pod(job)
+        # A finished pod is harvested whatever the probe would say, so skip the API call.
+        phase = (pod or {}).get('status', {}).get('phase')
+        has_output = False if (pod is None or phase in TERMINAL_PHASES) else pod_has_output(job, pod['metadata']['name'])
+        return pod, classify_job_pod(pod, has_output=has_output, reference_time=(clock or now)())
+    except Exception:
+        # An unreachable Kubernetes API is a statement about this controller's connection,
+        # not about the pod. Guessing here would delete live pods or fail live jobs.
+        logger.exception(f'{job.log_format}: could not triage container-group pod, deferring adoption')
+        return None
+
+
+def _adopt_absent_pod_job(job, clock):
+    """Settle a job whose pod is gone; same return contract as adopt_container_group_job."""
+    if not job.work_unit_id and not job.cancel_flag:
+        # The controller died before it created the pod, so nothing ran and nothing will appear.
+        if not is_requeueable(job):
+            reap_job(job, 'failed', job_explanation=reap_explanation(job, 'Job pod was never created before its controller was lost.'))
+            return True
+        return requeue_wedged_job(job, reason='controller died before creating the pod')
+    if not budget_exhausted(job, 'pod_absent', clock=clock):
+        # The pod may simply not have been created yet when the controller died.
+        logger.info(f'{job.log_format}: no container-group pod found yet, deferring adoption')
+        return False
+    logger.error(f'{job.log_format}: container-group pod is gone and the adoption deadline has passed, failing')
+    reap_job(job, 'failed', job_explanation='Job pod did not survive the loss of its controller and could not be recovered.')
+    return True
 
 
 def adopt_container_group_job(job, receptor_ctl=None, owner_task_id=None, clock=None):
@@ -451,17 +508,10 @@ def adopt_container_group_job(job, receptor_ctl=None, owner_task_id=None, clock=
     Returns True if the job reached a terminal state (or was requeued) and needs no further
     attention, False if it should be re-triaged on the next heartbeat.
     """
-    try:
-        pod = find_job_pod(job)
-        # A finished pod is harvested whatever the probe would say, so skip the API call.
-        phase = (pod or {}).get('status', {}).get('phase')
-        has_output = False if (pod is None or phase in TERMINAL_PHASES) else pod_has_output(job, pod['metadata']['name'])
-        state = classify_job_pod(pod, has_output=has_output, reference_time=(clock or now)())
-    except Exception:
-        # An unreachable Kubernetes API is a statement about this controller's connection,
-        # not about the pod. Guessing here would delete live pods or fail live jobs.
-        logger.exception(f'{job.log_format}: could not triage container-group pod, deferring adoption')
+    triage = _triage_job_pod(job, clock)
+    if triage is None:
         return False
+    pod, state = triage
 
     pod_name = pod['metadata']['name'] if pod else None
     logger.info(f'{job.log_format}: container-group pod triage = {state} (pod={pod_name})')
@@ -470,28 +520,22 @@ def adopt_container_group_job(job, receptor_ctl=None, owner_task_id=None, clock=
         return harvest_terminal_pod(job, pod_name, pod, owner_task_id=owner_task_id, clock=clock)
 
     if state == PodState.WEDGED:
+        # Triage can outlast a claim by another task, and the pod below is then its pod.
+        try:
+            check_still_owner(job, owner_task_id)
+        except NotOwner as exc:
+            logger.warning(f'{job.log_format}: claimed by task {exc.current_task_id} during triage, leaving wedged pod {pod_name} alone')
+            return True
         if not delete_job_pod(job, pod_name):
             # Requeuing now would let the task manager launch a second pod carrying the same
             # ansible-awx-job-id label, and find_job_pod could then pick either one.
             logger.warning(f'{job.log_format}: wedged pod {pod_name} could not be deleted, deferring requeue')
             return False
-        requeue_wedged_job(job)
+        requeue_wedged_job(job, owner_task_id=owner_task_id)
         return True
 
     if state == PodState.ABSENT:
-        if not job.work_unit_id and not job.cancel_flag:
-            # The controller died before it created the pod, so nothing ran and nothing will appear.
-            if not is_requeueable(job):
-                reap_job(job, 'failed', job_explanation=reap_explanation(job, 'Job pod was never created before its controller was lost.'))
-                return True
-            return requeue_wedged_job(job, reason='controller died before creating the pod')
-        if not budget_exhausted(job, 'pod_absent', clock=clock):
-            # The pod may simply not have been created yet when the controller died.
-            logger.info(f'{job.log_format}: no container-group pod found yet, deferring adoption')
-            return False
-        logger.error(f'{job.log_format}: container-group pod is gone and the adoption deadline has passed, failing')
-        reap_job(job, 'failed', job_explanation='Job pod did not survive the loss of its controller and could not be recovered.')
-        return True
+        return _adopt_absent_pod_job(job, clock)
 
     if state == PodState.STREAMING:
         return attach_to_streaming_pod(job, pod_name, pod, receptor_ctl=receptor_ctl, owner_task_id=owner_task_id, clock=clock)

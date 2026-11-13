@@ -248,9 +248,12 @@ class CallbackBrokerWorker:
                         metrics_events_missing_created += 1
                     else:  # only calculate the seconds if the created time already has been set
                         metrics_total_job_event_processing_seconds += e.modified - e.created
-                # Before the try below: a database error here raises out of flush() and perform_work
-                # retries it like any other, where the per-event fallback would skip the check.
-                _null_missing_host_ids(events)
+                # The host check is optional. If it fails the events are still saved, as before it
+                # existed; a database that is really down fails the bulk_create below instead.
+                try:
+                    _null_missing_host_ids(events)
+                except Exception:
+                    logger.warning('Could not check host ids of events before saving them, saving them as they are', exc_info=True)
                 metrics_duration_to_save = time.perf_counter()
                 saved_events = []
                 try:
@@ -277,6 +280,10 @@ class CallbackBrokerWorker:
                             if isinstance(exc_indv, IntegrityError) and _is_unique_constraint_violation(exc_indv):
                                 # Duplicate event from concurrent adoption stream — already stored.
                                 events.remove(e)
+                                # A receiver that died after storing the stats event but before
+                                # the wrapup above never ran it. Wrapup is idempotent.
+                                if getattr(e, '_notification_trigger_event', False):
+                                    job_stats_wrapup(getattr(e, e.JOB_REFERENCE), event=e)
                                 continue
 
                             retry_count = getattr(e, '_retry_count', 0) + 1

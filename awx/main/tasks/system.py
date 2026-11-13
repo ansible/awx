@@ -80,6 +80,7 @@ from awx.main.tasks.adoption_decisions import (
     drop_mesh_connected_control_nodes,
     drop_routed_remote_nodes,
     find_lost_instances,
+    is_requeueable,
     gate_lost_instances,
     live_controller_hostnames,
     mesh_hostnames,
@@ -935,9 +936,14 @@ def _handle_lost_instance_job(j, other_inst):
 
     if action == JobAction.REQUEUE:
         # Job never reached an EE — re-queue so any controller can dispatch it.
-        j.refresh_from_db(fields=['status'])
+        j.refresh_from_db(fields=['status', 'job_env', 'work_unit_id'])
         if j.status in ('running', 'waiting'):
-            UnifiedJob.objects.filter(pk=j.id, status=j.status).update(
+            # The action was decided on a snapshot. A controller that is declared lost but still
+            # running may have started submitting since; the next heartbeat decides again.
+            if j.work_unit_id or not is_requeueable(j):
+                logger.info(f'Job {j.id} began submitting to receptor after the requeue decision, leaving it for the next heartbeat')
+                return
+            UnifiedJob.objects.filter(Q(work_unit_id='') | Q(work_unit_id__isnull=True), pk=j.id, status=j.status).update(
                 status='pending',
                 controller_node='',
                 execution_node='',
@@ -1005,6 +1011,10 @@ def _reap_and_mark_lost_instance(other_inst):
         UnifiedJob.objects.filter(status='waiting', controller_node=other_inst.hostname).update(status='pending', controller_node='', execution_node='')
     except Exception:
         logger.exception('failed to re-process jobs for lost instance {}'.format(other_inst.hostname))
+    _deprovision_or_mark_offline(other_inst)
+
+
+def _deprovision_or_mark_offline(other_inst):
     try:
         disposition = lost_instance_disposition(other_inst, settings.AWX_AUTO_DEPROVISION_INSTANCES)
         if disposition == LostInstanceAction.DEPROVISION:
@@ -1247,9 +1257,12 @@ def _sweep_orphaned_jobs(this_inst, clock=None, mesh_lookup=None, route_lookup=N
         .exclude(execution_node=F('controller_node'))
         .exclude(polymorphic_ctype_id=workflow_ctype_id)
         .order_by('started')  # longest-stranded first: they are closest to their deadline
-        .values_list('id', 'controller_node', 'celery_task_id', 'execution_node', 'work_unit_id', named=True)[: settings.HADR_ORPHAN_SWEEP_MAX_PER_HEARTBEAT]
+        .values_list('id', 'controller_node', 'celery_task_id', 'execution_node', 'work_unit_id', named=True)
     )
     orphans = _exclude_live_controllers_without_rows(list(orphans), instances, ref_time, grace_seconds, mesh_lookup or _receptor_mesh_hostnames)
+    # The cap comes after the mesh exclusion: that exclusion never expires, so applying the cap
+    # first would let jobs of a still-meshed deprovisioned controller fill every batch.
+    orphans = orphans[: settings.HADR_ORPHAN_SWEEP_MAX_PER_HEARTBEAT]
     orphans = _exclude_unreachable_execution_nodes(orphans, route_lookup or _receptor_routed_hostnames, clock)
 
     swept = 0
@@ -1355,7 +1368,9 @@ def _receptor_routed_hostnames():
 
 
 def _current_namespace():
-    return settings.AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE
+    # The controller's own namespace. AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE also picks where
+    # execution pods run, so an override of it would point the controller pod lookup elsewhere.
+    return os.getenv('MY_POD_NAMESPACE', 'default')
 
 
 def _control_pod_is_gone(hostname):
@@ -1589,28 +1604,26 @@ def adopt_job_async(job_id, source_controller=None, owner_task_id=None):
     adopt_job(job_id, open_work=lambda: ReceptorWork(get_receptor_ctl()), owner_task_id=owner_task_id)
 
 
-def adopt_job(job_id, open_work, clock=None, owner_task_id=None):
-    """Adopt one orphaned job this controller has claimed: reattach to its work unit or time it out.
-
-    open_work returns the ReceptorWork to stream from; it is called once ownership is
-    confirmed and there is capacity for the job. clock returns the current time, defaults
-    to django.utils.timezone.now, and is what every deadline in the adoption is judged by.
-    """
-    clock = clock or now
-
+def _claimed_running_job(job_id, owner_task_id):
+    """The running job this controller holds the claim on, or None if adoption should skip it."""
     job = UnifiedJob.objects.filter(id=job_id, status='running').first()
     if not job:
         logger.debug(f'adopt_job_async: job {job_id} is no longer running, skipping')
-        return
+        return None
     if owner_task_id and job.celery_task_id != owner_task_id:
         logger.info(f'adopt_job_async: job {job_id} was claimed again by task {job.celery_task_id}, skipping')
-        return
+        return None
     # Every claim sets controller_node to the claiming controller before publishing to its
     # own queue, so a job owned by anyone else here was taken over since.
     if job.controller_node != settings.CLUSTER_HOST_ID:
         logger.info(f'Adoption skipped for job {job_id}: belongs to different controller {job.controller_node}')
-        return
+        return None
+    return job
 
+
+def _adoption_has_capacity(job, clock):
+    """False when adoption must wait (or the job was failed for waiting too long)."""
+    job_id = job.id
     # Checked after the claim, not before: the claim is what keeps the job visible to this
     # controller's heartbeat, and without it a deferred job whose original controller is gone
     # would never be re-queued by anyone.
@@ -1624,10 +1637,63 @@ def adopt_job(job_id, open_work, clock=None, owner_task_id=None):
         if _adoption_stall_budget_exhausted(job, 'capacity', clock=clock):
             logger.error(f'Job {job_id} could not be adopted within HADR_JOB_ADOPTION_TIMEOUT while this controller was out of control capacity, failing')
             reaper.reap_job(job, 'failed', job_explanation='Job exceeded HADR_JOB_ADOPTION_TIMEOUT waiting for control capacity to adopt it')
-            return
+            return False
         logger.info(f'Adoption deferred for job {job_id}: this controller is out of control capacity, retrying next heartbeat')
-        return
+        return False
     clear_adoption_stall(job, 'capacity')
+    return True
+
+
+def _settle_unreachable_job(job, work, owner_task_id, clock):
+    """Fail or recover a job whose unit is unreachable. True if settled, False to go on to reattach."""
+    # A container-group job's work unit lived in the dying controller's own EE
+    # sidecar, so "unreachable" here means "gone for good" — there is nothing for the
+    # receptor path to adopt and waiting out the timeout would only fail the job.
+    # Its pod survives in Kubernetes though, and that is recoverable. Deliberately
+    # reached only after the receptor attempt fails: while the submitting controller
+    # is still alive its unit answers, and reattaching to it keeps the full lifecycle
+    # (live streaming, work cancel, release) instead of this recovery subset.
+    if job.is_container_group_task:
+        from awx.main.tasks.container_groups import adopt_container_group_job
+
+        try:
+            adopt_container_group_job(job, receptor_ctl=work.receptor_ctl, owner_task_id=owner_task_id, clock=clock)
+        except Exception:
+            logger.exception(f'adopt_job_async: container-group adoption failed for job {job.id}')
+        return True
+
+    if _adoption_stall_budget_exhausted(job, 'unreachable', clock=clock):
+        logger.error(f'Job {job.id} (unit={job.work_unit_id}) unreachable for >{settings.HADR_JOB_ADOPTION_TIMEOUT}s, failing')
+        # The unit is cancelled below and ReceptorWork.cancel() has no ownership check, so confirm
+        # this adoption still holds the claim after the waits above.
+        if _claimed_running_job(job.id, owner_task_id) is None:
+            return True
+        # Best effort only: we only get here because the unit is unreachable, so the
+        # cancel is expected to fail too. Not worth a traceback. The unit is not leaked —
+        # awx_receptor_workunit_reaper releases units for any job outside ACTIVE_STATES,
+        # and unlike an inline release it honors RECEPTOR_KEEP_WORK_ON_ERROR for
+        # operators who keep failed work for debugging.
+        try:
+            work.cancel(job.work_unit_id)
+        except Exception as exc:
+            logger.warning(f'Failed to cancel work unit {job.work_unit_id} while timing out job {job.id}: {exc}')
+        reaper.reap_job(job, 'failed', job_explanation='Job exceeded HADR_JOB_ADOPTION_TIMEOUT during controller restart')
+        return True
+    return False
+
+
+def adopt_job(job_id, open_work, clock=None, owner_task_id=None):
+    """Adopt one orphaned job this controller has claimed: reattach to its work unit or time it out.
+
+    open_work returns the ReceptorWork to stream from; it is called once ownership is
+    confirmed and there is capacity for the job. clock returns the current time, defaults
+    to django.utils.timezone.now, and is what every deadline in the adoption is judged by.
+    """
+    clock = clock or now
+
+    job = _claimed_running_job(job_id, owner_task_id)
+    if job is None or not _adoption_has_capacity(job, clock):
+        return
 
     # Single try/finally so the control socket is closed on every exit path, including
     # the timeout branch below, which returns early.
@@ -1658,36 +1724,8 @@ def adopt_job(job_id, open_work, clock=None, owner_task_id=None):
         # created — it heap-fetches every event row for the job. Keep it inside the unreachable
         # branch: reachable jobs are re-queued by every heartbeat while reattach defers them,
         # so computing it up front would rescan the whole event table once a minute per job.
-        if not unit_reachable:
-            # A container-group job's work unit lived in the dying controller's own EE
-            # sidecar, so "unreachable" here means "gone for good" — there is nothing for the
-            # receptor path to adopt and waiting out the timeout would only fail the job.
-            # Its pod survives in Kubernetes though, and that is recoverable. Deliberately
-            # reached only after the receptor attempt fails: while the submitting controller
-            # is still alive its unit answers, and reattaching to it keeps the full lifecycle
-            # (live streaming, work cancel, release) instead of this recovery subset.
-            if job.is_container_group_task:
-                from awx.main.tasks.container_groups import adopt_container_group_job
-
-                try:
-                    adopt_container_group_job(job, receptor_ctl=work.receptor_ctl, owner_task_id=owner_task_id, clock=clock)
-                except Exception:
-                    logger.exception(f'adopt_job_async: container-group adoption failed for job {job.id}')
-                return
-
-            if _adoption_stall_budget_exhausted(job, 'unreachable', clock=clock):
-                logger.error(f'Job {job.id} (unit={job.work_unit_id}) unreachable for >{settings.HADR_JOB_ADOPTION_TIMEOUT}s, failing')
-                # Best effort only: we only get here because the unit is unreachable, so the
-                # cancel is expected to fail too. Not worth a traceback. The unit is not leaked —
-                # awx_receptor_workunit_reaper releases units for any job outside ACTIVE_STATES,
-                # and unlike an inline release it honors RECEPTOR_KEEP_WORK_ON_ERROR for
-                # operators who keep failed work for debugging.
-                try:
-                    work.cancel(job.work_unit_id)
-                except Exception as exc:
-                    logger.warning(f'Failed to cancel work unit {job.work_unit_id} while timing out job {job.id}: {exc}')
-                reaper.reap_job(job, 'failed', job_explanation='Job exceeded HADR_JOB_ADOPTION_TIMEOUT during controller restart')
-                return
+        if not unit_reachable and _settle_unreachable_job(job, work, owner_task_id, clock):
+            return
 
         try:
             reattach_to_work_unit(job, work, clock=clock, owner_task_id=owner_task_id, unit_status=unit_status)

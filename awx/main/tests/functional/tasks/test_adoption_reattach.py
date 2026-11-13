@@ -63,20 +63,33 @@ def test_unit_canceled_by_its_user_finalizes_canceled(job):
     assert job.status == 'canceled'
 
 
+class CancelRefused(FakeReceptorWork):
+    def cancel(self, unit_id):
+        self.calls.append(('cancel', unit_id))
+        raise RuntimeError('receptor said no')
+
+
 @pytest.mark.django_db
-def test_a_unit_that_refuses_the_cancel_still_ends_the_job(me_inst):
+def test_a_finished_unit_that_refuses_the_cancel_still_ends_the_job(me_inst):
     # The user asked for the job to stop; receptor refusing the command must not hide that.
     job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id=UNIT, cancel_flag=True)
 
-    class CancelRefused(FakeReceptorWork):
-        def cancel(self, unit_id):
-            self.calls.append(('cancel', unit_id))
-            raise RuntimeError('receptor said no')
-
-    assert reattach_to_work_unit(job, CancelRefused({UNIT: FakeWorkUnit(make_events(10), state='Running')})) is True
+    assert reattach_to_work_unit(job, CancelRefused({UNIT: FakeWorkUnit(make_events(10))})) is True
 
     job.refresh_from_db()
     assert job.status == 'canceled'
+
+
+@pytest.mark.django_db
+def test_a_running_unit_that_refuses_the_cancel_is_retried_not_streamed_out(me_inst):
+    # Streaming a unit that is still running waits for the whole playbook, so the cancel is
+    # retried on the next heartbeat instead.
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id=UNIT, cancel_flag=True)
+
+    assert reattach_to_work_unit(job, CancelRefused({UNIT: FakeWorkUnit(make_events(10), state='Running')})) is False
+
+    job.refresh_from_db()
+    assert job.status == 'running'
 
 
 # ── Events carry the job's identity ───────────────────────────────────────────
@@ -88,7 +101,8 @@ def test_streamed_events_carry_the_jobs_created_time(job):
     reattach_to_work_unit(job, FakeReceptorWork({UNIT: FakeWorkUnit(make_events(5))}))
 
     events = [e for e in RecordingDispatcher.dispatched if 'counter' in e]
-    assert events and all(e['job_created'] == str(job.created) for e in events)
+    assert events
+    assert all(e['job_created'] == str(job.created) for e in events)
     assert not any('workflow_job_id' in e for e in events), 'a job outside a workflow names no workflow'
 
 
@@ -101,7 +115,8 @@ def test_streamed_events_of_a_workflow_child_name_its_workflow(job):
         reattach_to_work_unit(job, FakeReceptorWork({UNIT: FakeWorkUnit(make_events(5))}))
 
     events = [e for e in RecordingDispatcher.dispatched if 'counter' in e]
-    assert events and all(e['workflow_job_id'] == 999 for e in events)
+    assert events
+    assert all(e['workflow_job_id'] == 999 for e in events)
 
 
 @pytest.mark.django_db

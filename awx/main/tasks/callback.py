@@ -305,31 +305,35 @@ class RunnerCallback:
         if self.wrapup_event_type == 'EOF':
             self.wrapup_event_dispatched = True
 
+    def _starting_job_env(self, runner_config):
+        from awx.main.models.credential import build_safe_env  # Circular import
+
+        '''
+        Pattern-mask first so nothing sensitive can reach job_env (exposed on the job
+        detail API) even when safe_env is empty — which is the case during adoption of a
+        job whose original controller died before its 'starting' status was persisted.
+        In the normal path safe_env is already build_safe_env(env), so this is a no-op.
+        '''
+        job_env = build_safe_env(runner_config.env)
+        '''
+        Take the safe environment variables and overwrite. These win over the pattern
+        masking above: they also cover credential-plugin values whose names match no pattern.
+        '''
+        for k, v in self.safe_env.items():
+            if k in job_env:
+                job_env[k] = v
+        # An adopter replaying 'starting' never counts: it keeps the count saved at job start.
+        host_count = self.host_count if self.host_count is not None else (self.instance.job_env or {}).get('host_count')
+        if host_count is not None:
+            job_env['host_count'] = host_count
+        return job_env
+
     def status_handler(self, status_data, runner_config):
         """
         Ansible runner callback triggered on status transition
         """
         if status_data['status'] == 'starting':
-            from awx.main.models.credential import build_safe_env  # Circular import
-
-            '''
-            Pattern-mask first so nothing sensitive can reach job_env (exposed on the job
-            detail API) even when safe_env is empty — which is the case during adoption of a
-            job whose original controller died before its 'starting' status was persisted.
-            In the normal path safe_env is already build_safe_env(env), so this is a no-op.
-            '''
-            job_env = build_safe_env(runner_config.env)
-            '''
-            Take the safe environment variables and overwrite. These win over the pattern
-            masking above: they also cover credential-plugin values whose names match no pattern.
-            '''
-            for k, v in self.safe_env.items():
-                if k in job_env:
-                    job_env[k] = v
-            # An adopter replaying 'starting' never counts: it keeps the count saved at job start.
-            host_count = self.host_count if self.host_count is not None else (self.instance.job_env or {}).get('host_count')
-            if host_count is not None:
-                job_env['host_count'] = host_count
+            job_env = self._starting_job_env(runner_config)
             from awx.main.signals import disable_activity_stream  # Circular import
 
             with disable_activity_stream():

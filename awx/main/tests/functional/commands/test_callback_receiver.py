@@ -107,17 +107,16 @@ class TestCallbackBrokerWorker(TransactionTestCase):
         assert (live_event.host_id, live_event.host_name) == (live_host.id, 'live')
         assert (gone_event.host_id, gone_event.host_name) == (None, 'gone')
 
-    def test_host_check_error_raises_out_of_flush_and_keeps_the_buffer(self):
-        """perform_work retries a flush that raises, so the events must still be buffered."""
+    def test_host_check_error_does_not_lose_the_events(self):
+        """The host check is optional: if it fails, the events are saved rather than dropped."""
         job = Job.objects.create(status='running')
         worker = CallbackBrokerWorker()
         events = [JobEvent(job=job, counter=1, job_created=job.created, uuid=str(uuid4()), created=job.created, host_id=1, host_name='h')]
         worker.buff = {JobEvent: events}
         with mock.patch.object(Host.objects, 'filter', side_effect=DatabaseError('statement timeout')):
-            with pytest.raises(DatabaseError):
-                worker.flush(force=True)
-        assert worker.buff == {JobEvent: events}
-        assert JobEvent.objects.filter(uuid=events[0].uuid).count() == 0
+            worker.flush(force=True)
+        assert worker.buff == {JobEvent: []}
+        assert JobEvent.objects.filter(uuid=events[0].uuid).count() == 1
 
     def test_null_missing_host_ids_ignores_ids_that_are_not_integers(self):
         events = [
@@ -198,6 +197,26 @@ class TestCallbackBrokerWorker(TransactionTestCase):
                 worker.flush(force=True)
 
         assert worker.buff.get(JobEvent, []) == [], "duplicate event must not remain in buffer"
+
+    def test_flush_finishes_the_stats_wrapup_of_a_replayed_stats_event(self):
+        """A receiver that died after storing the stats event but before the wrapup never ran
+        it, so the replay hits the unique constraint and must complete the wrapup."""
+        job = Job.objects.create(status='running')
+        created_ts = tz_now()
+
+        worker = CallbackBrokerWorker()
+        duplicate = JobEvent(job=job, counter=1, job_created=created_ts, uuid=str(uuid4()), created=created_ts)
+        duplicate._notification_trigger_event = True
+        worker.buff = {JobEvent: [duplicate]}
+
+        unique_error = DjangoIntegrityError('UNIQUE constraint failed: main_jobevent.job_id, main_jobevent.counter, main_jobevent.job_created')
+        with mock.patch.object(JobEvent.objects, 'bulk_create', side_effect=unique_error):
+            with mock.patch.object(duplicate, 'save', side_effect=unique_error):
+                with mock.patch('awx.main.dispatch.worker.callback.job_stats_wrapup') as wrapup:
+                    worker.flush(force=True)
+
+        wrapup.assert_called_once_with(job.id, event=duplicate)
+        assert worker.buff.get(JobEvent, []) == []
 
     def test_flush_with_empty_buffer(self):
         worker = CallbackBrokerWorker()

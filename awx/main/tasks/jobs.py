@@ -679,8 +679,11 @@ class BaseTask(object):
             # owner_task_id refuses the write if an adoption claimed the job (NotOwner below).
             # _required_status='running' skips it if something that took no ownership, such as a
             # reap, already ended the job; self.instance is then None, and run() stops without a
-            # second terminal notification.
-            self.instance = _finalize_job_run(self.model, pk, self.runner_callback, status, owner_task_id=owner_task_id, _required_status='running')
+            # second terminal notification. Only once the work was submitted: a failure before
+            # that (pre_run_hook) has already written failed/error itself and still needs this write
+            # for the traceback, the websocket status and the manager scheduling.
+            required_status = 'running' if receptor_job is not None else None
+            self.instance = _finalize_job_run(self.model, pk, self.runner_callback, status, owner_task_id=owner_task_id, _required_status=required_status)
         except NotOwner as exc:
             logger.warning(f'{self.instance.log_format} was taken over by task {exc.current_task_id}; not writing status {status} or releasing its work unit')
             release_work = False

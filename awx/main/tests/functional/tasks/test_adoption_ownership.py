@@ -272,7 +272,7 @@ def test_owner_finishing_after_a_reap_does_not_write_a_second_result(running_job
     task.runner_callback = RunnerCallback(model=Job)
     task.runner_callback.instance = running_job
 
-    assert task._finalize_and_release(running_job.pk, 'successful', None, ORIGINAL) is True
+    assert task._finalize_and_release(running_job.pk, 'successful', mock.Mock(work=None), ORIGINAL) is True
 
     assert task.instance is None, 'run() takes a None instance to mean another writer finalized the job'
     running_job.refresh_from_db()

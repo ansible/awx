@@ -12,6 +12,7 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import DEFAULT, Mock, patch
 
 import pytest
+from django.test import override_settings
 
 from awx.main.models import Job
 from awx.main.tasks import host_trust
@@ -267,8 +268,9 @@ def test_pod_has_output_propagates_api_errors(mock_pm_cls):
     pm = mock_pm_cls.return_value
     pm.namespace = 'aap'
     pm.kube_api.read_namespaced_pod_log.side_effect = RuntimeError('api down')
+    job = _job(42)
     with pytest.raises(RuntimeError):
-        pod_has_output(_job(42), 'automation-job-42-abcde')
+        pod_has_output(job, 'automation-job-42-abcde')
 
 
 # ---------------------------------------------------------------------------
@@ -294,6 +296,19 @@ def test_open_pod_log_stream_does_not_follow_a_terminal_pod(mock_pm_cls):
     pm.namespace = 'aap'
     open_pod_log_stream(_job(42), 'automation-job-42-abcde', follow=False)
     assert pm.kube_api.read_namespaced_pod_log.call_args.kwargs['follow'] is False
+
+
+@override_settings(AWX_CONTAINER_GROUP_K8S_API_TIMEOUT=7)
+@patch('awx.main.tasks.container_groups.PodManager')
+def test_a_terminal_pods_log_read_is_bounded_but_a_followed_stream_is_not(mock_pm_cls):
+    """A log endpoint that stops sending would hold the adoption worker; a followed stream is
+    quiet for as long as the playbook is, so a read timeout there would cut off live jobs."""
+    pm = mock_pm_cls.return_value
+    pm.namespace = 'aap'
+    open_pod_log_stream(_job(42), 'automation-job-42-abcde', follow=False)
+    assert pm.kube_api.read_namespaced_pod_log.call_args.kwargs['_request_timeout'] == 7
+    open_pod_log_stream(_job(42), 'automation-job-42-abcde', follow=True)
+    assert '_request_timeout' not in pm.kube_api.read_namespaced_pod_log.call_args.kwargs
 
 
 # ---------------------------------------------------------------------------
@@ -337,6 +352,7 @@ def adoption_env():
         'delete_job_pod',
         'requeue_wedged_job',
         'reap_job',
+        'check_still_owner',
     ]
     # budget_exhausted is autospec'd: it takes a stall reason, and a call that omits one
     # would fail only at runtime, on the rare path where the pod is gone.
@@ -475,8 +491,18 @@ def test_wedged_pod_is_deleted_and_its_job_requeued(adoption_env):
     job = _job()
     assert adopt_container_group_job(job) is True
     adoption_env['delete_job_pod'].assert_called_once()
-    adoption_env['requeue_wedged_job'].assert_called_once_with(job)
+    adoption_env['requeue_wedged_job'].assert_called_once_with(job, owner_task_id=None)
     adoption_env['reap_job'].assert_not_called()
+
+
+def test_wedged_pod_of_a_job_claimed_during_triage_is_left_alone(adoption_env):
+    """Triage can outlast a claim, and the pod is then the new owner's pod."""
+    adoption_env['classify_job_pod'].return_value = PodState.WEDGED
+    adoption_env['check_still_owner'].side_effect = NotOwner(42, 'adoption-task', 'newer-task')
+
+    assert adopt_container_group_job(_job(), owner_task_id='adoption-task') is True
+    adoption_env['delete_job_pod'].assert_not_called()
+    adoption_env['requeue_wedged_job'].assert_not_called()
 
 
 def test_wedged_pod_that_cannot_be_deleted_is_not_requeued(adoption_env):
@@ -598,9 +624,30 @@ def test_attach_repoints_the_job_at_the_unit_it_now_owns(attach_env):
 
     attach_to_streaming_pod(job, 'automation-job-42-abcde', _pod(), receptor_ctl=_receptor_ctl())
 
-    assert attach_env['UnifiedJob'].objects.filter.call_args.kwargs == {'pk': 42}
+    assert attach_env['UnifiedJob'].objects.filter.call_args.kwargs == {'pk': 42, 'status': 'running'}
     assert attach_env['UnifiedJob'].objects.filter.return_value.update.call_args.kwargs == {'work_unit_id': 'new-unit-id'}
     assert job.work_unit_id == 'new-unit-id'
+
+
+def test_attach_repoints_only_a_job_this_adoption_still_owns(attach_env):
+    """A claim made during the submit must not have its work_unit_id overwritten."""
+    job = _job()
+
+    attach_to_streaming_pod(job, 'automation-job-42-abcde', _pod(), receptor_ctl=_receptor_ctl(), owner_task_id='adoption-task')
+
+    assert attach_env['UnifiedJob'].objects.filter.call_args.kwargs == {'pk': 42, 'status': 'running', 'celery_task_id': 'adoption-task'}
+
+
+def test_attach_that_lost_the_job_records_nothing_and_does_not_release_the_unit(attach_env):
+    """Releasing an attach unit cancels it, and cancel deletes the pod the new owner streams."""
+    attach_env['UnifiedJob'].objects.filter.return_value.update.return_value = 0
+    job = _job()
+    ctl = _receptor_ctl()
+
+    assert attach_to_streaming_pod(job, 'automation-job-42-abcde', _pod(), receptor_ctl=ctl, owner_task_id='adoption-task') is True
+
+    assert job.work_unit_id != 'new-unit-id'
+    assert 'release' not in str(ctl.method_calls)
 
 
 def test_attach_hands_off_to_the_ordinary_adoption_path(attach_env):
@@ -733,6 +780,7 @@ def harvest_env(tmp_path):
         'invoke_adoption_hooks',
         '_finalize_adopted_job',
         'open_pod_log_stream',
+        'check_still_owner',
     ]
     with patch.multiple('awx.main.tasks.container_groups', **{t: DEFAULT for t in targets}) as mocks:
         mocks['_compute_adoption_dedup'].return_value = (0, set(), 0)
@@ -821,6 +869,26 @@ def test_harvest_by_a_task_that_lost_the_job_writes_nothing_and_is_done(harvest_
     assert not tmp_path.exists(), 'private_data_dir leaked'
 
 
+def test_harvest_by_a_task_that_lost_the_job_runs_no_hooks(harvest_env, tmp_path):
+    """The hooks write (an inventory import loads the unit's output), so they wait for the check."""
+    harvest_env['open_pod_log_stream'].return_value = io.BytesIO(POD_LOG)
+    harvest_env['check_still_owner'].side_effect = NotOwner(42, 'adoption-task', 'newer-task')
+
+    assert harvest_terminal_pod(_job(), 'automation-job-42-abcde', _pod(phase='Succeeded', exit_code=0), owner_task_id='adoption-task') is True
+    harvest_env['invoke_adoption_hooks'].assert_not_called()
+    harvest_env['_finalize_adopted_job'].assert_not_called()
+    assert not tmp_path.exists(), 'private_data_dir leaked'
+
+
+def test_harvest_tells_the_finalizer_when_a_hook_failed(harvest_env):
+    harvest_env['open_pod_log_stream'].return_value = io.BytesIO(POD_LOG)
+    harvest_env['invoke_adoption_hooks'].return_value = (False, {'explanation': 'hook broke'})
+
+    harvest_terminal_pod(_job(), 'automation-job-42-abcde', _pod(phase='Succeeded', exit_code=0))
+
+    assert harvest_env['_finalize_adopted_job'].call_args.kwargs['hook_failed'] is True
+
+
 def test_harvest_finalizes_on_the_adoption_clock(harvest_env):
     clock = Mock(return_value=NOW)
     harvest_env['open_pod_log_stream'].return_value = io.BytesIO(POD_LOG)
@@ -876,7 +944,8 @@ def test_harvest_fails_a_job_whose_inventory_changed(harvest_env):
     assert harvest_env['_finalize_adopted_job'].call_args.kwargs['final_status'] == 'failed'
     assert harvest_env['invoke_adoption_hooks'].call_args.args[3] == 'failed'  # so the fact cache never runs
     explanation = harvest_env['callback'].delay_update.call_args.kwargs['job_explanation']
-    assert 'could not be matched to the inventory' in explanation and CHANGED in explanation
+    assert 'could not be matched to the inventory' in explanation
+    assert CHANGED in explanation
 
 
 def test_harvest_still_replays_the_log_of_a_job_whose_inventory_changed(harvest_env):

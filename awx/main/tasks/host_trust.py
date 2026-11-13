@@ -58,6 +58,8 @@ def change_since_start(job):
     inventory update was created after it. The update check is what sees a sync's renames and
     enabled toggles: the importer saves them with update_fields, which never moves Host.modified.
     """
+    from django.db.models import Q
+
     from awx.main.models import InventoryUpdate  # Circular import
 
     saved = (job.job_env or {}).get('host_count')
@@ -75,7 +77,9 @@ def change_since_start(job):
     if inventory.hosts.filter(modified__gt=job.started).exists():
         return 'a host was added or edited'
     # A smart inventory has no sources: its hosts are every matching host of its organization.
-    updates = InventoryUpdate.objects.filter(created__gt=job.started)
+    # An update that began before the job and is still running, or finished during it, can change
+    # a host with save(update_fields=...) without moving Host.modified, so created alone misses it.
+    updates = InventoryUpdate.objects.filter(Q(created__gt=job.started) | Q(finished__gt=job.started) | Q(status__in=('pending', 'waiting', 'running')))
     if inventory.kind == 'smart':
         updates = updates.filter(inventory_source__inventory__organization_id=inventory.organization_id)
     else:

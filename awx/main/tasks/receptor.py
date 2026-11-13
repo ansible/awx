@@ -203,7 +203,7 @@ def _get_receptor_node_stanza(config_data=None):
 
 def get_receptor_data_dir(config_data=None):
     """Return the receptor data directory (``node.datadir``, default ``/tmp/receptor``)."""
-    return _get_receptor_node_stanza(config_data).get('datadir', '/tmp/receptor')
+    return _get_receptor_node_stanza(config_data).get('datadir', '/tmp/receptor')  # NOSONAR: receptor's own default; mirrors the daemon, not a path we create
 
 
 def get_receptor_node_id(config_data=None):
@@ -951,47 +951,11 @@ class AWXReceptorJob:
                         raise SignalExit()
                     res = self._await_processor(processor_future, work, reader, resultsock)
                 except SignalExit:
-                    # Nothing below may raise. The signal that got us here is usually this pod
-                    # shutting down, so the receptor control socket and the results socket are
-                    # dying at the same moment and any of these calls can fail. An escape lands
-                    # in BaseTask.run()'s generic handler, which records the job 'error' and
-                    # clears the running + work_unit_id pair the orphan scan matches on —
-                    # stranding the live EE whichever way we decided here.
-                    if self._cancel_unit_on_signal():
-                        try:
-                            work.cancel(self.unit_id)
-                        except Exception:
-                            logger.warning(f'Could not cancel work unit {self.unit_id}; it may outlive this controller')
-                    else:
-                        self.detached = True
-                        logger.info(f'Detaching from work unit {self.unit_id} without canceling it')
-                    # Yank the stream before the executor joins the processor, so a processor
-                    # blocked on a slow/unreachable remote EN cannot hold the dispatcher worker.
-                    self._close_results(resultsock, resultfile)
+                    res = self._on_signal_exit(work, resultsock, resultfile)
                     # The outer finally must not tear the stream down again.
                     resultsock, resultfile = None, None
-                    res = _PhaseResult('canceled', 1)
                 except Exception as exc:
-                    # The processor raised — typically a ConnectionError (Redis
-                    # sidecar gone) or OperationalError (transient DB failure).
-                    # The error is on this controller, not the EE. Detach so the
-                    # next controller can adopt and finalize correctly.
-                    if not self._cancel_unit_on_signal():
-                        try:
-                            probe = work.status(self.unit_id)
-                            probe_state = probe.get('StateName', '')
-                        except Exception:
-                            probe_state = None
-                        self.detached = True
-                        logger.info(f'Work unit {self.unit_id} (state={probe_state!r}) but process phase raised ({type(exc).__name__}); detaching for adoption')
-                        if resultsock:
-                            try:
-                                resultsock.shutdown(socket.SHUT_RDWR)
-                            except Exception:
-                                pass
-                        res = _PhaseResult('error', 1)
-                    else:
-                        raise
+                    res = self._on_processor_failure(work, exc, resultsock)
                 finally:
                     signal_state.raise_exception = False
         finally:
@@ -1005,6 +969,47 @@ class AWXReceptorJob:
             return self._handle_work_error(work, res)
 
         return res
+
+    def _on_signal_exit(self, work, resultsock, resultfile):
+        # Nothing below may raise. The signal that got us here is usually this pod
+        # shutting down, so the receptor control socket and the results socket are
+        # dying at the same moment and any of these calls can fail. An escape lands
+        # in BaseTask.run()'s generic handler, which records the job 'error' and
+        # clears the running + work_unit_id pair the orphan scan matches on —
+        # stranding the live EE whichever way we decided here.
+        if self._cancel_unit_on_signal():
+            try:
+                work.cancel(self.unit_id)
+            except Exception:
+                logger.warning(f'Could not cancel work unit {self.unit_id}; it may outlive this controller')
+        else:
+            self.detached = True
+            logger.info(f'Detaching from work unit {self.unit_id} without canceling it')
+        # Yank the stream before the executor joins the processor, so a processor
+        # blocked on a slow/unreachable remote EN cannot hold the dispatcher worker.
+        self._close_results(resultsock, resultfile)
+        return _PhaseResult('canceled', 1)
+
+    def _on_processor_failure(self, work, exc, resultsock):
+        # The processor raised — typically a ConnectionError (Redis
+        # sidecar gone) or OperationalError (transient DB failure).
+        # The error is on this controller, not the EE. Detach so the
+        # next controller can adopt and finalize correctly.
+        if self._cancel_unit_on_signal():
+            raise exc
+        try:
+            probe = work.status(self.unit_id)
+            probe_state = probe.get('StateName', '')
+        except Exception:
+            probe_state = None
+        self.detached = True
+        logger.info(f'Work unit {self.unit_id} (state={probe_state!r}) but process phase raised ({type(exc).__name__}); detaching for adoption')
+        if resultsock:
+            try:
+                resultsock.shutdown(socket.SHUT_RDWR)
+            except Exception:
+                pass
+        return _PhaseResult('error', 1)
 
     def _handle_work_error(self, work, res):
         """Handle the error path from _process_phase when the work unit status is 'error'."""
@@ -1049,7 +1054,9 @@ class AWXReceptorJob:
             logger.warning(detail)
             log_name = self.task.instance.log_format
             logger.warning(f"Could not launch pod for {log_name}. Exceeded quota.")
-            self.task.update_model(self.task.instance.pk, status='pending')
+            # work_unit_id goes too: it is what the orphan sweep matches a running job on, and a
+            # pending job that kept it could be claimed while the task manager redispatches it.
+            self.task.update_model(self.task.instance.pk, status='pending', work_unit_id='')
             return None
 
         try:
@@ -1472,7 +1479,7 @@ def _adopted_finished_at(job, callback=None, clock=None):
     return finished_at, (right_now - finished_at).total_seconds()
 
 
-def _finalize_adopted_job(job, callback, exit_code, process_phase_failed, final_status=None, pod_name=None, clock=None, owner_task_id=None):
+def _finalize_adopted_job(job, callback, exit_code, process_phase_failed, final_status=None, pod_name=None, clock=None, owner_task_id=None, hook_failed=False):
     """Commit terminal status for an adopted job via the shared _finalize_job_run path.
 
     The shared finalization function uses duck typing to schedule task/workflow managers
@@ -1484,6 +1491,8 @@ def _finalize_adopted_job(job, callback, exit_code, process_phase_failed, final_
     Args:
         final_status: overrides the status derived from exit_code. Used for a cancel, which
             is a nonzero exit that must not be reported as a failure.
+        hook_failed: a post-run hook failed the job, so its 'failed' is not the retry stream's
+            guess and the host_status_counts correction must not overwrite it.
     """
     from awx.main.tasks.jobs import _finalize_job_run
 
@@ -1509,7 +1518,7 @@ def _finalize_adopted_job(job, callback, exit_code, process_phase_failed, final_
     # Not for a job failed by its changed inventory either: it ran to the end, so its stats are clean.
     verdict = getattr(callback, 'host_verdict', None)
     failed_by_inventory = isinstance(verdict, host_trust.Verdict) and verdict.action == host_trust.FAIL_WHEN_DONE
-    if final_status == 'failed' and job.host_status_counts is not None and not failed_by_inventory:
+    if final_status == 'failed' and job.host_status_counts is not None and not failed_by_inventory and not hook_failed:
         corrected = _status_from_host_counts(job.host_status_counts)
         if corrected != 'failed':
             logger.info(
@@ -1732,6 +1741,15 @@ def failed_by_inventory_change(job, callback):
     return 'failed', 1
 
 
+def check_still_owner(job, owner_task_id):
+    """Raise NotOwner when another task has claimed the job since this adoption began."""
+    if not owner_task_id:
+        return
+    current = UnifiedJob.objects.filter(pk=job.pk).values_list('celery_task_id', flat=True).first()
+    if current != owner_task_id:
+        raise NotOwner(job.pk, owner_task_id, current)
+
+
 def _finalize_adoption_result(job, callback, res, process_phase_failed, work, unit_id, private_data_dir, pod_name=None, clock=None, owner_task_id=None):
     """Finalize a job after adoption completes or fails.
 
@@ -1759,6 +1777,10 @@ def _finalize_adoption_result(job, callback, res, process_phase_failed, work, un
 
     status, exit_code = failed_by_inventory_change(job, callback) or (status, exit_code)
 
+    # The hooks write (an inventory import loads the unit's output), so a task that lost the
+    # claim during the process phase must stop before them, not only at the final status write.
+    check_still_owner(job, owner_task_id)
+
     # Call post-run hooks before finalization
     hook_succeeded, hook_error = invoke_adoption_hooks(job, callback, private_data_dir, status)
     if not hook_succeeded:
@@ -1769,7 +1791,17 @@ def _finalize_adoption_result(job, callback, res, process_phase_failed, work, un
         if hook_error.get('traceback'):
             callback.delay_update(result_traceback=hook_error['traceback'])
 
-    _finalize_adopted_job(job, callback, exit_code, process_phase_failed, final_status=status, pod_name=pod_name, clock=clock, owner_task_id=owner_task_id)
+    _finalize_adopted_job(
+        job,
+        callback,
+        exit_code,
+        process_phase_failed,
+        final_status=status,
+        pod_name=pod_name,
+        clock=clock,
+        owner_task_id=owner_task_id,
+        hook_failed=not hook_succeeded,
+    )
     return True
 
 
@@ -1781,6 +1813,65 @@ def _no_route_to(execution_node, work):
         reset_receptor_connection(work.receptor_ctl)
         return False
     return not execution_node_reachable(execution_node, routed_hostnames(status))
+
+
+def _cancel_unit_of_orphaned_cancel(job, work, unit_id, state_name):
+    """Stop the unit of a job canceled while orphaned. True when a live unit refused it."""
+    logger.info(f'Job {job.id}: canceled while orphaned, canceling work unit {unit_id} before streaming it out')
+    try:
+        work.cancel(unit_id)
+    except Exception as exc:
+        # The status is committed as canceled either way. Leaving the job running
+        # because receptor refused the command would hide the cancel entirely, and the
+        # unit is not leaked: awx_receptor_workunit_reaper releases units for any job
+        # outside ACTIVE_STATES.
+        logger.warning(f'Could not cancel work unit {unit_id} for canceled job {job.id}: {exc}')
+        # A live unit that refused the cancel keeps running, and streaming it out would wait for
+        # the playbook. A finished unit has nothing left to cancel, so it is not retried.
+        return state_name in ('Pending', 'Running')
+    return False
+
+
+def _resolve_stalled_stream(job, work, unit_id, callback, clock, private_data_dir, stream_cut_off):
+    """Settle a job whose results stream stalled.
+
+    Returns the reattach result (True/False) when settled here, or None when the job should
+    be finalized from the work unit status without the full output.
+    """
+    # The unit finished and the execution node still holds the output; only the
+    # transport between here and there is down. Deferring keeps the job 'running'
+    # with its unit intact and the heartbeat re-queues it, so a later attempt can
+    # stream the full event set rather than finalizing on a truncated one. Bounded
+    # by HADR_JOB_ADOPTION_TIMEOUT from the first stall so a path that never recovers
+    # still converges.
+    if not _adoption_stall_budget_exhausted(job, 'stall', clock=clock):
+        logger.info(f'Job {job.id}: results stream for unit {unit_id} stalled, deferring adoption for retry on next heartbeat')
+        shutil.rmtree(private_data_dir, ignore_errors=True)
+        return False
+
+    if stream_cut_off:
+        # Cut off from the execution node for the whole budget: there is no unit status to
+        # finalize from, and the same wait already fails a unit that cannot be queried.
+        logger.error(f'Job {job.id}: no route to {job.execution_node} for >{settings.HADR_JOB_ADOPTION_TIMEOUT}s, failing')
+        try:
+            work.cancel(unit_id)
+        except Exception as exc:
+            logger.warning(f'Failed to cancel work unit {unit_id} while timing out job {job.id}: {exc}')
+        reaper.reap_job(
+            job, 'failed', job_explanation='Job exceeded HADR_JOB_ADOPTION_TIMEOUT: the execution node was unreachable (no route from the controller)'
+        )
+        shutil.rmtree(private_data_dir, ignore_errors=True)
+        return True
+
+    # Budget spent. The work unit status is the only truthful source left: the
+    # truncated stream reads as an error, which would record a job that actually
+    # succeeded as failed and then release the unit holding the proof.
+    logger.error(
+        f'Job {job.id}: results stream for unit {unit_id} never recovered within '
+        f'HADR_JOB_ADOPTION_TIMEOUT, finalizing from work unit status without full output'
+    )
+    callback.delay_update(job_explanation='Job output could not be retrieved from the execution node; final status was taken from the receptor work unit.')
+    return None
 
 
 def reattach_to_work_unit(job, work, clock=None, owner_task_id=None, unit_status=None, pod_name=None):
@@ -1821,15 +1912,9 @@ def reattach_to_work_unit(job, work, clock=None, owner_task_id=None, unit_status
     # job row marked. The stream below still runs: it is what carries the events the EE
     # already produced, and it is how the cancel's own last events arrive.
     if job.cancel_flag:
-        logger.info(f'Job {job.id}: canceled while orphaned, canceling work unit {unit_id} before streaming it out')
-        try:
-            work.cancel(unit_id)
-        except Exception as exc:
-            # The status is committed as canceled either way. Leaving the job running
-            # because receptor refused the command would hide the cancel entirely, and the
-            # unit is not leaked: awx_receptor_workunit_reaper releases units for any job
-            # outside ACTIVE_STATES.
-            logger.warning(f'Could not cancel work unit {unit_id} for canceled job {job.id}: {exc}')
+        if _cancel_unit_of_orphaned_cancel(job, work, unit_id, state_name):
+            logger.info(f'Job {job.id}: work unit {unit_id} refused the cancel, retrying on the next heartbeat')
+            return False
 
     # Pending and Running are streamed, not deferred. get_work_results blocks until the unit
     # produces output, which is exactly what _run_internal does the moment it submits work —
@@ -1881,39 +1966,9 @@ def reattach_to_work_unit(job, work, clock=None, owner_task_id=None, unit_status
         return False
 
     if receptor_job.stream_stalled:
-        # The unit finished and the execution node still holds the output; only the
-        # transport between here and there is down. Deferring keeps the job 'running'
-        # with its unit intact and the heartbeat re-queues it, so a later attempt can
-        # stream the full event set rather than finalizing on a truncated one. Bounded
-        # by HADR_JOB_ADOPTION_TIMEOUT from the first stall so a path that never recovers
-        # still converges.
-        if not _adoption_stall_budget_exhausted(job, 'stall', clock=clock):
-            logger.info(f'Job {job.id}: results stream for unit {unit_id} stalled, deferring adoption for retry on next heartbeat')
-            shutil.rmtree(private_data_dir, ignore_errors=True)
-            return False
-
-        if receptor_job.stream_cut_off:
-            # Cut off from the execution node for the whole budget: there is no unit status to
-            # finalize from, and the same wait already fails a unit that cannot be queried.
-            logger.error(f'Job {job.id}: no route to {job.execution_node} for >{settings.HADR_JOB_ADOPTION_TIMEOUT}s, failing')
-            try:
-                work.cancel(unit_id)
-            except Exception as exc:
-                logger.warning(f'Failed to cancel work unit {unit_id} while timing out job {job.id}: {exc}')
-            reaper.reap_job(
-                job, 'failed', job_explanation='Job exceeded HADR_JOB_ADOPTION_TIMEOUT: the execution node was unreachable (no route from the controller)'
-            )
-            shutil.rmtree(private_data_dir, ignore_errors=True)
-            return True
-
-        # Budget spent. The work unit status is the only truthful source left: the
-        # truncated stream reads as an error, which would record a job that actually
-        # succeeded as failed and then release the unit holding the proof.
-        logger.error(
-            f'Job {job.id}: results stream for unit {unit_id} never recovered within '
-            f'HADR_JOB_ADOPTION_TIMEOUT, finalizing from work unit status without full output'
-        )
-        callback.delay_update(job_explanation='Job output could not be retrieved from the execution node; final status was taken from the receptor work unit.')
+        outcome = _resolve_stalled_stream(job, work, unit_id, callback, clock, private_data_dir, receptor_job.stream_cut_off)
+        if outcome is not None:
+            return outcome
         res = None
         process_phase_failed = True
 
@@ -1936,6 +1991,16 @@ def reattach_to_work_unit(job, work, clock=None, owner_task_id=None, unit_status
         logger.warning(f'Job {job.id} was claimed by task {exc.current_task_id} during adoption; not finalizing or releasing unit {unit_id}')
         release_work = False
         finalized = True
+    except Exception:
+        # Terminal status was not saved, so the unit still holds the only copy of the output.
+        # Keep it and retry on the next heartbeat, bounded like every other adoption wait.
+        logger.exception(f'Job {job.id}: finalizing adopted job failed (unit={unit_id})')
+        if _adoption_stall_budget_exhausted(job, 'finalize', clock=clock):
+            reaper.reap_job(job, 'failed', job_explanation='Job could not be finalized within HADR_JOB_ADOPTION_TIMEOUT after adoption')
+            finalized = True
+        else:
+            release_work = False
+            finalized = False
     finally:
         # Release work unit based on finalization result:
         # - finalized=True: adoption succeeded, release unit

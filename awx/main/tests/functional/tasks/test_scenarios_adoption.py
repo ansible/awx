@@ -41,12 +41,10 @@ def save_events(job, counters, created=None):
         JobEvent.objects.filter(job=job).update(created=created)
 
 
-@pytest.mark.xfail(strict=True, reason='AAP-96828: an error while finalizing a resumed job releases its unit and strands the job')
 @pytest.mark.django_db
 def test_finalize_error_is_retried_on_the_next_adoption(orphan):
-    # 3.5 Finalize strand. The first adoption streams the whole unit, then finalization
-    # raises. Today the unit is released anyway, so the next adoption finds nothing and the
-    # job stays running until the adoption timeout fails it.
+    # 3.5 Finalize strand (AAP-96828). The first adoption streams the whole unit, then
+    # finalization raises. The unit is kept, so the next adoption can stream it and finish.
     work = FakeReceptorWork({UNIT: FakeWorkUnit(make_events(10))})
     real_finalize = jobs._finalize_job_run
     attempts = []
@@ -63,6 +61,27 @@ def test_finalize_error_is_retried_on_the_next_adoption(orphan):
 
     orphan.refresh_from_db()
     assert orphan.status == 'successful'
+
+
+@pytest.mark.django_db
+def test_finalize_that_never_succeeds_is_bounded_and_fails_the_job(orphan):
+    # A finalize that raises on every heartbeat must not keep the job running forever: the
+    # unit is kept while there is budget, then the job fails and the unit is released.
+    work = FakeReceptorWork({UNIT: FakeWorkUnit(make_events(10))})
+    clock = FakeClock()
+
+    with mock.patch('awx.main.tasks.jobs._finalize_job_run', side_effect=DatabaseError('connection lost during finalize')):
+        adopt_job(orphan.id, open_work=lambda: work, clock=clock)
+        orphan.refresh_from_db()
+        assert orphan.status == 'running'
+        assert UNIT in work.units, 'the unit is kept while the budget lasts'
+
+        clock.advance(TIMEOUT + 1)
+        adopt_job(orphan.id, open_work=lambda: work, clock=clock)
+
+    orphan.refresh_from_db()
+    assert orphan.status == 'failed'
+    assert UNIT not in work.units
 
 
 @pytest.mark.django_db

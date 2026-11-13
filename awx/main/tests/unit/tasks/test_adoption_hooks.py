@@ -4,7 +4,8 @@ Tests the conditions, artifact validation, and type checking without
 requiring database or EE integration.
 """
 
-from unittest.mock import Mock
+import os
+from unittest.mock import Mock, patch
 
 from awx.main.exceptions import PostRunError
 from awx.main.models.jobs import Job
@@ -98,8 +99,6 @@ def test_inventory_update_validates_output_json_exists(tmp_path):
 
 def test_inventory_update_validates_output_json_readable(tmp_path):
     """Verify output.json is readable."""
-    import os
-
     job = _make_mock_job(InventoryUpdate)
 
     # Create artifacts directory with output.json
@@ -108,16 +107,12 @@ def test_inventory_update_validates_output_json_readable(tmp_path):
     output_file = artifacts_dir / 'output.json'
     output_file.write_text('{}')
 
-    # Make it unreadable
-    os.chmod(str(output_file), 0o000)
-
-    try:
+    # Not a chmod: root and CAP_DAC_OVERRIDE read a 0o000 file, so the test would depend on who runs it
+    real_access = os.access
+    with patch('awx.main.tasks.adoption.os.access', side_effect=lambda path, mode: False if str(path) == str(output_file) else real_access(path, mode)):
         valid, error = _validate_adoption_artifacts(job, str(tmp_path))
-        assert valid is False
-        assert 'not readable' in error
-    finally:
-        # Restore permissions for cleanup
-        os.chmod(str(output_file), 0o644)
+    assert valid is False
+    assert 'not readable' in error
 
 
 def test_inventory_update_accepts_valid_artifacts(tmp_path):

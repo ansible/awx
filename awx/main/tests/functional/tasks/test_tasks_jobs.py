@@ -271,12 +271,21 @@ def test_run_does_not_reset_to_pending_when_receptor_dies_during_submit(jt_linke
 
 
 @pytest.mark.django_db
-def test_run_errors_local_system_job_that_loses_redis_at_shutdown(mocker):
+def test_run_errors_local_system_job_that_loses_redis_at_shutdown(execution_environment, mocker):
     """A system job runs ansible-runner inside the controller pod, so it may have done work by the
     time redis (a pod container) goes away; only receptor jobs that never reached an EE are safe to re-dispatch."""
-    job = SystemJob.objects.create(job_type='cleanup_jobs', status='running', controller_node='controller-a')
-    mocker.patch('awx.main.tasks.jobs.signal_callback', return_value=True)
-    mocker.patch('awx.main.tasks.jobs.ansible_runner.interface.run', side_effect=ConnectionError('Error 2 connecting to /var/run/redis/redis.sock.'))
+    job = SystemJob.objects.create(job_type='cleanup_jobs', status='running', controller_node='controller-a', execution_environment=execution_environment)
+    # The shutdown signal arrives while the runner is going down, not before the run starts:
+    # a signal that is already set makes the pre-run guard requeue the job before the runner is called.
+    shutdown = {'signalled': False}
+
+    def runner_loses_redis(*args, **kwargs):
+        shutdown['signalled'] = True
+        raise ConnectionError('Error 2 connecting to /var/run/redis/redis.sock.')
+
+    mocker.patch('awx.main.tasks.jobs.signal_callback', side_effect=lambda: shutdown['signalled'])
+    mocker.patch('awx.main.tasks.jobs.create_partition')  # needs PostgreSQL
+    runner = mocker.patch('awx.main.tasks.jobs.ansible_runner.interface.run', side_effect=runner_loses_redis)
     mock_finalize = mocker.patch('awx.main.tasks.jobs._finalize_job_run')
     mocker.patch.object(RunSystemJob, 'post_run_hook')
 
@@ -285,6 +294,7 @@ def test_run_errors_local_system_job_that_loses_redis_at_shutdown(mocker):
     except Exception:
         pass  # a finalized error re-raises TaskError
 
+    runner.assert_called_once()
     job.refresh_from_db()
     assert job.status != 'pending'
     mock_finalize.assert_called_once()

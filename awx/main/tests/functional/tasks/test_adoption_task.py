@@ -412,4 +412,5 @@ def test_task_streams_from_this_controllers_receptor(me_inst, kwargs):
 
     assert adopt.call_args.args == (job.id,)
     assert adopt.call_args.kwargs['owner_task_id'] == kwargs.get('owner_task_id')
-    assert isinstance(work, ReceptorWork) and work.receptor_ctl is ctl
+    assert isinstance(work, ReceptorWork)
+    assert work.receptor_ctl is ctl
