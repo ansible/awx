@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 
 from awx.api.versioning import reverse
 
-from awx.main.models import InventorySource, Inventory, ActivityStream, Organization, Host
+from awx.main.models import InventorySource, Inventory, ActivityStream, Organization, Host, Job
 from awx.main.utils.inventory_vars import update_group_variables
 
 from django.db import connection
@@ -202,6 +202,14 @@ def test_async_inventory_deletion(delete, get, inventory, alice):
     resp = get(reverse('api:inventory_detail', kwargs={'pk': inventory.id}), alice)
     assert resp.status_code == 200
     assert resp.data.get('pending_deletion') is True
+
+
+@pytest.mark.django_db
+def test_inventory_with_a_running_job_cannot_be_deleted(delete, inventory, admin_user):
+    """A running job still needs its inventory, whether or not the job's controller is alive."""
+    Job.objects.create(inventory=inventory, status='running', controller_node='ctrl-1', execution_node='receptor-1')
+
+    delete(reverse('api:inventory_detail', kwargs={'pk': inventory.pk}), admin_user, expect=409)
 
 
 @pytest.mark.django_db
