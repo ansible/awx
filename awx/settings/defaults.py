@@ -350,7 +350,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_extensions',
     'polymorphic',
-    'django_guid',
     'corsheaders',
     'awx.conf',
     'awx.main',
@@ -780,7 +779,6 @@ LOGGING = {
             'address': '/var/run/awx-rsyslog/rsyslog.sock',
             'filters': ['external_log_enabled', 'dynamic_level_filter', 'guid'],
         },
-        'otel': {'class': 'logging.NullHandler'},
     },
     'loggers': {
         'django': {'handlers': ['console']},
@@ -903,11 +901,24 @@ RECEPTOR_KEEP_WORK_ON_ERROR = False
 # K8S only. Use receptor_log_level on AWX spec to set this properly
 RECEPTOR_LOG_LEVEL = 'info'
 
+# OpenTelemetry tracing and logs through django-ansible-base's observability app (opt-in).
+# Set ANSIBLE_OBSERVABILITY_OTLP_ENDPOINT (an OTLP gRPC endpoint, e.g. 'http://collector:4317') to enable it:
+# 'ansible_base.observability' is then added to INSTALLED_APPS (awx/settings/functions.py:merge_observability) and
+# every Django process traces its requests, database queries and outgoing HTTP calls, and exports its log records
+# carrying their trace and span ids.
+ANSIBLE_OBSERVABILITY_OTLP_ENDPOINT = None
+# None: named after the process, e.g. 'controller-uwsgi', 'controller-daphne', 'controller-dispatcher' (functions.py:observability_service_name)
+ANSIBLE_OBSERVABILITY_SERVICE_NAME = None
+
 MIDDLEWARE = [
-    'django_guid.middleware.guid_middleware',
+    # X-API-Request-Id <-> X-Request-ID, then X-Request-ID (ansible_base.lib.logging.context.trace_id_var, the `guid` of
+    # every log record) and X-API-Total-Time from django-ansible-base, with AWX_REQUEST_PROFILE and the performance log
+    # wrapped around them
+    'awx.main.middleware.RequestIdHeaderMiddleware',
+    'awx.main.middleware.TimingMiddleware',
+    'ansible_base.lib.middleware.observability.ObservabilityMiddleware',
     'ansible_base.lib.middleware.logging.log_request.LogTracebackMiddleware',
     'awx.main.middleware.SettingsCacheMiddleware',
-    'awx.main.middleware.TimingMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'awx.main.middleware.MigrationRanCheckMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -951,8 +962,6 @@ BROADCAST_WEBSOCKET_STATS_POLL_RATE_SECONDS = 5
 
 # How often should web instances advertise themselves?
 BROADCAST_WEBSOCKET_BEACON_FROM_WEB_RATE_SECONDS = 15
-
-DJANGO_GUID = {'GUID_HEADER_NAME': 'X-API-Request-Id'}
 
 # Name of the default task queue
 DEFAULT_EXECUTION_QUEUE_NAME = 'default'
