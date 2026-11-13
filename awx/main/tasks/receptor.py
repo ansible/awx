@@ -203,7 +203,7 @@ def _get_receptor_node_stanza(config_data=None):
 
 def get_receptor_data_dir(config_data=None):
     """Return the receptor data directory (``node.datadir``, default ``/tmp/receptor``)."""
-    return _get_receptor_node_stanza(config_data).get('datadir', '/tmp/receptor')  # NOSONAR: receptor's own default; mirrors the daemon, not a path we create
+    return _get_receptor_node_stanza(config_data).get('datadir', '/tmp/receptor')  # NOSONAR
 
 
 def get_receptor_node_id(config_data=None):
@@ -1874,6 +1874,26 @@ def _resolve_stalled_stream(job, work, unit_id, callback, clock, private_data_di
     return None
 
 
+def _finalize_or_defer(job, callback, res, process_phase_failed, work, unit_id, private_data_dir, pod_name, clock, owner_task_id):
+    """Finalize the adopted job. Returns (finalized, release_work); finalized=False defers to the next heartbeat."""
+    try:
+        return _finalize_adoption_result(
+            job, callback, res, process_phase_failed, work, unit_id, private_data_dir, pod_name=pod_name, clock=clock, owner_task_id=owner_task_id
+        ), True
+    except NotOwner as exc:
+        # A later claim took the job over; its final status and work unit are that task's.
+        logger.warning(f'Job {job.id} was claimed by task {exc.current_task_id} during adoption; not finalizing or releasing unit {unit_id}')
+        return True, False
+    except Exception:
+        # Terminal status was not saved, so the unit still holds the only copy of the output.
+        # Keep it and retry on the next heartbeat, bounded like every other adoption wait.
+        logger.exception(f'Job {job.id}: finalizing adopted job failed (unit={unit_id})')
+        if _adoption_stall_budget_exhausted(job, 'finalize', clock=clock):
+            reaper.reap_job(job, 'failed', job_explanation='Job could not be finalized within HADR_JOB_ADOPTION_TIMEOUT after adoption')
+            return True, True
+        return False, False
+
+
 def reattach_to_work_unit(job, work, clock=None, owner_task_id=None, unit_status=None, pod_name=None):
     """Reconnect to a receptor work unit and stream events in real-time until it completes.
 
@@ -1980,27 +2000,11 @@ def reattach_to_work_unit(job, work, clock=None, owner_task_id=None, unit_status
     # the job is already set to 'pending' — don't finalize, let the next dispatch handle it.
     # _finalize_adoption_result returns False when adoption is deferred (unit still running) —
     # in that case, do NOT release the work unit.
-    finalized = None
-    release_work = True
+    finalized, release_work = None, True
     try:
-        finalized = _finalize_adoption_result(
+        finalized, release_work = _finalize_or_defer(
             job, callback, res, process_phase_failed, work, unit_id, private_data_dir, pod_name=pod_name, clock=clock, owner_task_id=owner_task_id
         )
-    except NotOwner as exc:
-        # A later claim took the job over; its final status and work unit are that task's.
-        logger.warning(f'Job {job.id} was claimed by task {exc.current_task_id} during adoption; not finalizing or releasing unit {unit_id}')
-        release_work = False
-        finalized = True
-    except Exception:
-        # Terminal status was not saved, so the unit still holds the only copy of the output.
-        # Keep it and retry on the next heartbeat, bounded like every other adoption wait.
-        logger.exception(f'Job {job.id}: finalizing adopted job failed (unit={unit_id})')
-        if _adoption_stall_budget_exhausted(job, 'finalize', clock=clock):
-            reaper.reap_job(job, 'failed', job_explanation='Job could not be finalized within HADR_JOB_ADOPTION_TIMEOUT after adoption')
-            finalized = True
-        else:
-            release_work = False
-            finalized = False
     finally:
         # Release work unit based on finalization result:
         # - finalized=True: adoption succeeded, release unit
