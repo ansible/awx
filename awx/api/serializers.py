@@ -27,6 +27,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError as Django
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import force_str
+from django.utils.functional import SimpleLazyObject
 from django.utils.text import capfirst
 from django.utils.timezone import now
 from django.core.validators import RegexValidator, MaxLengthValidator
@@ -52,7 +53,7 @@ from ansible_base.rbac import permission_registry
 
 # AWX
 from awx.api.validation_patterns import inject_patterns_into_field_list
-from awx.main.access import get_user_capabilities
+from awx.main.access import get_user_capabilities, PagePermissionSnapshot, prefetch_page_permissions
 from awx.main.constants import ACTIVE_STATES, org_role_to_permission
 from awx.main.models import (
     ActivityStream,
@@ -114,7 +115,6 @@ from awx.main.utils import (
     has_model_field_prefetched,
     extract_ansible_vars,
     encrypt_dict,
-    prefetch_page_capabilities,
     truncate_stdout,
     get_licenser,
 )
@@ -451,6 +451,8 @@ class BaseSerializerMetaclass(serializers.SerializerMetaclass):
 
 
 class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetaclass):
+    show_capabilities = ()
+
     class Meta:
         fields = ('id', 'type', 'url', 'related', 'summary_fields', 'created', 'modified', 'name', 'description')
         summary_fields = ()
@@ -601,7 +603,7 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
             summary_fields['object_roles'] = roles
 
         # Advance display of RBAC capabilities
-        if hasattr(self, 'show_capabilities'):
+        if self.show_capabilities:
             user_capabilities = self._obj_capability_dict(obj)
             if user_capabilities:
                 summary_fields['user_capabilities'] = user_capabilities
@@ -609,36 +611,28 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
         return summary_fields
 
     def _obj_capability_dict(self, obj):
+        """Return the requested user_capabilities for an item.
+
+        List items share a permission snapshot owned by their ListSerializer.
+        An access check that needs object grants triggers the lazy page lookup.
         """
-        Returns the user_capabilities dictionary for a single item
-        If inside of a list view, it runs the prefetching algorithm for
-        the entire current page, saves it into context
-        """
-        view = self.context.get('view', None)
-        parent_obj = None
-        if view and hasattr(view, 'parent_model') and hasattr(view, 'get_parent_object'):
-            parent_obj = view.get_parent_object()
-        if view and view.request and view.request.user:
-            capabilities_cache = {}
-            # if serializer has parent, it is ListView, apply page capabilities prefetch
-            if self.parent and hasattr(self, 'capabilities_prefetch') and self.capabilities_prefetch:
-                qs = self.parent.instance
-                if 'capability_map' not in self.context:
-                    if hasattr(self, 'polymorphic_base'):
-                        model = self.polymorphic_base.Meta.model
-                        prefetch_list = self.polymorphic_base.capabilities_prefetch
-                    else:
-                        model = self.Meta.model
-                        prefetch_list = self.capabilities_prefetch
-                    self.context['capability_map'] = prefetch_page_capabilities(model, qs, prefetch_list, view.request.user)
-                if obj.id in self.context['capability_map']:
-                    capabilities_cache = self.context['capability_map'][obj.id]
-            return get_user_capabilities(
-                view.request.user, obj, method_list=self.show_capabilities, parent_obj=parent_obj, capabilities_cache=capabilities_cache
-            )
-        else:
-            # Contextual information to produce user_capabilities doesn't exist
+        if not self.show_capabilities:
             return {}
+        view = self.context.get('view')
+        if not view or not view.request or not view.request.user:
+            return {}
+        parent_obj = None
+        if hasattr(view, 'parent_model') and hasattr(view, 'get_parent_object'):
+            parent_obj = view.get_parent_object()
+        user = view.request.user
+        prefetched_permissions = None
+        if isinstance(self.parent, serializers.ListSerializer):
+            prefetched_permissions = getattr(self.parent, '_prefetched_page_permissions', None)
+            if prefetched_permissions is None or prefetched_permissions.actor is not user:
+                page = self.parent.instance
+                prefetched_permissions = PagePermissionSnapshot(user, SimpleLazyObject(lambda: prefetch_page_permissions(page, user).grants))
+                self.parent._prefetched_page_permissions = prefetched_permissions
+        return get_user_capabilities(user, obj, method_list=self.show_capabilities, parent_obj=parent_obj, prefetched_permissions=prefetched_permissions)
 
     def get_created(self, obj):
         if obj is None:
@@ -920,10 +914,6 @@ class OpaQueryPathMixin(serializers.Serializer):
 
 
 class UnifiedJobTemplateSerializer(BaseSerializer, OpaQueryPathMixin):
-    # As a base serializer, the capabilities prefetch is not used directly,
-    # instead they are derived from the Workflow Job Template Serializer and the Job Template Serializer, respectively.
-    capabilities_prefetch = []
-
     class Meta:
         model = UnifiedJobTemplate
         fields = ('*', 'last_job_run', 'last_job_failed', 'next_job_run', 'status', 'execution_environment')
@@ -967,15 +957,11 @@ class UnifiedJobTemplateSerializer(BaseSerializer, OpaQueryPathMixin):
         serializer_class = self.get_sub_serializer(obj)
         if serializer_class:
             serializer = serializer_class(instance=obj, context=self.context)
-            # preserve links for list view
+            # Manually constructed polymorphic children need the list parent
+            # to share its page and permission batches. Keep this in sync with
+            # UnifiedJobSerializer and UnifiedJobListSerializer.
             if self.parent:
                 serializer.parent = self.parent
-                serializer.polymorphic_base = self
-                # capabilities prefetch is only valid for these models
-                if isinstance(obj, (JobTemplate, WorkflowJobTemplate)):
-                    serializer.capabilities_prefetch = serializer_class.capabilities_prefetch
-                else:
-                    serializer.capabilities_prefetch = None
             return serializer.to_representation(obj)
         else:
             return super(UnifiedJobTemplateSerializer, self).to_representation(obj)
@@ -1107,11 +1093,11 @@ class UnifiedJobSerializer(BaseSerializer):
         serializer_class = self.get_sub_serializer(obj)
         if serializer_class:
             serializer = serializer_class(instance=obj, context=self.context)
-            # preserve links for list view
+            # Manually constructed polymorphic children need the list parent
+            # to share its page and permission batches. Keep this in sync with
+            # UnifiedJobTemplateSerializer and UnifiedJobListSerializer.
             if self.parent:
                 serializer.parent = self.parent
-                serializer.polymorphic_base = self
-                # TODO: restrict models for capabilities prefetch, when it is added
             ret = serializer.to_representation(obj)
         else:
             ret = super(UnifiedJobSerializer, self).to_representation(obj)
@@ -1183,6 +1169,11 @@ class UnifiedJobListSerializer(UnifiedJobSerializer):
         serializer_class = self.get_sub_serializer(obj)
         if serializer_class:
             serializer = serializer_class(instance=obj, context=self.context)
+            # Manually constructed polymorphic children need the list parent
+            # to share its page and permission batches. Keep this in sync with
+            # UnifiedJobTemplateSerializer and UnifiedJobSerializer.
+            if self.parent:
+                serializer.parent = self.parent
             ret = serializer.to_representation(obj)
         else:
             ret = super(UnifiedJobListSerializer, self).to_representation(obj)
@@ -1538,7 +1529,6 @@ class ProjectSerializer(CleanTextMixin, UnifiedJobTemplateSerializer, ProjectOpt
     last_update_failed = serializers.BooleanField(read_only=True)
     last_updated = serializers.DateTimeField(read_only=True)
     show_capabilities = ['start', 'schedule', 'edit', 'delete', 'copy']
-    capabilities_prefetch = [{'edit': 'change'}, {'start': 'update'}, {'copy': 'organization.add_project'}]
 
     class Meta:
         model = Project
@@ -1737,7 +1727,6 @@ class LabelsListMixin(object):
 
 class InventorySerializer(CleanTextMixin, LabelsListMixin, BaseSerializerWithVariables, OpaQueryPathMixin):
     show_capabilities = ['edit', 'delete', 'adhoc', 'copy']
-    capabilities_prefetch = [{'edit': 'change'}, {'adhoc': 'adhoc'}, {'copy': 'organization.add_inventory'}]
 
     # variables is raw YAML/JSON that legitimately contains Jinja2 syntax,
     # same conflict class as extra_vars.
@@ -1985,7 +1974,6 @@ class InventoryScriptSerializer(InventorySerializer):
 
 class HostSerializer(CleanTextMixin, BaseSerializerWithVariables):
     show_capabilities = ['edit', 'delete']
-    capabilities_prefetch = [{'edit': 'inventory.change'}]
 
     # variables is raw YAML/JSON that legitimately contains Jinja2 syntax.
     excluded_fields = frozenset({'variables'})
@@ -2180,7 +2168,6 @@ class AnsibleFactsSerializer(BaseSerializer):
 
 class GroupSerializer(CleanTextMixin, BaseSerializerWithVariables):
     show_capabilities = ['copy', 'edit', 'delete']
-    capabilities_prefetch = [{'edit': 'inventory.change'}, {'adhoc': 'inventory.adhoc'}]
 
     # variables is raw YAML/JSON that legitimately contains Jinja2 syntax.
     excluded_fields = frozenset({'variables'})
@@ -2591,7 +2578,6 @@ class InventorySourceSerializer(DeprecationSerializerMixin, CleanTextMixin, Unif
     last_update_failed = serializers.BooleanField(read_only=True)
     last_updated = serializers.DateTimeField(read_only=True)
     show_capabilities = ['start', 'schedule', 'edit', 'delete']
-    capabilities_prefetch = [{'edit': 'inventory.change'}, {'start': 'inventory.update'}]
 
     # source_vars is raw YAML/JSON that legitimately contains Jinja2 syntax.
     excluded_fields = frozenset({'source_vars'})
@@ -3236,7 +3222,6 @@ class CredentialTypeSerializer(CleanTextMixin, BaseSerializer):
 
 class CredentialSerializer(CleanTextMixin, BaseSerializer):
     show_capabilities = ['edit', 'delete', 'copy', 'use']
-    capabilities_prefetch = [{'edit': 'change'}, {'use': 'use'}]
     managed = serializers.ReadOnlyField()
 
     # inputs is a JSONField whose schema is credential-type-dependent, including
@@ -3595,7 +3580,6 @@ class JobTemplateMixin(object):
 
 class JobTemplateSerializer(CleanTextMixin, JobTemplateMixin, UnifiedJobTemplateSerializer, JobOptionsSerializer):
     show_capabilities = ['start', 'schedule', 'copy', 'edit', 'delete']
-    capabilities_prefetch = [{'edit': 'change'}, {'start': 'execute'}, {'copy': ['project.use', 'inventory.use']}]
 
     # extra_vars is raw YAML/JSON that legitimately contains Jinja2 syntax
     # ("{{ var }}"), which Tier 2's injection blocklist would reject.
@@ -4099,7 +4083,6 @@ class SystemJobCancelSerializer(SystemJobSerializer):
 
 class WorkflowJobTemplateSerializer(PromptFieldCleanTextMixin, JobTemplateMixin, LabelsListMixin, UnifiedJobTemplateSerializer):
     show_capabilities = ['start', 'schedule', 'edit', 'copy', 'delete']
-    capabilities_prefetch = [{'edit': 'change'}, {'start': 'execute'}, {'copy': 'organization.add_workflowjobtemplate'}]
 
     # extra_vars is raw YAML/JSON that legitimately contains Jinja2 syntax.
     excluded_fields = frozenset({'extra_vars'})
@@ -5471,7 +5454,6 @@ class BulkJobLaunchSerializer(PromptFieldCleanTextMixin, serializers.Serializer)
 
 class NotificationTemplateSerializer(CleanTextMixin, BaseSerializer):
     show_capabilities = ['edit', 'delete', 'copy']
-    capabilities_prefetch = [{'copy': 'organization.add_notificationtemplate'}]
 
     # messages is user-authored Jinja2 template text ("{{ job.id }}" etc.),
     # already validated by its own sandboxed Jinja renderer in

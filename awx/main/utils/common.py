@@ -29,7 +29,6 @@ from django.db import connection, DatabaseError, transaction, ProgrammingError, 
 from django.db.models.fields.related import ForeignObjectRel, ManyToManyField
 from django.db.models.fields.related_descriptors import ForwardManyToOneDescriptor, ManyToManyDescriptor
 from django.db.models.query import QuerySet
-from django.db.models import Q
 from django.db import connection as django_connection
 from django.core.cache import cache as django_cache
 
@@ -60,7 +59,6 @@ __all__ = [
     'get_model_for_type',
     'copy_model_by_class',
     'copy_m2m_relationships',
-    'prefetch_page_capabilities',
     'datetime_hook',
     'ignore_inventory_computed_fields',
     'ignore_inventory_group_removal',
@@ -582,77 +580,6 @@ def get_capacity_type(uj):
     elif model_name in ('projectupdate', 'systemjob', 'project', 'systemjobtemplate'):
         return 'control'
     raise RuntimeError(f'Capacity type does not apply to {model_name} model')
-
-
-def prefetch_page_capabilities(model, page, prefetch_list, user):
-    """
-    Given a `page` list of objects, a nested dictionary of user_capabilities
-    are returned by id, ex.
-    {
-        4: {'edit': True, 'start': True},
-        6: {'edit': False, 'start': False}
-    }
-    Each capability is produced for all items in the page in a single query.
-
-    Examples of prefetch language (permission-based):
-    prefetch_list = [{'edit': 'change'}, {'start': 'execute'}]
-      --> prefetch change (edit) and execute (start) permissions for
-          items in list for current user
-    prefetch_list = [{'edit': 'inventory.change'}]
-      --> prefetch related inventory FK change permissions for current user,
-          and put it into the object's cache
-    prefetch_list = [{'copy': ['inventory.use', 'project.use']}]
-      --> prefetch logical combination of use permission to inventory AND
-          project, put into cache dictionary as 'copy'
-    """
-    page_ids = [obj.id for obj in page]
-    mapping = {}
-    for obj in page:
-        mapping[obj.id] = {}
-
-    for prefetch_entry in prefetch_list:
-        display_method = None
-        if type(prefetch_entry) is dict:
-            display_method = list(prefetch_entry.keys())[0]
-            paths = prefetch_entry[display_method]
-        else:
-            paths = prefetch_entry
-
-        if type(paths) is not list:
-            paths = [paths]
-
-        # Build the query for access_qs according the user & permission(s)
-        filter_args = []
-        for perm_path in paths:
-            if '.' in perm_path:
-                res_path = '__'.join(perm_path.split('.')[:-1])
-                action = perm_path.split('.')[-1]
-                parent_model = model
-                for subpath in perm_path.split('.')[:-1]:
-                    parent_model = parent_model._meta.get_field(subpath).related_model
-                access_qs = parent_model.access_qs(user, action)
-                filter_args.append(Q(Q(**{'%s__in' % res_path: access_qs}) | Q(**{'%s__isnull' % res_path: True})))
-            else:
-                action = perm_path
-                if hasattr(model, 'access_qs'):
-                    filter_args.append(Q(**{'pk__in': model.access_qs(user, action)}))
-                else:
-                    # UnifiedJobTemplate is not registered with the permission registry,
-                    # so it only has access_ids_qs (not access_qs)
-                    filter_args.append(Q(**{'pk__in': model.access_ids_qs(user, action)}))
-
-        if display_method is None:
-            display_method = action
-
-        # Union that query with the list of items on page
-        filter_args.append(Q(pk__in=page_ids))
-        ids_with_role = set(model.objects.filter(*filter_args).values_list('pk', flat=True))
-
-        # Save data item-by-item
-        for obj in page:
-            mapping[obj.pk][display_method] = bool(obj.pk in ids_with_role)
-
-    return mapping
 
 
 def validate_vars_type(vars_obj):

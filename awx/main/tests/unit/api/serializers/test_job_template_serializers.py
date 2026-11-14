@@ -88,8 +88,7 @@ class TestJobTemplateSerializerGetSummaryFields:
         assert 'survey' not in summary
 
     def test_copy_edit_standard(self, mocker, job_template_factory):
-        """Verify that the exact output of the access.py methods
-        are put into the serializer user_capabilities"""
+        """Edit uses its access check; copy defers related policies to the request."""
 
         jt_obj = job_template_factory('testJT', project='proj1', persisted=False).job_template
         jt_obj.admin_role = Role(id=9, role_field='admin_role')
@@ -109,11 +108,12 @@ class TestJobTemplateSerializerGetSummaryFields:
 
         mocker.patch("awx.api.serializers.role_summary_fields_generator", return_value='Can eat pie')
         mocker.patch("awx.main.access.JobTemplateAccess.can_change", return_value='foobar')
-        mocker.patch("awx.main.access.JobTemplateAccess.can_copy", return_value='foo')
+        can_add = mocker.patch("awx.main.access.JobTemplateAccess.can_add")
         response = serializer.get_summary_fields(jt_obj)
 
-        assert response['user_capabilities']['copy'] == 'foo'
+        assert response['user_capabilities']['copy'] is True
         assert response['user_capabilities']['edit'] == 'foobar'
+        can_add.assert_not_called()
 
 
 class TestJobTemplateSerializerValidation(object):
