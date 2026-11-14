@@ -1,6 +1,7 @@
 import subprocess
 import base64
 import json
+import logging
 from collections import namedtuple
 
 from unittest import mock  # noqa
@@ -313,7 +314,9 @@ def test_pod_definition_awx_task_env_replaces_value_from(containerized_job, defa
     settings.AWX_TASK_ENV = {'HTTP_PROXY': 'http://global-proxy:3128'}
     settings.AWX_RUNNER_KEEPALIVE_SECONDS = 0
 
-    with caplog.at_level('WARNING', logger='awx.main.tasks.receptor'):
+    logger = logging.getLogger('awx.main.tasks.receptor')
+    # The task logger intentionally does not propagate to pytest's root handler.
+    with caplog.at_level('WARNING', logger=logger.name), mock.patch.object(logger, 'handlers', [*logger.handlers, caplog.handler]):
         env_list = _receptor_job_for_containerized(containerized_job).pod_definition['spec']['containers'][0]['env']
     proxy_entry = next(item for item in env_list if item['name'] == 'HTTP_PROXY')
     assert proxy_entry == {'name': 'HTTP_PROXY', 'value': 'http://global-proxy:3128'}
