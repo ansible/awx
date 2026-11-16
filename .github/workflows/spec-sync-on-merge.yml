@@ -161,7 +161,7 @@ jobs:
           git checkout -b "$BRANCH_NAME"
 
           # Add and commit changes
-          git add "controller.json"
+          git add "controller.yaml"
 
           if [ "${{ steps.compare.outputs.is_new_file }}" == "true" ]; then
             COMMIT_MSG="Add Controller OpenAPI spec for ${SPEC_BRANCH}"
@@ -190,7 +190,7 @@ jobs:
           **Source Branch:** \`${SPEC_BRANCH}\`
           **Spec Repo Branch:** \`${SPEC_BRANCH}\`
           **Component:** \`Controller\`
-          **Spec File:** \`controller.json\`
+          **Spec File:** \`controller.yaml\`
 
           ## Changes
           $(if [ "${{ steps.compare.outputs.is_new_file }}" == "true" ]; then echo "- 🆕 New spec file created"; else echo "- 📝 Spec file updated with latest changes"; fi)

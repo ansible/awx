@@ -138,7 +138,7 @@ clean-dist:
 clean-schema:
 	rm -rf swagger.json
 	rm -rf openapi.yaml
-	rm -rf reference-schema.json
+	rm -rf reference-schema.yaml
 
 clean-languages:
 	rm -f $(I18N_FLAG_FILE)
@@ -600,10 +600,10 @@ awx-tui:
 SCHEMA_DIFF_BASE_FOLDER ?= awx
 SCHEMA_DIFF_BASE_BRANCH ?= devel
 detect-schema-change: genschema
-	curl https://s3.amazonaws.com/awx-public-ci-files/$(SCHEMA_DIFF_BASE_FOLDER)/$(SCHEMA_DIFF_BASE_BRANCH)/schema.json -o reference-schema.json
+	curl https://s3.amazonaws.com/awx-public-ci-files/$(SCHEMA_DIFF_BASE_FOLDER)/$(SCHEMA_DIFF_BASE_BRANCH)/openapi.yaml -o reference-schema.yaml
 	# Ignore differences in whitespace with -b
 	# diff exits with 1 when files differ - capture but don't fail
-	-diff -u -b reference-schema.json openapi.yaml
+	-diff -u -b reference-schema.yaml openapi.yaml
 
 validate-openapi-schema: genschema
 	@echo "Validating OpenAPI schema from openapi.yaml..."
