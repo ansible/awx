@@ -11,7 +11,6 @@ on:
       - release_**
       - feature_**
       - stable-**
-      - AAP-86434-*
     paths:
       - 'openapi.yaml'
       - 'changelogs/fragments/**'

@@ -12,7 +12,6 @@ on:
       - release_**
       - feature_**
       - stable-**
-      - AAP-86434-*
     paths:
       - 'openapi.yaml'
       - '.github/workflows/oasdiff-breaking-changes*.yml'

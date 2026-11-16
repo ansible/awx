@@ -14,7 +14,6 @@ on:
       - release_**
       - feature_**
       - stable-**
-      - AAP-86434-*
   push:
     branches:
       - devel
