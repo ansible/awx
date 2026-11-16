@@ -45,6 +45,8 @@ from awx.main.constants import (
     CONTAINER_VOLUMES_MOUNT_TYPES,
     HOST_FACTS_FIELDS,
 )
+
+SCM_REVISION_FILE = '.scm_revision'
 from awx.main.models import (
     Instance,
     InventorySource,
@@ -892,42 +894,61 @@ class BaseTask(object):
 class SourceControlMixin(BaseTask):
     """Utility methods for tasks that run use content from source control"""
 
+    def _git_revision_matches(self, project_path, job_revision):
+        try:
+            git_repo = git.Repo(project_path)
+            return job_revision == git_repo.head.commit.hexsha
+        except (ValueError, BadGitName, git.exc.InvalidGitRepositoryError):
+            return False
+
+    def _marker_revision_matches(self, project_path, job_revision):
+        marker_path = os.path.join(project_path, SCM_REVISION_FILE)
+        try:
+            fd = os.open(marker_path, os.O_RDONLY | os.O_NOFOLLOW)
+            with os.fdopen(fd) as f:
+                local_revision = f.read(256).strip()
+            return job_revision == local_revision
+        except OSError:
+            return False
+
+    def _needs_source_update(self, project, project_path, branch_override):
+        """Determine whether a source update sync is needed for this project."""
+        if isinstance(self.instance, InventoryUpdate):
+            return True
+        if not project.scm_type:
+            return False
+        if not os.path.exists(project_path):
+            logger.debug(f'Performing fresh clone of {project.id} for unified job {self.instance.id} on this instance.')
+            return True
+        if branch_override:
+            logger.debug(f'Project not available locally, {self.instance.id} will sync with remote')
+            return True
+        if not project.scm_revision:
+            logger.debug(f'Project not available locally, {self.instance.id} will sync with remote')
+            return True
+        if project.scm_type == 'git':
+            if self._git_revision_matches(project_path, project.scm_revision):
+                logger.debug(f'Skipping project sync for {self.instance.id} because commit is locally available')
+                return False
+            logger.debug(f'Needed commit for {self.instance.id} not in local source tree, will sync with remote')
+            return True
+        if self._marker_revision_matches(project_path, project.scm_revision):
+            logger.debug(f'Skipping project sync for {self.instance.id} because revision marker matches')
+            return False
+        logger.debug(f'No revision marker for {self.instance.id}, will sync with remote')
+        return True
+
     def get_sync_needs(self, project, scm_branch=None):
         project_path = project.get_project_path(check_if_exists=False)
-        job_revision = project.scm_revision
         sync_needs = []
         source_update_tag = 'update_{}'.format(project.scm_type)
         branch_override = bool(scm_branch and scm_branch != project.scm_branch)
-        # TODO: skip syncs for inventory updates. Now, UI needs a link added so clients can link to project
-        # source_project is only a field on inventory sources.
-        if isinstance(self.instance, InventoryUpdate):
-            sync_needs.append(source_update_tag)
-        elif not project.scm_type:
-            pass  # manual projects are not synced, user has responsibility for that
-        elif not os.path.exists(project_path):
-            logger.debug(f'Performing fresh clone of {project.id} for unified job {self.instance.id} on this instance.')
-            sync_needs.append(source_update_tag)
-        elif project.scm_type == 'git' and project.scm_revision and (not branch_override):
-            try:
-                git_repo = git.Repo(project_path)
 
-                if job_revision == git_repo.head.commit.hexsha:
-                    logger.debug(f'Skipping project sync for {self.instance.id} because commit is locally available')
-                else:
-                    sync_needs.append(source_update_tag)
-            except (ValueError, BadGitName, git.exc.InvalidGitRepositoryError):
-                logger.debug(f'Needed commit for {self.instance.id} not in local source tree, will sync with remote')
-                sync_needs.append(source_update_tag)
-        else:
-            logger.debug(f'Project not available locally, {self.instance.id} will sync with remote')
+        if self._needs_source_update(project, project_path, branch_override):
             sync_needs.append(source_update_tag)
 
-        # Determine whether or not this project sync needs to populate the cache for Ansible content, roles and collections
         has_cache = os.path.exists(os.path.join(project.get_cache_path(), project.cache_id))
-        # Galaxy requirements are not supported for manual projects
-        # If a source update is scheduled, always include roles/collections because
-        # the new revision may have different requirements.
-        if project.scm_type and ((not has_cache) or branch_override or source_update_tag in sync_needs):
+        if project.scm_type and (not has_cache or branch_override or source_update_tag in sync_needs):
             sync_needs.extend(['install_roles', 'install_collections'])
 
         return sync_needs
@@ -1788,6 +1809,24 @@ class RunProjectUpdate(BaseTask):
             if self.runner_callback.playbook_new_revision:
                 instance.scm_revision = self.runner_callback.playbook_new_revision
                 instance.save(update_fields=['scm_revision'])
+                if instance.scm_type and instance.scm_type != 'git':
+                    project_path = instance.get_project_path(check_if_exists=False)
+                    if project_path:
+                        marker_path = os.path.join(project_path, SCM_REVISION_FILE)
+                        try:
+                            fd = os.open(marker_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o644)
+                            with os.fdopen(fd, 'w') as f:
+                                f.write(instance.scm_revision)
+                        except OSError:
+                            logger.warning(f'Could not write revision marker at {marker_path}')
+            elif instance.scm_type and instance.scm_type != 'git' and status != 'successful':
+                project_path = instance.get_project_path(check_if_exists=False)
+                if project_path:
+                    marker_path = os.path.join(project_path, SCM_REVISION_FILE)
+                    try:
+                        os.remove(marker_path)
+                    except FileNotFoundError:
+                        pass
 
             # Roles and collection folders copy to durable cache
             base_path = instance.get_cache_path()

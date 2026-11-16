@@ -6,6 +6,7 @@ from pathlib import Path
 
 import fcntl
 from unittest import mock
+import git
 import pytest
 import yaml
 
@@ -1925,6 +1926,356 @@ def test_sync_and_copy_get_sync_needs_called_under_shared_lock(get_sync_needs, s
 
     assert call_order[0] == 'acquire', 'lock must be acquired before get_sync_needs is called'
     assert call_order[1] == 'get_sync_needs'
+
+
+class TestGetSyncNeedsRevisionMarker:
+    """Tests for non-git SCM types (insights, svn, archive) using .scm_revision marker files."""
+
+    def _make_task(self, instance_type='Job'):
+        task = jobs.RunJob()
+        task.instance = mock.Mock(spec=Job)
+        task.instance.id = 42
+        task.update_model = mock.Mock(return_value=task.instance)
+        return task
+
+    def test_insights_skips_sync_when_marker_matches(self, tmp_path):
+        project_path = str(tmp_path / 'project')
+        os.makedirs(project_path)
+        with open(os.path.join(project_path, '.scm_revision'), 'w') as f:
+            f.write('abc123')
+
+        project = mock.Mock()
+        project.scm_type = 'insights'
+        project.scm_revision = 'abc123'
+        project.scm_branch = 'main'
+        project.get_project_path.return_value = project_path
+        project.get_cache_path.return_value = str(tmp_path / 'cache')
+        project.cache_id = 'abc123'
+
+        task = self._make_task()
+        sync_needs = task.get_sync_needs(project)
+        assert 'update_insights' not in sync_needs
+
+    def test_insights_syncs_when_marker_mismatch(self, tmp_path):
+        project_path = str(tmp_path / 'project')
+        os.makedirs(project_path)
+        with open(os.path.join(project_path, '.scm_revision'), 'w') as f:
+            f.write('old_revision')
+
+        project = mock.Mock()
+        project.scm_type = 'insights'
+        project.scm_revision = 'new_revision'
+        project.scm_branch = 'main'
+        project.get_project_path.return_value = project_path
+        project.get_cache_path.return_value = str(tmp_path / 'cache')
+        project.cache_id = 'new_revision'
+
+        task = self._make_task()
+        sync_needs = task.get_sync_needs(project)
+        assert 'update_insights' in sync_needs
+
+    def test_insights_syncs_when_no_marker(self, tmp_path):
+        project_path = str(tmp_path / 'project')
+        os.makedirs(project_path)
+
+        project = mock.Mock()
+        project.scm_type = 'insights'
+        project.scm_revision = 'abc123'
+        project.scm_branch = 'main'
+        project.get_project_path.return_value = project_path
+        project.get_cache_path.return_value = str(tmp_path / 'cache')
+        project.cache_id = 'abc123'
+
+        task = self._make_task()
+        sync_needs = task.get_sync_needs(project)
+        assert 'update_insights' in sync_needs
+
+    def test_insights_syncs_when_no_scm_revision(self, tmp_path):
+        project_path = str(tmp_path / 'project')
+        os.makedirs(project_path)
+
+        project = mock.Mock()
+        project.scm_type = 'insights'
+        project.scm_revision = ''
+        project.scm_branch = 'main'
+        project.get_project_path.return_value = project_path
+        project.get_cache_path.return_value = str(tmp_path / 'cache')
+        project.cache_id = ''
+
+        task = self._make_task()
+        sync_needs = task.get_sync_needs(project)
+        assert 'update_insights' in sync_needs
+
+    def test_insights_syncs_on_branch_override(self, tmp_path):
+        project_path = str(tmp_path / 'project')
+        os.makedirs(project_path)
+        with open(os.path.join(project_path, '.scm_revision'), 'w') as f:
+            f.write('abc123')
+
+        project = mock.Mock()
+        project.scm_type = 'insights'
+        project.scm_revision = 'abc123'
+        project.scm_branch = 'main'
+        project.get_project_path.return_value = project_path
+        project.get_cache_path.return_value = str(tmp_path / 'cache')
+        project.cache_id = 'abc123'
+
+        task = self._make_task()
+        sync_needs = task.get_sync_needs(project, scm_branch='other-branch')
+        assert 'update_insights' in sync_needs
+
+    def test_archive_skips_sync_when_marker_matches(self, tmp_path):
+        project_path = str(tmp_path / 'project')
+        os.makedirs(project_path)
+        with open(os.path.join(project_path, '.scm_revision'), 'w') as f:
+            f.write('sha1checksum')
+
+        project = mock.Mock()
+        project.scm_type = 'archive'
+        project.scm_revision = 'sha1checksum'
+        project.scm_branch = 'main'
+        project.get_project_path.return_value = project_path
+        project.get_cache_path.return_value = str(tmp_path / 'cache')
+        project.cache_id = 'sha1checksum'
+
+        task = self._make_task()
+        sync_needs = task.get_sync_needs(project)
+        assert 'update_archive' not in sync_needs
+
+    def test_svn_skips_sync_when_marker_matches(self, tmp_path):
+        project_path = str(tmp_path / 'project')
+        os.makedirs(project_path)
+        with open(os.path.join(project_path, '.scm_revision'), 'w') as f:
+            f.write('12345')
+
+        project = mock.Mock()
+        project.scm_type = 'svn'
+        project.scm_revision = '12345'
+        project.scm_branch = 'main'
+        project.get_project_path.return_value = project_path
+        project.get_cache_path.return_value = str(tmp_path / 'cache')
+        project.cache_id = '12345'
+
+        task = self._make_task()
+        sync_needs = task.get_sync_needs(project)
+        assert 'update_svn' not in sync_needs
+
+
+class TestNeedsSourceUpdate:
+    """Tests for _needs_source_update covering git, inventory update, manual, and missing project paths."""
+
+    def _make_task(self):
+        task = jobs.RunJob()
+        task.instance = mock.Mock(spec=Job)
+        task.instance.id = 42
+        task.update_model = mock.Mock(return_value=task.instance)
+        return task
+
+    def test_inventory_update_always_needs_sync(self, tmp_path):
+        task = jobs.RunJob()
+        task.instance = mock.Mock(spec=InventoryUpdate)
+        task.instance.id = 42
+        task.update_model = mock.Mock(return_value=task.instance)
+
+        project = mock.Mock()
+        project.scm_type = 'insights'
+        assert task._needs_source_update(project, str(tmp_path), False) is True
+
+    def test_manual_project_skips_sync(self, tmp_path):
+        task = self._make_task()
+        project = mock.Mock()
+        project.scm_type = ''
+        assert task._needs_source_update(project, str(tmp_path), False) is False
+
+    def test_missing_project_path_needs_sync(self):
+        task = self._make_task()
+        project = mock.Mock()
+        project.scm_type = 'git'
+        project.id = 1
+        assert task._needs_source_update(project, '/nonexistent/path', False) is True
+
+    def test_branch_override_needs_sync(self, tmp_path):
+        task = self._make_task()
+        project = mock.Mock()
+        project.scm_type = 'insights'
+        assert task._needs_source_update(project, str(tmp_path), True) is True
+
+    def test_no_scm_revision_needs_sync(self, tmp_path):
+        task = self._make_task()
+        project = mock.Mock()
+        project.scm_type = 'insights'
+        project.scm_revision = ''
+        assert task._needs_source_update(project, str(tmp_path), False) is True
+
+    @mock.patch('awx.main.tasks.jobs.git.Repo')
+    def test_git_matching_revision_skips_sync(self, mock_repo, tmp_path):
+        mock_repo.return_value.head.commit.hexsha = 'abc123'
+        task = self._make_task()
+        project = mock.Mock()
+        project.scm_type = 'git'
+        project.scm_revision = 'abc123'
+        assert task._needs_source_update(project, str(tmp_path), False) is False
+
+    @mock.patch('awx.main.tasks.jobs.git.Repo')
+    def test_git_mismatched_revision_needs_sync(self, mock_repo, tmp_path):
+        mock_repo.return_value.head.commit.hexsha = 'abc123'
+        task = self._make_task()
+        project = mock.Mock()
+        project.scm_type = 'git'
+        project.scm_revision = 'def456'
+        assert task._needs_source_update(project, str(tmp_path), False) is True
+
+    @mock.patch('awx.main.tasks.jobs.git.Repo', side_effect=git.exc.InvalidGitRepositoryError)
+    def test_git_invalid_repo_needs_sync(self, mock_repo, tmp_path):
+        task = self._make_task()
+        project = mock.Mock()
+        project.scm_type = 'git'
+        project.scm_revision = 'abc123'
+        assert task._needs_source_update(project, str(tmp_path), False) is True
+
+
+class TestWriteRevisionMarker:
+    """Tests that RunProjectUpdate.post_run_hook writes .scm_revision marker for non-git types."""
+
+    @mock.patch('awx.main.tasks.jobs.RunProjectUpdate.release_lock')
+    @mock.patch('awx.main.tasks.jobs.BaseTask.post_run_hook')
+    def test_writes_marker_for_insights(self, mock_super_hook, mock_release, tmp_path):
+        project_path = str(tmp_path / 'project')
+        os.makedirs(project_path)
+
+        instance = mock.Mock()
+        instance.scm_type = 'insights'
+        instance.launch_type = 'sync'
+        instance.job_type = 'run'
+        instance.job_tags = 'update_insights'
+        instance.get_project_path.return_value = project_path
+        instance.get_cache_path.return_value = str(tmp_path / 'cache')
+        instance.project = mock.Mock()
+        instance.project.scm_type = 'insights'
+        instance.log_format = 'test'
+
+        task = jobs.RunProjectUpdate()
+        task.runner_callback = mock.Mock()
+        task.runner_callback.playbook_new_revision = 'new_rev_123'
+        task.job_private_data_dir = None
+
+        task.post_run_hook(instance, 'successful')
+
+        marker_path = os.path.join(project_path, '.scm_revision')
+        assert os.path.exists(marker_path)
+        with open(marker_path) as f:
+            assert f.read() == 'new_rev_123'
+
+    @mock.patch('awx.main.tasks.jobs.RunProjectUpdate.release_lock')
+    @mock.patch('awx.main.tasks.jobs.BaseTask.post_run_hook')
+    def test_does_not_write_marker_for_git(self, mock_super_hook, mock_release, tmp_path):
+        project_path = str(tmp_path / 'project')
+        os.makedirs(project_path)
+
+        instance = mock.Mock()
+        instance.scm_type = 'git'
+        instance.launch_type = 'sync'
+        instance.job_type = 'run'
+        instance.job_tags = 'update_git'
+        instance.get_project_path.return_value = project_path
+        instance.get_cache_path.return_value = str(tmp_path / 'cache')
+        instance.project = mock.Mock()
+        instance.project.scm_type = 'git'
+        instance.log_format = 'test'
+
+        task = jobs.RunProjectUpdate()
+        task.runner_callback = mock.Mock()
+        task.runner_callback.playbook_new_revision = 'abc123'
+        task.job_private_data_dir = None
+
+        task.post_run_hook(instance, 'successful')
+
+        marker_path = os.path.join(project_path, '.scm_revision')
+        assert not os.path.exists(marker_path)
+
+    @mock.patch('awx.main.tasks.jobs.RunProjectUpdate.release_lock')
+    @mock.patch('awx.main.tasks.jobs.BaseTask.post_run_hook')
+    def test_does_not_follow_symlink_when_writing_marker(self, mock_super_hook, mock_release, tmp_path):
+        project_path = str(tmp_path / 'project')
+        os.makedirs(project_path)
+        target_file = str(tmp_path / 'target')
+        with open(target_file, 'w') as f:
+            f.write('original content')
+        os.symlink(target_file, os.path.join(project_path, '.scm_revision'))
+
+        instance = mock.Mock()
+        instance.scm_type = 'insights'
+        instance.launch_type = 'sync'
+        instance.job_type = 'run'
+        instance.job_tags = 'update_insights'
+        instance.get_project_path.return_value = project_path
+        instance.get_cache_path.return_value = str(tmp_path / 'cache')
+        instance.project = mock.Mock()
+        instance.project.scm_type = 'insights'
+        instance.log_format = 'test'
+
+        task = jobs.RunProjectUpdate()
+        task.runner_callback = mock.Mock()
+        task.runner_callback.playbook_new_revision = 'new_rev'
+        task.job_private_data_dir = None
+
+        task.post_run_hook(instance, 'successful')
+
+        with open(target_file) as f:
+            assert f.read() == 'original content'
+
+    @mock.patch('awx.main.tasks.jobs.RunProjectUpdate.release_lock')
+    @mock.patch('awx.main.tasks.jobs.BaseTask.post_run_hook')
+    def test_removes_marker_on_failed_sync(self, mock_super_hook, mock_release, tmp_path):
+        project_path = str(tmp_path / 'project')
+        os.makedirs(project_path)
+        marker_path = os.path.join(project_path, '.scm_revision')
+        with open(marker_path, 'w') as f:
+            f.write('old_rev')
+
+        instance = mock.Mock()
+        instance.scm_type = 'insights'
+        instance.launch_type = 'sync'
+        instance.job_type = 'run'
+        instance.job_tags = 'update_insights'
+        instance.get_project_path.return_value = project_path
+        instance.get_cache_path.return_value = str(tmp_path / 'cache')
+        instance.project = mock.Mock()
+        instance.project.scm_type = 'insights'
+        instance.log_format = 'test'
+
+        task = jobs.RunProjectUpdate()
+        task.runner_callback = mock.Mock()
+        task.runner_callback.playbook_new_revision = None
+        task.job_private_data_dir = None
+
+        task.post_run_hook(instance, 'failed')
+
+        assert not os.path.exists(marker_path)
+
+    @mock.patch('awx.main.tasks.jobs.RunProjectUpdate.release_lock')
+    @mock.patch('awx.main.tasks.jobs.BaseTask.post_run_hook')
+    def test_no_error_removing_marker_when_none_exists(self, mock_super_hook, mock_release, tmp_path):
+        project_path = str(tmp_path / 'project')
+        os.makedirs(project_path)
+
+        instance = mock.Mock()
+        instance.scm_type = 'insights'
+        instance.launch_type = 'sync'
+        instance.job_type = 'run'
+        instance.job_tags = 'update_insights'
+        instance.get_project_path.return_value = project_path
+        instance.get_cache_path.return_value = str(tmp_path / 'cache')
+        instance.project = mock.Mock()
+        instance.project.scm_type = 'insights'
+        instance.log_format = 'test'
+
+        task = jobs.RunProjectUpdate()
+        task.runner_callback = mock.Mock()
+        task.runner_callback.playbook_new_revision = None
+        task.job_private_data_dir = None
+
+        task.post_run_hook(instance, 'failed')
 
 
 @mock.patch('awx.main.tasks.jobs.RunProjectUpdate.make_local_copy')
