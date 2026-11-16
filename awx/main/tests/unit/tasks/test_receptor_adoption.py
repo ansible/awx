@@ -20,6 +20,7 @@ from awx.main.tasks.callback import RunnerCallback
 from awx.main.tasks.jobs import _finalize_job_run
 from awx.main.tasks.receptor import (
     AWXReceptorJob,
+    ReceptorWork,
     _AdoptionTask,
     _compute_adoption_dedup,
     _finalize_adopted_job,
@@ -69,6 +70,52 @@ def _make_receptor_ctl(state='Succeeded', exit_code=None, detail='', stdout_size
     file_mock.readlines.return_value = [b'some output']
     ctl.get_work_results.return_value = (sock_mock, file_mock)
     return ctl
+
+
+# ---------------------------------------------------------------------------
+# ReceptorWork — each operation maps to one receptorctl command
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    'call, command',
+    [
+        (lambda w: w.list(), 'work list'),
+        (lambda w: w.status('unit-1'), 'work status unit-1'),
+        (lambda w: w.cancel('unit-1'), 'work cancel unit-1'),
+        (lambda w: w.release('unit-1'), 'work release unit-1'),
+    ],
+)
+def test_receptor_work_simple_commands(call, command):
+    ctl = Mock()
+
+    call(ReceptorWork(ctl))
+
+    ctl.simple_command.assert_called_once_with(command)
+
+
+def test_receptor_work_results_passes_startpos_only_when_given():
+    ctl = Mock()
+    work = ReceptorWork(ctl)
+
+    work.results('unit-1')
+    work.results('unit-1', startpos=42)
+
+    assert ctl.get_work_results.call_args_list[0].kwargs == {'return_socket': True, 'return_sockfile': True}
+    assert ctl.get_work_results.call_args_list[1].kwargs == {'return_socket': True, 'return_sockfile': True, 'startpos': 42}
+
+
+@patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase', return_value='res')
+@patch('awx.main.tasks.receptor.AWXReceptorJob._transmit_phase')
+def test_run_internal_streams_through_receptor_work(mock_transmit, mock_process):
+    rj = _make_receptor_job()
+    ctl = Mock()
+
+    assert rj._run_internal(ctl) == 'res'
+
+    mock_transmit.assert_called_once_with(ctl)
+    assert rj.work.receptor_ctl is ctl
+    mock_process.assert_called_once_with(rj.work)
 
 
 # ---------------------------------------------------------------------------
@@ -127,7 +174,7 @@ def test_process_phase_success(mock_signal, mock_connections):
     rj.processor = Mock(return_value=expected_res)
     ctl = _make_receptor_ctl()
 
-    res = rj._process_phase(ctl)
+    res = rj._process_phase(ReceptorWork(ctl))
 
     assert res.status == 'successful'
     mock_connections.close_all.assert_called_once()
@@ -145,7 +192,7 @@ def test_process_phase_signal_exit(mock_signal, mock_connections):
     rj.processor = Mock()
     ctl = _make_receptor_ctl()
 
-    res = rj._process_phase(ctl)
+    res = rj._process_phase(ReceptorWork(ctl))
 
     assert res.status == 'canceled'
     ctl.simple_command.assert_any_call('work cancel unit-1')
@@ -161,7 +208,7 @@ def test_handle_work_error_result_traceback_present():
     ctl = _make_receptor_ctl()
     err_res = _Result(status='error', rc=1)
 
-    result = rj._handle_work_error(ctl, err_res)
+    result = rj._handle_work_error(ReceptorWork(ctl), err_res)
 
     assert result is err_res
     ctl.simple_command.assert_not_called()
@@ -179,7 +226,7 @@ def test_handle_work_error_status_command_raises():
     err_res = _Result(status='error', rc=1)
 
     # should not raise; falls through and returns res
-    result = rj._handle_work_error(ctl, err_res)
+    result = rj._handle_work_error(ReceptorWork(ctl), err_res)
     assert result is err_res
 
 
@@ -193,7 +240,7 @@ def test_handle_work_error_exceeded_quota():
     ctl = _make_receptor_ctl(detail='exceeded quota for namespace')
     err_res = _Result(status='error', rc=1)
 
-    result = rj._handle_work_error(ctl, err_res)
+    result = rj._handle_work_error(ReceptorWork(ctl), err_res)
 
     assert result is None
     rj.task.update_model.assert_called_once_with(1, status='pending')
@@ -209,7 +256,7 @@ def test_handle_work_error_reads_receptor_output_on_failed():
     ctl = _make_receptor_ctl(state='Failed', stdout_size=2000)
     err_res = _Result(status='error', rc=1)
 
-    rj._handle_work_error(ctl, err_res)
+    rj._handle_work_error(ReceptorWork(ctl), err_res)
 
     rj.task.runner_callback.delay_update.assert_called_once()
     call_kwargs = rj.task.runner_callback.delay_update.call_args[1]
@@ -226,7 +273,7 @@ def test_handle_work_error_detail_only():
     ctl = _make_receptor_ctl(state='Succeeded', detail='some error detail')
     err_res = _Result(status='error', rc=1)
 
-    rj._handle_work_error(ctl, err_res)
+    rj._handle_work_error(ReceptorWork(ctl), err_res)
 
     rj.task.runner_callback.delay_update.assert_called_once()
     call_kwargs = rj.task.runner_callback.delay_update.call_args[1]
@@ -243,7 +290,7 @@ def test_handle_work_error_no_detail_no_output():
     ctl = _make_receptor_ctl(state='Succeeded', detail='')
     err_res = _Result(status='error', rc=1)
 
-    result = rj._handle_work_error(ctl, err_res)
+    result = rj._handle_work_error(ReceptorWork(ctl), err_res)
 
     assert result is err_res
     rj.task.runner_callback.delay_update.assert_not_called()
@@ -259,9 +306,10 @@ def test_handle_work_error_get_results_raises():
     ctl = _make_receptor_ctl(state='Failed', stdout_size=500)
     ctl.get_work_results.side_effect = Exception('socket error')
     err_res = _Result(status='error', rc=1)
+    work = ReceptorWork(ctl)
 
     with pytest.raises(RuntimeError):
-        rj._handle_work_error(ctl, err_res)
+        rj._handle_work_error(work, err_res)
 
 
 # ---------------------------------------------------------------------------
@@ -296,7 +344,7 @@ def test_reattach_sets_job_created_on_callback(mock_rmtree, mock_pdd, mock_relea
         created_callbacks.append(self)
 
     with patch.object(RealCallback, '__init__', capturing_cb_init):
-        reattach_to_work_unit(job, ctl)
+        reattach_to_work_unit(job, ReceptorWork(ctl))
 
     assert len(created_callbacks) == 1
     assert created_callbacks[0].job_created == str(job.created)
@@ -325,7 +373,7 @@ def test_reattach_releases_work_unit_on_success(mock_rmtree, mock_pdd, mock_rele
     ctl.simple_command.return_value = {'StateName': ''}
     mock_process.return_value = Mock(status='successful', rc=0)
 
-    reattach_to_work_unit(job, ctl)
+    reattach_to_work_unit(job, ReceptorWork(ctl))
 
     mock_release.assert_called_once()
 
@@ -350,7 +398,7 @@ def test_reattach_releases_work_unit_on_failure(mock_rmtree, mock_pdd, mock_rele
         {'StateName': 'Succeeded', 'ExitCode': 0, 'Detail': ''},  # fallback re-check
     ]
 
-    result = reattach_to_work_unit(job, ctl)
+    result = reattach_to_work_unit(job, ReceptorWork(ctl))
 
     assert result is True  # finalized via exit_code path
     mock_release.assert_called_once()
@@ -391,7 +439,7 @@ def test_reattach_sets_parent_workflow_job_id_when_workflow_child(mock_rmtree, m
         created_callbacks.append(self)
 
     with patch.object(RealCallback, '__init__', capturing_cb_init):
-        reattach_to_work_unit(job, ctl)
+        reattach_to_work_unit(job, ReceptorWork(ctl))
 
     assert len(created_callbacks) == 1
     assert created_callbacks[0].parent_workflow_job_id == 999
@@ -415,7 +463,7 @@ def test_reattach_workflow_job_lookup_exception_swallowed(mock_rmtree, mock_pdd,
     ctl = Mock()
     ctl.simple_command.return_value = {'StateName': 'Succeeded', 'ExitCode': 0, 'Detail': ''}
 
-    result = reattach_to_work_unit(job, ctl)
+    result = reattach_to_work_unit(job, ReceptorWork(ctl))
 
     assert result is True  # exception swallowed, adoption completes
 
@@ -552,7 +600,7 @@ def test_reattach_non_workflow_job_no_parent_id(mock_rmtree, mock_pdd, mock_rele
         created_callbacks.append(self)
 
     with patch.object(RealCallback, '__init__', capturing_cb_init):
-        reattach_to_work_unit(job, ctl)
+        reattach_to_work_unit(job, ReceptorWork(ctl))
 
     assert created_callbacks[0].parent_workflow_job_id is None
 
@@ -585,7 +633,7 @@ def test_reattach_running_defers_without_streaming_variant(mock_rmtree, mock_pdd
     ctl = Mock()
     ctl.simple_command.return_value = {'StateName': 'Running'}
 
-    result = reattach_to_work_unit(job, ctl)
+    result = reattach_to_work_unit(job, ReceptorWork(ctl))
 
     mock_process.assert_not_called()
     assert result is False
@@ -619,7 +667,7 @@ def test_reattach_process_phase_failure_falls_back_to_work_status(mock_rmtree, m
     ]
     mock_process.side_effect = RuntimeError('process phase failed')
 
-    result = reattach_to_work_unit(job, ctl)  # must not raise
+    result = reattach_to_work_unit(job, ReceptorWork(ctl))  # must not raise
 
     # Returns True (function completed without re-raising)
     assert result is True
@@ -645,7 +693,7 @@ def test_reattach_pending_defers_without_streaming():
     ctl.simple_command.return_value = {'StateName': 'Pending'}
 
     with patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase') as mock_process:
-        result = reattach_to_work_unit(job, ctl)
+        result = reattach_to_work_unit(job, ReceptorWork(ctl))
 
     assert result is False
     mock_process.assert_not_called()
@@ -673,7 +721,7 @@ def test_reattach_succeeded_goes_through_process_phase(mock_rmtree, mock_pdd, mo
     ctl.simple_command.return_value = {'StateName': 'Succeeded', 'ExitCode': 0, 'Detail': ''}
 
     with patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase', return_value=Mock(status='successful', rc=0)) as mock_process:
-        reattach_to_work_unit(job, ctl)
+        reattach_to_work_unit(job, ReceptorWork(ctl))
 
     mock_process.assert_called_once()
     mock_finalize_job.assert_called_once()
@@ -699,7 +747,7 @@ def test_reattach_failed_goes_through_process_phase(mock_rmtree, mock_pdd, mock_
     ctl.simple_command.return_value = {'StateName': 'Failed', 'ExitCode': 1, 'Detail': 'exit status 1'}
 
     with patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase', return_value=Mock(status='failed', rc=1)) as mock_process:
-        reattach_to_work_unit(job, ctl)
+        reattach_to_work_unit(job, ReceptorWork(ctl))
 
     mock_process.assert_called_once()
     mock_finalize_job.assert_called_once()
@@ -724,7 +772,7 @@ def test_reattach_canceled_goes_through_process_phase(mock_rmtree, mock_pdd, moc
     ctl.simple_command.return_value = {'StateName': 'Canceled', 'Detail': ''}
 
     with patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase', return_value=Mock(status='error', rc=1)) as mock_process:
-        reattach_to_work_unit(job, ctl)
+        reattach_to_work_unit(job, ReceptorWork(ctl))
 
     mock_process.assert_called_once()
     mock_finalize_job.assert_called_once()
@@ -752,7 +800,7 @@ def test_reattach_running_defers_without_streaming(mock_rmtree, mock_pdd, mock_r
     ctl.simple_command.return_value = {'StateName': 'Running'}
 
     with patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase') as mock_process:
-        result = reattach_to_work_unit(job, ctl)
+        result = reattach_to_work_unit(job, ReceptorWork(ctl))
 
     assert result is False
     mock_process.assert_not_called()
@@ -969,7 +1017,7 @@ def test_reattach_returns_false_when_status_command_raises():
     ctl = Mock()
     ctl.simple_command.side_effect = Exception('socket closed')
 
-    result = reattach_to_work_unit(job, ctl)
+    result = reattach_to_work_unit(job, ReceptorWork(ctl))
 
     assert result is False
 
@@ -1320,7 +1368,7 @@ def test_handle_work_error_no_output_no_detail(mock_logger):
     receptor_job.task.runner_callback.extra_update_fields = {}
     receptor_job.task.runner_callback.event_ct = 0  # No events
 
-    result = receptor_job._handle_work_error(receptor_ctl, res)
+    result = receptor_job._handle_work_error(ReceptorWork(receptor_ctl), res)
 
     assert result == res
     mock_logger.warning.assert_called()
@@ -1345,7 +1393,7 @@ def test_handle_work_error_state_name_empty_string(mock_logger):
     receptor_job.task.runner_callback.extra_update_fields = {}
     receptor_job.task.runner_callback.event_ct = 5
 
-    result = receptor_job._handle_work_error(receptor_ctl, res)
+    result = receptor_job._handle_work_error(ReceptorWork(receptor_ctl), res)
 
     assert result == res
     # Verify exception was logged
@@ -1377,7 +1425,7 @@ def test_handle_work_error_delay_update_with_receptor_output():
     receptor_job.task.runner_callback.extra_update_fields = {}
     receptor_job.task.runner_callback.event_ct = 0  # No events → fetch output
 
-    result = receptor_job._handle_work_error(receptor_ctl, res)
+    result = receptor_job._handle_work_error(ReceptorWork(receptor_ctl), res)
 
     assert result == res
     # Verify delay_update was called with receptor output
@@ -1406,7 +1454,7 @@ def test_handle_work_error_delay_update_with_detail_fallback():
     receptor_job.task.runner_callback.extra_update_fields = {}
     receptor_job.task.runner_callback.event_ct = 5
 
-    result = receptor_job._handle_work_error(receptor_ctl, res)
+    result = receptor_job._handle_work_error(ReceptorWork(receptor_ctl), res)
 
     assert result == res
     # Verify delay_update was called with detail

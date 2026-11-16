@@ -10,6 +10,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from awx.main.tasks.adoption_decisions import JobAction
+from awx.main.tasks.receptor import ReceptorWork
 from awx.main.tasks.system import (
     CleanupImagesAndFiles,
     execution_node_health_check,
@@ -674,6 +676,18 @@ def test_heartbeat_marks_offline_when_receptor_unavailable(settings):
     assert this_inst.node_state == Instance.States.UNAVAILABLE
 
 
+@pytest.mark.django_db
+def test_heartbeat_stops_when_this_instance_is_missing(settings):
+    """No record for this node and no auto-deprovision → returns (None, None, None, None)."""
+    settings.CLUSTER_HOST_ID = 'ctrl-0'
+    settings.AWX_AUTO_DEPROVISION_INSTANCES = False
+    ctl = mock.MagicMock()
+    ctl.simple_command.return_value = {'KnownConnectionCosts': {'ctrl-0': {}}}
+
+    with mock.patch('awx.main.tasks.system.get_receptor_ctl', return_value=ctl):
+        assert _heartbeat_instance_management() == (None, None, None, None)
+
+
 # ── AAP-89607: unified startup job processing ─────────────────────────────────
 
 
@@ -803,7 +817,7 @@ def test_adoption_finalizes_successful_job(me_inst):
         mock_instance._process_phase.return_value = MagicMock(status='successful', rc=0)
         mock_job_cls.return_value = mock_instance
 
-        reattach_to_work_unit(job, ctl)
+        reattach_to_work_unit(job, ReceptorWork(ctl))
 
     job.refresh_from_db()
     assert job.status == 'successful'
@@ -826,7 +840,7 @@ def test_adoption_finalizes_failed_job(me_inst):
         mock_instance._process_phase.return_value = MagicMock(status='failed', rc=1)
         mock_job_cls.return_value = mock_instance
 
-        reattach_to_work_unit(job, ctl)
+        reattach_to_work_unit(job, ReceptorWork(ctl))
 
     job.refresh_from_db()
     assert job.status == 'failed'
@@ -1106,7 +1120,7 @@ def test_reattach_receptor_command_fails(me_inst):
     ctl = MagicMock()
     ctl.simple_command.side_effect = Exception('connection refused')
 
-    result = reattach_to_work_unit(job, ctl)
+    result = reattach_to_work_unit(job, ReceptorWork(ctl))
 
     assert result is False
     job.refresh_from_db()
@@ -1127,7 +1141,7 @@ def test_reattach_exit_code_from_detail(me_inst):
         patch('awx.main.tasks.callback.RunnerCallback'),
     ):
         mock_job_cls.return_value = MagicMock()
-        reattach_to_work_unit(job, ctl)
+        reattach_to_work_unit(job, ReceptorWork(ctl))
 
     job.refresh_from_db()
     assert job.status == 'failed'
@@ -1149,7 +1163,7 @@ def test_reattach_exit_code_fallback_succeeded(me_inst):
         mock_instance = MagicMock()
         mock_instance._process_phase.return_value = MagicMock(status='successful', rc=0)
         mock_job_cls.return_value = mock_instance
-        reattach_to_work_unit(job, ctl)
+        reattach_to_work_unit(job, ReceptorWork(ctl))
 
     job.refresh_from_db()
     assert job.status == 'successful'
@@ -1169,7 +1183,7 @@ def test_reattach_exit_code_fallback_failed(me_inst):
         patch('awx.main.tasks.callback.RunnerCallback'),
     ):
         mock_job_cls.return_value = MagicMock()
-        reattach_to_work_unit(job, ctl)
+        reattach_to_work_unit(job, ReceptorWork(ctl))
 
     job.refresh_from_db()
     assert job.status == 'failed'
@@ -1191,7 +1205,7 @@ def test_reattach_process_phase_raises(me_inst):
         mock_instance = MagicMock()
         mock_instance._process_phase.side_effect = RuntimeError('boom')
         mock_job_cls.return_value = mock_instance
-        result = reattach_to_work_unit(job, ctl)
+        result = reattach_to_work_unit(job, ReceptorWork(ctl))
 
     assert result is True
     job.refresh_from_db()
@@ -1217,7 +1231,7 @@ def test_reattach_job_already_finalized(me_inst):
         mock_instance = MagicMock()
         mock_instance._process_phase.side_effect = _finalize_in_db
         mock_job_cls.return_value = mock_instance
-        reattach_to_work_unit(job, ctl)
+        reattach_to_work_unit(job, ReceptorWork(ctl))
 
     job.refresh_from_db()
     assert job.status == 'successful'
@@ -1235,7 +1249,10 @@ def test_adopt_job_async_calls_reattach(me_inst, settings):
         adopt_job_async(job.id)
 
     mock_ctl_factory.assert_called_once()
-    mock_reattach.assert_called_once_with(job, mock_ctl_factory.return_value)
+    mock_reattach.assert_called_once()
+    called_job, work = mock_reattach.call_args.args
+    assert called_job == job
+    assert work.receptor_ctl is mock_ctl_factory.return_value
 
 
 @pytest.mark.django_db
@@ -1385,3 +1402,35 @@ def test_finalize_job_run_inventory_update_exception_logged(me_inst):
         with patch('awx.main.tasks.jobs.logger') as mock_logger:
             _finalize_job_run(Job, job.pk, callback, 'successful')
             mock_logger.exception.assert_called()
+
+
+@pytest.mark.django_db
+def test_lost_instance_job_not_marked_for_reaping_is_left_running(settings):
+    """Only jobs the decision says to reap are reaped; AAP-89602 will return ADOPT here."""
+    settings.AWX_AUTO_DEPROVISION_INSTANCES = False
+    lost = Instance.objects.create(hostname='lost-node', node_type='control', node_state='ready')
+    job = Job.objects.create(controller_node='lost-node', status='running', work_unit_id='unit-1')
+
+    with patch('awx.main.tasks.system.lost_instance_job_action', return_value=JobAction.ADOPT), patch('awx.main.tasks.system.reaper') as mock_reaper:
+        _reap_and_mark_lost_instance(lost)
+
+    mock_reaper.reap_job.assert_not_called()
+    job.refresh_from_db()
+    assert job.status == 'running'
+
+
+@pytest.mark.django_db
+def test_heartbeat_job_the_decision_skips_is_neither_adopted_nor_reaped(me_inst):
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-1', started=now() - timedelta(minutes=1))
+
+    with (
+        patch('awx.main.tasks.system.running_job_action', return_value=JobAction.SKIP),
+        patch('awx.main.tasks.system.adopt_job_async') as mock_adopt,
+        patch('awx.main.tasks.system.reaper') as mock_reaper,
+    ):
+        _process_running_jobs(me_inst, ['other-task'], now())
+
+    mock_adopt.apply_async.assert_not_called()
+    mock_reaper.reap_job.assert_not_called()
+    job.refresh_from_db()
+    assert job.status == 'running'
