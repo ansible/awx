@@ -16,4 +16,4 @@ permissions:
 
 jobs:
   comment:
-    uses: ansible/actions/.github/workflows/openapi-post-changelog-comment.yml@main
+    uses: ansible/actions/.github/workflows/openapi-post-changelog-comment.yml@216419226018c512a37ed606e85b9df6aca50fee

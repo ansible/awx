@@ -27,6 +27,6 @@ permissions:
 
 jobs:
   detect:
-    uses: ansible/actions/.github/workflows/oasdiff-detect-breaking-changes.yml@main
+    uses: ansible/actions/.github/workflows/oasdiff-detect-breaking-changes.yml@364fabf5470712ced6b63e1a27c9bcfac66f81e6
     with:
       spec-path: openapi.yaml
