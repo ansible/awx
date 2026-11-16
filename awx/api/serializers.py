@@ -53,7 +53,7 @@ from ansible_base.rbac import permission_registry
 # AWX
 from awx.api.validation_patterns import inject_patterns_into_field_list
 from awx.main.access import get_user_capabilities
-from awx.main.constants import ACTIVE_STATES, org_role_to_permission
+from awx.main.constants import ACTIVE_STATES, ADOPTION_JOB_ENV_KEYS, org_role_to_permission
 from awx.main.models import (
     ActivityStream,
     AdHocCommand,
@@ -1124,6 +1124,10 @@ class UnifiedJobSerializer(BaseSerializer):
         # Because this string is saved in the db in the source language,
         # it must be marked for translation after it is pulled from the db, not when set
         ret['job_explanation'] = _(obj.job_explanation)
+        if isinstance(ret.get('job_env'), dict) and ADOPTION_JOB_ENV_KEYS & ret['job_env'].keys():
+            # Internal to adoption, not API-facing: job_env is shown as the job's environment, and
+            # host_map (saved by an earlier build) is large on a big inventory.
+            ret['job_env'] = {k: v for k, v in ret['job_env'].items() if k not in ADOPTION_JOB_ENV_KEYS}
         return ret
 
     def get_launched_by(self, obj):

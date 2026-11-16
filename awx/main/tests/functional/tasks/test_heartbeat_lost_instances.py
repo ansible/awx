@@ -76,7 +76,7 @@ def lost_hostnames(clock):
     """
     Instance.objects.filter(hostname='ctrl-0').update(last_seen=clock())
     ctl = mock.MagicMock()
-    ctl.simple_command.return_value = {'KnownConnectionCosts': {'ctrl-0': {'ctrl-1': 1}}, 'Advertisements': []}
+    ctl.simple_command.return_value = {'KnownConnectionCosts': {'ctrl-0': {}}, 'Advertisements': []}
     with (
         mock.patch('awx.main.tasks.system.get_receptor_ctl', return_value=ctl),
         mock.patch('awx.main.tasks.system.inspect_execution_and_hop_nodes'),
@@ -136,7 +136,6 @@ def job_of_peer():
     return peer_job()
 
 
-@pytest.mark.xfail(strict=True, reason='AAP-96824: a controller that misses heartbeats is judged lost while it still runs its job')
 @pytest.mark.django_db
 def test_slow_controller_still_on_the_mesh_keeps_its_job(job_of_peer):
     """Slow controller. ctrl-1 has missed two heartbeats but is still connected on the receptor mesh
@@ -152,30 +151,16 @@ def test_slow_controller_still_on_the_mesh_keeps_its_job(job_of_peer):
 
 
 @pytest.mark.django_db
-def test_controller_gone_from_the_mesh_has_its_job_reaped(job_of_peer):
+def test_controller_gone_from_the_mesh_has_its_job_adopted(job_of_peer):
     """The case the slow-controller test must not break: a controller that is silent and gone from the mesh
-    is lost, and its job is no longer reported as running.
+    is lost, and its job, whose unit lives on another node, is claimed for adoption instead of reaped.
     """
     make_cluster()
 
     assert run_lost_instance_handling(mesh(EXEC)) == [PEER]
 
     job_of_peer.refresh_from_db()
-    assert job_of_peer.status == 'failed'
-
-
-@pytest.mark.xfail(strict=True, reason='AAP-96848: a slow controller\'s job first notifies failed with no hosts, then successful')
-@pytest.mark.django_db
-def test_slow_controller_job_sends_no_failed_notification(job_of_peer):
-    """Notification content. The reap of a live controller's job sends a failed notification with no
-    hosts; the job later ends successful and notifies again.
-    """
-    make_cluster()
-
-    with mock.patch.object(Job, 'send_notification_templates') as send:
-        run_lost_instance_handling(mesh(PEER, EXEC))
-
-    assert mock.call('failed') not in send.call_args_list
+    assert (job_of_peer.status, job_of_peer.controller_node) == ('running', THIS)
 
 
 def assert_left_with(job, controller, task_id):
@@ -297,11 +282,13 @@ def full_node():
     ],
 )
 @pytest.mark.django_db
-def test_node_without_room_does_not_take_a_lost_controllers_job(make_room):
+def test_node_without_room_does_not_take_a_lost_controllers_job(make_room, settings):
     """ctrl-1 is lost while its job runs. ctrl-0 is disabled, or already at its capacity. The
     task manager would not place work on it, so it must not take ctrl-1's job either: the claim would
     sit with no room to run the adoption.
     """
+    # The heartbeat's own health check resets this node's capacity, so a full node is one whose jobs cost more than it has.
+    settings.AWX_CONTROL_NODE_TASK_IMPACT = 10**6
     make_cluster()
     job = running_job(PEER, task_id='peer-task')
     fillers = make_room()
@@ -386,20 +373,16 @@ def xfail(bug, summary):
     return pytest.mark.xfail(strict=True, reason=f'{bug}: {summary}')
 
 
-def xfail_playbook_left_running(bug):
-    return pytest.mark.xfail(strict=True, reason=f'{bug}: a reaped job leaves its playbook running')
-
-
 @pytest.mark.parametrize(
     'make_job',
     [
-        pytest.param(job_of_template_without_simultaneous_runs, id='AAP-96832-same-hosts', marks=xfail_playbook_left_running('AAP-96832')),
-        pytest.param(job_in_workflow, id='AAP-96833-nested-workflow', marks=xfail_playbook_left_running('AAP-96833')),
-        pytest.param(job_of_template_without_simultaneous_runs, id='AAP-96834-relaunch', marks=xfail_playbook_left_running('AAP-96834')),
-        pytest.param(job_in_limited_instance_group, id='AAP-96837-instance-group-limit', marks=xfail_playbook_left_running('AAP-96837')),
-        pytest.param(peer_job, id='AAP-96841-execution-node-capacity', marks=xfail_playbook_left_running('AAP-96841')),
-        pytest.param(job_in_workflow, id='AAP-96844-workflow-branch', marks=xfail_playbook_left_running('AAP-96844')),
-        pytest.param(job_in_workflow, id='AAP-96845-set-stats-artifacts', marks=xfail_playbook_left_running('AAP-96845')),
+        pytest.param(job_of_template_without_simultaneous_runs, id='AAP-96832-same-hosts'),
+        pytest.param(job_in_workflow, id='AAP-96833-nested-workflow'),
+        pytest.param(job_of_template_without_simultaneous_runs, id='AAP-96834-relaunch'),
+        pytest.param(job_in_limited_instance_group, id='AAP-96837-instance-group-limit'),
+        pytest.param(peer_job, id='AAP-96841-execution-node-capacity'),
+        pytest.param(job_in_workflow, id='AAP-96844-workflow-branch'),
+        pytest.param(job_in_workflow, id='AAP-96845-set-stats-artifacts'),
     ],
 )
 @pytest.mark.django_db

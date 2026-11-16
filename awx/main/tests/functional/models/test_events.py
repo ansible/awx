@@ -6,6 +6,7 @@ from django.utils.timezone import now
 from django.db.models import Q
 
 from awx.main.models import Job, JobEvent, Inventory, Host, JobHostSummary, HostMetric
+from awx.main.models import events as events_module
 
 
 @pytest.mark.django_db
@@ -113,6 +114,84 @@ class TestEvents:
                 assert latest_summary.id == JobHostSummary.objects.first().id
             else:
                 assert latest_summary is None
+
+    def test_host_summary_generation_is_idempotent(self):
+        # A job can see its `playbook_on_stats` processed twice: when a controller is lost
+        # mid-job, the dying pod's callback receiver drains its queue while the adopting
+        # controller replays the same stream. The second pass used to blow up on the
+        # (job_id, host_name) unique constraint and abort the whole bulk_create.
+        self._generate_hosts(10)
+        stats = dict((hostname, len(hostname)) for hostname in self.hostnames)
+
+        self._create_job_event(ok=stats)
+        self._create_job_event(ok=stats, parent_uuid='abc456')
+
+        assert self.job.job_host_summaries.count() == len(self.hostnames)
+        assert sorted([s.host_name for s in self.job.job_host_summaries.all()]) == sorted(self.hostnames)
+        for s in self.job.job_host_summaries.all():
+            assert s.ok == len(s.host_name)
+
+    def test_replayed_stats_do_not_double_count_host_metrics(self):
+        # The replay must be a true no-op. A bare `ignore_conflicts` on the insert would keep
+        # the summaries correct but still run every host back through HostMetric, inflating
+        # automated_counter for an automation that only happened once.
+        self._generate_hosts(5)
+        stats = dict((hostname, len(hostname)) for hostname in self.hostnames)
+
+        self._create_job_event(ok=stats)
+        self._create_job_event(ok=stats, parent_uuid='abc456')
+
+        for hm in HostMetric.objects.all():
+            assert hm.automated_counter == 1
+
+    def test_concurrent_stats_do_not_double_count_host_metrics(self):
+        # 5.9 Concurrent stats insert. The sequential replay above is skipped by reading the
+        # recorded summaries up front. Two writers can also both read nothing recorded and
+        # then both insert: the loser's insert is dropped by ignore_conflicts, so it must
+        # not count the hosts it did not record.
+        self._generate_hosts(5)
+        stats = dict((hostname, len(hostname)) for hostname in self.hostnames)
+        real_advisory_lock = events_module.advisory_lock
+        peer_ran = []
+
+        def peer_finishes_first(*args, **kwargs):
+            # Fires once, right where the real race window is: after a writer has read
+            # "nothing recorded yet" and decided what to insert, but before it takes the
+            # lock. A second writer landing here first is exactly the case ignore_conflicts
+            # exists to protect against.
+            if not peer_ran:
+                peer_ran.append(True)
+                self._create_job_event(ok=stats, parent_uuid='peer')
+            return real_advisory_lock(*args, **kwargs)
+
+        with mock.patch.object(events_module, 'advisory_lock', side_effect=peer_finishes_first):
+            self._create_job_event(ok=stats)
+
+        assert peer_ran
+        assert self.job.job_host_summaries.count() == len(self.hostnames)
+        for hm in HostMetric.objects.all():
+            assert hm.automated_counter == 1
+
+    def test_two_jobs_on_the_same_hosts_keep_separate_summaries(self):
+        # 4.6 Two playbooks on the same hosts, one orphaned. Adoption replays a job's stats
+        # through this same path, so two jobs of one inventory must each get their own
+        # summaries even though every host_name collides: JobHostSummary is unique per
+        # (job_id, host_name), not per host_name alone.
+        self._generate_hosts(5)
+        job_a = self.job
+        job_b = Job(inventory=self.inventory)
+        job_b.save()
+        stats_a = dict((hostname, len(hostname)) for hostname in self.hostnames)
+        stats_b = dict((hostname, len(hostname) * 2) for hostname in self.hostnames)
+
+        self._create_job_event(ok=stats_a)
+        self.job = job_b
+        self._create_job_event(ok=stats_b, parent_uuid='job-b-stats')
+
+        assert {s.host_name: s.ok for s in job_a.job_host_summaries.all()} == stats_a
+        assert {s.host_name: s.ok for s in job_b.job_host_summaries.all()} == stats_b
+        for hm in HostMetric.objects.all():
+            assert hm.automated_counter == 2  # each host ran once per job, two jobs
 
     def test_host_metrics_insert(self):
         self._generate_hosts(10)

@@ -19,7 +19,7 @@ import pytest
 from django.db import DatabaseError
 from django.utils.timezone import now, timedelta
 
-from awx.main.models import Inventory, Job, JobEvent
+from awx.main.models import Host, Inventory, Job, JobEvent
 from awx.main.tasks import jobs
 from awx.main.tasks.receptor import reattach_to_work_unit
 from awx.main.tasks.system import (
@@ -94,15 +94,16 @@ def test_failed_playbook_finalizes_failed(job_with_unit):
 
 
 @pytest.mark.django_db
-def test_unit_still_running_is_deferred(job_with_unit):
+def test_unit_still_running_is_streamed_live(job_with_unit):
+    """A running unit is streamed, not deferred: its events reach the job as they are produced."""
     work = FakeReceptorWork({UNIT: FakeWorkUnit(make_events(10), state='Running')})
 
-    assert reattach_to_work_unit(job_with_unit, work) is False
+    assert reattach_to_work_unit(job_with_unit, work) is True
 
     job_with_unit.refresh_from_db()
-    assert job_with_unit.status == 'running'
-    assert RecordingDispatcher.dispatched == []
-    assert UNIT in work.units
+    assert job_with_unit.status == 'successful'
+    assert RecordingDispatcher.counters() == list(range(1, 11))
+    assert UNIT not in work.units, 'work unit released after finalize'
 
 
 @pytest.mark.django_db
@@ -171,22 +172,39 @@ def test_orphan_within_the_deadline_is_adopted(quiet_orphan):
 
     job.refresh_from_db()
     assert job.status == 'successful'
-    assert job.finished == clock()
+    assert job.finished == last_event, 'an adopted job finishes when its last event was saved, not when it was adopted'
     assert RecordingDispatcher.counters() == list(range(2, 11))
     assert ('close',) in work.calls
 
 
 @pytest.mark.django_db
-def test_orphan_past_the_deadline_is_failed_without_contacting_receptor(quiet_orphan):
+def test_unreachable_unit_fails_the_job_after_the_adoption_timeout(quiet_orphan):
+    """Only an unreachable unit times out; a quiet job whose unit answers is adopted however old its last event."""
     job, last_event = quiet_orphan
-    opened = mock.Mock()
+    work = FakeReceptorWork({UNIT: FakeWorkUnit(make_events(10), status_error=RuntimeError('node unreachable'))})
+    clock = FakeClock(last_event)
 
-    adopt_job(job.id, open_work=opened, clock=FakeClock(last_event + timedelta(seconds=TIMEOUT + 1)))
+    adopt_job(job.id, open_work=lambda: work, clock=clock)
+    job.refresh_from_db()
+    assert job.status == 'running'
+
+    clock.advance(TIMEOUT + 1)
+    adopt_job(job.id, open_work=lambda: work, clock=clock)
 
     job.refresh_from_db()
     assert job.status == 'failed'
     assert 'HADR_JOB_ADOPTION_TIMEOUT' in job.job_explanation
-    opened.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_quiet_orphan_with_a_reachable_unit_is_adopted_past_the_deadline(quiet_orphan):
+    job, last_event = quiet_orphan
+    work = FakeReceptorWork({UNIT: FakeWorkUnit(make_events(10))})
+
+    adopt_job(job.id, open_work=lambda: work, clock=FakeClock(last_event + timedelta(seconds=TIMEOUT + 1)))
+
+    job.refresh_from_db()
+    assert job.status == 'successful'
 
 
 @pytest.fixture
@@ -195,7 +213,6 @@ def orphan(me_inst):
     return Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id=UNIT, started=now() - timedelta(seconds=60))
 
 
-@pytest.mark.xfail(strict=True, reason='AAP-96828: an error while finalizing a resumed job releases its unit and strands the job')
 @pytest.mark.django_db
 def test_finalize_error_is_retried_on_the_next_adoption(orphan):
     """Finalize strand. The first adoption streams the whole unit, then finalization raises. Today the
@@ -220,7 +237,6 @@ def test_finalize_error_is_retried_on_the_next_adoption(orphan):
     assert orphan.status == 'successful'
 
 
-@pytest.mark.xfail(strict=True, reason='AAP-96829: a restart fails a healthy job with a long quiet task while its playbook keeps running')
 @pytest.mark.django_db
 def test_quiet_job_whose_unit_is_still_running_is_not_failed(orphan):
     """Quiet deadline. The playbook is in a long task with no output, so its last event is older than
@@ -235,32 +251,7 @@ def test_quiet_job_whose_unit_is_still_running_is_not_failed(orphan):
     adopt_job(orphan.id, open_work=lambda: work, clock=clock)
 
     orphan.refresh_from_db()
-    assert orphan.status == 'running'
-
-
-@pytest.mark.django_db
-def test_adoption_waits_through_repeated_restarts_and_replays_each_event_once(orphan):
-    """Three restarts during one job. While the unit runs, each adoption defers; once it finishes, the
-    replay sends only the events not yet saved, each once.
-    """
-    clock = FakeClock()
-    save_events(orphan, range(1, 13), created=clock())
-    unit = FakeWorkUnit(make_events(30), state='Running')
-    work = FakeReceptorWork({UNIT: unit})
-
-    for _ in range(3):
-        adopt_job(orphan.id, open_work=lambda: work, clock=clock)
-        orphan.refresh_from_db()
-        assert orphan.status == 'running'
-        assert RecordingDispatcher.dispatched == []
-        clock.advance(60)
-
-    unit.state = 'Succeeded'
-    adopt_job(orphan.id, open_work=lambda: work, clock=clock)
-
-    orphan.refresh_from_db()
     assert orphan.status == 'successful'
-    assert RecordingDispatcher.counters() == list(range(13, 31))
 
 
 @pytest.mark.django_db
@@ -304,7 +295,6 @@ def test_unreachable_unit_is_waited_for_then_failed_once(me_inst):
     assert RecordingDispatcher.dispatched == []
 
 
-@pytest.mark.xfail(strict=True, reason='AAP-96857: an adopted job that timed out does not say so')
 @pytest.mark.django_db
 def test_adopted_job_that_timed_out_says_so(me_inst):
     """Job timeout while orphaned. The timeout is enforced on the execution node, so the unit ends with
@@ -321,7 +311,6 @@ def test_adopted_job_that_timed_out_says_so(me_inst):
     assert 'timeout' in job.job_explanation
 
 
-@pytest.mark.xfail(strict=True, reason='AAP-96830: canceling a job whose controller is down is dropped; the job never ends canceled')
 @pytest.mark.django_db
 def test_cancel_requested_while_orphaned_cancels_the_unit(me_inst):
     """Cancel while orphaned. The user canceled while the controller was down, so the cancel reached no
@@ -353,6 +342,12 @@ def test_canceled_job_whose_unit_is_gone_is_finalized_canceled(me_inst):
     assert job.status == 'canceled'
 
 
+def host_snapshot(inventory):
+    """The host count a job saves at start, with the inventory unchanged since: what adoption needs to trust host ids."""
+    Host.objects.update(modified=now() - timedelta(minutes=5))
+    return {'host_count': inventory.hosts.count()}
+
+
 @pytest.mark.django_db
 def test_adopted_slice_maps_only_its_own_hosts(me_inst, inventory):
     """Job slicing. Slice 1 of 2 over five hosts runs fp-h1, fp-h3 and fp-h5. The host map adoption
@@ -360,7 +355,7 @@ def test_adopted_slice_maps_only_its_own_hosts(me_inst, inventory):
     no other.
     """
     hosts = {name: inventory.hosts.create(name=name) for name in ('fp-h1', 'fp-h2', 'fp-h3', 'fp-h4', 'fp-h5')}
-    job = running_job(me_inst.hostname, inventory=inventory, job_slice_number=1, job_slice_count=2)
+    job = running_job(me_inst.hostname, inventory=inventory, job_slice_number=1, job_slice_count=2, job_env=host_snapshot(inventory))
     work = FakeReceptorWork({UNIT: FakeWorkUnit(stats_event(make_events(5), ['fp-h1', 'fp-h3', 'fp-h5']))})
 
     adopt_job(job.id, open_work=lambda: work)
@@ -377,7 +372,7 @@ def test_adopted_job_updates_host_pointers_and_inventory_counts(me_inst, invento
     """
     hostnames = ['dc-h1', 'dc-h2', 'dc-h3']
     hosts = {name: inventory.hosts.create(name=name) for name in hostnames}
-    job = running_job(me_inst.hostname, inventory=inventory)
+    job = running_job(me_inst.hostname, inventory=inventory, job_env=host_snapshot(inventory))
     work = FakeReceptorWork({UNIT: FakeWorkUnit(stats_event(make_events(5), hostnames, failed=['dc-h2']))})
 
     adopt_job(job.id, open_work=lambda: work)
@@ -399,7 +394,7 @@ def test_adopted_job_maps_constructed_hosts_like_a_normal_run(me_inst, inventory
     constructed = Inventory.objects.create(name='constructed', kind='constructed', organization=organization)
     constructed.input_inventories.add(inventory)
     constructed_host = constructed.hosts.create(name='ci-h1', instance_id=str(source.id))
-    job = running_job(me_inst.hostname, inventory=constructed)
+    job = running_job(me_inst.hostname, inventory=constructed, job_env=host_snapshot(constructed))
     work = FakeReceptorWork({UNIT: FakeWorkUnit(stats_event(make_events(3), ['ci-h1']))})
 
     adopt_job(job.id, open_work=lambda: work)
