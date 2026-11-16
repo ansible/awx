@@ -682,41 +682,41 @@ def test_work_unit_released_on_quota_exceeded():
     Scenario: Job hits quota limit → _handle_work_error returns None →
     BaseTask.run() early-returns. Work unit MUST be released.
     """
-    receptor_ctl = mock.MagicMock()
+    work = mock.MagicMock()
     receptor_job = mock.MagicMock()
     receptor_job.unit_id = "test-unit-123"
-    receptor_job.receptor_ctl = receptor_ctl
+    receptor_job.work = work
 
     # When res is None (quota exceeded case)
     res = None
 
     # This is the fixed code path from jobs.py lines 810-818
     if not res:
-        if receptor_job and getattr(receptor_job, 'receptor_ctl', None):
+        if receptor_job and getattr(receptor_job, 'work', None):
             try:
-                receptor_job._receptor_release_work(receptor_job.receptor_ctl, 'error')
+                receptor_job._receptor_release_work(receptor_job.work, 'error')
             except Exception:
                 pass
 
     # Verify release was called
-    receptor_job._receptor_release_work.assert_called_once_with(receptor_ctl, 'error')
+    receptor_job._receptor_release_work.assert_called_once_with(work, 'error')
 
 
-def test_work_unit_not_released_if_no_receptor_ctl():
+def test_work_unit_not_released_if_no_receptor_work():
     """
-    Edge case: receptor_ctl not set (transmit phase failed before unit submission).
+    Edge case: work not set (transmit phase failed before unit submission).
 
-    Verify graceful handling when receptor_ctl is None.
+    Verify graceful handling when work is None.
     """
     receptor_job = mock.MagicMock(spec=['unit_id', '_receptor_release_work'])
-    receptor_job.receptor_ctl = None  # Not set
+    receptor_job.work = None  # Not set
 
     res = None
 
     # Code should not crash
     if not res:
-        if receptor_job and getattr(receptor_job, 'receptor_ctl', None):
-            receptor_job._receptor_release_work(receptor_job.receptor_ctl, 'error')
+        if receptor_job and getattr(receptor_job, 'work', None):
+            receptor_job._receptor_release_work(receptor_job.work, 'error')
         # else: No release needed, unit was never submitted
 
     # Verify _receptor_release_work was NOT called
