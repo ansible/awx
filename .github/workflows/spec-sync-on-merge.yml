@@ -87,7 +87,7 @@ jobs:
         id: compare
         run: |
           COMPONENT_SPEC="./openapi.yaml"
-          SPEC_REPO_FILE="spec-repo/controller.yaml"
+          SPEC_REPO_FILE="spec-repo/controller.json"
 
           # Check if spec file exists in spec repo
           if [ ! -f "$SPEC_REPO_FILE" ]; then
@@ -109,8 +109,8 @@ jobs:
       - name: Update spec file
         if: steps.compare.outputs.has_diff == 'true'
         run: |
-          cp "./openapi.yaml" "spec-repo/controller.yaml"
-          echo "✅ Updated spec-repo/controller.yaml"
+          cp "./openapi.yaml" "spec-repo/controller.json"
+          echo "✅ Updated spec-repo/controller.json"
 
       - name: Create or update PR in spec repo
         if: steps.compare.outputs.has_diff == 'true'
@@ -161,7 +161,7 @@ jobs:
           git checkout -b "$BRANCH_NAME"
 
           # Add and commit changes
-          git add "controller.yaml"
+          git add "controller.json"
 
           if [ "${{ steps.compare.outputs.is_new_file }}" == "true" ]; then
             COMMIT_MSG="Add Controller OpenAPI spec for ${SPEC_BRANCH}"
@@ -190,7 +190,7 @@ jobs:
           **Source Branch:** \`${SPEC_BRANCH}\`
           **Spec Repo Branch:** \`${SPEC_BRANCH}\`
           **Component:** \`Controller\`
-          **Spec File:** \`controller.yaml\`
+          **Spec File:** \`controller.json\`
 
           ## Changes
           $(if [ "${{ steps.compare.outputs.is_new_file }}" == "true" ]; then echo "- 🆕 New spec file created"; else echo "- 📝 Spec file updated with latest changes"; fi)
