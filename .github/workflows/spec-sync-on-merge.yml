@@ -83,10 +83,16 @@ jobs:
           echo "##[error]This branch must be created in the spec repo before specs can be synced."
           exit 1
 
+      - name: Convert spec to JSON
+        run: |
+          pip install yq
+          yq -o=json '.' ./openapi.yaml > ./openapi.json
+          echo "✅ Converted openapi.yaml to JSON"
+
       - name: Compare specs
         id: compare
         run: |
-          COMPONENT_SPEC="./openapi.yaml"
+          COMPONENT_SPEC="./openapi.json"
           SPEC_REPO_FILE="spec-repo/controller.json"
 
           # Check if spec file exists in spec repo
@@ -109,7 +115,7 @@ jobs:
       - name: Update spec file
         if: steps.compare.outputs.has_diff == 'true'
         run: |
-          cp "./openapi.yaml" "spec-repo/controller.json"
+          cp "./openapi.json" "spec-repo/controller.json"
           echo "✅ Updated spec-repo/controller.json"
 
       - name: Create or update PR in spec repo
