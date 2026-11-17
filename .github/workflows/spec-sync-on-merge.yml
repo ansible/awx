@@ -85,8 +85,7 @@ jobs:
 
       - name: Convert spec to JSON
         run: |
-          pip install yq
-          yq -o=json '.' ./openapi.yaml > ./openapi.json
+          python3 -c "import json, yaml, sys; json.dump(yaml.safe_load(open(sys.argv[1])), open(sys.argv[2], 'w'), indent=2)" ./openapi.yaml ./openapi.json
           echo "✅ Converted openapi.yaml to JSON"
 
       - name: Compare specs
