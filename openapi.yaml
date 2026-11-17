@@ -2835,6 +2835,7 @@ paths:
           types.
       tags:
       - credentials
+      deprecated: true
       responses:
         '200':
           content:
@@ -2843,6 +2844,7 @@ paths:
                 $ref: '#/components/schemas/PaginatedResourceAccessListElementList'
           description: ''
       x-ai-description: Get access list for a credential
+      x-api-deprecated-detail: Resource Access List has been deprecated.
   /api/v2/credentials/{id}/activity_stream/:
     get:
       operationId: credentials_activity_stream_list
@@ -3089,6 +3091,7 @@ paths:
           types.
       tags:
       - credentials
+      deprecated: true
       responses:
         '200':
           content:
@@ -3096,6 +3099,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedRoleList'
           description: ''
+      x-api-deprecated-detail: Credential Object Roles is deprecated.
       x-ai-description: List roles of a credential
   /api/v2/credentials/{id}/owner_teams/:
     get:
@@ -3267,10 +3271,12 @@ paths:
       description: Show Dashboard Details
       tags:
       - dashboard
+      deprecated: true
       responses:
         '200':
           description: No response body
       x-ai-description: Get aggregate statistics for Tower
+      x-api-deprecated-detail: The Dashboard endpoint is deprecated.
   /api/v2/dashboard/graphs/jobs/:
     get:
       operationId: dashboard_graphs_jobs_retrieve
@@ -5758,6 +5764,7 @@ paths:
           types.
       tags:
       - instance_groups
+      deprecated: true
       responses:
         '200':
           content:
@@ -5766,6 +5773,7 @@ paths:
                 $ref: '#/components/schemas/PaginatedResourceAccessListElementList'
           description: ''
       x-ai-description: Retrieve access list of an instance group
+      x-api-deprecated-detail: Resource Access List has been deprecated.
   /api/v2/instance_groups/{id}/instances/:
     get:
       operationId: instance_groups_instances_list
@@ -5974,6 +5982,7 @@ paths:
           types.
       tags:
       - instance_groups
+      deprecated: true
       responses:
         '200':
           content:
@@ -5981,6 +5990,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedRoleList'
           description: ''
+      x-api-deprecated-detail: Instance Group Object Roles has been deprecated.
       x-ai-description: List all roles for an instance_group
   /api/v2/instances/:
     get:
@@ -6677,6 +6687,7 @@ paths:
           types.
       tags:
       - inventories
+      deprecated: true
       responses:
         '200':
           content:
@@ -6684,6 +6695,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedResourceAccessListElementList'
           description: ''
+      x-api-deprecated-detail: Resource Access List has been deprecated.
       x-ai-description: List users who can access the inventory
   /api/v2/inventories/{id}/activity_stream/:
     get:
@@ -7529,6 +7541,7 @@ paths:
           types.
       tags:
       - inventories
+      deprecated: true
       responses:
         '200':
           content:
@@ -7536,6 +7549,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedRoleList'
           description: ''
+      x-api-deprecated-detail: Inventory Object Roles is deprecated.
       x-ai-description: List roles of an inventory
   /api/v2/inventories/{id}/root_groups/:
     get:
@@ -7880,6 +7894,17 @@ paths:
   /api/v2/inventory_sources/{id}/:
     get:
       operationId: inventory_sources_retrieve
+      description: |-
+        View mixin that emits X-API-Deprecated headers for deprecated serializer fields.
+
+        Pair with DeprecationSerializerMixin on the serializer side.
+        The serializer detects which deprecated fields the caller actually sent
+        and stores warnings on the view instance. This mixin reads them in
+        finalize_response and calls mark_deprecated for each.
+
+        Usage:
+            class MyViewSet(DeprecatedFieldsViewMixin, ModelViewSet):
+                serializer_class = MySerializer  # uses DeprecationSerializerMixin
       parameters:
       - in: path
         name: id
@@ -7899,6 +7924,17 @@ paths:
       x-ai-description: Retrieve an inventory source
     put:
       operationId: inventory_sources_update
+      description: |-
+        View mixin that emits X-API-Deprecated headers for deprecated serializer fields.
+
+        Pair with DeprecationSerializerMixin on the serializer side.
+        The serializer detects which deprecated fields the caller actually sent
+        and stores warnings on the view instance. This mixin reads them in
+        finalize_response and calls mark_deprecated for each.
+
+        Usage:
+            class MyViewSet(DeprecatedFieldsViewMixin, ModelViewSet):
+                serializer_class = MySerializer  # uses DeprecationSerializerMixin
       parameters:
       - in: path
         name: id
@@ -7924,6 +7960,17 @@ paths:
       x-ai-description: Update an inventory source
     patch:
       operationId: inventory_sources_partial_update
+      description: |-
+        View mixin that emits X-API-Deprecated headers for deprecated serializer fields.
+
+        Pair with DeprecationSerializerMixin on the serializer side.
+        The serializer detects which deprecated fields the caller actually sent
+        and stores warnings on the view instance. This mixin reads them in
+        finalize_response and calls mark_deprecated for each.
+
+        Usage:
+            class MyViewSet(DeprecatedFieldsViewMixin, ModelViewSet):
+                serializer_class = MySerializer  # uses DeprecationSerializerMixin
       parameters:
       - in: path
         name: id
@@ -7948,6 +7995,17 @@ paths:
       x-ai-description: Update an inventory source
     delete:
       operationId: inventory_sources_destroy
+      description: |-
+        View mixin that emits X-API-Deprecated headers for deprecated serializer fields.
+
+        Pair with DeprecationSerializerMixin on the serializer side.
+        The serializer detects which deprecated fields the caller actually sent
+        and stores warnings on the view instance. This mixin reads them in
+        finalize_response and calls mark_deprecated for each.
+
+        Usage:
+            class MyViewSet(DeprecatedFieldsViewMixin, ModelViewSet):
+                serializer_class = MySerializer  # uses DeprecationSerializerMixin
       parameters:
       - in: path
         name: id
@@ -8774,7 +8832,17 @@ paths:
   /api/v2/inventory_updates/{id}/:
     get:
       operationId: inventory_updates_retrieve
-      description: Special handling when deleting a running unified job object.
+      description: |-
+        View mixin that emits X-API-Deprecated headers for deprecated serializer fields.
+
+        Pair with DeprecationSerializerMixin on the serializer side.
+        The serializer detects which deprecated fields the caller actually sent
+        and stores warnings on the view instance. This mixin reads them in
+        finalize_response and calls mark_deprecated for each.
+
+        Usage:
+            class MyViewSet(DeprecatedFieldsViewMixin, ModelViewSet):
+                serializer_class = MySerializer  # uses DeprecationSerializerMixin
       parameters:
       - in: path
         name: id
@@ -8794,7 +8862,17 @@ paths:
       x-ai-description: Retrieve an inventory update
     delete:
       operationId: inventory_updates_destroy
-      description: Special handling when deleting a running unified job object.
+      description: |-
+        View mixin that emits X-API-Deprecated headers for deprecated serializer fields.
+
+        Pair with DeprecationSerializerMixin on the serializer side.
+        The serializer detects which deprecated fields the caller actually sent
+        and stores warnings on the view instance. This mixin reads them in
+        finalize_response and calls mark_deprecated for each.
+
+        Usage:
+            class MyViewSet(DeprecatedFieldsViewMixin, ModelViewSet):
+                serializer_class = MySerializer  # uses DeprecationSerializerMixin
       parameters:
       - in: path
         name: id
@@ -9382,6 +9460,7 @@ paths:
           types.
       tags:
       - job_templates
+      deprecated: true
       responses:
         '200':
           content:
@@ -9389,6 +9468,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedResourceAccessListElementList'
           description: ''
+      x-api-deprecated-detail: Resource Access List has been deprecated.
       x-ai-description: List users who can access a job template
   /api/v2/job_templates/{id}/activity_stream/:
     get:
@@ -10279,6 +10359,7 @@ paths:
           types.
       tags:
       - job_templates
+      deprecated: true
       responses:
         '200':
           content:
@@ -10286,6 +10367,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedRoleList'
           description: ''
+      x-api-deprecated-detail: Job Template Object Roles is deprecated.
       x-ai-description: List roles of a job template
   /api/v2/job_templates/{id}/schedules/:
     get:
@@ -11963,6 +12045,7 @@ paths:
           types.
       tags:
       - organizations
+      deprecated: true
       responses:
         '200':
           content:
@@ -11970,6 +12053,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedResourceAccessListElementList'
           description: ''
+      x-api-deprecated-detail: Resource Access List has been deprecated.
       x-ai-description: List users who can access the organization
   /api/v2/organizations/{id}/activity_stream/:
     get:
@@ -13104,6 +13188,7 @@ paths:
           types.
       tags:
       - organizations
+      deprecated: true
       responses:
         '200':
           content:
@@ -13111,6 +13196,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedRoleList'
           description: ''
+      x-api-deprecated-detail: Organization Object Roles is deprecated.
       x-ai-description: List roles of an organization
   /api/v2/organizations/{id}/projects/:
     get:
@@ -14035,6 +14121,7 @@ paths:
           types.
       tags:
       - projects
+      deprecated: true
       responses:
         '200':
           content:
@@ -14042,6 +14129,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedResourceAccessListElementList'
           description: ''
+      x-api-deprecated-detail: Resource Access List has been deprecated.
       x-ai-description: List users who can access the project
   /api/v2/projects/{id}/activity_stream/:
     get:
@@ -14480,6 +14568,7 @@ paths:
           types.
       tags:
       - projects
+      deprecated: true
       responses:
         '200':
           content:
@@ -14487,6 +14576,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedRoleList'
           description: ''
+      x-api-deprecated-detail: Project Object Roles is deprecated.
       x-ai-description: List roles of a project
   /api/v2/projects/{id}/playbooks/:
     get:
@@ -14939,6 +15029,7 @@ paths:
           types.
       tags:
       - roles
+      deprecated: true
       responses:
         '200':
           content:
@@ -14946,6 +15037,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedRoleList'
           description: ''
+      x-api-deprecated-detail: Role is deprecated.
       x-ai-description: List roles
   /api/v2/roles/{id}/:
     get:
@@ -14959,6 +15051,7 @@ paths:
         required: true
       tags:
       - roles
+      deprecated: true
       responses:
         '200':
           content:
@@ -14966,6 +15059,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Role'
           description: ''
+      x-api-deprecated-detail: Role Detail is deprecated
       x-ai-description: Retrieve a role
   /api/v2/roles/{id}/teams/:
     get:
@@ -15022,6 +15116,7 @@ paths:
           types.
       tags:
       - roles
+      deprecated: true
       responses:
         '200':
           content:
@@ -15029,6 +15124,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedTeamList'
           description: ''
+      x-api-deprecated-detail: Role Teams is deprecated.
       x-ai-description: List teams with a role
     post:
       operationId: roles_teams_create
@@ -15049,6 +15145,7 @@ paths:
             schema:
               $ref: '#/components/schemas/TeamRequest'
         required: true
+      deprecated: true
       responses:
         '201':
           content:
@@ -15057,6 +15154,7 @@ paths:
                 $ref: '#/components/schemas/Team'
           description: ''
       x-ai-description: Add a team to a role
+      x-api-deprecated-detail: Role Teams is deprecated.
   /api/v2/roles/{id}/users/:
     get:
       operationId: roles_users_list
@@ -15112,6 +15210,7 @@ paths:
           types.
       tags:
       - roles
+      deprecated: true
       responses:
         '200':
           content:
@@ -15119,6 +15218,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedUserList'
           description: ''
+      x-api-deprecated-detail: Role Users List is deprecated
       x-ai-description: List users with a role
     post:
       operationId: roles_users_create
@@ -15139,6 +15239,7 @@ paths:
             schema:
               $ref: '#/components/schemas/UserRequest'
         required: true
+      deprecated: true
       responses:
         '201':
           content:
@@ -15147,6 +15248,7 @@ paths:
                 $ref: '#/components/schemas/User'
           description: ''
       x-ai-description: Add a user to a role
+      x-api-deprecated-detail: Role Users List is deprecated
   /api/v2/schedules/:
     get:
       operationId: schedules_list
@@ -16776,6 +16878,7 @@ paths:
           types.
       tags:
       - teams
+      deprecated: true
       responses:
         '200':
           content:
@@ -16783,6 +16886,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedResourceAccessListElementList'
           description: ''
+      x-api-deprecated-detail: Resource Access List has been deprecated.
       x-ai-description: List users who can access the team
   /api/v2/teams/{id}/activity_stream/:
     get:
@@ -16984,6 +17088,7 @@ paths:
           types.
       tags:
       - teams
+      deprecated: true
       responses:
         '200':
           content:
@@ -16991,6 +17096,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedRoleList'
           description: ''
+      x-api-deprecated-detail: Team Object Roles is deprecated.
       x-ai-description: List object roles of a team
   /api/v2/teams/{id}/projects/:
     get:
@@ -17108,6 +17214,7 @@ paths:
           types.
       tags:
       - teams
+      deprecated: true
       responses:
         '200':
           content:
@@ -17115,6 +17222,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedRoleSerializerWithParentAccessList'
           description: ''
+      x-api-deprecated-detail: Team Roles is deprecated.
       x-ai-description: List roles of a team
     post:
       operationId: teams_roles_create
@@ -17129,6 +17237,7 @@ paths:
         required: true
       tags:
       - teams
+      deprecated: true
       responses:
         '201':
           content:
@@ -17137,6 +17246,7 @@ paths:
                 $ref: '#/components/schemas/RoleSerializerWithParentAccess'
           description: ''
       x-ai-description: Add a role to a team
+      x-api-deprecated-detail: Team Roles is deprecated.
   /api/v2/teams/{id}/users/:
     get:
       operationId: teams_users_list
@@ -17544,6 +17654,7 @@ paths:
           types.
       tags:
       - users
+      deprecated: true
       responses:
         '200':
           content:
@@ -17551,6 +17662,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedResourceAccessListElementList'
           description: ''
+      x-api-deprecated-detail: Resource Access List has been deprecated.
       x-ai-description: List users who can access the user
   /api/v2/users/{id}/activity_stream/:
     get:
@@ -17935,6 +18047,7 @@ paths:
           types.
       tags:
       - users
+      deprecated: true
       responses:
         '200':
           content:
@@ -17942,6 +18055,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedRoleSerializerWithParentAccessList'
           description: ''
+      x-api-deprecated-detail: User Roles is deprecated.
       x-ai-description: List roles of a user
     post:
       operationId: users_roles_create
@@ -17956,6 +18070,7 @@ paths:
         required: true
       tags:
       - users
+      deprecated: true
       responses:
         '201':
           content:
@@ -17964,6 +18079,7 @@ paths:
                 $ref: '#/components/schemas/RoleSerializerWithParentAccess'
           description: ''
       x-ai-description: Add a role to a user
+      x-api-deprecated-detail: User Roles is deprecated.
   /api/v2/users/{id}/teams/:
     get:
       operationId: users_teams_list
@@ -19813,6 +19929,7 @@ paths:
           types.
       tags:
       - workflow_job_templates
+      deprecated: true
       responses:
         '200':
           content:
@@ -19820,6 +19937,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedResourceAccessListElementList'
           description: ''
+      x-api-deprecated-detail: Resource Access List has been deprecated.
       x-ai-description: List users who can access a workflow job template
   /api/v2/workflow_job_templates/{id}/activity_stream/:
     get:
@@ -20525,6 +20643,7 @@ paths:
           types.
       tags:
       - workflow_job_templates
+      deprecated: true
       responses:
         '200':
           content:
@@ -20532,6 +20651,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedRoleList'
           description: ''
+      x-api-deprecated-detail: Workflow Job Template Object Roles is deprecated.
       x-ai-description: List roles of a workflow job template
   /api/v2/workflow_job_templates/{id}/schedules/:
     get:
@@ -26770,6 +26890,21 @@ components:
       - organization
     InventorySource:
       type: object
+      description: |-
+        Mixin for serializers to detect deprecated fields in request data
+        and propagate warnings to the view for HTTP header emission.
+
+        Usage:
+            class MySerializer(DeprecationSerializerMixin, Serializer):
+                old_field = CharField(required=False)
+
+                deprecated_fields = {
+                    'old_field': 'old_field is deprecated. Use new_field instead.'
+                }
+
+        When a request includes a deprecated field, the mixin stores the warnings
+        on the view instance (via DRF's serializer context) so that
+        DeprecatedFieldsViewMixin.finalize_response can emit X-API-Deprecated headers.
       properties:
         id:
           type: integer
@@ -26853,6 +26988,9 @@ components:
           minimum: 1
           nullable: true
           description: Cloud credential to use for inventory updates.
+          deprecated: true
+          x-api-deprecated-detail: The credential field has been deprecated. Use credentials
+            instead.
         enabled_var:
           type: string
           nullable: true
@@ -26994,6 +27132,21 @@ components:
       - source
     InventorySourceRequest:
       type: object
+      description: |-
+        Mixin for serializers to detect deprecated fields in request data
+        and propagate warnings to the view for HTTP header emission.
+
+        Usage:
+            class MySerializer(DeprecationSerializerMixin, Serializer):
+                old_field = CharField(required=False)
+
+                deprecated_fields = {
+                    'old_field': 'old_field is deprecated. Use new_field instead.'
+                }
+
+        When a request includes a deprecated field, the mixin stores the warnings
+        on the view instance (via DRF's serializer context) so that
+        DeprecatedFieldsViewMixin.finalize_response can emit X-API-Deprecated headers.
       properties:
         name:
           type: string
@@ -27057,6 +27210,9 @@ components:
           minimum: 1
           nullable: true
           description: Cloud credential to use for inventory updates.
+          deprecated: true
+          x-api-deprecated-detail: The credential field has been deprecated. Use credentials
+            instead.
         enabled_var:
           type: string
           nullable: true
@@ -27146,18 +27302,63 @@ components:
       - source
     InventorySourceUpdate:
       type: object
+      description: |-
+        Mixin for serializers to detect deprecated fields in request data
+        and propagate warnings to the view for HTTP header emission.
+
+        Usage:
+            class MySerializer(DeprecationSerializerMixin, Serializer):
+                old_field = CharField(required=False)
+
+                deprecated_fields = {
+                    'old_field': 'old_field is deprecated. Use new_field instead.'
+                }
+
+        When a request includes a deprecated field, the mixin stores the warnings
+        on the view instance (via DRF's serializer context) so that
+        DeprecatedFieldsViewMixin.finalize_response can emit X-API-Deprecated headers.
       properties:
         can_update:
           type: boolean
           readOnly: true
     InventoryUpdateCancel:
       type: object
+      description: |-
+        Mixin for serializers to detect deprecated fields in request data
+        and propagate warnings to the view for HTTP header emission.
+
+        Usage:
+            class MySerializer(DeprecationSerializerMixin, Serializer):
+                old_field = CharField(required=False)
+
+                deprecated_fields = {
+                    'old_field': 'old_field is deprecated. Use new_field instead.'
+                }
+
+        When a request includes a deprecated field, the mixin stores the warnings
+        on the view instance (via DRF's serializer context) so that
+        DeprecatedFieldsViewMixin.finalize_response can emit X-API-Deprecated headers.
       properties:
         can_cancel:
           type: boolean
           readOnly: true
     InventoryUpdateDetail:
       type: object
+      description: |-
+        Mixin for serializers to detect deprecated fields in request data
+        and propagate warnings to the view for HTTP header emission.
+
+        Usage:
+            class MySerializer(DeprecationSerializerMixin, Serializer):
+                old_field = CharField(required=False)
+
+                deprecated_fields = {
+                    'old_field': 'old_field is deprecated. Use new_field instead.'
+                }
+
+        When a request includes a deprecated field, the mixin stores the warnings
+        on the view instance (via DRF's serializer context) so that
+        DeprecatedFieldsViewMixin.finalize_response can emit X-API-Deprecated headers.
       properties:
         id:
           type: integer
@@ -27241,6 +27442,9 @@ components:
           minimum: 1
           nullable: true
           description: Cloud credential to use for inventory updates.
+          deprecated: true
+          x-api-deprecated-detail: The credential field has been deprecated. Use credentials
+            instead.
         enabled_var:
           type: string
           nullable: true
@@ -27525,6 +27729,21 @@ components:
           readOnly: true
     InventoryUpdateList:
       type: object
+      description: |-
+        Mixin for serializers to detect deprecated fields in request data
+        and propagate warnings to the view for HTTP header emission.
+
+        Usage:
+            class MySerializer(DeprecationSerializerMixin, Serializer):
+                old_field = CharField(required=False)
+
+                deprecated_fields = {
+                    'old_field': 'old_field is deprecated. Use new_field instead.'
+                }
+
+        When a request includes a deprecated field, the mixin stores the warnings
+        on the view instance (via DRF's serializer context) so that
+        DeprecatedFieldsViewMixin.finalize_response can emit X-API-Deprecated headers.
       properties:
         id:
           type: integer
@@ -27710,6 +27929,9 @@ components:
           minimum: 1
           nullable: true
           description: Cloud credential to use for inventory updates.
+          deprecated: true
+          x-api-deprecated-detail: The credential field has been deprecated. Use credentials
+            instead.
         enabled_var:
           type: string
           nullable: true
@@ -31868,6 +32090,21 @@ components:
           maxLength: 128
     PatchedInventorySourceRequest:
       type: object
+      description: |-
+        Mixin for serializers to detect deprecated fields in request data
+        and propagate warnings to the view for HTTP header emission.
+
+        Usage:
+            class MySerializer(DeprecationSerializerMixin, Serializer):
+                old_field = CharField(required=False)
+
+                deprecated_fields = {
+                    'old_field': 'old_field is deprecated. Use new_field instead.'
+                }
+
+        When a request includes a deprecated field, the mixin stores the warnings
+        on the view instance (via DRF's serializer context) so that
+        DeprecatedFieldsViewMixin.finalize_response can emit X-API-Deprecated headers.
       properties:
         name:
           type: string
@@ -31931,6 +32168,9 @@ components:
           minimum: 1
           nullable: true
           description: Cloud credential to use for inventory updates.
+          deprecated: true
+          x-api-deprecated-detail: The credential field has been deprecated. Use credentials
+            instead.
         enabled_var:
           type: string
           nullable: true
