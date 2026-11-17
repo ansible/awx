@@ -50,7 +50,7 @@ jobs:
           DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} \
           COMPOSE_TAG=${BASE_REF:-${REF_NAME}} \
           docker run -u $(id -u) --rm -v ${{ github.workspace }}:/awx_devel/:Z \
-            --workdir=/awx_devel `make print-DEVEL_IMAGE_NAME` /start_tests.sh genschema
+            --workdir=/awx_devel $(make print-DEVEL_IMAGE_NAME) /start_tests.sh genschema
 
       - name: Verify spec file exists
         run: |
