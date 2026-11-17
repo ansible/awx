@@ -79,6 +79,10 @@ When enabled, project updates will pass the `--no-cache` flag to `ansible-galaxy
 bypassing the response cache and fetching the latest available collection versions that match
 the requirements specified in `collections/requirements.yml`.
 
+**Note:** This setting only affects collection-specific requirements files at `collections/requirements.yml`.
+Root-level `requirements.yml` files (which may include both roles and collections) are not affected,
+as only the `ansible-galaxy collection install` command supports the `--no-cache` flag.
+
 **Use this option when:**
 - You've recently published a new collection version to Private Automation Hub
 - Pinning to a specific version fails with resolution errors
