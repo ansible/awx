@@ -33,11 +33,7 @@ def test_to_prometheus_can_omit_help_type_header():
 def _family_line_indexes(payload, metric_name):
     indexes = []
     for i, line in enumerate(payload.splitlines()):
-        if (
-            line.startswith(f'# HELP {metric_name} ')
-            or line.startswith(f'# TYPE {metric_name} ')
-            or line.startswith(f'{metric_name}{{')
-        ):
+        if line.startswith(f'# HELP {metric_name} ') or line.startswith(f'# TYPE {metric_name} ') or line.startswith(f'{metric_name}{{'):
             indexes.append(i)
     return indexes
 
@@ -47,9 +43,7 @@ def _family_line_indexes(payload, metric_name):
 @mock.patch.object(DispatcherMetrics, 'load_other_metrics')
 @mock.patch('awx.main.analytics.subsystem_metrics.get_redis_client')
 @mock.patch('awx.main.analytics.subsystem_metrics.get_dispatcherd_metrics', return_value='')
-def test_metrics_emits_single_help_type_for_all_shared_families(
-    _mock_dispatcherd, _mock_redis, mock_dispatcher_load, mock_callback_load, _mock_indirect_load
-):
+def test_metrics_emits_single_help_type_for_all_shared_families(_mock_dispatcherd, _mock_redis, mock_dispatcher_load, mock_callback_load, _mock_indirect_load):
     """AAP-84834: one HELP/TYPE per shared family; samples contiguous across subsystems."""
     mock_dispatcher_load.return_value = {
         'node.example.com': {
@@ -89,18 +83,14 @@ def test_metrics_emits_single_help_type_for_all_shared_families(
 
         indexes = _family_line_indexes(payload, metric_name)
         assert indexes, metric_name
-        assert indexes == list(range(indexes[0], indexes[0] + len(indexes))), (
-            f'{metric_name} family is not contiguous: indexes={indexes}\n{payload}'
-        )
+        assert indexes == list(range(indexes[0], indexes[0] + len(indexes))), f'{metric_name} family is not contiguous: indexes={indexes}\n{payload}'
 
     # Unique metrics still present and not mixed into a shared family block.
     assert 'callback_receiver_events_insert_db{' in payload
     assert 'task_manager__schedule_calls{' in payload
     shared_start = min(_family_line_indexes(payload, SHARED_FIELDS[0]))
     shared_end = max(_family_line_indexes(payload, SHARED_FIELDS[-1]))
-    unique_line = next(
-        i for i, line in enumerate(payload.splitlines()) if line.startswith('callback_receiver_events_insert_db{')
-    )
+    unique_line = next(i for i, line in enumerate(payload.splitlines()) if line.startswith('callback_receiver_events_insert_db{'))
     assert unique_line < shared_start or unique_line > shared_end
 
 
@@ -109,9 +99,7 @@ def test_metrics_emits_single_help_type_for_all_shared_families(
 @mock.patch.object(DispatcherMetrics, 'load_other_metrics')
 @mock.patch('awx.main.analytics.subsystem_metrics.get_redis_client')
 @mock.patch('awx.main.analytics.subsystem_metrics.get_dispatcherd_metrics', return_value='')
-def test_metrics_metric_filter_applies_to_shared_families(
-    _mock_dispatcherd, _mock_redis, mock_dispatcher_load, mock_callback_load, _mock_indirect_load
-):
+def test_metrics_metric_filter_applies_to_shared_families(_mock_dispatcherd, _mock_redis, mock_dispatcher_load, mock_callback_load, _mock_indirect_load):
     mock_dispatcher_load.return_value = {
         'node.example.com': {
             'subsystem_metrics_pipe_execute_seconds': 0.1,
@@ -121,9 +109,7 @@ def test_metrics_metric_filter_applies_to_shared_families(
     }
     mock_callback_load.return_value = mock_dispatcher_load.return_value
 
-    request = Request(
-        RequestFactory().get('/api/v2/metrics/', {'metric': 'subsystem_metrics_pipe_execute_seconds'})
-    )
+    request = Request(RequestFactory().get('/api/v2/metrics/', {'metric': 'subsystem_metrics_pipe_execute_seconds'}))
     payload = metrics(request)
 
     assert '# HELP subsystem_metrics_pipe_execute_seconds ' in payload

@@ -382,9 +382,7 @@ class Metrics(MetricsNamespace):
                 if len(metrics_filter) == 0 or field in metrics_filter:
                     # Add subsystem label only for operational metrics
                     namespace = self._namespace if field in shared_fields else None
-                    output_text += self.METRICS[field].to_prometheus(
-                        instance_data, namespace, include_meta=True
-                    )
+                    output_text += self.METRICS[field].to_prometheus(instance_data, namespace, include_meta=True)
         return output_text
 
 
@@ -469,9 +467,7 @@ def _generate_shared_operational_metrics(request, loaded):
         for collector, instance_data in loaded:
             if not instance_data:
                 continue
-            output_text += template.METRICS[field].to_prometheus(
-                instance_data, namespace=collector._namespace, include_meta=include_meta
-            )
+            output_text += template.METRICS[field].to_prometheus(instance_data, namespace=collector._namespace, include_meta=include_meta)
             include_meta = False
     return output_text
 
@@ -487,9 +483,7 @@ def metrics(request):
     loaded = [(collector, collector.load_other_metrics(request)) for collector in collectors]
     output_text = ''
     for collector, instance_data in loaded:
-        output_text += collector.generate_metrics(
-            request, include_shared=False, instance_data=instance_data
-        )
+        output_text += collector.generate_metrics(request, include_shared=False, instance_data=instance_data)
     output_text += _generate_shared_operational_metrics(request, loaded)
 
     dispatcherd_metrics = get_dispatcherd_metrics(request)

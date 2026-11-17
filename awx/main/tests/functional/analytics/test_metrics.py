@@ -165,9 +165,7 @@ def test_indirect_counting_metrics_init():
 @mock.patch.object(subsystem_metrics_module, 'DispatcherMetrics')
 @mock.patch.object(subsystem_metrics_module, 'get_dispatcherd_metrics', return_value='')
 @mock.patch.object(subsystem_metrics_module, '_generate_shared_operational_metrics', return_value='')
-def test_subsystem_metrics_function_includes_indirect_counting(
-    mock_shared, mock_dispatcherd, mock_dispatcher, mock_callback, mock_indirect
-):
+def test_subsystem_metrics_function_includes_indirect_counting(mock_shared, mock_dispatcherd, mock_dispatcher, mock_callback, mock_indirect):
     """subsystem_metrics.metrics() calls generate_metrics on IndirectCountingMetrics."""
     for m in (mock_dispatcher, mock_callback, mock_indirect):
         m.return_value.generate_metrics.return_value = ''
@@ -190,6 +188,11 @@ def test_shared_subsystem_metrics_emit_help_type_once():
             'subsystem_metrics_send_metrics_seconds': 0.25,
             'task_manager__schedule_calls': 9,
             'callback_receiver_events_insert_db': 8,
+            'callback_receiver_batch_events_insert_db': {
+                'counts': [0, 0, 0, 0, 0, 0],
+                'inf': 0,
+                'sum': 0.0,
+            },
         }
     }
     request = mock.MagicMock()
@@ -203,12 +206,8 @@ def test_shared_subsystem_metrics_emit_help_type_once():
         mock.patch.object(dispatcher, 'load_other_metrics', return_value=instance_data),
         mock.patch.object(callback, 'load_other_metrics', return_value=instance_data),
     ):
-        unique_dispatcher = dispatcher.generate_metrics(
-            request, include_shared=False, instance_data=instance_data
-        )
-        unique_callback = callback.generate_metrics(
-            request, include_shared=False, instance_data=instance_data
-        )
+        unique_dispatcher = dispatcher.generate_metrics(request, include_shared=False, instance_data=instance_data)
+        unique_callback = callback.generate_metrics(request, include_shared=False, instance_data=instance_data)
         loaded = [(dispatcher, instance_data), (callback, instance_data)]
         shared = subsystem_metrics_module._generate_shared_operational_metrics(request, loaded)
 
@@ -222,11 +221,7 @@ def test_shared_subsystem_metrics_emit_help_type_once():
 
         lines = shared.splitlines()
         indexes = [
-            i
-            for i, line in enumerate(lines)
-            if line.startswith(f'# HELP {field} ')
-            or line.startswith(f'# TYPE {field} ')
-            or line.startswith(f'{field}{{')
+            i for i, line in enumerate(lines) if line.startswith(f'# HELP {field} ') or line.startswith(f'# TYPE {field} ') or line.startswith(f'{field}{{')
         ]
         assert indexes == list(range(indexes[0], indexes[0] + len(indexes)))
 
