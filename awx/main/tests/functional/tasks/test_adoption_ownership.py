@@ -319,3 +319,33 @@ def test_reap_with_an_owner_fails_the_job_only_while_that_task_still_owns_it():
     assert reaper.reap_job(job, 'failed', job_explanation='gone', owner_task_id='adopt-2') is True
     job.refresh_from_db()
     assert (job.status, job.job_explanation) == ('failed', 'gone')
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('owner_task_id', [None, 'adopt-1'])
+def test_reap_of_a_deleted_job_logs_it_and_does_nothing(owner_task_id, caplog):
+    job = Job.objects.create(status='running', celery_task_id='adopt-1')
+    UnifiedJob.objects.filter(pk=job.pk).delete()
+
+    assert reaper.reap_job(job, 'failed', owner_task_id=owner_task_id) is False
+    assert 'no longer exists (job deleted); not reaping' in caplog.text
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    'status, controller, cause',
+    [
+        ('running', 'awx-2', 'another controller claimed it'),
+        ('running', 'awx-1', 're-claimed on this controller, or a claim was released'),
+        ('pending', 'awx-1', 'it was reset and re-dispatched'),
+        ('successful', 'awx-1', 'someone else already finished it'),
+    ],
+)
+def test_reap_that_lost_its_claim_logs_the_current_owner_and_likely_cause(status, controller, cause, caplog):
+    job = Job.objects.create(status='running', celery_task_id='adopt-1', controller_node='awx-1')
+    UnifiedJob.objects.filter(pk=job.pk).update(status=status, celery_task_id='adopt-2', controller_node=controller)
+
+    assert reaper.reap_job(job, 'failed', owner_task_id='adopt-1') is False
+    assert f"is now owned by task 'adopt-2' on controller '{controller}' with status '{status}'" in caplog.text
+    assert "not by task 'adopt-1' (controller was 'awx-1')" in caplog.text
+    assert caplog.text.rstrip().endswith(cause)

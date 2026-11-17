@@ -14,13 +14,14 @@ from django.db import transaction, IntegrityError, connection as django_connecti
 from django_guid import set_guid
 
 import psutil
+import psycopg
 
 import redis
 
 from awx.main.utils.redis import get_redis_client
 from awx.main.utils.db import set_connection_name
 from awx.main.consumers import emit_channel_notification
-from awx.main.models import Host, JobEvent, AdHocCommandEvent, ProjectUpdateEvent, InventoryUpdateEvent, SystemJobEvent, UnifiedJob
+from awx.main.models import JobEvent, AdHocCommandEvent, ProjectUpdateEvent, InventoryUpdateEvent, SystemJobEvent, UnifiedJob
 from awx.main.constants import ACTIVE_STATES
 from awx.main.models.events import emit_event_detail
 from awx.main.utils.profiling import AWXProfiler
@@ -32,56 +33,31 @@ logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 
 def _is_unique_constraint_violation(exc):
     """Return True if exc is a unique-key IntegrityError (already stored, safe to skip)."""
-    cause = getattr(exc, '__cause__', None)
-    if getattr(cause, 'sqlstate', None) == '23505':
+    if isinstance(exc.__cause__, psycopg.errors.UniqueViolation):
         return True
-    return 'UNIQUE constraint failed' in str(exc)
-
-
-def _null_missing_host_ids(events):
-    """Null host_id on events whose host no longer exists.
-
-    The event host FKs have no DB constraint (lost in the bigint migration), so a host deleted
-    mid-job leaves a dangling id. JobHostSummary already nulls these.
-
-    Only real ids are checked: anything else ('' for an unmapped host) is left to the save, so
-    one malformed id cannot make the whole batch fail here.
-    """
-    ids = {e.host_id for e in events if isinstance(getattr(e, 'host_id', None), int)}
-    if not ids:
-        return
-    live = set(Host.objects.filter(id__in=ids).values_list('id', flat=True))
-    for e in events:
-        if isinstance(getattr(e, 'host_id', None), int) and e.host_id not in live:
-            e.host_id = None
+    return 'UNIQUE constraint failed' in str(exc)  # sqlite, in unit tests
 
 
 def job_stats_wrapup(job_identifier, event=None):
     """Fill in the unified job host_status_counts, fire off notifications if needed"""
     try:
-        # empty dict (versus default of None) can still indicate that events have been processed
-        # for job types like system jobs, and jobs with no hosts matched
-        host_status_counts = {}
-        if event:
-            host_status_counts = event.get_host_status_counts()
-
         # Update host_status_counts while holding the row lock
         with transaction.atomic():
             uj = UnifiedJob.objects.select_for_update().get(pk=job_identifier)
-            # If host_status_counts is already set, another controller already ran stats_wrapup
-            # for this job. Capturing this before the save lets us avoid sending a duplicate
-            # notification below when both controllers process playbook_on_stats concurrently.
-            already_processed = uj.host_status_counts is not None
-            uj.host_status_counts = host_status_counts
+            # Already set: another controller ran stats_wrapup for this job (both can process
+            # playbook_on_stats when a job is adopted), so there is nothing left to do here.
+            if uj.host_status_counts is not None:
+                return
+            # empty dict (versus default of None) can still indicate that events have been processed
+            # for job types like system jobs, and jobs with no hosts matched
+            uj.host_status_counts = event.get_host_status_counts() if event else {}
             uj.save(update_fields=['host_status_counts'])
 
         uj.log_lifecycle("stats_wrapup_finished")
 
         # If the status was a finished state before this update was made, send notifications
         # If not, we will send notifications when the status changes.
-        # Guard on already_processed: if another controller ran stats_wrapup first and the job
-        # is already terminal, that controller's finalization already sent the notification.
-        if uj.status not in ACTIVE_STATES and not already_processed:
+        if uj.status not in ACTIVE_STATES:
             events_processed_hook(uj)
 
     except Exception:
@@ -249,12 +225,6 @@ class CallbackBrokerWorker:
                         metrics_events_missing_created += 1
                     else:  # only calculate the seconds if the created time already has been set
                         metrics_total_job_event_processing_seconds += e.modified - e.created
-                # The host check is optional. If it fails the events are still saved, as before it
-                # existed; a database that is really down fails the bulk_create below instead.
-                try:
-                    _null_missing_host_ids(events)
-                except Exception:
-                    logger.warning('Could not check host ids of events before saving them, saving them as they are', exc_info=True)
                 metrics_duration_to_save = time.perf_counter()
                 saved_events = []
                 try:
@@ -283,7 +253,7 @@ class CallbackBrokerWorker:
                                 events.remove(e)
                                 # A receiver that died after storing the stats event but before
                                 # the wrapup above never ran it. Wrapup is idempotent.
-                                if getattr(e, '_notification_trigger_event', False):
+                                if e.is_wrapup_event:
                                     job_stats_wrapup(getattr(e, e.JOB_REFERENCE), event=e)
                                 continue
 
@@ -307,7 +277,7 @@ class CallbackBrokerWorker:
                     if not getattr(e, '_skip_websocket_message', False):
                         metrics_events_broadcast += 1
                         emit_event_detail(e)
-                    if getattr(e, '_notification_trigger_event', False):
+                    if e.is_wrapup_event:
                         job_stats_wrapup(getattr(e, e.JOB_REFERENCE), event=e)
             self.last_flush = time.time()
             # only update metrics if we saved events
@@ -369,9 +339,6 @@ class CallbackBrokerWorker:
 
                 if skip_websocket_message:  # if this event sends websocket messages, fire them off on flush
                     event._skip_websocket_message = True
-
-                if notification_trigger_event:  # if this is an Ansible stats event, ensure notifications on flush
-                    event._notification_trigger_event = True
 
                 self.buff.setdefault(cls, []).append(event)
 

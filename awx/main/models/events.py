@@ -134,6 +134,11 @@ class BasePlaybookEvent(CreatedModifiedModel):
     class Meta:
         abstract = True
 
+    @property
+    def is_wrapup_event(self):
+        """True for the event that marks the end of the job's output and triggers stats wrapup."""
+        return self.event == self.WRAPUP_EVENT
+
     # Playbook events will be structured to form the following hierarchy:
     # - playbook_on_start (once for each playbook file)
     #   - playbook_on_vars_prompt (for each play, but before play starts, we
@@ -551,6 +556,14 @@ class JobEvent(BasePlaybookEvent):
 
             from awx.main.models import Host, JobHostSummary  # circular import
 
+            # A job's playbook_on_stats can be processed more than once: when a controller is
+            # lost mid-job, the dying pod's callback receiver drains its queue while the
+            # adopting controller replays the same stream. The summaries are written all at once
+            # (one transaction below), so any summary means the first pass recorded everything;
+            # the replay is a no-op, and host metrics are not counted twice.
+            if JobHostSummary.objects.filter(job_id=job.id).exists():
+                return
+
             if self.job.inventory.kind == 'constructed':
                 all_hosts = Host.objects.filter(id__in=self.job.inventory.hosts.values_list(Cast('instance_id', output_field=models.IntegerField()))).only(
                     'id', 'name'
@@ -564,19 +577,8 @@ class JobEvent(BasePlaybookEvent):
 
             existing_host_ids = set(h.id for h in all_hosts)
 
-            # A job's playbook_on_stats can be processed more than once: when a controller is
-            # lost mid-job, the dying pod's callback receiver drains its queue while the
-            # adopting controller replays the same stream. The second pass used to violate the
-            # (job_id, host_name) unique constraint, which aborted the whole bulk_create and
-            # left a traceback in the log even though the first pass had recorded everything
-            # correctly. Skip what is already recorded so the replay is a no-op — in particular
-            # so host metrics are not counted twice for the same automation.
-            already_recorded = set(JobHostSummary.objects.filter(job_id=job.id).values_list('host_name', flat=True))
-
             summaries = dict()
             for host in hostnames:
-                if host in already_recorded:
-                    continue
                 host_id = host_map.get(host)
                 if host_id not in existing_host_ids:
                     host_id = None
@@ -597,12 +599,12 @@ class JobEvent(BasePlaybookEvent):
                 if bool(summary.dark):
                     logger.warning(f'host {host.lower()} is dark / unreachable, not marking it as updated')
 
-            # Two writers can both read nothing recorded above, so they take turns and look again:
-            # only the writer whose summaries land may count the hosts (the host metrics update
-            # cannot tell a dropped insert from a kept one). ignore_conflicts is the backstop.
+            # Two writers can both pass the check above, so they take turns and look again;
+            # the second returns here, so hosts are counted once. bulk_create(ignore_conflicts=True)
+            # does not say which rows it kept, so the lock decides instead. ignore_conflicts is a backstop.
             with advisory_lock(f'job_host_summary_{job.id}'), transaction.atomic():
-                recorded = set(JobHostSummary.objects.filter(job_id=job.id).values_list('host_name', flat=True))
-                summaries = {key: summary for key, summary in summaries.items() if summary.host_name not in recorded}
+                if JobHostSummary.objects.filter(job_id=job.id).exists():
+                    return
                 # do not count dark / unreachable hosts as updated
                 updated_hosts_list = [summary.host_name.lower() for summary in summaries.values() if not summary.dark]
                 JobHostSummary.objects.bulk_create(summaries.values(), ignore_conflicts=True)
@@ -693,6 +695,11 @@ class BaseCommandEvent(CreatedModifiedModel):
 
     class Meta:
         abstract = True
+
+    @property
+    def is_wrapup_event(self):
+        """True for the event that marks the end of the job's output and triggers stats wrapup."""
+        return self.event == self.WRAPUP_EVENT
 
     event_data = JSONBlob(default=dict, blank=True)
     uuid = models.CharField(

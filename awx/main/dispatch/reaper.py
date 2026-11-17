@@ -9,6 +9,17 @@ from awx.main.models import Instance, UnifiedJob, WorkflowJob
 logger = logging.getLogger('awx.main.dispatch')
 
 
+def _not_reaping_cause(status_now, controller_now, controller_before):
+    """The likely reason a job left the expected task, from its current row."""
+    if status_now not in ('pending', 'waiting', 'running'):
+        return 'someone else already finished it'
+    if status_now != 'running':
+        return 'it was reset and re-dispatched'
+    if controller_now != controller_before:
+        return 'another controller claimed it'
+    return 're-claimed on this controller, or a claim was released'
+
+
 def reap_job(j, status, job_explanation=None, owner_task_id=None):
     """Mark a running job as reaped. Returns True if this call did it.
 
@@ -17,9 +28,17 @@ def reap_job(j, status, job_explanation=None, owner_task_id=None):
     adoption that lost its claim to a later one cannot fail the new owner's job.
     """
     with transaction.atomic():
-        current = UnifiedJob.objects.select_for_update().filter(pk=j.pk).values_list('celery_task_id', flat=True).first()
-        if owner_task_id and current != owner_task_id:
-            logger.warning(f'{j.log_format} is now owned by task {current!r}, not {owner_task_id!r}; not reaping')
+        try:
+            task_id, controller, status_now = UnifiedJob.objects.select_for_update().values_list('celery_task_id', 'controller_node', 'status').get(pk=j.pk)
+        except UnifiedJob.DoesNotExist:
+            logger.warning(f'{j.log_format} no longer exists (job deleted); not reaping')
+            return False
+        if owner_task_id and task_id != owner_task_id:
+            logger.warning(
+                f'{j.log_format} is now owned by task {task_id!r} on controller {controller!r} with status {status_now!r}, '
+                f'not by task {owner_task_id!r} (controller was {j.controller_node!r}); not reaping: '
+                f'{_not_reaping_cause(status_now, controller, j.controller_node)}'
+            )
             return False
         j.refresh_from_db(fields=['status', 'job_explanation'])
         status_before = j.status
