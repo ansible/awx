@@ -1265,6 +1265,66 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
             ('ANSIBLE_GALAXY_SERVER_SERVER1_URL', 'https://cloud.redhat.com/api/automation-hub/'),
         ]
 
+    def test_galaxy_update_on_launch_enabled(self, private_data_dir, project_update, mock_me):
+        """Test that galaxy_update_on_launch is passed to extra vars when enabled"""
+        class RunProjectUpdate(jobs.RunProjectUpdate):
+            __vars__ = {}
+
+            def _write_extra_vars_file(self, private_data_dir, extra_vars, *kw):
+                self.__vars__ = extra_vars
+
+        # Set up project with galaxy_update_on_launch enabled
+        project_update.project.galaxy_update_on_launch = True
+
+        # Add galaxy credentials to enable galaxy functionality
+        credential_type = CredentialType.defaults['galaxy_api_token']()
+        public_galaxy = Credential(
+            pk=1,
+            credential_type=credential_type,
+            inputs={
+                'url': 'https://galaxy.ansible.com/',
+            },
+        )
+        project_update.project.organization.galaxy_credentials.add(public_galaxy)
+
+        task = RunProjectUpdate()
+        task.instance = project_update
+
+        with mock.patch.object(Licenser, 'validate', lambda *args, **kw: {}):
+            task.build_extra_vars_file(project_update, private_data_dir)
+
+        assert task.__vars__['galaxy_update_on_launch'] is True
+
+    def test_galaxy_update_on_launch_disabled(self, private_data_dir, project_update, mock_me):
+        """Test that galaxy_update_on_launch is passed to extra vars when disabled"""
+        class RunProjectUpdate(jobs.RunProjectUpdate):
+            __vars__ = {}
+
+            def _write_extra_vars_file(self, private_data_dir, extra_vars, *kw):
+                self.__vars__ = extra_vars
+
+        # Set up project with galaxy_update_on_launch disabled (default)
+        project_update.project.galaxy_update_on_launch = False
+
+        # Add galaxy credentials to enable galaxy functionality
+        credential_type = CredentialType.defaults['galaxy_api_token']()
+        public_galaxy = Credential(
+            pk=1,
+            credential_type=credential_type,
+            inputs={
+                'url': 'https://galaxy.ansible.com/',
+            },
+        )
+        project_update.project.organization.galaxy_credentials.add(public_galaxy)
+
+        task = RunProjectUpdate()
+        task.instance = project_update
+
+        with mock.patch.object(Licenser, 'validate', lambda *args, **kw: {}):
+            task.build_extra_vars_file(project_update, private_data_dir)
+
+        assert task.__vars__['galaxy_update_on_launch'] is False
+
 
 @pytest.mark.usefixtures("patch_Organization")
 class TestProjectUpdateCredentials(TestJobExecution):
