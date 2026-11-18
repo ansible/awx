@@ -183,7 +183,8 @@ jobs:
             --arg run_url "$RUN_URL" \
             '{text: "Metrics utility tests failed",
               blocks: [
-                {type: "section", text: {type: "mrkdwn", text: (":x: *Metrics utility tests failed* in <" + $pr_url + "|PR #" + $pr_number + ">: " + $pr_title)}},
+                {type: "section", text: {type: "mrkdwn", text: (":x: *Metrics utility tests failed* in <" + $pr_url + "|PR #" + $pr_number + ">")}},
+                {type: "section", text: {type: "plain_text", text: ("PR title: " + $pr_title), emoji: true}},
                 {type: "context", elements: [{type: "mrkdwn", text: ("<" + $run_url + "|View GitHub Actions run>")}]}
               ]}' \
           | curl -sS --fail-with-body -X POST "$SLACK_WEBHOOK" \
