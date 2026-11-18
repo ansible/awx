@@ -160,32 +160,3 @@ jobs:
           MOCK_PROMETHEUS_URL: http://localhost:9090
         # Ignore AWX's parent pytest.ini and run pytest with the utility checkout as root.
         run: uv run pytest -s -v -c pyproject.toml
-
-      - name: Notify Slack on failure
-        if: failure() && github.event_name == 'pull_request'
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_METRICS_UTILITY_WEBHOOK_URL }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          if [ -z "$SLACK_WEBHOOK" ]; then
-            echo "::warning::SLACK_METRICS_UTILITY_WEBHOOK_URL is not configured; skipping Slack notification"
-            exit 0
-          fi
-
-          jq -n \
-            --arg pr_url "$PR_URL" \
-            --arg pr_number "$PR_NUMBER" \
-            --arg pr_title "$PR_TITLE" \
-            --arg run_url "$RUN_URL" \
-            '{text: "Metrics utility tests failed",
-              blocks: [
-                {type: "section", text: {type: "mrkdwn", text: (":x: *Metrics utility tests failed* in <" + $pr_url + "|PR #" + $pr_number + ">")}},
-                {type: "section", text: {type: "plain_text", text: ("PR title: " + $pr_title), emoji: true}},
-                {type: "context", elements: [{type: "mrkdwn", text: ("<" + $run_url + "|View GitHub Actions run>")}]}
-              ]}' \
-          | curl -sS --fail-with-body -X POST "$SLACK_WEBHOOK" \
-              -H 'Content-Type: application/json' \
-              -d @-
