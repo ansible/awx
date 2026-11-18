@@ -5,14 +5,13 @@ on:
   push:
     branches: [devel]
 
-permissions:
-  contents: read
-
 jobs:
   pytest:
     name: metrics-utility pytest
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    permissions:
+      contents: read
     steps:
       - name: Checkout AWX
         uses: actions/checkout@v4
