@@ -599,9 +599,9 @@ class JobEvent(BasePlaybookEvent):
                 if bool(summary.dark):
                     logger.warning(f'host {host.lower()} is dark / unreachable, not marking it as updated')
 
-            # Two writers can both pass the check above, so they take turns and look again;
-            # the second returns here, so hosts are counted once. bulk_create(ignore_conflicts=True)
-            # does not say which rows it kept, so the lock decides instead. ignore_conflicts is a backstop.
+            # Two writers can both pass the check above. The lock only makes them take turns; the
+            # exists() re-check under it is what makes this once-only. bulk_create(ignore_conflicts=True)
+            # does not say which rows it kept, so the re-check decides instead. ignore_conflicts is a backstop.
             with advisory_lock(f'job_host_summary_{job.id}'), transaction.atomic():
                 if JobHostSummary.objects.filter(job_id=job.id).exists():
                     return

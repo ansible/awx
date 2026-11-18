@@ -1057,7 +1057,7 @@ def test_process_startup_jobs_reaps_undispatched_job(me_inst, settings):
 @pytest.mark.django_db
 def test_process_startup_jobs_warns_that_a_submitted_job_may_still_run(me_inst):
     """A controller that died between submit and the work_unit_id save left a playbook that may still be running."""
-    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id=None, job_env={'receptor_submit_started': True})
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id=None, job_env={'AWX_ADOPTION_SUBMIT_STARTED': True})
     _process_startup_jobs(me_inst)
     job.refresh_from_db()
     assert job.status == 'failed'
@@ -1325,7 +1325,7 @@ def test_the_adoption_host_map_resolves_real_hosts(me_inst):
     inv = Inventory.objects.create(name='cb-hostmap-inv', organization=org)
     host = Host.objects.create(name='myhost', inventory=inv)
     job = Job.objects.create(
-        controller_node=me_inst.hostname, status='running', work_unit_id='unit-hm', inventory=inv, started=now(), job_env={'host_count': 1}
+        controller_node=me_inst.hostname, status='running', work_unit_id='unit-hm', inventory=inv, started=now(), job_env={'AWX_ADOPTION_HOST_COUNT': 1}
     )
 
     assert host_trust.assess(job).host_map.get('myhost') == host.id

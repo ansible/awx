@@ -1433,14 +1433,14 @@ def _get_or_create_private_data_dir(job):
 def _adopted_finished_at(job, callback=None, clock=None):
     """When the job *actually* ended, for an adopted job, plus the adoption lag in seconds.
 
+    Only the lag is used, for the job_explanation note and the finalize log. `finished` is not
+    back-dated: like the normal path, it stays the time the controller saw the job end.
+
     On the normal path `finished` is set to `now()` at the moment the controller commits the
     terminal status, which is within a second of the playbook ending. Adoption breaks that
     equivalence: the job keeps running on its execution node while its controller is dead, and
     nobody writes a terminal status until an adopter picks it up. Observed on hadr-rosa-a that
-    is 90-180 s, and it lands on every job the dead controller owned at once — 24 jobs stamped
-    inside a 2.6 s window, each inflated by its own share of the gap. A 27 s playbook reported
-    207 s elapsed (job 2392528). Left alone it silently corrupts every duration measurement
-    taken across a controller failure, which is exactly when we most want to measure.
+    is 90-180 s, and it lands on every job the dead controller owned at once. The lag is that gap.
 
     The wrapup event's `created` is the right source. It is the *execution node's* clock,
     carried in the runner payload, so it marks when the work really finished rather than when
@@ -1548,7 +1548,9 @@ def _finalize_adopted_job(job, callback, exit_code, process_phase_failed, final_
     final_status, exit_code, process_phase_failed = resolve_adopted_status(
         job, callback, final_status, exit_code, process_phase_failed, hook_failed=hook_failed
     )
-    finished_at, adoption_lag = _adopted_finished_at(job, callback, clock=clock)
+    _, adoption_lag = _adopted_finished_at(job, callback, clock=clock)
+    # Same as the normal path: finished is when the controller saw the job end, not when the work did.
+    finished_at = (clock or now)()
     extra = {'finished': finished_at}
     if job.started:
         extra['elapsed'] = (finished_at - job.started).total_seconds()
@@ -1576,9 +1578,8 @@ def _finalize_adopted_job(job, callback, exit_code, process_phase_failed, final_
     _finalize_job_run(type(job), job.pk, callback, final_status, extra_fields=extra, owner_task_id=owner_task_id, _required_status='running')
 
     label = 'exit_code (process phase raised)' if process_phase_failed else 'adoption'
-    # adoption_lag is no longer visible in `finished` now that it is back-dated, and it is the
-    # recovery SLO for this whole feature — how long a job sat done-but-uncommitted after its
-    # controller died. Keep it where it can still be measured.
+    # adoption_lag is the recovery SLO for this whole feature — how long a job sat
+    # done-but-uncommitted after its controller died. `finished` does not show it, so log it.
     logger.info(f'Job {job.id} finalized via {label}: {final_status} (adoption lag {adoption_lag:.1f}s)')
 
 

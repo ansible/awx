@@ -262,7 +262,7 @@ def test_run_does_not_reset_to_pending_when_receptor_dies_during_submit(jt_linke
     """receptor starts the unit before it replies, so a submit that got no reply may have a playbook running."""
 
     def submit_started(job):
-        type(job).objects.filter(pk=job.pk).update(job_env={'receptor_submit_started': True})
+        type(job).objects.filter(pk=job.pk).update(job_env={'AWX_ADOPTION_SUBMIT_STARTED': True})
 
     job, mock_finalize, _ = _run_with_receptor_dying(jt_linked, execution_environment, mocker, on_failure=submit_started)
 

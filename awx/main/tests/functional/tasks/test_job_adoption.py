@@ -172,7 +172,7 @@ def test_orphan_within_the_deadline_is_adopted(quiet_orphan):
 
     job.refresh_from_db()
     assert job.status == 'successful'
-    assert job.finished == last_event, 'an adopted job finishes when its last event was saved, not when it was adopted'
+    assert job.finished == clock(), 'an adopted job finishes when the adopter saw it end, like the normal path'
     assert RecordingDispatcher.counters() == list(range(2, 11))
     assert ('close',) in work.calls
 
@@ -345,7 +345,7 @@ def test_canceled_job_whose_unit_is_gone_is_finalized_canceled(me_inst):
 def host_snapshot(inventory):
     """The host count a job saves at start, with the inventory unchanged since: what adoption needs to trust host ids."""
     Host.objects.update(modified=now() - timedelta(minutes=5))
-    return {'host_count': inventory.hosts.count()}
+    return {'AWX_ADOPTION_HOST_COUNT': inventory.hosts.count()}
 
 
 @pytest.mark.django_db

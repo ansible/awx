@@ -44,6 +44,8 @@ from awx.main.constants import (
     MAX_ISOLATED_PATH_COLON_DELIMITER,
     CONTAINER_VOLUMES_MOUNT_TYPES,
     HOST_FACTS_FIELDS,
+    HOST_COUNT_KEY,
+    HOST_FILTER_KEY,
 )
 
 SCM_REVISION_FILE = '.scm_revision'
@@ -556,10 +558,10 @@ class BaseTask(object):
         host_count = self.runner_callback.host_count = host_trust.count_hosts(instance)
         if host_count is not None:
             # Saved now, not only at 'starting': a controller lost before that save still leaves the adopter a count.
-            saved = {'host_count': host_count}
+            saved = {HOST_COUNT_KEY: host_count}
             host_filter = self.runner_callback.host_filter = host_trust.smart_host_filter(instance)
             if host_filter is not None:
-                saved['host_filter'] = host_filter
+                saved[HOST_FILTER_KEY] = host_filter
             self.instance = self.update_model(instance.pk, job_env={**(instance.job_env or {}), **saved})
         return self.write_inventory_file(instance.inventory, private_data_dir, 'hosts', host_trust.script_params(instance))
 
@@ -1496,11 +1498,11 @@ class RunJob(SourceControlMixin, BaseTask):
         if not private_data_dir:
             job.refresh_from_db(fields=['job_env'])
             private_data_dir = job.job_env.get('AWX_PRIVATE_DATA_DIR')
-        if not private_data_dir:
-            # If there's no private data dir, that means we didn't get into the
-            # actual `run()` call; this _usually_ means something failed in
-            # the pre_run_hook method
-            return
+            if not private_data_dir:
+                # If there's no private data dir, that means we didn't get into the
+                # actual `run()` call; this _usually_ means something failed in
+                # the pre_run_hook method
+                return
         if self.should_use_fact_cache() and self.runner_callback.artifacts_processed:
             job.log_lifecycle("finish_job_fact_cache")
             if job.inventory.kind == 'constructed':

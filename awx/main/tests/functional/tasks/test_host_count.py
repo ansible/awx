@@ -65,8 +65,8 @@ def test_build_inventory_saves_the_count_before_the_job_is_submitted(inv, tmp_pa
     task = RunJob()
     task.instance = job
     task.build_inventory(job, str(tmp_path))
-    assert Job.objects.get(pk=job.pk).job_env == {'kept': '1', 'host_count': 3}
-    assert task.instance.job_env['host_count'] == 3
+    assert Job.objects.get(pk=job.pk).job_env == {'kept': '1', 'AWX_ADOPTION_HOST_COUNT': 3}
+    assert task.instance.job_env['AWX_ADOPTION_HOST_COUNT'] == 3
 
 
 @pytest.mark.django_db

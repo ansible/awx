@@ -25,7 +25,7 @@ def inv(organization):
 
 @pytest.fixture
 def job(inv):
-    return Job.objects.create(inventory=inv, status='running', started=now(), job_env={'host_count': 2})
+    return Job.objects.create(inventory=inv, status='running', started=now(), job_env={'AWX_ADOPTION_HOST_COUNT': 2})
 
 
 @pytest.mark.django_db
@@ -106,7 +106,9 @@ def smart_job(filter_now, filter_at_start='name=h1'):
     smart = mock.Mock(kind='smart', host_filter=filter_now, organization_id=1)
     smart.hosts.count.return_value = 2
     smart.hosts.filter.return_value.exists.return_value = False
-    return mock.Mock(spec=Job, inventory=smart, inventory_id=1, started=now(), job_env={'host_count': 2, 'host_filter': filter_at_start})
+    return mock.Mock(
+        spec=Job, inventory=smart, inventory_id=1, started=now(), job_env={'AWX_ADOPTION_HOST_COUNT': 2, 'AWX_ADOPTION_HOST_FILTER': filter_at_start}
+    )
 
 
 @pytest.mark.django_db
@@ -123,7 +125,7 @@ def test_a_smart_inventory_with_the_same_filter_is_unchanged():
 @pytest.mark.django_db
 def test_a_job_saved_before_filters_were_recorded_is_not_failed_for_its_filter():
     job = smart_job('name=h2')
-    job.job_env = {'host_count': 2}
+    job.job_env = {'AWX_ADOPTION_HOST_COUNT': 2}
     assert host_trust.change_since_start(job) is None
 
 

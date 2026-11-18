@@ -16,7 +16,7 @@ from django.db import connections
 
 # AWX
 from awx.main.redact import UriCleaner
-from awx.main.constants import ADOPTION_JOB_ENV_KEYS, MINIMAL_EVENTS, ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE
+from awx.main.constants import ADOPTION_JOB_ENV_KEYS, HOST_COUNT_KEY, HOST_FILTER_KEY, MINIMAL_EVENTS, ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE
 from awx.main.utils.update_model import update_model
 from awx.main.queue import CallbackQueueDispatcher
 
@@ -321,18 +321,22 @@ class RunnerCallback:
         from awx.main.models.credential import build_safe_env  # Circular import
 
         masked = {k: v for k, v in self.safe_env.items() if k not in ADOPTION_JOB_ENV_KEYS}
-        job_env = build_safe_env(runner_config.env) if masked else {}
-        for k, v in masked.items():
-            if k in job_env:
-                job_env[k] = v
+        if masked:
+            job_env = build_safe_env(runner_config.env)
+            for k, v in masked.items():
+                if k in job_env:
+                    job_env[k] = v
+        else:
+            # An adopter replaying 'starting' has no masked env, and pattern masking alone would leak plugin values.
+            job_env = {}
         # An adopter replaying 'starting' never counts: it keeps the count saved at job start.
-        host_count = self.host_count if self.host_count is not None else (self.instance.job_env or {}).get('host_count')
+        host_count = self.host_count if self.host_count is not None else (self.instance.job_env or {}).get(HOST_COUNT_KEY)
         if host_count is not None:
-            job_env['host_count'] = host_count
+            job_env[HOST_COUNT_KEY] = host_count
         # self.instance is the row from before build_inventory saved the filter, so a normal run's own value comes first.
-        host_filter = self.host_filter if self.host_filter is not None else (self.instance.job_env or {}).get('host_filter')
+        host_filter = self.host_filter if self.host_filter is not None else (self.instance.job_env or {}).get(HOST_FILTER_KEY)
         if host_filter is not None:
-            job_env['host_filter'] = host_filter
+            job_env[HOST_FILTER_KEY] = host_filter
         return job_env
 
     def status_handler(self, status_data, runner_config):

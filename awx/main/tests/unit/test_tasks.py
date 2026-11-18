@@ -524,9 +524,9 @@ class TestGenericRun:
     @pytest.mark.parametrize(
         'host_count, existing_job_env, stored',
         [
-            (3, {}, {'host_count': 3}),
-            (None, {'host_count': 5}, {'host_count': 5}),  # an adopter replaying 'starting' keeps the original
-            (3, {'host_count': 5}, {'host_count': 3}),
+            (3, {}, {'AWX_ADOPTION_HOST_COUNT': 3}),
+            (None, {'AWX_ADOPTION_HOST_COUNT': 5}, {'AWX_ADOPTION_HOST_COUNT': 5}),  # an adopter replaying 'starting' keeps the original
+            (3, {'AWX_ADOPTION_HOST_COUNT': 5}, {'AWX_ADOPTION_HOST_COUNT': 3}),
             (None, {}, {}),
         ],
     )
@@ -546,7 +546,7 @@ class TestGenericRun:
         task.runner_callback.status_handler({'status': 'starting'}, runner_config)
 
         saved_env = task.runner_callback.update_model.call_args.kwargs['job_env']
-        assert {k: v for k, v in saved_env.items() if k == 'host_count'} == stored
+        assert {k: v for k, v in saved_env.items() if k == 'AWX_ADOPTION_HOST_COUNT'} == stored
 
     def test_created_by_extra_vars(self, mock_me):
         job = Job(created_by=User(pk=123, username='angry-spud'))

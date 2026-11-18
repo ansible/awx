@@ -202,7 +202,7 @@ def test_run_internal_streams_through_receptor_work(mock_transmit, mock_process)
 def test_transmit_phase_marks_the_job_submitted_before_receptor_can_start_a_unit(mock_transmit):
     # receptor starts the unit before it replies, so the marker must be saved before the call (AAP-99320).
     rj = _make_receptor_job(unit_id=None)
-    rj.task.instance.job_env = {'host_count': 3}
+    rj.task.instance.job_env = {'AWX_ADOPTION_HOST_COUNT': 3}
     order = []
     rj.task.update_model.side_effect = lambda pk, **kw: order.append(('update_model', kw)) or rj.task.instance
     ctl = Mock()
@@ -210,7 +210,7 @@ def test_transmit_phase_marks_the_job_submitted_before_receptor_can_start_a_unit
 
     rj._transmit_phase(ctl)
 
-    assert order[0] == ('update_model', {'job_env': {'host_count': 3, 'receptor_submit_started': True}})
+    assert order[0] == ('update_model', {'job_env': {'AWX_ADOPTION_HOST_COUNT': 3, 'AWX_ADOPTION_SUBMIT_STARTED': True}})
     assert order[1] == ('submit_work', None)
 
 
@@ -875,22 +875,24 @@ def test_finalize_adopted_job_failed(mock_finalize):
 @override_settings(CLUSTER_HOST_ID='surviving-controller')
 @patch('awx.main.tasks.jobs._finalize_job_run')
 def test_finalize_adopted_job_includes_elapsed_when_started(mock_finalize):
-    """elapsed is passed in extra_fields when job.started is set."""
+    """finished is when the adopter saw the job end, not back-dated to when the playbook did."""
     from datetime import datetime, timezone
 
     job = Mock()
     job.status = 'running'
     job.started = datetime(2026, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
     job.execution_node = None
-    # The playbook ended 30 s in; the adoption that notices it happens much later.
+    # The playbook ended 30 s in; the adoption that notices it happens 120 s in.
     _stub_last_event(job, job.started + timedelta(seconds=30))
     callback = Mock()
+    adopted_at = job.started + timedelta(seconds=120)
 
-    _finalize_adopted_job(job, callback, exit_code=0, process_phase_failed=False)
+    _finalize_adopted_job(job, callback, exit_code=0, process_phase_failed=False, clock=lambda: adopted_at)
 
     extra_fields = mock_finalize.call_args[1].get('extra_fields') or mock_finalize.call_args[0][4]
-    assert extra_fields['elapsed'] == 30.0
-    assert extra_fields['finished'] == job.started + timedelta(seconds=30)
+    assert extra_fields['finished'] == adopted_at
+    assert extra_fields['elapsed'] == 120.0
+    assert 'lag 90s' in callback.delay_update.call_args.kwargs['job_explanation']
 
 
 @patch('awx.main.tasks.jobs._finalize_job_run')
@@ -1232,25 +1234,25 @@ def test_status_handler_persists_no_environment_when_there_is_no_masked_one():
     from awx.main.tasks.callback import RunnerCallback
 
     callback = RunnerCallback(model=None)
-    callback.safe_env = {'host_count': 3}  # adoption seeded this from a job_env with only adoption keys
-    callback.instance = Mock(pk=7, job_env={'host_count': 3})
+    callback.safe_env = {'AWX_ADOPTION_HOST_COUNT': 3}  # adoption seeded this from a job_env with only adoption keys
+    callback.instance = Mock(pk=7, job_env={'AWX_ADOPTION_HOST_COUNT': 3})
     callback.update_model = Mock(return_value=callback.instance)
 
     runner_config = Mock(env={'MY_VAULT_PASSWORD': 'hunter2', 'CUSTOM_VALUE': 'plugin-secret', 'PATH': '/usr/bin'}, command=['ansible-playbook'], cwd='/tmp')
     callback.status_handler({'status': 'starting'}, runner_config)
 
-    assert callback.update_model.call_args.kwargs['job_env'] == {'host_count': 3}
+    assert callback.update_model.call_args.kwargs['job_env'] == {'AWX_ADOPTION_HOST_COUNT': 3}
 
 
 def test_status_handler_keeps_the_saved_smart_inventory_filter():
     callback = RunnerCallback(model=None)
     callback.safe_env = {'PATH': '/usr/bin'}
-    callback.instance = Mock(pk=7, job_env={'host_count': 3, 'host_filter': 'name=h1'})
+    callback.instance = Mock(pk=7, job_env={'AWX_ADOPTION_HOST_COUNT': 3, 'AWX_ADOPTION_HOST_FILTER': 'name=h1'})
     callback.update_model = Mock(return_value=callback.instance)
 
     callback.status_handler({'status': 'starting'}, Mock(env={'PATH': '/usr/bin'}, command=['ansible-playbook'], cwd='/tmp'))
 
-    assert callback.update_model.call_args.kwargs['job_env']['host_filter'] == 'name=h1'
+    assert callback.update_model.call_args.kwargs['job_env']['AWX_ADOPTION_HOST_FILTER'] == 'name=h1'
 
 
 def test_status_handler_saves_the_filter_a_normal_run_recorded_even_though_its_instance_predates_it():
@@ -1262,7 +1264,7 @@ def test_status_handler_saves_the_filter_a_normal_run_recorded_even_though_its_i
 
     callback.status_handler({'status': 'starting'}, Mock(env={'PATH': '/usr/bin'}, command=['ansible-playbook'], cwd='/tmp'))
 
-    assert callback.update_model.call_args.kwargs['job_env']['host_filter'] == 'name=h1'
+    assert callback.update_model.call_args.kwargs['job_env']['AWX_ADOPTION_HOST_FILTER'] == 'name=h1'
 
 
 def test_status_handler_safe_env_still_overrides_pattern_masking():

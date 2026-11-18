@@ -53,7 +53,7 @@ def running_job(controller, execution_node=EXEC, task_id='job-task', **fields):
     if fields.get('inventory'):
         # The hosts exist by now, so the job started after them, with their count saved: as a normal run does.
         started = now()
-        fields.setdefault('job_env', {'host_count': fields['inventory'].hosts.count()})
+        fields.setdefault('job_env', {'AWX_ADOPTION_HOST_COUNT': fields['inventory'].hosts.count()})
     return Job.objects.create(
         controller_node=controller,
         execution_node=execution_node,

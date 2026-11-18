@@ -227,13 +227,13 @@ class TestLostInstanceDecisions:
     @pytest.mark.parametrize('job_fields', [{'started': None}, {}])
     def test_job_submitted_to_receptor_without_a_saved_work_unit_is_reaped_not_requeued(self, job_fields):
         # receptor may have started the unit before the controller died, so a requeue could run the playbook twice.
-        job = make_job(controller_node=PEER, work_unit_id='', job_env={'receptor_submit_started': True}, **job_fields)
+        job = make_job(controller_node=PEER, work_unit_id='', job_env={'AWX_ADOPTION_SUBMIT_STARTED': True}, **job_fields)
         assert self.decide(job) == JobAction.REAP
         assert f'may still be running on {EXEC}' in reap_explanation(job, 'default')
 
     def test_reap_explanation_keeps_the_default_when_no_playbook_can_be_running(self):
         assert reap_explanation(make_job(work_unit_id=''), 'default') == 'default'
-        assert reap_explanation(make_job(job_env={'receptor_submit_started': True}), 'default') == 'default'
+        assert reap_explanation(make_job(job_env={'AWX_ADOPTION_SUBMIT_STARTED': True}), 'default') == 'default'
 
     def test_capacity_is_asked_only_for_a_job_that_would_be_adopted(self):
         def slot_available():
@@ -392,7 +392,7 @@ class TestRunningJobAction:
 
     def test_running_orphan_submitted_to_receptor_without_a_saved_work_unit_is_reaped(self):
         # receptor may have started the unit, so a requeue could run the playbook twice.
-        assert self.decide(make_job(work_unit_id='', execution_node='', job_env={'receptor_submit_started': True})) == JobAction.REAP
+        assert self.decide(make_job(work_unit_id='', execution_node='', job_env={'AWX_ADOPTION_SUBMIT_STARTED': True})) == JobAction.REAP
 
     def test_orphan_this_instance_only_executes_is_left_to_the_sweep(self):
         # A dispatched job this instance only executes, for a controller that isn't live: this

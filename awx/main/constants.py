@@ -43,10 +43,14 @@ STANDARD_INVENTORY_UPDATE_ENV = {
 CAN_CANCEL = ('new', 'pending', 'waiting', 'running')
 ACTIVE_STATES = CAN_CANCEL
 ERROR_STATES = ('error',)
-# job_env keys that belong to adoption, not to the job's environment: hidden from the API
-ADOPTION_JOB_ENV_KEYS = frozenset({'host_count', 'host_filter', 'host_map', 'receptor_submit_started'})
+# job_env keys saved at job start for adoption to compare the inventory against
+HOST_COUNT_KEY = 'AWX_ADOPTION_HOST_COUNT'
+HOST_FILTER_KEY = 'AWX_ADOPTION_HOST_FILTER'
 # job_env key written just before the work is submitted to receptor; a job that has it may not be requeued
-RECEPTOR_SUBMIT_STARTED = 'receptor_submit_started'
+RECEPTOR_SUBMIT_STARTED = 'AWX_ADOPTION_SUBMIT_STARTED'
+# job_env keys that belong to adoption, not to the job's environment: hidden from the API, and
+# in ENV_BLOCKLIST so a credential injector cannot set one and collide with it
+ADOPTION_JOB_ENV_KEYS = frozenset({HOST_COUNT_KEY, HOST_FILTER_KEY, RECEPTOR_SUBMIT_STARTED})
 # Start of the job_explanation of an adopted job whose host results cannot be matched to its inventory
 HOST_RESULTS_UNMATCHED = 'Job failed because its host results could not be matched to the inventory after its controller was lost'
 MINIMAL_EVENTS = set(['playbook_on_play_start', 'playbook_on_task_start', 'playbook_on_stats', 'EOF'])
@@ -72,6 +76,7 @@ ENV_BLOCKLIST = frozenset(
         'AWX_HOST',
         'PROJECT_REVISION',
         'SUPERVISOR_CONFIG_PATH',
+        *ADOPTION_JOB_ENV_KEYS,
     )
 )
 

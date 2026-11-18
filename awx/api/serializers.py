@@ -1125,8 +1125,7 @@ class UnifiedJobSerializer(BaseSerializer):
         # it must be marked for translation after it is pulled from the db, not when set
         ret['job_explanation'] = _(obj.job_explanation)
         if isinstance(ret.get('job_env'), dict) and ADOPTION_JOB_ENV_KEYS & ret['job_env'].keys():
-            # Internal to adoption, not API-facing: job_env is shown as the job's environment, and
-            # host_map (saved by an earlier build) is large on a big inventory.
+            # Internal to adoption, not API-facing: job_env is shown as the job's environment.
             ret['job_env'] = {k: v for k, v in ret['job_env'].items() if k not in ADOPTION_JOB_ENV_KEYS}
         return ret
 

@@ -24,7 +24,7 @@ def inv(organization):
 @pytest.fixture
 def job(inv):
     """A job that started after the hosts existed and saved their count."""
-    return Job.objects.create(inventory=inv, status='running', started=now(), job_env={'host_count': 3})
+    return Job.objects.create(inventory=inv, status='running', started=now(), job_env={'AWX_ADOPTION_HOST_COUNT': 3})
 
 
 def _sync(inv, created=None):
@@ -117,7 +117,7 @@ def test_a_sync_of_another_inventory_is_not_a_change(job, organization):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('job_env', [None, {}, {'host_count': None}])
+@pytest.mark.parametrize('job_env', [None, {}, {'AWX_ADOPTION_HOST_COUNT': None}])
 def test_a_job_without_a_saved_count_is_a_change(job, job_env):
     job.job_env = job_env
     assert 'no host count was saved' in host_trust.change_since_start(job)
@@ -147,7 +147,7 @@ def test_a_job_with_no_start_time_is_a_change(job):
 
 @pytest.mark.django_db
 def test_an_ad_hoc_command_is_checked_like_a_job(inv):
-    command = AdHocCommand.objects.create(inventory=inv, status='running', started=now(), job_env={'host_count': 3})
+    command = AdHocCommand.objects.create(inventory=inv, status='running', started=now(), job_env={'AWX_ADOPTION_HOST_COUNT': 3})
     assert len(host_trust.assess(command).host_map) == 3
     inv.hosts.create(name='h4')
     assert host_trust.assess(command).reason
@@ -195,13 +195,13 @@ on_postgres = pytest.mark.skipif(connection.vendor != 'postgresql', reason='smar
 def smart_job(inv, organization):
     """A job on a smart inventory whose members (a live host_filter query) are the 3 hosts of inv."""
     smart = Inventory.objects.create(name='smart', organization=organization, kind='smart', host_filter='name__startswith=h')
-    return Job.objects.create(inventory=smart, status='running', started=now(), job_env={'host_count': smart.hosts.count()})
+    return Job.objects.create(inventory=smart, status='running', started=now(), job_env={'AWX_ADOPTION_HOST_COUNT': smart.hosts.count()})
 
 
 @on_postgres
 @pytest.mark.django_db
 def test_a_smart_inventory_job_is_trusted_while_its_members_are_unchanged(smart_job):
-    assert smart_job.job_env['host_count'] == 3
+    assert smart_job.job_env['AWX_ADOPTION_HOST_COUNT'] == 3
     assert host_trust.change_since_start(smart_job) is None
 
 
@@ -226,7 +226,7 @@ def test_a_change_to_a_smart_inventorys_members_is_seen(smart_job, inv, change):
 def test_a_sync_in_the_organization_is_a_change_for_a_smart_inventory(inv, organization):
     # The smart host query needs PostgreSQL, so its members are stood in for by inv's hosts.
     smart = Inventory.objects.create(name='smart', organization=organization, kind='smart', host_filter='name__startswith=h')
-    job = Job.objects.create(inventory=smart, status='running', started=now(), job_env={'host_count': 3})
+    job = Job.objects.create(inventory=smart, status='running', started=now(), job_env={'AWX_ADOPTION_HOST_COUNT': 3})
     with mock.patch.object(Inventory, 'hosts', new_callable=mock.PropertyMock, return_value=inv.hosts):
         assert host_trust.change_since_start(job) is None
         _sync(inv)
@@ -237,7 +237,7 @@ def test_a_sync_in_the_organization_is_a_change_for_a_smart_inventory(inv, organ
 def test_a_sync_in_another_organization_is_not_a_change_for_a_smart_inventory(inv, organization, organization_factory):
     other = organization_factory('other').organization
     smart = Inventory.objects.create(name='smart', organization=organization, kind='smart', host_filter='name__startswith=h')
-    job = Job.objects.create(inventory=smart, status='running', started=now(), job_env={'host_count': 3})
+    job = Job.objects.create(inventory=smart, status='running', started=now(), job_env={'AWX_ADOPTION_HOST_COUNT': 3})
     _sync(Inventory.objects.create(name='elsewhere', organization=other))
     with mock.patch.object(Inventory, 'hosts', new_callable=mock.PropertyMock, return_value=inv.hosts):
         assert host_trust.change_since_start(job) is None

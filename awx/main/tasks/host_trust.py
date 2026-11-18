@@ -8,6 +8,8 @@ import dataclasses
 import logging
 from typing import Optional
 
+from awx.main.constants import HOST_COUNT_KEY, HOST_FILTER_KEY
+
 logger = logging.getLogger('awx.main.tasks.host_trust')
 
 PROCEED = 'proceed'  # trusted, or canceled: the job ends the usual way
@@ -72,7 +74,7 @@ def change_since_start(job):
 
     from awx.main.models import InventoryUpdate  # Circular import
 
-    saved = (job.job_env or {}).get('host_count')
+    saved = (job.job_env or {}).get(HOST_COUNT_KEY)
     inventory = job.inventory
     if inventory is None:
         # A job that never had an inventory has no hosts to attribute. One that had one is
@@ -86,7 +88,7 @@ def change_since_start(job):
         return 'hosts were added or removed'
     if inventory.hosts.filter(modified__gt=job.started).exists():
         return 'a host was added or edited'
-    saved_filter = (job.job_env or {}).get('host_filter')
+    saved_filter = (job.job_env or {}).get(HOST_FILTER_KEY)
     if inventory.kind == 'smart' and saved_filter is not None and (inventory.host_filter or '') != saved_filter:
         return "the smart inventory's host filter was changed"
     # A smart inventory has no sources: its hosts are every matching host of its organization.

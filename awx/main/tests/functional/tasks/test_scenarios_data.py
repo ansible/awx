@@ -83,7 +83,7 @@ def _orphaned_job_over_five_hosts(me_inst, inventory, original_controller):
         started=now(),
         work_unit_id=UNIT,
         inventory=inventory,
-        job_env={'host_count': len(hosts)},
+        job_env={'AWX_ADOPTION_HOST_COUNT': len(hosts)},
     )
     if original_controller:
         # The claim a peer controller makes before publishing adopt_job_async: controller_node
@@ -255,7 +255,7 @@ def _fact_cache_job(me_inst, inventory):
         work_unit_id=UNIT,
         inventory=inventory,
         use_fact_cache=True,
-        job_env={'host_count': 1},
+        job_env={'AWX_ADOPTION_HOST_COUNT': 1},
     )
     facts = {'ansible_distribution': 'RedHat'}
     artifacts = {
