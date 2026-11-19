@@ -14,8 +14,6 @@ from unittest.mock import DEFAULT, Mock, patch
 import pytest
 from django.test import override_settings
 
-from awx.main.models import Job
-from awx.main.tasks import host_trust
 from awx.main.tasks.container_groups import (
     PodState,
     adopt_container_group_job,
@@ -795,7 +793,6 @@ def harvest_env(tmp_path):
     callback.status_handler = Mock(return_value=False)
     callback.artifacts_handler = Mock()
     callback.finished_callback = Mock()
-    callback.host_verdict = host_trust.Verdict(None, {}, host_trust.PROCEED)
 
     # DEFAULT sentinels, not explicit Mocks: patch.multiple only hands back a dict of the
     # mocks it created itself, so passing values yields an empty dict and no way to assert.
@@ -946,75 +943,3 @@ def test_harvest_unpacks_artifacts_where_the_post_run_hooks_read_them(harvest_en
         harvest_terminal_pod(_job(), 'automation-job-42-abcde', _pod(phase='Succeeded', exit_code=0))
 
     assert run.call_args.kwargs['ident'] == 42
-
-
-# ---------------------------------------------------------------------------
-# A changed inventory: the job's host results cannot be trusted
-# ---------------------------------------------------------------------------
-
-CHANGED = 'hosts were added or removed'
-CHANGED_VERDICT = host_trust.Verdict(CHANGED, {}, host_trust.FAIL_WHEN_DONE)
-
-
-def _host_job(cancel_flag=False):
-    job = Mock(spec=Job)
-    job.id = job.pk = 42
-    job.log_format = 'job 42'
-    job.cancel_flag = cancel_flag
-    return job
-
-
-def test_harvest_fails_a_job_whose_inventory_changed(harvest_env):
-    harvest_env['open_pod_log_stream'].return_value = io.BytesIO(POD_LOG)
-    harvest_env['callback'].host_verdict = CHANGED_VERDICT
-
-    harvest_terminal_pod(_host_job(), 'automation-job-42-abcde', _pod(phase='Succeeded', exit_code=0))
-
-    assert harvest_env['_finalize_adopted_job'].call_args.kwargs['final_status'] == 'failed'
-    assert harvest_env['invoke_adoption_hooks'].call_args.args[3] == 'failed'  # so the fact cache never runs
-    explanation = harvest_env['callback'].delay_update.call_args.kwargs['job_explanation']
-    assert 'could not be matched to the inventory' in explanation
-    assert CHANGED in explanation
-
-
-def test_harvest_still_replays_the_log_of_a_job_whose_inventory_changed(harvest_env):
-    harvest_env['open_pod_log_stream'].return_value = io.BytesIO(POD_LOG)
-    harvest_env['callback'].host_verdict = CHANGED_VERDICT
-
-    harvest_terminal_pod(_host_job(), 'automation-job-42-abcde', _pod(phase='Succeeded', exit_code=0))
-
-    assert len(harvest_env['callback'].event_handler.call_args_list) == 3
-
-
-def test_harvest_leaves_a_job_canceled_while_orphaned_alone(harvest_env):
-    harvest_env['open_pod_log_stream'].return_value = io.BytesIO(POD_LOG)
-    harvest_env['callback'].host_verdict = CHANGED_VERDICT
-
-    harvest_terminal_pod(_host_job(cancel_flag=True), 'automation-job-42-abcde', _pod(phase='Succeeded', exit_code=0))
-
-    assert harvest_env['_finalize_adopted_job'].call_args.kwargs['final_status'] == 'successful'
-    harvest_env['callback'].delay_update.assert_not_called()
-
-
-def test_harvest_keeps_the_pod_of_a_job_whose_inventory_changed(harvest_env):
-    harvest_env['open_pod_log_stream'].return_value = io.BytesIO(POD_LOG)
-    harvest_env['callback'].host_verdict = CHANGED_VERDICT
-
-    with patch('awx.main.tasks.container_groups.delete_job_pod') as delete:
-        harvest_terminal_pod(_host_job(), 'automation-job-42-abcde', _pod(phase='Succeeded', exit_code=0))
-
-    delete.assert_not_called()
-
-
-@pytest.mark.parametrize('changed', [CHANGED, None], ids=['changed', 'unchanged'])
-def test_a_streaming_pod_is_attached_to_whether_or_not_its_inventory_changed(adoption_env, changed):
-    """A changed inventory never stops the run: the pod finishes and the job is failed when finalized."""
-    adoption_env['classify_job_pod'].return_value = PodState.STREAMING
-    adoption_env['attach_to_streaming_pod'].return_value = True
-    adoption_env['find_job_pod'].return_value = _pod()
-
-    with patch('awx.main.tasks.host_trust.change_since_start', return_value=changed):
-        assert adopt_container_group_job(_host_job()) is True
-
-    adoption_env['harvest_terminal_pod'].assert_not_called()
-    adoption_env['attach_to_streaming_pod'].assert_called_once()

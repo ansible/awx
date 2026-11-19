@@ -19,7 +19,7 @@ import pytest
 from django.db import DatabaseError
 from django.utils.timezone import now, timedelta
 
-from awx.main.models import Host, Inventory, Job, JobEvent
+from awx.main.models import Inventory, Job, JobEvent
 from awx.main.tasks import jobs
 from awx.main.tasks.receptor import reattach_to_work_unit
 from awx.main.tasks.system import (
@@ -342,12 +342,6 @@ def test_canceled_job_whose_unit_is_gone_is_finalized_canceled(me_inst):
     assert job.status == 'canceled'
 
 
-def host_snapshot(inventory):
-    """The host count a job saves at start, with the inventory unchanged since: what adoption needs to trust host ids."""
-    Host.objects.update(modified=now() - timedelta(minutes=5))
-    return {'AWX_ADOPTION_HOST_COUNT': inventory.hosts.count()}
-
-
 @pytest.mark.django_db
 def test_adopted_slice_maps_only_its_own_hosts(me_inst, inventory):
     """Job slicing. Slice 1 of 2 over five hosts runs fp-h1, fp-h3 and fp-h5. The host map adoption
@@ -355,7 +349,7 @@ def test_adopted_slice_maps_only_its_own_hosts(me_inst, inventory):
     no other.
     """
     hosts = {name: inventory.hosts.create(name=name) for name in ('fp-h1', 'fp-h2', 'fp-h3', 'fp-h4', 'fp-h5')}
-    job = running_job(me_inst.hostname, inventory=inventory, job_slice_number=1, job_slice_count=2, job_env=host_snapshot(inventory))
+    job = running_job(me_inst.hostname, inventory=inventory, job_slice_number=1, job_slice_count=2)
     work = FakeReceptorWork({UNIT: FakeWorkUnit(stats_event(make_events(5), ['fp-h1', 'fp-h3', 'fp-h5']))})
 
     adopt_job(job.id, open_work=lambda: work)
@@ -372,7 +366,7 @@ def test_adopted_job_updates_host_pointers_and_inventory_counts(me_inst, invento
     """
     hostnames = ['dc-h1', 'dc-h2', 'dc-h3']
     hosts = {name: inventory.hosts.create(name=name) for name in hostnames}
-    job = running_job(me_inst.hostname, inventory=inventory, job_env=host_snapshot(inventory))
+    job = running_job(me_inst.hostname, inventory=inventory)
     work = FakeReceptorWork({UNIT: FakeWorkUnit(stats_event(make_events(5), hostnames, failed=['dc-h2']))})
 
     adopt_job(job.id, open_work=lambda: work)
@@ -394,7 +388,7 @@ def test_adopted_job_maps_constructed_hosts_like_a_normal_run(me_inst, inventory
     constructed = Inventory.objects.create(name='constructed', kind='constructed', organization=organization)
     constructed.input_inventories.add(inventory)
     constructed_host = constructed.hosts.create(name='ci-h1', instance_id=str(source.id))
-    job = running_job(me_inst.hostname, inventory=constructed, job_env=host_snapshot(constructed))
+    job = running_job(me_inst.hostname, inventory=constructed)
     work = FakeReceptorWork({UNIT: FakeWorkUnit(stats_event(make_events(3), ['ci-h1']))})
 
     adopt_job(job.id, open_work=lambda: work)

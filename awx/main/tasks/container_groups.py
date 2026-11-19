@@ -45,7 +45,6 @@ from awx.main.tasks.receptor import (
     _finalize_adopted_job,
     check_still_owner,
     _get_or_create_private_data_dir,
-    failed_by_inventory_change,
     get_receptor_ctl,
     read_receptor_config,
     reattach_to_work_unit,
@@ -320,7 +319,7 @@ def harvest_terminal_pod(job, pod_name, pod, owner_task_id=None, clock=None):
             logger.exception(f'{job.log_format}: failed reading the log of terminal pod {pod_name}, deferring')
             return False
 
-        status, exit_code = failed_by_inventory_change(job, callback) or _terminal_status(job, pod, res)
+        status, exit_code = _terminal_status(job, pod, res)
 
         try:
             check_still_owner(job, owner_task_id)

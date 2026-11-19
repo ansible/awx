@@ -23,7 +23,7 @@ from django.test import override_settings
 from django.utils.timezone import now
 
 from awx.main.models import UnifiedJob
-from awx.main.tasks import host_trust
+from awx.main.tasks import host_map
 from awx.main.tasks.callback import RunnerCallback
 from awx.main.tasks.jobs import _finalize_job_run
 from awx.main.tasks.receptor import (
@@ -47,7 +47,6 @@ from awx.main.tasks.receptor import (
     clear_adoption_stall,
     reattach_to_work_unit,
     receptor_config_exists,
-    reassess_host_trust,
     should_update_config,
 )
 from awx.main.tasks.signals import signal_state
@@ -202,7 +201,7 @@ def test_run_internal_streams_through_receptor_work(mock_transmit, mock_process)
 def test_transmit_phase_marks_the_job_submitted_before_receptor_can_start_a_unit(mock_transmit):
     # receptor starts the unit before it replies, so the marker must be saved before the call (AAP-99320).
     rj = _make_receptor_job(unit_id=None)
-    rj.task.instance.job_env = {'AWX_ADOPTION_HOST_COUNT': 3}
+    rj.task.instance.job_env = {}
     order = []
     rj.task.update_model.side_effect = lambda pk, **kw: order.append(('update_model', kw)) or rj.task.instance
     ctl = Mock()
@@ -210,7 +209,7 @@ def test_transmit_phase_marks_the_job_submitted_before_receptor_can_start_a_unit
 
     rj._transmit_phase(ctl)
 
-    assert order[0] == ('update_model', {'job_env': {'AWX_ADOPTION_HOST_COUNT': 3, 'AWX_ADOPTION_SUBMIT_STARTED': True}})
+    assert order[0] == ('update_model', {'job_env': {'AWX_ADOPTION_SUBMIT_STARTED': True}})
     assert order[1] == ('submit_work', None)
 
 
@@ -1069,33 +1068,12 @@ def test_finalize_adopted_job_failed_hook_outranks_the_host_counts_correction(mo
     job.started = None
     job.execution_node = None
     _stub_last_event(job)
-    callback = Mock(wrapup_event_created=None, host_verdict=None, extra_update_fields={'job_explanation': 'hook broke'})
+    callback = Mock(wrapup_event_created=None, extra_update_fields={'job_explanation': 'hook broke'})
 
     _finalize_adopted_job(job, callback, exit_code=1, process_phase_failed=False, final_status='failed', hook_failed=hook_failed)
 
     assert mock_finalize.call_args[0][3] == expected
     assert ('job_explanation' in callback.extra_update_fields) is hook_failed
-
-
-@override_settings(CLUSTER_HOST_ID='surviving-controller')
-@patch('awx.main.tasks.jobs._finalize_job_run')
-def test_finalize_adopted_job_inventory_change_outranks_the_host_counts_correction(mock_finalize):
-    """A job whose inventory changed runs to the end, so its stats are clean; it must still fail."""
-    job = Mock()
-    job.status = 'running'
-    job.cancel_flag = False
-    job.host_status_counts = {'ok': 5}
-    job.started = None
-    job.execution_node = None
-    _stub_last_event(job)
-    callback = Mock(wrapup_event_created=None)
-    callback.host_verdict = host_trust.Verdict('hosts were added or removed', {}, host_trust.FAIL_WHEN_DONE)
-    callback.extra_update_fields = {'job_explanation': 'Job failed because its host results could not be matched'}
-
-    _finalize_adopted_job(job, callback, exit_code=1, process_phase_failed=False, final_status='failed')
-
-    assert mock_finalize.call_args[0][3] == 'failed'
-    assert 'job_explanation' in callback.extra_update_fields
 
 
 # ---------------------------------------------------------------------------
@@ -1234,37 +1212,14 @@ def test_status_handler_persists_no_environment_when_there_is_no_masked_one():
     from awx.main.tasks.callback import RunnerCallback
 
     callback = RunnerCallback(model=None)
-    callback.safe_env = {'AWX_ADOPTION_HOST_COUNT': 3}  # adoption seeded this from a job_env with only adoption keys
-    callback.instance = Mock(pk=7, job_env={'AWX_ADOPTION_HOST_COUNT': 3})
+    callback.safe_env = {'AWX_ADOPTION_SUBMIT_STARTED': True}  # adoption seeded this from a job_env with only adoption keys
+    callback.instance = Mock(pk=7, job_env={'AWX_ADOPTION_SUBMIT_STARTED': True})
     callback.update_model = Mock(return_value=callback.instance)
 
     runner_config = Mock(env={'MY_VAULT_PASSWORD': 'hunter2', 'CUSTOM_VALUE': 'plugin-secret', 'PATH': '/usr/bin'}, command=['ansible-playbook'], cwd='/tmp')
     callback.status_handler({'status': 'starting'}, runner_config)
 
-    assert callback.update_model.call_args.kwargs['job_env'] == {'AWX_ADOPTION_HOST_COUNT': 3}
-
-
-def test_status_handler_keeps_the_saved_smart_inventory_filter():
-    callback = RunnerCallback(model=None)
-    callback.safe_env = {'PATH': '/usr/bin'}
-    callback.instance = Mock(pk=7, job_env={'AWX_ADOPTION_HOST_COUNT': 3, 'AWX_ADOPTION_HOST_FILTER': 'name=h1'})
-    callback.update_model = Mock(return_value=callback.instance)
-
-    callback.status_handler({'status': 'starting'}, Mock(env={'PATH': '/usr/bin'}, command=['ansible-playbook'], cwd='/tmp'))
-
-    assert callback.update_model.call_args.kwargs['job_env']['AWX_ADOPTION_HOST_FILTER'] == 'name=h1'
-
-
-def test_status_handler_saves_the_filter_a_normal_run_recorded_even_though_its_instance_predates_it():
-    callback = RunnerCallback(model=None)
-    callback.safe_env = {'PATH': '/usr/bin'}
-    callback.host_filter = 'name=h1'
-    callback.instance = Mock(pk=7, job_env={})  # the row as it was before build_inventory saved the filter
-    callback.update_model = Mock(return_value=callback.instance)
-
-    callback.status_handler({'status': 'starting'}, Mock(env={'PATH': '/usr/bin'}, command=['ansible-playbook'], cwd='/tmp'))
-
-    assert callback.update_model.call_args.kwargs['job_env']['AWX_ADOPTION_HOST_FILTER'] == 'name=h1'
+    assert callback.update_model.call_args.kwargs['job_env'] == {}
 
 
 def test_status_handler_safe_env_still_overrides_pattern_masking():
@@ -1695,7 +1650,7 @@ def test_configure_for_job_does_not_touch_inventory():
 def test_script_params_match_build_inventory():
     """Adoption must ask for the same script_data shape build_inventory writes, slicing included."""
     sliced = Mock(job_slice_number=2, job_slice_count=5)
-    assert host_trust.script_params(sliced) == {
+    assert host_map.script_params(sliced) == {
         'hostvars': True,
         'towervars': True,
         'slice_number': 2,
@@ -1703,7 +1658,7 @@ def test_script_params_match_build_inventory():
     }
 
     unsliced = Mock(spec=[])  # no job_slice_number attribute
-    assert host_trust.script_params(unsliced) == {'hostvars': True, 'towervars': True}
+    assert host_map.script_params(unsliced) == {'hostvars': True, 'towervars': True}
 
 
 # ---------------------------------------------------------------------------
@@ -2399,9 +2354,7 @@ def test_hooks_see_the_status_the_job_will_end_with(mock_hooks, _finalize, job_f
     """A canceled job, or one whose saved stats show it succeeded, must not run its hooks as if it had failed or succeeded."""
     job = Mock(status="running", **job_fields)
 
-    _finalize_adoption_result(
-        job, Mock(host_verdict=None), _PhaseResult(stream_status, 0 if stream_status == 'successful' else 1), False, Mock(), 'unit', '/tmp/pdd'
-    )
+    _finalize_adoption_result(job, Mock(), _PhaseResult(stream_status, 0 if stream_status == 'successful' else 1), False, Mock(), 'unit', '/tmp/pdd')
 
     assert mock_hooks.call_args.args[3] == expected_hook_status
 
@@ -2420,64 +2373,13 @@ def test_a_stalled_stream_cancels_the_unit_only_if_its_adoption_still_owned_the_
     assert work.cancel.called is canceled
 
 
-_FAIL_VERDICT = host_trust.Verdict('hosts were added or removed', {}, host_trust.FAIL_WHEN_DONE)
-_PROCEED_VERDICT = host_trust.Verdict(None, {}, host_trust.PROCEED)
-
-
-def test_a_host_added_while_the_stream_ran_fails_the_job():
-    callback = Mock(host_verdict=_PROCEED_VERDICT)
-
-    with patch('awx.main.tasks.receptor.host_trust.assess', return_value=_FAIL_VERDICT) as assess:
-        reassess_host_trust(Mock(), callback)
-
-    assess.assert_called_once()
-    assert callback.host_verdict is _FAIL_VERDICT
-
-
-def test_the_final_host_check_reloads_the_inventory_first():
-    job = Mock()
-    job.refresh_from_db.side_effect = lambda **kw: job.order.append('refresh')
-    job.order = []
-    callback = Mock(host_verdict=_PROCEED_VERDICT)
-
-    with patch('awx.main.tasks.receptor.host_trust.assess', side_effect=lambda *a, **kw: job.order.append('assess') or _PROCEED_VERDICT):
-        reassess_host_trust(job, callback)
-
-    job.refresh_from_db.assert_called_once_with(fields=['inventory'])
-    assert job.order == ['refresh', 'assess']
-
-
-def test_an_earlier_failure_verdict_is_never_undone_by_a_later_unchanged_check():
-    callback = Mock(host_verdict=_FAIL_VERDICT)
-
-    with patch('awx.main.tasks.receptor.host_trust.assess', return_value=_PROCEED_VERDICT) as assess:
-        reassess_host_trust(Mock(), callback)
-
-    assess.assert_not_called()
-    assert callback.host_verdict is _FAIL_VERDICT
-
-
-@patch('awx.main.tasks.receptor._finalize_adopted_job')
-@patch('awx.main.tasks.receptor.invoke_adoption_hooks', return_value=(True, None))
-def test_hooks_run_with_the_status_a_late_inventory_change_gives(mock_hooks, _finalize):
-    callback = Mock(host_verdict=_PROCEED_VERDICT)
-    job = Mock(status="running", cancel_flag=False, host_status_counts=None)
-
-    with patch('awx.main.tasks.receptor.host_trust.assess', return_value=_FAIL_VERDICT):
-        _finalize_adoption_result(job, callback, _PhaseResult('successful', 0), False, Mock(), 'unit', '/tmp/pdd')
-
-    assert mock_hooks.call_args.args[3] == 'failed'
-
-
 @pytest.mark.parametrize('status', ['failed', 'successful', 'canceled'])
 @patch('awx.main.tasks.receptor._finalize_adopted_job')
 @patch('awx.main.tasks.receptor.invoke_adoption_hooks', return_value=(True, None))
 def test_a_job_another_writer_already_ended_gets_no_hooks_and_no_final_write(mock_hooks, finalize, status):
-    callback = Mock(host_verdict=_PROCEED_VERDICT)
     job = Mock(status=status, cancel_flag=False, host_status_counts=None)
 
-    with patch('awx.main.tasks.receptor.host_trust.assess', return_value=_PROCEED_VERDICT):
-        outcome = _finalize_adoption_result(job, callback, _PhaseResult('successful', 0), False, Mock(), 'unit', '/tmp/pdd')
+    outcome = _finalize_adoption_result(job, Mock(), _PhaseResult('successful', 0), False, Mock(), 'unit', '/tmp/pdd')
 
     assert outcome is True
     mock_hooks.assert_not_called()

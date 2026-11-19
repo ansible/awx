@@ -14,7 +14,7 @@ from uuid import uuid4
 import pytest
 from kubernetes.client.rest import ApiException
 
-from awx.main.tasks import host_trust
+from awx.main.tasks import host_map
 from awx.main.tasks.adoption_decisions import JobAction
 from awx.main.tasks.callback import RunnerCallback
 from awx.main.tasks.jobs import _finalize_job_run
@@ -1324,11 +1324,9 @@ def test_the_adoption_host_map_resolves_real_hosts(me_inst):
     org = Organization.objects.first()
     inv = Inventory.objects.create(name='cb-hostmap-inv', organization=org)
     host = Host.objects.create(name='myhost', inventory=inv)
-    job = Job.objects.create(
-        controller_node=me_inst.hostname, status='running', work_unit_id='unit-hm', inventory=inv, started=now(), job_env={'AWX_ADOPTION_HOST_COUNT': 1}
-    )
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-hm', inventory=inv, started=now())
 
-    assert host_trust.assess(job).host_map.get('myhost') == host.id
+    assert host_map.read_host_map(job).get('myhost') == host.id
 
 
 @pytest.mark.django_db

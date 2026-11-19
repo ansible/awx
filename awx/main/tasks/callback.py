@@ -16,7 +16,7 @@ from django.db import connections
 
 # AWX
 from awx.main.redact import UriCleaner
-from awx.main.constants import ADOPTION_JOB_ENV_KEYS, HOST_COUNT_KEY, HOST_FILTER_KEY, MINIMAL_EVENTS, ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE
+from awx.main.constants import ADOPTION_JOB_ENV_KEYS, MINIMAL_EVENTS, ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE
 from awx.main.utils.update_model import update_model
 from awx.main.queue import CallbackQueueDispatcher
 
@@ -78,9 +78,6 @@ class RunnerCallback:
         self.instance = None
         self.parent_workflow_job_id = None
         self.host_map = {}
-        self.host_count = None  # set only by a normal run, see host_trust.count_hosts
-        self.host_filter = None  # likewise, a smart inventory's filter, see host_trust.smart_host_filter
-        self.host_verdict = None  # set only by adoption: the host_trust.Verdict for replayed events
         self.guid = get_guid()
         self.job_created = None
         self.recent_event_timings = deque(maxlen=settings.MAX_WEBSOCKET_EVENT_RATE)
@@ -136,7 +133,7 @@ class RunnerCallback:
         normal test suite rather than only by adoption-specific tests.
 
         host_map is deliberately not set here — each path has a different cheapest source
-        for it. See host_trust.host_map_from.
+        for it. See host_map.host_map_from.
 
         Args:
             instance: the UnifiedJob model instance being run
@@ -329,14 +326,6 @@ class RunnerCallback:
         else:
             # An adopter replaying 'starting' has no masked env, and pattern masking alone would leak plugin values.
             job_env = {}
-        # An adopter replaying 'starting' never counts: it keeps the count saved at job start.
-        host_count = self.host_count if self.host_count is not None else (self.instance.job_env or {}).get(HOST_COUNT_KEY)
-        if host_count is not None:
-            job_env[HOST_COUNT_KEY] = host_count
-        # self.instance is the row from before build_inventory saved the filter, so a normal run's own value comes first.
-        host_filter = self.host_filter if self.host_filter is not None else (self.instance.job_env or {}).get(HOST_FILTER_KEY)
-        if host_filter is not None:
-            job_env[HOST_FILTER_KEY] = host_filter
         return job_env
 
     def status_handler(self, status_data, runner_config):

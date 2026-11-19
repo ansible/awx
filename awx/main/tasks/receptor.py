@@ -39,9 +39,9 @@ from awx.main.utils.common import (
     parse_yaml_or_json,
     cleanup_new_process,
 )
-from awx.main.constants import HOST_RESULTS_UNMATCHED, JOB_FOLDER_PREFIX, MAX_ISOLATED_PATH_COLON_DELIMITER, RECEPTOR_SUBMIT_STARTED
+from awx.main.constants import JOB_FOLDER_PREFIX, MAX_ISOLATED_PATH_COLON_DELIMITER, RECEPTOR_SUBMIT_STARTED
 from awx.main.tasks.signals import signal_state, signal_callback, SignalExit
-from awx.main.tasks import host_trust
+from awx.main.tasks import host_map
 from awx.main.tasks.callback import RunnerCallback
 from awx.main.utils.update_model import NotOwner, update_model
 from awx.main.tasks.adoption import invoke_adoption_hooks
@@ -1404,13 +1404,8 @@ def _build_adoption_callback(job, dedup_threshold, collision_zone):
         persisted_counters=collision_zone,
     )
     # Normal runs get host_map for free from build_inventory. Adoption writes no inventory
-    # file, so it has to source the same data itself or replayed events lose host_id. It does
-    # so only for an inventory that is unchanged since the job started; otherwise the map is
-    # empty and host_verdict says why.
-    callback.host_verdict = host_trust.assess(job)
-    callback.host_map = callback.host_verdict.host_map
-    if callback.host_verdict.reason:
-        logger.warning('Job %s will not get host ids on replayed events: %s', job.id, callback.host_verdict.reason)
+    # file, so it has to source the same data itself or replayed events lose host_id.
+    callback.host_map = host_map.read_host_map(job)
     return callback
 
 
@@ -1505,10 +1500,7 @@ def resolve_adopted_status(job, callback, final_status, exit_code, process_phase
     # raising (e.g., an exception just before finalization). The work unit may have been
     # released, making the retry stream empty/errored. Use the real playbook outcome
     # from host_status_counts rather than the unreliable retry stream result.
-    # Not for a job failed by its changed inventory either: it ran to the end, so its stats are clean.
-    verdict = getattr(callback, 'host_verdict', None)
-    failed_by_inventory = isinstance(verdict, host_trust.Verdict) and verdict.action == host_trust.FAIL_WHEN_DONE
-    if final_status == 'failed' and job.host_status_counts is not None and not failed_by_inventory and not hook_failed:
+    if final_status == 'failed' and job.host_status_counts is not None and not hook_failed:
         corrected = _status_from_host_counts(job.host_status_counts)
         if corrected != 'failed':
             logger.info(
@@ -1744,38 +1736,6 @@ def _determine_adoption_status_from_unit(job, work, unit_id):
     return status, exit_code, True
 
 
-def reassess_host_trust(job, callback):
-    """Re-check the inventory now that the stream has ended, and keep any failure verdict.
-
-    The verdict is first made before streaming, and a job can stream for a long time, so a host
-    added meanwhile would otherwise still be trusted. An earlier failure is never undone.
-    """
-    verdict = callback.host_verdict
-    if not isinstance(verdict, host_trust.Verdict) or verdict.action == host_trust.FAIL_WHEN_DONE:
-        return
-    # Drops the cached inventory: a smart filter edited during the stream is read fresh. A deleted
-    # inventory leaves inventory_id NULL (SET_NULL), which the check reports as a change.
-    job.refresh_from_db(fields=['inventory'])
-    latest = host_trust.assess(job, read_map=False)
-    if latest.action == host_trust.FAIL_WHEN_DONE:
-        callback.host_verdict = latest
-
-
-def failed_by_inventory_change(job, callback):
-    """('failed', 1), with the reason recorded, if a changed inventory fails this adopted job; else None.
-
-    The replayed events carry no host ids, so the job's host results cannot be trusted. A job
-    canceled while it was orphaned stays canceled. Called before the post-run hooks, which only
-    run for 'successful', so the fact cache never writes facts to a host that may now be another.
-    """
-    verdict = callback.host_verdict
-    # cancel_flag again: a cancel that came after the verdict also wins.
-    if verdict is None or verdict.action == host_trust.PROCEED or job.cancel_flag:
-        return None
-    callback.delay_update(job_explanation=f'{HOST_RESULTS_UNMATCHED} ({verdict.reason}).')
-    return 'failed', 1
-
-
 def check_still_owner(job, owner_task_id):
     """Raise NotOwner when another task has claimed the job since this adoption began."""
     if not owner_task_id:
@@ -1809,9 +1769,6 @@ def _finalize_adoption_result(job, callback, res, process_phase_failed, work, un
         status, exit_code, should_finalize = _determine_adoption_status_from_unit(job, work, unit_id)
         if not should_finalize:
             return False
-
-    reassess_host_trust(job, callback)
-    status, exit_code = failed_by_inventory_change(job, callback) or (status, exit_code)
 
     # The hooks write (an inventory import loads the unit's output), so a task that lost the
     # claim during the process phase must stop before them, not only at the final status write.
@@ -2035,8 +1992,6 @@ def reattach_to_work_unit(job, work: ReceptorWork, clock=None, owner_task_id=Non
         f'(max counter={max_counter}), replaying from startpos=0 with counter-skip'
     )
 
-    # A changed inventory does not stop the unit: it runs to the end, and failed_by_inventory_change
-    # fails the job when it is finalized.
     callback = _build_adoption_callback(job, safe_threshold, collision_zone)
     # Account for events already persisted so emitted_events / EOF final_counter reflect the
     # full job. Uses the DB count rather than len(collision_zone), which is capped.

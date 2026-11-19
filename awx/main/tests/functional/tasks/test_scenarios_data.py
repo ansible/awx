@@ -12,8 +12,6 @@ import pytest
 from django.utils.timezone import now
 
 from awx.main.models import ActivityStream, InventorySource, InventoryUpdate, Job
-from awx.main.tasks.adoption import invoke_adoption_hooks
-from awx.main.tasks.receptor import reattach_to_work_unit
 from awx.main.tasks.system import adopt_job, awx_receptor_workunit_reaper
 from awx.main.tests.adoption_cluster import EXEC, PEER, UNIT, adoption_env, configure, make_cluster, mesh, run_lost_instance_handling
 from awx.main.tests.fake_receptor import FakeReceptorWork, FakeWorkUnit, RecordingDispatcher, make_events
@@ -83,7 +81,6 @@ def _orphaned_job_over_five_hosts(me_inst, inventory, original_controller):
         started=now(),
         work_unit_id=UNIT,
         inventory=inventory,
-        job_env={'AWX_ADOPTION_HOST_COUNT': len(hosts)},
     )
     if original_controller:
         # The claim a peer controller makes before publishing adopt_job_async: controller_node
@@ -107,10 +104,10 @@ def _replayed_host_ids(job, hosts):
 @pytest.mark.parametrize('original_controller', [None, PEER], ids=['same-node-resume', 'cross-controller-claim'])
 @pytest.mark.django_db
 def test_replayed_events_keep_the_host_ids_of_an_unchanged_inventory(me_inst, inventory, original_controller):
-    # 5.2 Host map. A normal run saves the inventory's host count when the job starts. If the
-    # inventory is unchanged when the job is adopted, adoption rebuilds the host map from it and
-    # replayed events carry the ids the job started with. reattach_to_work_unit is one function
-    # shared by every adoption path, so the cross-controller claim is covered here too.
+    # 5.2 Host map. Adoption rebuilds the host map from the inventory as it is when the job is
+    # adopted, so replayed events of an unchanged inventory carry the ids the job started with.
+    # reattach_to_work_unit is one function shared by every adoption path, so the cross-controller
+    # claim is covered here too.
     hosts, job = _orphaned_job_over_five_hosts(me_inst, inventory, original_controller)
 
     assert _replayed_host_ids(job, hosts) == {name: host.id for name, host in hosts.items()}
@@ -118,57 +115,28 @@ def test_replayed_events_keep_the_host_ids_of_an_unchanged_inventory(me_inst, in
 
 @pytest.mark.parametrize('original_controller', [None, PEER], ids=['same-node-resume', 'cross-controller-claim'])
 @pytest.mark.django_db
-def test_replayed_events_of_a_changed_inventory_carry_no_host_ids(me_inst, inventory, original_controller):
-    # 5.2 Host map after an inventory change. The ids saved at start can no longer be told apart
-    # from the inventory's, so adoption does not guess: while the job was orphaned a host was
-    # deleted, one was recreated under the same name and one was disabled, and no replayed event
-    # gets a host id (AAP-100937).
+def test_replayed_events_of_hosts_edited_before_adoption_get_the_current_ids(me_inst, inventory, original_controller):
+    # 5.2 Host map after an inventory change (AAP-100937). The map is read at adoption, so hosts
+    # edited while the job was orphaned are not the ones it started with: a deleted or disabled
+    # host gets no id, and one recreated under the same name gets the new host's id. The job is
+    # not failed for it.
     hosts, job = _orphaned_job_over_five_hosts(me_inst, inventory, original_controller)
 
     hosts['fp-h2'].delete()
     hosts['fp-h3'].delete()
-    inventory.hosts.create(name='fp-h3')
+    recreated = inventory.hosts.create(name='fp-h3')
     hosts['fp-h4'].enabled = False
     hosts['fp-h4'].save()
 
-    assert _replayed_host_ids(job, hosts) == {name: None for name in hosts}
-
-
-def _change_the_inventory(inventory, hosts):
-    hosts['fp-h2'].delete()
-
-
-@pytest.mark.django_db
-def test_a_job_whose_inventory_changed_runs_to_the_end_and_fails(me_inst, inventory):
-    # 5.2 Host map, AAP-100937. The unit is not stopped, its output is replayed (with no host
-    # ids), and the job ends failed with the reason, so no host result lands on the wrong host.
-    hosts, job = _orphaned_job_over_five_hosts(me_inst, inventory, None)
-    _change_the_inventory(inventory, hosts)
-
-    with mock.patch('awx.main.tasks.receptor.invoke_adoption_hooks', wraps=invoke_adoption_hooks) as hooks:
-        work = _adopt(job, hosts)
-
+    assert _replayed_host_ids(job, hosts) == {
+        'fp-h1': hosts['fp-h1'].id,
+        'fp-h2': None,
+        'fp-h3': recreated.id,
+        'fp-h4': None,
+        'fp-h5': hosts['fp-h5'].id,
+    }
     job.refresh_from_db()
-    assert job.status == 'failed'
-    assert 'could not be matched to the inventory' in job.job_explanation
-    assert 'hosts were added or removed' in job.job_explanation
-    assert ('cancel', UNIT) not in work.calls
-    assert hooks.call_args.args[3] == 'failed'  # post-run hooks, and the fact cache with them, only run for 'successful'
-    assert [event for event in RecordingDispatcher.dispatched if event.get('host_name')]
-
-
-@pytest.mark.django_db
-def test_a_pod_attached_by_a_new_unit_is_left_to_finish_and_the_job_failed(me_inst, inventory):
-    hosts, job = _orphaned_job_over_five_hosts(me_inst, inventory, None)
-    _change_the_inventory(inventory, hosts)
-    work = FakeReceptorWork({UNIT: FakeWorkUnit(host_events(list(hosts)))})
-
-    reattach_to_work_unit(job, work, pod_name='automation-job-1-abcde')
-
-    job.refresh_from_db()
-    assert job.status == 'failed'
-    assert 'hosts were added or removed' in job.job_explanation
-    assert ('cancel', UNIT) not in work.calls
+    assert job.status == 'successful'
 
 
 @pytest.mark.django_db
@@ -179,23 +147,7 @@ def test_a_job_whose_inventory_is_unchanged_is_adopted_as_before(me_inst, invent
 
     job.refresh_from_db()
     assert job.status == 'successful'
-    assert 'could not be matched' not in job.job_explanation
     assert ('cancel', UNIT) not in work.calls
-
-
-@pytest.mark.django_db
-def test_a_job_canceled_while_orphaned_stays_canceled_when_its_inventory_changed(me_inst, inventory):
-    hosts, job = _orphaned_job_over_five_hosts(me_inst, inventory, None)
-    job.cancel_flag = True
-    job.save(update_fields=['cancel_flag'])
-    _change_the_inventory(inventory, hosts)
-
-    work = _adopt(job, hosts)
-
-    job.refresh_from_db()
-    assert job.status == 'canceled'
-    assert 'could not be matched' not in job.job_explanation
-    assert work.calls.count(('cancel', UNIT)) == 1  # the cancel flag's own, not a second one
 
 
 # ── What records a reap ───────────────────────────────────────────────────────
@@ -255,7 +207,6 @@ def _fact_cache_job(me_inst, inventory):
         work_unit_id=UNIT,
         inventory=inventory,
         use_fact_cache=True,
-        job_env={'AWX_ADOPTION_HOST_COUNT': 1},
     )
     facts = {'ansible_distribution': 'RedHat'}
     artifacts = {
@@ -279,21 +230,6 @@ def test_adopted_job_saves_the_facts_its_playbook_gathered(me_inst, inventory):
     host.refresh_from_db()
     assert job.status == 'successful'
     assert host.ansible_facts == facts
-
-
-@pytest.mark.django_db
-def test_adopted_job_whose_inventory_changed_saves_no_facts(me_inst, inventory):
-    # 5.4 + 5.2. The facts would go to a host that may now be another one, so the job fails and
-    # the post-run hooks, the fact cache with them, never run.
-    host, job, facts, work = _fact_cache_job(me_inst, inventory)
-    inventory.hosts.create(name='fc-h2')
-
-    adopt_job(job.id, open_work=lambda: work)
-
-    job.refresh_from_db()
-    host.refresh_from_db()
-    assert job.status == 'failed'
-    assert not host.ansible_facts
 
 
 @pytest.mark.django_db

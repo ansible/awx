@@ -44,8 +44,6 @@ from awx.main.constants import (
     MAX_ISOLATED_PATH_COLON_DELIMITER,
     CONTAINER_VOLUMES_MOUNT_TYPES,
     HOST_FACTS_FIELDS,
-    HOST_COUNT_KEY,
-    HOST_FILTER_KEY,
 )
 
 SCM_REVISION_FILE = '.scm_revision'
@@ -72,7 +70,7 @@ from awx.main.tasks.callback import (
     RunnerCallbackForProjectUpdate,
     RunnerCallbackForSystemJob,
 )
-from awx.main.tasks import host_trust
+from awx.main.tasks import host_map
 from awx.main.tasks.adoption_decisions import is_requeueable
 from awx.main.tasks.policy import evaluate_policy
 from awx.main.tasks.signals import with_signal_handling, signal_callback
@@ -550,20 +548,12 @@ class BaseTask(object):
         its own copy, which is what the adoption path has to do.
         """
         script_data = inventory.get_script_data(**script_params)
-        self.runner_callback.host_map = host_trust.host_map_from(script_data)
+        self.runner_callback.host_map = host_map.host_map_from(script_data)
         file_content = '#! /usr/bin/env python3\n# -*- coding: utf-8 -*-\nprint(%r)\n' % json.dumps(script_data)
         return self.write_private_data_file(private_data_dir, file_name, file_content, sub_dir='inventory', file_permissions=0o700)
 
     def build_inventory(self, instance, private_data_dir):
-        host_count = self.runner_callback.host_count = host_trust.count_hosts(instance)
-        if host_count is not None:
-            # Saved now, not only at 'starting': a controller lost before that save still leaves the adopter a count.
-            saved = {HOST_COUNT_KEY: host_count}
-            host_filter = self.runner_callback.host_filter = host_trust.smart_host_filter(instance)
-            if host_filter is not None:
-                saved[HOST_FILTER_KEY] = host_filter
-            self.instance = self.update_model(instance.pk, job_env={**(instance.job_env or {}), **saved})
-        return self.write_inventory_file(instance.inventory, private_data_dir, 'hosts', host_trust.script_params(instance))
+        return self.write_inventory_file(instance.inventory, private_data_dir, 'hosts', host_map.script_params(instance))
 
     def build_args(self, instance, private_data_dir, passwords):
         raise NotImplementedError
