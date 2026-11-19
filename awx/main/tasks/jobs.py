@@ -290,8 +290,8 @@ def _copytree_without_metadata(src, dst, src_stat, ignore_names):
             src_path = entry.path
             dst_path = os.path.join(dst, entry.name)
             if entry.is_symlink():
-                os.symlink(os.readlink(src_path), dst_path)
                 link_stat = entry.stat(follow_symlinks=False)
+                os.symlink(os.readlink(src_path), dst_path)
                 os.utime(dst_path, ns=(link_stat.st_atime_ns, link_stat.st_mtime_ns), follow_symlinks=False)
             elif entry.is_dir(follow_symlinks=False):
                 _copytree_without_metadata(src_path, dst_path, entry.stat(follow_symlinks=False), ignore_names)
