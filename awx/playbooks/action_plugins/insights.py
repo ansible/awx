@@ -117,8 +117,11 @@ class ActionModule(ActionBase):
             # into how to deal with them in combination with pagination.
             if 'ETag' in res.headers:
                 version = res.headers['ETag']
-                if version.startswith('"') and version.endswith('"'):
-                    version = version[1:-1]
+                # Strip ETag format (both weak W/"value" and strong "value")
+                if version.startswith('W/"') and version.endswith('"'):
+                    version = version[3:-1]  # Remove W/" prefix and " suffix
+                elif version.startswith('"') and version.endswith('"'):
+                    version = version[1:-1]  # Remove " wrappers
             else:
                 version = "ETAG_NOT_FOUND"
 
