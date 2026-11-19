@@ -1201,6 +1201,7 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
 
         assert task.__vars__['roles_enabled'] is False
         assert task.__vars__['collections_enabled'] is False
+        assert task.__vars__['galaxy_update_on_launch'] is False
         for k in env:
             assert not k.startswith('ANSIBLE_GALAXY_SERVER')
 
@@ -1229,6 +1230,7 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
 
         assert task.__vars__['roles_enabled'] is True
         assert task.__vars__['collections_enabled'] is True
+        assert task.__vars__['galaxy_update_on_launch'] is False
         assert sorted([(k, v) for k, v in env.items() if k.startswith('ANSIBLE_GALAXY')]) == [
             ('ANSIBLE_GALAXY_SERVER_LIST', 'server0'),
             ('ANSIBLE_GALAXY_SERVER_SERVER0_URL', 'https://galaxy.ansible.com/'),
