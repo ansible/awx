@@ -263,8 +263,10 @@ def main():
     unified_job_template_id = None
     if unified_job_template:
         search_fields['name'] = unified_job_template
-        unified_job_template_id = module.get_one('unified_job_templates', **{'data': search_fields})['id']
-        sched_search_fields['unified_job_template'] = unified_job_template_id
+        unified_job_template_obj = module.get_one('unified_job_templates', **{'data': search_fields})
+        if unified_job_template_obj is not None:
+            unified_job_template_id = unified_job_template_obj['id']
+            sched_search_fields['unified_job_template'] = unified_job_template_id
 
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('schedules', name_or_id=name, check_exists=(state == 'exists'), **{'data': sched_search_fields})
