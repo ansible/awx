@@ -49,6 +49,33 @@ def test_wrapup_skips_notifications_if_already_processed(mocker):
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize('wrapup_dispatched', [True, False], ids=['replay-reached-wrapup', 'replay-deduped'])
+def test_adopter_finalize_runs_the_hook_a_dead_receiver_skipped(mocker, wrapup_dispatched):
+    """The old receiver committed host_status_counts and died before events_processed_hook.
+    The job is still running, so it is adopted. The replayed stats event skips the hook because the
+    counts are set, and the adopter's finalize runs it, once."""
+    from awx.main.tasks.jobs import _finalize_job_run
+
+    job = Job.objects.create(status='running', host_status_counts={'ok': 1}, celery_task_id='adopt-1')
+    hook = mocker.patch('awx.main.dispatch.worker.callback.events_processed_hook')
+    mocker.patch('awx.main.tasks.jobs.events_processed_hook', hook)
+    mocker.patch('awx.main.models.unified_jobs.UnifiedJob.websocket_emit_status')
+
+    job_stats_wrapup(job.id)  # the adopter's replay of playbook_on_stats
+    hook.assert_not_called()
+    job.refresh_from_db()
+    assert job.host_status_counts == {'ok': 1}, 'the replay must keep the counts the old receiver saved'
+
+    callback = mock.Mock(wrapup_event_dispatched=wrapup_dispatched)
+    callback.get_delayed_update_fields.return_value = {}
+    # as receptor.py's adoption finalize calls it
+    _finalize_job_run(Job, job.pk, callback, 'successful', owner_task_id='adopt-1', _required_status='running')
+
+    hook.assert_called_once()
+    assert hook.call_args[0][0].pk == job.pk
+
+
+@pytest.mark.django_db
 def test_read_survives_a_redis_connection_error():
     # 5.17 Redis restart across the cluster. A worker mid-blpop when Redis restarts must not
     # crash: it logs, backs off, and returns FLUSH so the dispatcher's main loop keeps running
