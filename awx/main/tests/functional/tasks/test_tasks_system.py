@@ -735,8 +735,9 @@ class TestReapAndMarkLostInstance:
         mock_adopt.apply_async.assert_not_called()
         mock_reaper.reap_job.assert_called_once()
 
-    def test_undispatched_jobs_of_a_lost_instance_go_back_to_pending(self, settings):
-        """Jobs without work_unit_id have nothing to adopt; they are re-queued, not reaped."""
+    def test_undispatched_running_jobs_of_a_lost_instance_are_reaped(self, settings):
+        """Running jobs without work_unit_id have nothing to adopt. They are reaped, not re-queued,
+        because they already sent their 'running' notifications."""
         settings.AWX_AUTO_DEPROVISION_INSTANCES = False
         inst = self._inst(hostname='ctrl-lost')
         job = Job.objects.create(
@@ -749,9 +750,7 @@ class TestReapAndMarkLostInstance:
 
         # Adoption should NOT be queued
         mock_adopt.apply_async.assert_not_called()
-        mock_reaper.reap_job.assert_not_called()
-        job.refresh_from_db()
-        assert job.status == 'pending'
+        assert mock_reaper.reap_job.call_args[0][0].pk == job.pk
 
     def test_database_error_with_sqlstate_logs_details(self, settings):
         settings.AWX_AUTO_DEPROVISION_INSTANCES = False
@@ -1023,7 +1022,7 @@ def test_process_startup_jobs_skips_dispatched_job(me_inst, settings):
 
 @pytest.mark.django_db
 def test_process_startup_jobs_persists_adoption_task_id(me_inst):
-    """celery_task_id must point at the adoption task, otherwise the next heartbeat re-queues it."""
+    """celery_task_id must point at the adoption task, otherwise the next heartbeat queues one again."""
     job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-1', celery_task_id='original-dispatch-uuid')
     with patch('awx.main.tasks.system.adopt_job_async') as mock_adopt:
         mock_adopt.apply_async = MagicMock(return_value=({'uuid': 'adopt-uuid'}, 'celery'))
@@ -1035,7 +1034,7 @@ def test_process_startup_jobs_persists_adoption_task_id(me_inst):
 
 @pytest.mark.django_db
 def test_process_running_jobs_persists_adoption_task_id(me_inst):
-    """Same as startup: without this the job looks orphaned forever and is re-queued every heartbeat."""
+    """Same as startup: without this the job looks orphaned forever and is adopted again every heartbeat."""
     job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-1', celery_task_id='stale-uuid')
     with patch('awx.main.tasks.system.adopt_job_async') as mock_adopt:
         mock_adopt.apply_async = MagicMock(return_value=({'uuid': 'adopt-uuid'}, 'celery'))
@@ -1162,8 +1161,8 @@ def test_process_running_jobs_reaps_undispatched_with_cancel_requested(me_inst):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize('work_unit_id', ['', None])
-def test_process_running_jobs_requeues_running_job_without_work_unit(me_inst, work_unit_id):
-    """A running job that never got a work unit goes back to pending instead of failing."""
+def test_process_running_jobs_reaps_running_job_without_work_unit(me_inst, work_unit_id):
+    """A running job that never got a work unit is failed, not put back to pending: it already sent its 'running' notifications."""
     job = Job.objects.create(
         controller_node=me_inst.hostname,
         status='running',
@@ -1173,9 +1172,7 @@ def test_process_running_jobs_requeues_running_job_without_work_unit(me_inst, wo
     )
     _process_running_jobs(me_inst, active_task_ids=set(), ref_time=None)
     job.refresh_from_db()
-    assert job.status == 'pending'
-    assert job.controller_node == ''
-    assert job.execution_node == ''
+    assert job.status == 'failed'
 
 
 @pytest.mark.django_db
@@ -2234,13 +2231,12 @@ class TestLostInstanceCapacity:
         assert _adoption_slot_available(headroom_needed=django_settings.AWX_CONTROL_NODE_TASK_IMPACT) is False
 
     # ------------------------------------------------------------------
-    # AAP-96141: never-started jobs are re-queued, not reaped as failed
+    # AAP-96141: a lost controller's running job without a work unit is reaped, not re-queued
     # ------------------------------------------------------------------
 
-    def test_never_started_job_is_reset_to_pending(self, me_inst, settings):
-        """A job with no started time and no work_unit_id never reached the EE.
-        Reaping it as failed permanently loses a job that could have run on any
-        controller. Reset to pending instead."""
+    def test_never_started_job_is_reaped(self, me_inst, settings):
+        """A running job with no started time and no work_unit_id never reached the EE, but it
+        already sent its 'running' notifications, so it is failed rather than put back to pending."""
         settings.CLUSTER_HOST_ID = me_inst.hostname
         lost = self._lost()
         job = self._job(lost, work_unit_id='')
@@ -2252,31 +2248,13 @@ class TestLostInstanceCapacity:
         with patch('awx.main.tasks.system.reaper.reap_job') as reap_job:
             _handle_lost_instance_job(job, lost)
 
+        assert reap_job.call_args[0][1] == 'failed'
         job.refresh_from_db()
-        assert job.status == 'pending'
-        assert job.controller_node == ''
-        assert job.execution_node == ''
-        reap_job.assert_not_called()
-
-    def test_never_started_waiting_job_is_reset_to_pending(self, me_inst, settings):
-        """Same as above but the job is in 'waiting' instead of 'running'.
-        _handle_lost_instance_job is called from a loop that fetches running jobs,
-        but the refresh_from_db inside sees the real status."""
-        settings.CLUSTER_HOST_ID = me_inst.hostname
-        lost = self._lost()
-        job = self._job(lost, work_unit_id='', status='waiting')
-
-        with patch('awx.main.tasks.system.reaper.reap_job') as reap_job:
-            _handle_lost_instance_job(job, lost)
-
-        job.refresh_from_db()
-        assert job.status == 'pending'
-        reap_job.assert_not_called()
+        assert job.status == 'running', 'reap_job is patched, so nothing else may have changed the job'
 
     def test_never_started_but_already_terminal_is_not_reset(self, me_inst, settings):
         """A race: another controller already marked the job as error between
-        the list and this call. The CAS guard (status in running/waiting) prevents
-        a reset to pending; the job falls through to the reaper instead."""
+        the list and this call. The job goes to the reaper, whose status check leaves it alone."""
         settings.CLUSTER_HOST_ID = me_inst.hostname
         lost = self._lost()
         job = self._job(lost, work_unit_id='')
@@ -2287,12 +2265,12 @@ class TestLostInstanceCapacity:
             _handle_lost_instance_job(job, lost)
 
         job.refresh_from_db()
-        assert job.status == 'error', 'must not overwrite a terminal status back to pending'
+        assert job.status == 'error', 'must not overwrite a terminal status'
         reap_job.assert_called_once()
 
-    def test_started_job_without_a_work_unit_goes_back_to_pending(self, me_inst, settings):
-        """A job that started but never got a work_unit_id reached no execution environment,
-        so there is nothing to reconnect to and nothing to collide with: it is re-queued."""
+    def test_started_job_without_a_work_unit_is_reaped(self, me_inst, settings):
+        """A job that started but never got a work_unit_id has nothing to reconnect to. It is failed,
+        not re-queued, because it already sent its 'running' notifications."""
         settings.CLUSTER_HOST_ID = me_inst.hostname
         lost = self._lost()
         job = self._job(lost, work_unit_id='')
@@ -2301,9 +2279,7 @@ class TestLostInstanceCapacity:
         with patch('awx.main.tasks.system.reaper.reap_job') as reap_job:
             _handle_lost_instance_job(job, lost)
 
-        job.refresh_from_db()
-        assert job.status == 'pending'
-        reap_job.assert_not_called()
+        assert reap_job.call_args[0][1] == 'failed'
 
     def test_canceled_started_job_without_a_work_unit_is_reaped(self, me_inst, settings):
         """A user cancel must not be undone by putting the job back in the queue."""

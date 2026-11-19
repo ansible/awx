@@ -34,7 +34,7 @@ from awx.main.dispatch.reaper import reap_job
 from awx.main.models import UnifiedJob
 from awx.main.scheduler.kubernetes import PodManager
 from awx.main.tasks.adoption import invoke_adoption_hooks
-from awx.main.tasks.adoption_decisions import is_requeueable, reap_explanation
+from awx.main.tasks.adoption_decisions import reap_explanation
 from awx.main.tasks.receptor import (
     ReceptorWork,
     AWXReceptorJob,
@@ -78,7 +78,7 @@ class PodState:
     #: Pod is live but has been silent past the budget. ``ansible-runner worker`` blocks
     #: reading the private data dir from stdin, which receptor streams over the work unit; the
     #: controller died mid-transmit, so the worker is blocked forever and will never run the
-    #: playbook. Not adoptable — delete the pod and let the job be requeued.
+    #: playbook. Not adoptable — delete the pod and fail the job.
     WEDGED = 'wedged'
     #: Pod is live, silent, and still within the budget — or we cannot measure its age. A slow
     #: start looks exactly like a wedge, so defer and re-triage on the next heartbeat.
@@ -260,30 +260,6 @@ def delete_job_pod(job, pod_name):
 # ---------------------------------------------------------------------------
 # Adoption
 # ---------------------------------------------------------------------------
-
-
-def requeue_wedged_job(job, reason='pod never received its private data dir', owner_task_id=None):
-    """Hand a wedged job back to the task manager for a clean re-dispatch.
-
-    Safe precisely because a wedged worker never got its private data dir and therefore never
-    ran the playbook: there are no partial side effects for a re-run to collide with.
-
-    Clearing work_unit_id matters as much as the status. It is the field the orphan scan keys
-    on, so a requeued job that kept it would be picked up as orphaned again and sent back here
-    to adopt a work unit that no longer exists. Mirrors how _reap_and_mark_lost_instance hands
-    'waiting' jobs back. The status filter keeps this a no-op if another controller finalized
-    the job between triage and now, and owner_task_id does the same for a later claim.
-    """
-    owned = {'celery_task_id': owner_task_id} if owner_task_id else {}
-    updated = UnifiedJob.objects.filter(pk=job.pk, status='running', **owned).update(
-        status='pending',
-        work_unit_id='',
-        controller_node='',
-        execution_node='',
-    )
-    if updated:
-        logger.warning(f'{job.log_format}: {reason}; requeued for re-dispatch')
-    return bool(updated)
 
 
 def harvest_terminal_pod(job, pod_name, pod, owner_task_id=None, clock=None):
@@ -482,7 +458,7 @@ def _triage_job_pod(job, clock):
 
 def _adopt_absent_pod_job(job, clock, owner_task_id=None):
     """Settle a job whose pod is gone; same return contract as adopt_container_group_job."""
-    # Triage can outlast a claim by another task, whose job this would otherwise requeue or fail.
+    # Triage can outlast a claim by another task, whose job this would otherwise fail.
     try:
         check_still_owner(job, owner_task_id)
     except NotOwner as exc:
@@ -490,14 +466,14 @@ def _adopt_absent_pod_job(job, clock, owner_task_id=None):
         return True
     if not job.work_unit_id and not job.cancel_flag:
         # The controller died before it created the pod, so nothing ran and nothing will appear.
-        if not is_requeueable(job):
-            reap_job(
-                job, 'failed', job_explanation=reap_explanation(job, 'Job pod was never created before its controller was lost.'), owner_task_id=owner_task_id
-            )
-            return True
-        return requeue_wedged_job(job, reason='controller died before creating the pod', owner_task_id=owner_task_id)
+        reap_job(job, 'failed', job_explanation=reap_explanation(job, 'Job pod was never created before its controller was lost.'), owner_task_id=owner_task_id)
+        return True
+    # Deferred for one of two reasons, both of which need the pod to be looked at again rather than
+    # failed here. With a work unit the pod may simply not have been created yet when the controller
+    # died. With cancel_flag the pod may be about to appear, and only a live pod can have the cancel
+    # applied to it; failing the job now would drop the user's cancel on the floor. Either way the
+    # pod-absent budget bounds the wait.
     if not budget_exhausted(job, 'pod_absent', clock=clock):
-        # The pod may simply not have been created yet when the controller died.
         logger.info(f'{job.log_format}: no container-group pod found yet, deferring adoption')
         return False
     logger.error(f'{job.log_format}: container-group pod is gone and the adoption deadline has passed, failing')
@@ -515,7 +491,7 @@ def adopt_container_group_job(job, receptor_ctl=None, owner_task_id=None, clock=
     both are fenced by it. clock returns the current time and defaults to
     django.utils.timezone.now; the pod triage and the absent-pod budget are judged by it.
 
-    Returns True if the job reached a terminal state (or was requeued) and needs no further
+    Returns True if the job reached a terminal state and needs no further
     attention, False if it should be re-triaged on the next heartbeat.
     """
     triage = _triage_job_pod(job, clock)
@@ -537,11 +513,14 @@ def adopt_container_group_job(job, receptor_ctl=None, owner_task_id=None, clock=
             logger.warning(f'{job.log_format}: claimed by task {exc.current_task_id} during triage, leaving wedged pod {pod_name} alone')
             return True
         if not delete_job_pod(job, pod_name):
-            # Requeuing now would let the task manager launch a second pod carrying the same
-            # ansible-awx-job-id label, and find_job_pod could then pick either one.
-            logger.warning(f'{job.log_format}: wedged pod {pod_name} could not be deleted, deferring requeue')
+            # A wedged pod waits forever for its private data dir, so failing the job while leaving
+            # the pod behind would leak it with nothing left to delete it.
+            logger.warning(f'{job.log_format}: wedged pod {pod_name} could not be deleted, deferring')
             return False
-        requeue_wedged_job(job, owner_task_id=owner_task_id)
+        # No reap_explanation: the worker wedged before its private data dir existed, so no playbook
+        # can be running and there is nothing to warn about. The pod is deleted first, so a crash
+        # between the two leaves an ABSENT pod, which the next triage settles on the pod-absent budget.
+        reap_job(job, 'failed', job_explanation='Job pod never received its private data dir before its controller was lost.', owner_task_id=owner_task_id)
         return True
 
     if state == PodState.ABSENT:

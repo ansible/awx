@@ -43,7 +43,7 @@ STANDARD_INVENTORY_UPDATE_ENV = {
 CAN_CANCEL = ('new', 'pending', 'waiting', 'running')
 ACTIVE_STATES = CAN_CANCEL
 ERROR_STATES = ('error',)
-# job_env key written just before the work is submitted to receptor; a job that has it may not be requeued
+# job_env key written just before the work is submitted to receptor; a reaped job that has it is warned that its playbook may still run
 RECEPTOR_SUBMIT_STARTED = 'AWX_ADOPTION_SUBMIT_STARTED'
 # job_env keys that belong to adoption, not to the job's environment: hidden from the API, and
 # in ENV_BLOCKLIST so a credential injector cannot set one and collide with it

@@ -370,7 +370,7 @@ def test_process_phase_shutdown_signal_detaches(mock_signal, mock_connections):
     """A shutdown leaves the work unit running instead of canceling it.
 
     The EE is on another node and still working; this controller going away says nothing
-    about the job. _process_running_jobs re-queues adoption for any running job we own, so
+    about the job. _process_running_jobs dispatches an adoption for any running job we own, so
     an abandoned unit gets picked back up — a canceled one is gone for good.
     """
     rj = _make_receptor_job(cancel_flag=False)

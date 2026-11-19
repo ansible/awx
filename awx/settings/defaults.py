@@ -440,7 +440,7 @@ HADR_ADOPTION_STREAM_IDLE_TIMEOUT = 120
 # than slow. `ansible-runner worker` blocks reading the private data dir from stdin, which
 # receptor streams over the work unit; if the submitting controller died mid-transmit the
 # worker waits forever and never runs the playbook. Such a pod is not adoptable — there is no
-# output to recover and none is coming — so it is deleted and its job requeued. Healthy pods
+# output to recover and none is coming — so it is deleted and its job failed. Healthy pods
 # emit their first event within seconds (measured: 5-9s), so this is deliberately generous:
 # the cost of waiting is one more heartbeat, the cost of being wrong is a deleted live job.
 HADR_CONTAINER_GROUP_WEDGE_TIMEOUT = 300

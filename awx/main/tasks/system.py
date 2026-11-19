@@ -80,7 +80,6 @@ from awx.main.tasks.adoption_decisions import (
     drop_mesh_connected_control_nodes,
     drop_routed_remote_nodes,
     find_lost_instances,
-    is_requeueable,
     gate_lost_instances,
     live_controller_hostnames,
     mesh_hostnames,
@@ -936,23 +935,6 @@ def _handle_lost_instance_job(j, other_inst):
         )
         return
 
-    if action == JobAction.REQUEUE:
-        # Job never reached an EE — re-queue so any controller can dispatch it.
-        j.refresh_from_db(fields=['status', 'job_env', 'work_unit_id'])
-        if j.status in ('running', 'waiting'):
-            # The action was decided on a snapshot. A controller that is declared lost but still
-            # running may have started submitting since; the next heartbeat decides again.
-            if j.work_unit_id or not is_requeueable(j):
-                logger.info(f'Job {j.id} began submitting to receptor after the requeue decision, leaving it for the next heartbeat')
-                return
-            UnifiedJob.objects.filter(Q(work_unit_id='') | Q(work_unit_id__isnull=True), pk=j.id, status=j.status).update(
-                status='pending',
-                controller_node='',
-                execution_node='',
-            )
-            logger.info(f'Job {j.id} never started on lost controller {other_inst.hostname}; reset to pending for re-dispatch')
-            return
-
     if action != JobAction.ADOPT:
         logger.warning(
             f'Reaping job {j.id} of lost instance {other_inst.hostname}: controller={j.controller_node!r} execution_node={j.execution_node!r} '
@@ -1149,9 +1131,6 @@ def _process_running_jobs(this_inst, active_task_ids, ref_time):
             action = running_job_action(j, this_inst.hostname, active_task_ids, ref_time, workflow_ctype_id, live_controllers)
             if action == JobAction.ADOPT:
                 _dispatch_adoption(j)
-            elif action == JobAction.REQUEUE:
-                if UnifiedJob.objects.filter(pk=j.id, status='running').update(status='pending', controller_node='', execution_node=''):
-                    logger.warning(f'Job {j.id} had no work unit and no dispatcher task; reset to pending for re-dispatch')
             elif action == JobAction.REAP:
                 reaper.reap_job(j, 'failed', job_explanation=reap_explanation(j))
         except Exception:
@@ -1629,7 +1608,7 @@ def _adoption_has_capacity(job, clock, owner_task_id=None):
     job_id = job.id
     # Checked after the claim, not before: the claim is what keeps the job visible to this
     # controller's heartbeat, and without it a deferred job whose original controller is gone
-    # would never be re-queued by anyone.
+    # would never be picked up by anyone.
     if not _adoption_slot_available():
         # The deferral has to converge, and not only for this job's sake. The claim above is
         # what makes the job count against control capacity, and the job stays 'running'
@@ -1728,7 +1707,7 @@ def adopt_job(job_id, open_work, clock=None, owner_task_id=None):
 
         # MAX(created) is only needed to decide the timeout, and JobEvent has no index on
         # created — it heap-fetches every event row for the job. Keep it inside the unreachable
-        # branch: reachable jobs are re-queued by every heartbeat while reattach defers them,
+        # branch: reachable jobs are retried by every heartbeat while reattach defers them,
         # so computing it up front would rescan the whole event table once a minute per job.
         if not unit_reachable and _settle_unreachable_job(job, work, owner_task_id, clock):
             return

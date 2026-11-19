@@ -649,7 +649,7 @@ class AWXReceptorJob:
     # canceling it; see _cancel_unit_on_signal. Also set when receptor died under the job,
     # before or after the unit was created; see _detach_from_dead_receptor. Callers must then
     # leave the job 'running' with its work_unit_id (if any), and must not finalize or release
-    # it — that state is what lets the job be adopted, or requeued when it has no unit.
+    # it — that state is what lets the job be adopted, or reaped when it has no unit.
     detached = False
     # Set with detached when the processor itself raised (Redis or DB trouble on this controller), not on shutdown.
     processor_failed = False
@@ -729,7 +729,7 @@ class AWXReceptorJob:
 
         A pod kill stops receptor at once, and this worker can see the dead socket before its
         shutdown signal. Failing the job then would hide a pod or remote unit that may already
-        run it. Left running, adoption attaches to that pod or unit, or requeues a job with no unit.
+        run it. Left running, adoption attaches to that pod or unit, or reaps a job with no unit.
         """
         if self._cancel_unit_on_signal():
             raise exc
@@ -765,7 +765,7 @@ class AWXReceptorJob:
             use_stream_tls = get_conn_type(work_submit_kw['node'], receptor_ctl).name == "STREAMTLS"
             work_submit_kw['tlsclient'] = get_tls_client(self.config_data, use_stream_tls)
 
-        # receptor starts the unit before it replies, so from here on the job may not be requeued
+        # receptor starts the unit before it replies, so a job reaped from here on is warned that its playbook may still run
         instance = self.task.instance
         self.task.instance = self.task.update_model(instance.pk, job_env={**(instance.job_env or {}), RECEPTOR_SUBMIT_STARTED: True})
 
@@ -1842,7 +1842,7 @@ def _resolve_stalled_stream(job, work, unit_id, callback, clock, private_data_di
 
     The unit finished and the execution node still holds the output; only the
     transport between here and there is down. Deferring keeps the job 'running'
-    with its unit intact and the heartbeat re-queues it, so a later attempt can
+    with its unit intact and the heartbeat tries it again, so a later attempt can
     stream the full event set rather than finalizing on a truncated one. Bounded
     by HADR_JOB_ADOPTION_TIMEOUT from the first stall so a path that never recovers
     still converges.

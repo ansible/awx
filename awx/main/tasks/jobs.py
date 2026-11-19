@@ -71,7 +71,6 @@ from awx.main.tasks.callback import (
     RunnerCallbackForSystemJob,
 )
 from awx.main.tasks import host_map
-from awx.main.tasks.adoption_decisions import is_requeueable
 from awx.main.tasks.policy import evaluate_policy
 from awx.main.tasks.signals import with_signal_handling, signal_callback
 from awx.main.tasks.receptor import AWXReceptorJob
@@ -752,15 +751,8 @@ class BaseTask(object):
             self.build_project_dir(self.instance, private_data_dir)
             self.instance.log_lifecycle("preparing_playbook")
             if self.instance.cancel_flag or signal_callback():
-                if self.instance.cancel_flag:
-                    logger.debug(f'detected pre-run cancel flag for {self.instance.log_format}')
-                    self.instance = self.update_model(self.instance.pk, status='canceled')
-                else:
-                    # Signal without cancel_flag is a controller shutdown, not a user cancel.
-                    # Reset to pending so any controller can re-dispatch the job.
-                    logger.info(f'{self.instance.log_format} received shutdown signal before reaching EE; resetting to pending')
-                    self.instance = self.update_model(self.instance.pk, status='pending', controller_node='', execution_node='')
-                    return
+                logger.debug(f'detected pre-run cancel flag for {self.instance.log_format}')
+                self.instance = self.update_model(self.instance.pk, status='canceled')
 
             if self.instance.status != 'running':
                 # Stop the task chain and prevent starting the job if it has
@@ -921,19 +913,6 @@ class BaseTask(object):
                     exc_info=True,
                 )
                 return
-            if signal_callback() and not isinstance(self.instance, SystemJob) and (receptor_job is None or receptor_job.unit_id is None):
-                # The pod stops all its containers at once, so receptor can die after the pre-EE
-                # signal check and before a work unit exists. Nothing reached an EE and no
-                # work_unit_id was saved, so the orphan scan can never find this job: re-dispatch
-                # it like the pre-EE check does. System jobs are excluded: they run ansible-runner
-                # inside this pod, so they may already have done work. A user cancel arrives as the
-                # same signal, so re-read cancel_flag, which was set after this task loaded the job.
-                # The re-read also brings the submit marker: receptor may have started a unit whose id never came back.
-                self.instance = self.update_model(pk)
-                if not self.instance.cancel_flag and is_requeueable(self.instance):
-                    logger.info(f'{self.instance.log_format} lost receptor to a shutdown before reaching EE; resetting to pending', exc_info=True)
-                    self.instance = self.update_model(pk, status='pending', controller_node='', execution_node='')
-                    return
             # this could catch programming or file system errors
             self.runner_callback.delay_update(result_traceback=traceback.format_exc())
             logger.exception('%s Exception occurred while running task', self.instance.log_format)

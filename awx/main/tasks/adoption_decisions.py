@@ -21,7 +21,6 @@ class JobAction(str, Enum):
     ADOPT = 'adopt'
     REAP = 'reap'
     DEFER = 'defer'  # adoptable, but not here and not now; left for another controller
-    REQUEUE = 'requeue'  # never reached an execution environment; back to pending
 
 
 class LostInstanceAction(str, Enum):
@@ -159,18 +158,6 @@ def submitted_to_receptor(job):
     return bool((getattr(job, 'job_env', None) or {}).get(RECEPTOR_SUBMIT_STARTED))
 
 
-def is_requeueable(job):
-    """May this job go back to pending and run again?
-
-    Not with launch_type='sync' (inline project/inventory updates): the task manager never
-    dispatches one, so a requeued one stays pending forever. Not once it was submitted to
-    receptor: receptor starts the unit before it replies with the id, so a controller lost
-    before it saved work_unit_id leaves a playbook running, and a requeue would run it twice
-    (gist 4.5, AAP-99320).
-    """
-    return getattr(job, 'launch_type', None) != 'sync' and not submitted_to_receptor(job)
-
-
 def reap_explanation(job, default=None):
     """The job_explanation for reaping job: a warning when its playbook may still run, else default."""
     if job.work_unit_id or not submitted_to_receptor(job):
@@ -187,15 +174,13 @@ def lost_instance_job_action(job, lost_hostname, slot_available, route_available
     A job dispatched to receptor whose controller was lost is adopted if its playbook ran on
     another node, which outlived the controller. It is deferred instead when this controller
     has no room or no route to its execution node: it stays owned by the lost controller, so
-    another controller's orphan sweep still finds it. A job that never reached an execution environment goes back to pending,
-    and so does a started job of the lost controller that has no work unit, unless a cancel was requested. Anything else is reaped.
+    another controller's orphan sweep still finds it. Anything else is reaped: a running job is
+    never put back to pending, because it has already sent its 'running' notifications.
 
     slot_available and route_available are callables, asked only for a job that would be adopted.
     """
     if job.work_unit_id and job.controller_node == lost_hostname and job.execution_node != lost_hostname:
         return JobAction.ADOPT if route_available() and slot_available() else JobAction.DEFER
-    if is_requeueable(job) and not job.work_unit_id and (not job.started or (job.controller_node == lost_hostname and not getattr(job, 'cancel_flag', False))):
-        return JobAction.REQUEUE
     return JobAction.REAP
 
 
@@ -216,7 +201,7 @@ def adoption_slot_available(capacity, remaining_capacity, headroom_needed=0):
     instance's jobs would otherwise fill the pool with adoptions and starve the heartbeat,
     at which point the rest of the cluster declares *this* controller lost too and the
     cascade repeats. Jobs over the bound are simply not adopted this cycle: they stay running
-    and claimed by us, so the next heartbeat re-queues them.
+    and claimed by us, so the next heartbeat tries them again.
 
     Control capacity is that bound. It already prices exactly this cost — one
     AWX_CONTROL_NODE_TASK_IMPACT per running job we are the controller_node for — and an
@@ -270,9 +255,9 @@ def running_job_action(job, this_hostname, active_task_ids, ref_time, workflow_c
     A job is left alone unless it is running, belongs to this instance as controller or
     execution node, is not a workflow, started before ref_time, and no dispatcher task is
     tracking it. Such an orphan is adopted when this instance controls it and it was
-    dispatched to receptor, and put back to pending when it never got a work unit. One that
-    another instance controls is left alone too: a live controller handles its own jobs, and a
-    dispatched job of a dead controller is the orphan sweep's to adopt. Anything else is reaped.
+    dispatched to receptor. One that another instance controls is left alone: a live
+    controller handles its own jobs, and a dispatched job of a dead controller is the
+    orphan sweep's to adopt. Anything else is reaped.
     """
     if job.status != 'running':
         return JobAction.SKIP
@@ -286,10 +271,6 @@ def running_job_action(job, this_hostname, active_task_ids, ref_time, workflow_c
         return JobAction.SKIP
     if job.work_unit_id and job.controller_node == this_hostname:
         return JobAction.ADOPT
-    if is_requeueable(job) and not job.work_unit_id and job.controller_node == this_hostname and not getattr(job, 'cancel_flag', False):
-        # Claimed by this controller but never given a work unit, e.g. it was swept from a killed
-        # controller before dispatch got that far. Nothing reached an EE, so run it again.
-        return JobAction.REQUEUE
     if job.controller_node != this_hostname and (job.controller_node in live_controller_hostnames or job.work_unit_id):
         return JobAction.SKIP
     return JobAction.REAP

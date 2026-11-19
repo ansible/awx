@@ -2,8 +2,8 @@ from collections import namedtuple
 
 import pytest
 
-from awx.main.tasks.jobs import RunJob, RunSystemJob
-from awx.main.models import Job, SystemJob
+from awx.main.tasks.jobs import RunJob
+from awx.main.models import Job
 
 _Result = namedtuple('result', ['status', 'rc'])
 
@@ -166,7 +166,7 @@ def test_run_finalizes_normally_when_not_detached(jt_linked, execution_environme
     receptor_job._receptor_release_work.assert_called_once()
 
 
-def _run_with_receptor_dying(jt_linked, execution_environment, mocker, unit_id=None, signal_on_failure=True, on_failure=None):
+def _run_with_receptor_dying(jt_linked, execution_environment, mocker):
     """Run a job whose receptor call fails; the shutdown signal lands during that call.
 
     The pre-EE signal check has already passed by then, which is the window a pod kill hits:
@@ -182,12 +182,11 @@ def _run_with_receptor_dying(jt_linked, execution_environment, mocker, unit_id=N
     shutdown = {'signalled': False}
 
     def receptor_fails(*args, **kwargs):
-        shutdown['signalled'] = signal_on_failure
-        if on_failure:
-            on_failure(job)
+        shutdown['signalled'] = True
         raise ConnectionRefusedError(111, 'Connection refused')
 
-    receptor_job = _detached_receptor_job(mocker, unit_id=unit_id)
+    # No work unit: receptor dies before the job reaches one, which is what the test is about.
+    receptor_job = _detached_receptor_job(mocker, unit_id=None)
     receptor_job.detached = False
     receptor_job.run.side_effect = receptor_fails
     mocker.patch('awx.main.tasks.jobs.AWXReceptorJob', return_value=receptor_job)
@@ -207,95 +206,13 @@ def _run_with_receptor_dying(jt_linked, execution_environment, mocker, unit_id=N
 
 
 @pytest.mark.django_db
-def test_run_resets_job_to_pending_when_receptor_dies_at_shutdown(jt_linked, execution_environment, mocker):
-    """A shutdown that takes receptor down before any work unit exists must not fail the job.
+def test_run_errors_when_receptor_dies_at_shutdown(jt_linked, execution_environment, mocker):
+    """A shutdown that takes receptor down before any work unit exists errors the job, as on devel.
 
-    The pod stops every container at once, so the receptor container can die after the
-    pre-EE signal check and before submit_work. Nothing reached an EE and no work_unit_id
-    was saved, so the orphan scan can never pick the job up: pending is the only recovery.
+    It is not put back to pending: the job already sent its 'running' notifications.
     """
-    job, mock_finalize, mock_post_run = _run_with_receptor_dying(jt_linked, execution_environment, mocker)
+    job, mock_finalize, _ = _run_with_receptor_dying(jt_linked, execution_environment, mocker)
 
-    assert job.status == 'pending'
-    assert job.controller_node == ''
-    assert job.execution_node == ''
-    mock_finalize.assert_not_called()
-    mock_post_run.assert_not_called()
-
-
-@pytest.mark.django_db
-def test_run_still_errors_when_receptor_fails_without_shutdown(jt_linked, execution_environment, mocker):
-    """Only a shutdown makes a receptor failure retryable; a plain one is still an error."""
-    job, mock_finalize, _ = _run_with_receptor_dying(jt_linked, execution_environment, mocker, signal_on_failure=False)
-
-    mock_finalize.assert_called_once()
-    assert mock_finalize.call_args[0][3] == 'error'
-
-
-@pytest.mark.django_db
-def test_run_still_errors_when_work_unit_exists_at_shutdown(jt_linked, execution_environment, mocker):
-    """Once a work unit was created the EE may be running the job, so re-dispatching could run it twice."""
-    job, mock_finalize, _ = _run_with_receptor_dying(jt_linked, execution_environment, mocker, unit_id='unit-created')
-
-    mock_finalize.assert_called_once()
-    assert mock_finalize.call_args[0][3] == 'error'
-
-
-@pytest.mark.django_db
-def test_run_does_not_reset_to_pending_when_user_cancelled_during_shutdown(jt_linked, execution_environment, mocker):
-    """SIGUSR1 is also the dispatcher's cancel signal; cancel_flag is what tells the two apart.
-
-    The flag is set after this task loaded the job, so only a fresh read sees it.
-    """
-
-    def user_cancels(job):
-        type(job).objects.filter(pk=job.pk).update(cancel_flag=True)
-
-    job, mock_finalize, _ = _run_with_receptor_dying(jt_linked, execution_environment, mocker, on_failure=user_cancels)
-
-    assert job.status != 'pending'
-    mock_finalize.assert_called_once()
-
-
-@pytest.mark.django_db
-def test_run_does_not_reset_to_pending_when_receptor_dies_during_submit(jt_linked, execution_environment, mocker):
-    """receptor starts the unit before it replies, so a submit that got no reply may have a playbook running."""
-
-    def submit_started(job):
-        type(job).objects.filter(pk=job.pk).update(job_env={'AWX_ADOPTION_SUBMIT_STARTED': True})
-
-    job, mock_finalize, _ = _run_with_receptor_dying(jt_linked, execution_environment, mocker, on_failure=submit_started)
-
-    assert job.status != 'pending'
-    mock_finalize.assert_called_once()
-
-
-@pytest.mark.django_db
-def test_run_errors_local_system_job_that_loses_redis_at_shutdown(execution_environment, mocker):
-    """A system job runs ansible-runner inside the controller pod, so it may have done work by the
-    time redis (a pod container) goes away; only receptor jobs that never reached an EE are safe to re-dispatch."""
-    job = SystemJob.objects.create(job_type='cleanup_jobs', status='running', controller_node='controller-a', execution_environment=execution_environment)
-    # The shutdown signal arrives while the runner is going down, not before the run starts:
-    # a signal that is already set makes the pre-run guard requeue the job before the runner is called.
-    shutdown = {'signalled': False}
-
-    def runner_loses_redis(*args, **kwargs):
-        shutdown['signalled'] = True
-        raise ConnectionError('Error 2 connecting to /var/run/redis/redis.sock.')
-
-    mocker.patch('awx.main.tasks.jobs.signal_callback', side_effect=lambda: shutdown['signalled'])
-    mocker.patch('awx.main.tasks.jobs.create_partition')  # needs PostgreSQL
-    runner = mocker.patch('awx.main.tasks.jobs.ansible_runner.interface.run', side_effect=runner_loses_redis)
-    mock_finalize = mocker.patch('awx.main.tasks.jobs._finalize_job_run')
-    mocker.patch.object(RunSystemJob, 'post_run_hook')
-
-    try:
-        RunSystemJob().run(job.id)
-    except Exception:
-        pass  # a finalized error re-raises TaskError
-
-    runner.assert_called_once()
-    job.refresh_from_db()
     assert job.status != 'pending'
     mock_finalize.assert_called_once()
     assert mock_finalize.call_args[0][3] == 'error'

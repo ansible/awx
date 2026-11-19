@@ -25,7 +25,6 @@ from awx.main.tasks.container_groups import (
     open_pod_log_stream,
     pod_exit_code,
     pod_has_output,
-    requeue_wedged_job,
 )
 from awx.main.utils.update_model import NotOwner
 
@@ -348,7 +347,6 @@ def adoption_env():
         'harvest_terminal_pod',
         'attach_to_streaming_pod',
         'delete_job_pod',
-        'requeue_wedged_job',
         'reap_job',
         'check_still_owner',
     ]
@@ -386,31 +384,31 @@ def test_absent_pod_past_budget_fails_the_job(adoption_env):
 
 
 @pytest.mark.parametrize('work_unit_id', ['', None])
-def test_absent_pod_of_a_job_that_never_got_a_work_unit_is_requeued(adoption_env, work_unit_id):
-    """The controller died before it created the pod, so nothing ran and nothing will appear."""
+def test_absent_pod_of_a_job_that_never_got_a_work_unit_is_failed(adoption_env, work_unit_id):
+    """The controller died before it created the pod, so nothing ran and nothing will appear.
+
+    The job is failed, not put back to pending: it already sent its 'running' notifications."""
     adoption_env['find_job_pod'].return_value = None
     adoption_env['classify_job_pod'].return_value = PodState.ABSENT
-    adoption_env['requeue_wedged_job'].return_value = True
     job = _job()
     job.work_unit_id = work_unit_id
     job.cancel_flag = False
 
     assert adopt_container_group_job(job) is True
-    adoption_env['requeue_wedged_job'].assert_called_once()
-    adoption_env['reap_job'].assert_not_called()
+    assert adoption_env['reap_job'].call_args[0][1] == 'failed'
+    adoption_env['budget_exhausted'].assert_not_called()
 
 
 def test_absent_pod_recovery_is_fenced_by_the_adoption_claim(adoption_env):
     adoption_env['find_job_pod'].return_value = None
     adoption_env['classify_job_pod'].return_value = PodState.ABSENT
-    adoption_env['requeue_wedged_job'].return_value = True
     job = _job()
     job.work_unit_id = ''
     job.cancel_flag = False
 
     adopt_container_group_job(job, owner_task_id='adopt-1')
 
-    assert adoption_env['requeue_wedged_job'].call_args.kwargs['owner_task_id'] == 'adopt-1'
+    assert adoption_env['reap_job'].call_args.kwargs['owner_task_id'] == 'adopt-1'
 
 
 def test_absent_pod_of_a_job_claimed_during_triage_is_left_to_its_new_owner(adoption_env):
@@ -422,22 +420,7 @@ def test_absent_pod_of_a_job_claimed_during_triage_is_left_to_its_new_owner(adop
     job.cancel_flag = False
 
     assert adopt_container_group_job(job, owner_task_id='adopt-1') is True
-    adoption_env['requeue_wedged_job'].assert_not_called()
     adoption_env['reap_job'].assert_not_called()
-
-
-def test_absent_pod_of_a_sync_job_is_reaped_not_requeued(adoption_env):
-    # The task manager never dispatches launch_type='sync', so a requeued one would sit pending forever.
-    adoption_env['find_job_pod'].return_value = None
-    adoption_env['classify_job_pod'].return_value = PodState.ABSENT
-    job = _job()
-    job.work_unit_id = ''
-    job.cancel_flag = False
-    job.launch_type = 'sync'
-
-    assert adopt_container_group_job(job) is True
-    adoption_env['requeue_wedged_job'].assert_not_called()
-    assert adoption_env['reap_job'].call_args[0][1] == 'failed'
 
 
 def test_absent_pod_of_a_job_with_a_work_unit_still_waits_for_the_deadline(adoption_env):
@@ -448,11 +431,12 @@ def test_absent_pod_of_a_job_with_a_work_unit_still_waits_for_the_deadline(adopt
     job.cancel_flag = False
 
     assert adopt_container_group_job(job) is False
-    adoption_env['requeue_wedged_job'].assert_not_called()
+    adoption_env['reap_job'].assert_not_called()
 
 
-def test_absent_pod_of_a_canceled_job_is_not_requeued(adoption_env):
-    # A user cancel must not be undone by putting the job back in the queue.
+def test_absent_pod_of_a_canceled_job_waits_for_the_deadline(adoption_env):
+    # A canceled job is not failed early: the pod may still appear, and only a live pod can have
+    # the cancel applied to it, so it waits for the pod-absent deadline like one with a work unit.
     adoption_env['find_job_pod'].return_value = None
     adoption_env['classify_job_pod'].return_value = PodState.ABSENT
     job = _job()
@@ -460,7 +444,13 @@ def test_absent_pod_of_a_canceled_job_is_not_requeued(adoption_env):
     job.cancel_flag = True
 
     assert adopt_container_group_job(job) is False
-    adoption_env['requeue_wedged_job'].assert_not_called()
+    adoption_env['reap_job'].assert_not_called()
+
+    # Past the deadline nothing ran and no pod will appear, so it converges on the shared
+    # deadline like any other absent pod.
+    adoption_env['budget_exhausted'].return_value = True
+    assert adopt_container_group_job(job) is True
+    assert adoption_env['reap_job'].call_args[0][1] == 'failed'
 
 
 def test_waiting_pod_defers_without_touching_the_job(adoption_env):
@@ -508,15 +498,16 @@ def test_streaming_attach_is_given_the_callers_control_connection(adoption_env):
     assert adoption_env['attach_to_streaming_pod'].call_args[1]['receptor_ctl'] is ctl
 
 
-def test_wedged_pod_is_deleted_and_its_job_requeued(adoption_env):
-    """The worker blocked before the playbook ran, so a re-run has nothing to undo."""
+def test_wedged_pod_is_deleted_and_its_job_failed(adoption_env):
+    """The worker blocked before the playbook ran. The job is failed, not put back to pending:
+    it already sent its 'running' notifications."""
     adoption_env['classify_job_pod'].return_value = PodState.WEDGED
 
     job = _job()
-    assert adopt_container_group_job(job) is True
+    assert adopt_container_group_job(job, owner_task_id='adopt-1') is True
     adoption_env['delete_job_pod'].assert_called_once()
-    adoption_env['requeue_wedged_job'].assert_called_once_with(job, owner_task_id=None)
-    adoption_env['reap_job'].assert_not_called()
+    assert adoption_env['reap_job'].call_args[0][:2] == (job, 'failed')
+    assert adoption_env['reap_job'].call_args.kwargs['owner_task_id'] == 'adopt-1'
 
 
 def test_wedged_pod_of_a_job_claimed_during_triage_is_left_alone(adoption_env):
@@ -526,17 +517,16 @@ def test_wedged_pod_of_a_job_claimed_during_triage_is_left_alone(adoption_env):
 
     assert adopt_container_group_job(_job(), owner_task_id='adoption-task') is True
     adoption_env['delete_job_pod'].assert_not_called()
-    adoption_env['requeue_wedged_job'].assert_not_called()
+    adoption_env['reap_job'].assert_not_called()
 
 
-def test_wedged_pod_that_cannot_be_deleted_is_not_requeued(adoption_env):
-    """Requeuing on a failed delete would leave two pods carrying the same job-id label,
-    and find_job_pod could then pick either one."""
+def test_wedged_pod_that_cannot_be_deleted_defers(adoption_env):
+    """Failing the job on a failed delete would leave the wedged pod behind, waiting forever."""
     adoption_env['classify_job_pod'].return_value = PodState.WEDGED
     adoption_env['delete_job_pod'].return_value = False
 
     assert adopt_container_group_job(_job()) is False
-    adoption_env['requeue_wedged_job'].assert_not_called()
+    adoption_env['reap_job'].assert_not_called()
 
 
 def test_terminal_pod_is_harvested(adoption_env):
@@ -744,31 +734,6 @@ def test_attach_rejects_when_pod_name_differs(attach_env):
 
     ctl.simple_command.assert_any_call('work release new-unit-id')
     attach_env['reattach_to_work_unit'].assert_not_called()
-
-
-# ---------------------------------------------------------------------------
-# requeue_wedged_job
-# ---------------------------------------------------------------------------
-
-
-@patch('awx.main.tasks.container_groups.UnifiedJob')
-def test_requeue_clears_the_identifiers_that_mark_a_job_as_dispatched(mock_uj):
-    """Leaving work_unit_id set would make the requeued job look orphaned to the next
-    heartbeat, which would try to adopt the unit that just failed to exist."""
-    requeue_wedged_job(_job(42))
-
-    updates = mock_uj.objects.filter.return_value.update.call_args.kwargs
-    assert updates['status'] == 'pending'
-    assert updates['work_unit_id'] == ''
-    assert updates['controller_node'] == ''
-    assert updates['execution_node'] == ''
-
-
-@patch('awx.main.tasks.container_groups.UnifiedJob')
-def test_requeue_only_touches_a_job_that_is_still_running(mock_uj):
-    """Another controller may have finalized it between triage and here."""
-    requeue_wedged_job(_job(42))
-    assert mock_uj.objects.filter.call_args.kwargs == {'pk': 42, 'status': 'running'}
 
 
 # ---------------------------------------------------------------------------

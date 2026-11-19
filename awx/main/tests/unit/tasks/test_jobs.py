@@ -932,19 +932,19 @@ def test_acquire_lock_exclusive(mock_exists, mock_os_open, mock_lockf):
 
 
 # ---------------------------------------------------------------------------
-# AAP-96144: pre-transmit shutdown signal resets to pending, not canceled
+# AAP-96144: pre-transmit shutdown signal cancels the job, as on devel (not put back to pending)
 #
 # When a controller task pod is shutting down, dispatcherd sends SIGUSR1 to
-# all workers. A worker in the pre-transmit phase (between dispatch and EE
-# submission) previously marked the job as 'canceled' — even though the user
-# didn't cancel it. These tests verify that a shutdown signal (no cancel_flag)
-# resets the job to 'pending' for re-dispatch, while a real user cancel still
-# marks 'canceled'.
+# all workers. These tests pin what a worker in the pre-transmit phase (between
+# dispatch and EE submission) writes when that happens: both a shutdown signal
+# with no cancel_flag and a real user cancel mark the job 'canceled', as on
+# devel. Nothing resets it to 'pending' for re-dispatch, because the job already
+# sent its 'running' notifications.
 # ---------------------------------------------------------------------------
 
 
 class TestPreTransmitShutdownSignal:
-    """Tests for the pre-transmit signal handling in BaseTask.run() (jobs.py:699)."""
+    """Tests for the pre-transmit signal handling in BaseTask.run() (jobs.py:761)."""
 
     def _make_task(self):
         """Create a minimal BaseTask with mocked internals for the pre-transmit path."""
@@ -962,31 +962,30 @@ class TestPreTransmitShutdownSignal:
         task.build_project_dir = mock.MagicMock()
         return task
 
+    @mock.patch('awx.main.tasks.jobs._finalize_job_run')
     @mock.patch('awx.main.tasks.jobs.evaluate_policy')
     @mock.patch('awx.main.tasks.jobs.signal_callback', return_value=True)
-    def test_shutdown_signal_resets_to_pending(self, mock_signal, mock_policy):
-        """SIGUSR1 without cancel_flag = controller shutdown, not user cancel.
-        Job should be reset to pending, not marked canceled."""
+    def test_shutdown_signal_marks_canceled_not_pending(self, mock_signal, mock_policy, mock_finalize):
+        """A shutdown before the EE cancels the job, as on devel. It is not put back to pending:
+        it already sent its 'running' notifications."""
         task = self._make_task()
         task.instance.cancel_flag = False
 
-        task.run(42)
+        def update_model(pk, **fields):
+            task.instance.status = fields.get('status', task.instance.status)
+            return task.instance
 
-        task.update_model.assert_any_call(42, status='pending', controller_node='', execution_node='')
-
-    @mock.patch('awx.main.tasks.jobs.evaluate_policy')
-    @mock.patch('awx.main.tasks.jobs.signal_callback', return_value=True)
-    def test_shutdown_signal_returns_early(self, mock_signal, mock_policy):
-        """After resetting to pending, BaseTask.run() must return immediately.
-        If it falls through, the RuntimeError 'not starting pending task' would
-        be caught by the except block and the job finalized as error."""
-        task = self._make_task()
-        task.instance.cancel_flag = False
+        task.update_model.side_effect = update_model
+        task.post_run_hook = mock.MagicMock()
         task.final_run_hook = mock.MagicMock()
 
-        task.run(42)
+        try:
+            task.run(42)
+        except Exception:
+            pass  # a job that never started finalizes with an error and re-raises
 
-        task.final_run_hook.assert_not_called()
+        task.update_model.assert_any_call(42, status='canceled')
+        assert not [c for c in task.update_model.call_args_list if c[1].get('status') == 'pending']
 
     @mock.patch('awx.main.tasks.jobs.evaluate_policy')
     @mock.patch('awx.main.tasks.jobs.signal_callback', return_value=True)

@@ -198,8 +198,9 @@ class TestLostInstanceDecisions:
     def test_execution_node_reachable_declines_only_on_positive_evidence(self, execution_node, on_mesh, expected):
         assert execution_node_reachable(execution_node, on_mesh) is expected
 
-    def test_job_that_never_reached_an_execution_environment_goes_back_to_pending(self):
-        assert self.decide(make_job(controller_node=PEER, work_unit_id='', started=None)) == JobAction.REQUEUE
+    def test_running_job_that_never_reached_an_execution_environment_is_reaped(self):
+        # Not put back to pending: a running job has already sent its 'running' notifications.
+        assert self.decide(make_job(controller_node=PEER, work_unit_id='', started=None)) == JobAction.REAP
 
     @pytest.mark.parametrize(
         'job_fields',
@@ -214,19 +215,12 @@ class TestLostInstanceDecisions:
         assert self.decide(make_job(**job_fields)) == JobAction.REAP
 
     @pytest.mark.parametrize('work_unit_id', ['', None])
-    def test_started_job_that_never_got_a_work_unit_goes_back_to_pending(self, work_unit_id):
-        # Claimed during the controller's death, before any work unit existed: nothing reached an
-        # execution environment, so a re-dispatch cannot collide with partial work.
-        assert self.decide(make_job(controller_node=PEER, work_unit_id=work_unit_id)) == JobAction.REQUEUE
-
-    @pytest.mark.parametrize('job_fields', [{'started': None}, {'controller_node': PEER}])
-    def test_sync_job_is_reaped_not_requeued(self, job_fields):
-        # The task manager never dispatches launch_type='sync', so a requeued one would sit pending forever.
-        assert self.decide(make_job(work_unit_id='', launch_type='sync', **job_fields)) == JobAction.REAP
+    def test_started_job_that_never_got_a_work_unit_is_reaped(self, work_unit_id):
+        assert self.decide(make_job(controller_node=PEER, work_unit_id=work_unit_id)) == JobAction.REAP
 
     @pytest.mark.parametrize('job_fields', [{'started': None}, {}])
-    def test_job_submitted_to_receptor_without_a_saved_work_unit_is_reaped_not_requeued(self, job_fields):
-        # receptor may have started the unit before the controller died, so a requeue could run the playbook twice.
+    def test_job_submitted_to_receptor_without_a_saved_work_unit_is_reaped_with_a_warning(self, job_fields):
+        # receptor may have started the unit before the controller died, so the playbook may still run.
         job = make_job(controller_node=PEER, work_unit_id='', job_env={'AWX_ADOPTION_SUBMIT_STARTED': True}, **job_fields)
         assert self.decide(job) == JobAction.REAP
         assert f'may still be running on {EXEC}' in reap_explanation(job, 'default')
@@ -377,21 +371,14 @@ class TestRunningJobAction:
         assert self.decide(make_job(celery_task_id='task-1'), active_task_ids=['task-1']) == JobAction.SKIP
 
     def test_orphan_with_cancel_requested_and_no_work_unit_is_reaped(self):
-        # A user cancel must not be undone by putting the job back in the queue.
         assert self.decide(make_job(work_unit_id='', cancel_flag=True)) == JobAction.REAP
 
     @pytest.mark.parametrize('work_unit_id', ['', None])
-    def test_running_orphan_that_never_got_a_work_unit_is_requeued(self, work_unit_id):
-        # It was claimed during a controller kill, before any work unit existed, so nothing
-        # reached an execution environment and a re-dispatch cannot collide with partial work.
-        assert self.decide(make_job(work_unit_id=work_unit_id, execution_node='')) == JobAction.REQUEUE
-
-    def test_running_sync_orphan_without_a_work_unit_is_reaped(self):
-        # The task manager never dispatches launch_type='sync', so a requeued one would sit pending forever.
-        assert self.decide(make_job(work_unit_id='', execution_node='', launch_type='sync')) == JobAction.REAP
+    def test_running_orphan_that_never_got_a_work_unit_is_reaped(self, work_unit_id):
+        # Not put back to pending: a running job has already sent its 'running' notifications.
+        assert self.decide(make_job(work_unit_id=work_unit_id, execution_node='')) == JobAction.REAP
 
     def test_running_orphan_submitted_to_receptor_without_a_saved_work_unit_is_reaped(self):
-        # receptor may have started the unit, so a requeue could run the playbook twice.
         assert self.decide(make_job(work_unit_id='', execution_node='', job_env={'AWX_ADOPTION_SUBMIT_STARTED': True})) == JobAction.REAP
 
     def test_orphan_this_instance_only_executes_is_left_to_the_sweep(self):
