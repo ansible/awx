@@ -29,6 +29,7 @@ from awx.main.tasks.system import (
     _mesh_all_ready_nodes_visible,
     _heartbeat_handle_lost_instances,
     _reap_and_mark_lost_instance,
+    _live_controller_hostnames,
     inspect_execution_and_hop_nodes,
     _heartbeat_instance_management,
     _process_startup_jobs,
@@ -2703,45 +2704,71 @@ class TestStartupMarkDepartedPeers:
 
 
 @pytest.mark.django_db
-class TestMarkOfflineBackdate:
-    """Instance.mark_offline(backdate_last_seen=True) must make is_lost() return True
-    immediately so the orphan sweep can treat an explicitly-departed node as gone without
-    waiting for the grace period to expire."""
+class TestMarkOfflineDeparted:
+    """mark_offline(departed=True) records an announced departure in departed_at, so is_lost() is
+    True at once and the orphan sweep can take the node's jobs. last_seen is left alone: peers and
+    the API read it, and it must not go back in time."""
 
-    def test_backdate_makes_is_lost_true(self, settings):
+    @pytest.fixture(autouse=True)
+    def grace(self, settings):
         settings.CLUSTER_NODE_HEARTBEAT_PERIOD = 30
         settings.CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE = 4  # grace = 120 s
 
-        inst = Instance.objects.create(
-            hostname='ctrl-backdate-test',
-            node_type='control',
-            node_state=Instance.States.READY,
-            last_seen=now(),
-        )
-        inst.mark_offline(backdate_last_seen=True)
+    def _ready(self, hostname, **fields):
+        return Instance.objects.create(hostname=hostname, node_type='control', node_state=Instance.States.READY, last_seen=now(), **fields)
+
+    def test_departure_makes_is_lost_true_without_moving_last_seen(self):
+        inst = self._ready('ctrl-departed')
+        seen = inst.last_seen
+        inst.mark_offline(departed=True)
         inst.refresh_from_db()
 
         assert inst.node_state == Instance.States.UNAVAILABLE
-        assert inst.is_lost(), 'last_seen must be past the grace cutoff after backdate'
+        assert inst.departed_at is not None
+        assert inst.last_seen == seen
+        assert inst.is_lost()
 
-    def test_plain_mark_offline_does_not_backdate(self, settings):
-        """Existing callers that pass no argument keep their current behavior: last_seen is
-        unchanged, so a recently-heartbeating node still looks alive after a transient
-        health-check failure."""
-        settings.CLUSTER_NODE_HEARTBEAT_PERIOD = 30
-        settings.CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE = 4
-
-        inst = Instance.objects.create(
-            hostname='ctrl-no-backdate-test',
-            node_type='control',
-            node_state=Instance.States.READY,
-            last_seen=now(),
-        )
+    def test_plain_mark_offline_is_not_a_departure(self):
+        """A failed health check marks a node unavailable but it may still be running, so it keeps
+        its recent last_seen and is not lost."""
+        inst = self._ready('ctrl-not-departed')
         inst.mark_offline()
         inst.refresh_from_db()
 
         assert inst.node_state == Instance.States.UNAVAILABLE
-        assert not inst.is_lost(), 'last_seen must be unchanged when backdate_last_seen is not set'
+        assert inst.departed_at is None
+        assert not inst.is_lost()
+
+    def test_departure_is_recorded_on_a_node_that_is_already_unavailable(self):
+        inst = self._ready('ctrl-unavailable-then-departed')
+        inst.mark_offline(errors='redis ping failed')
+        inst.mark_offline(errors='redis ping failed', departed=True)
+        inst.refresh_from_db()
+
+        assert inst.departed_at is not None
+        assert inst.is_lost()
+
+    def test_healthy_check_clears_the_departure(self):
+        """A node that comes back, such as a restarted pod with the same hostname, is no longer departed."""
+        inst = self._ready('ctrl-back')
+        inst.mark_offline(departed=True)
+        inst.save_health_data(cpu=4, memory=8 * 1024**3, update_last_seen=True)
+        inst.refresh_from_db()
+
+        assert inst.node_state == Instance.States.READY
+        assert inst.departed_at is None
+        assert not inst.is_lost()
+
+    def test_sweep_does_not_treat_a_departed_controller_as_live(self):
+        inst = self._ready('ctrl-departed-sweep')
+        inst.mark_offline(departed=True)
+
+        assert inst.hostname not in _live_controller_hostnames()
+
+    def test_departed_at_is_not_in_the_api(self):
+        from awx.api.serializers import InstanceSerializer
+
+        assert 'departed_at' not in InstanceSerializer.Meta.fields
 
 
 class _DesyncingReceptor:

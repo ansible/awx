@@ -49,9 +49,9 @@ def make_job(**kwargs):
     return SimpleNamespace(**fields)
 
 
-def make_instance(hostname, node_type='control', seconds_since_seen=0, node_state='ready'):
+def make_instance(hostname, node_type='control', seconds_since_seen=0, node_state='ready', departed_at=None):
     last_seen = None if seconds_since_seen is None else NOW - timedelta(seconds=seconds_since_seen)
-    return Instance(hostname=hostname, node_type=node_type, node_state=node_state, last_seen=last_seen)
+    return Instance(hostname=hostname, node_type=node_type, node_state=node_state, last_seen=last_seen, departed_at=departed_at)
 
 
 @pytest.fixture
@@ -313,10 +313,14 @@ class TestLiveControllerHostnames:
         assert PEER not in live_controller_hostnames([], NOW, self.GRACE, mesh_hostnames={EXEC})
 
     def test_departed_controller_is_not_live_while_its_connection_lingers(self):
-        # A controller that announced its shutdown keeps its row, unavailable and back-dated;
+        # A controller that announced its shutdown keeps its row, unavailable with departed_at set;
         # its jobs are swept at once even though its receptor has not dropped off the mesh yet.
-        departed = make_instance(PEER, node_state='unavailable', seconds_since_seen=self.GRACE + 1)
+        departed = make_instance(PEER, node_state='unavailable', departed_at=NOW)
         assert live_controller_hostnames([departed], NOW, self.GRACE, mesh_hostnames={PEER}) == set()
+
+    def test_departed_controller_is_not_live_with_a_recent_check_in(self):
+        # Its last_seen is left as it was, so a recent check-in must not keep it live.
+        assert self.live(make_instance(PEER, node_state='unavailable', seconds_since_seen=1, departed_at=NOW)) == set()
 
 
 class TestMeshHostnames:

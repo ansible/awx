@@ -48,8 +48,8 @@ def live_controller_hostnames(instances, ref_time, grace_seconds, mesh_hostnames
     still runs its jobs. It also stays live while unavailable if it checked in within
     grace_seconds of ref_time: one failed Redis ping marks a running controller unavailable
     with a recent last_seen, and sweeping its jobs then had the controller and its peers all
-    stream them (AAP-96708). A controller that leaves on purpose back-dates its last_seen past
-    the grace period, so its jobs are swept at once.
+    stream them (AAP-96708). A controller that leaves on purpose sets departed_at, so its jobs
+    are swept at once.
 
     A controller with no row at all was deprovisioned, which says nothing about whether it is
     still running. mesh_hostnames are the nodes on the receptor mesh; one of them without a row
@@ -62,7 +62,7 @@ def live_controller_hostnames(instances, ref_time, grace_seconds, mesh_hostnames
     for inst in instances:
         with_rows.add(inst.hostname)
         if inst.node_state in ('ready', 'installed', 'deprovisioning') or (
-            inst.node_state == 'unavailable' and inst.last_seen is not None and inst.last_seen >= cutoff
+            inst.node_state == 'unavailable' and inst.departed_at is None and inst.last_seen is not None and inst.last_seen >= cutoff
         ):
             live.add(inst.hostname)
     return live | (set(mesh_hostnames) - with_rows)
