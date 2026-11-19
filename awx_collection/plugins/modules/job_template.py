@@ -376,7 +376,7 @@ def update_survey(module, last_request):
     if module.params.get('survey_spec') == {}:
         response = module.delete_endpoint(spec_endpoint)
         if response['status_code'] != 200:
-            # Not sure how to make this actually return a non 200 to test what to dump in the respinse
+            # Not sure how to make this actually return a non 200 to test what to dump in the response
             module.fail_json(msg="Failed to delete survey: {0}".format(response['json']))
     else:
         response = module.post_endpoint(spec_endpoint, **{'data': module.params.get('survey_spec')})
@@ -400,7 +400,7 @@ def main():
         credential=dict(),
         vault_credential=dict(),
         credentials=dict(type='list', elements='str'),
-        execution_environment=dict(),
+        execution_environment=dict(type='str'),
         custom_virtualenv=dict(),
         instance_groups=dict(type="list", elements='str'),
         forks=dict(type='int'),
@@ -480,8 +480,11 @@ def main():
         search_fields['organization'] = new_fields['organization'] = organization_id
 
     ee = module.params.get('execution_environment')
-    if ee:
-        new_fields['execution_environment'] = module.resolve_name_to_id('execution_environments', ee)
+    if ee is not None:
+        if ee == "":
+            new_fields['execution_environment'] = None
+        elif ee:
+            new_fields['execution_environment'] = module.resolve_name_to_id('execution_environments', ee)
 
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('job_templates', name_or_id=name, check_exists=(state == 'exists'), **{'data': search_fields})
