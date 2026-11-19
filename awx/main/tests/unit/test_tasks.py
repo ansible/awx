@@ -2844,7 +2844,7 @@ class TestCopytreeWithoutMetadata:
         with pytest.raises(FileExistsError):
             jobs.copytree_without_metadata(str(src), str(tmp_path / 'dst'))
 
-    def test_make_local_copy_without_metadata_calls(self, tmp_path):
+    def test_make_local_copy_without_metadata_calls(self, tmp_path, umask_022):
         cache_base = tmp_path / 'cache'
         collections = cache_base / 'abc123' / 'requirements_collections'
         self._make_tree(collections)
