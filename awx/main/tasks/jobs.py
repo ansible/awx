@@ -280,6 +280,7 @@ def copytree_without_metadata(src, dst, ignore_names=()):
 
 
 def _copytree_without_metadata(src, dst, src_stat, ignore_names):
+    """Recursive implementation of copytree_without_metadata; src_stat is the caller's os.stat(src)."""
     dir_mode = stat.S_IMODE(src_stat.st_mode)
     os.mkdir(dst, dir_mode | stat.S_IRWXU)  # owner rwx so that the directory can be filled
     with os.scandir(src) as entries:
