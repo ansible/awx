@@ -243,4 +243,5 @@ def test_get_ask_mapping_integrity():
         'job_tags',
         'skip_tags',
         'extra_vars',
+        'nodes_job_type',
     ]

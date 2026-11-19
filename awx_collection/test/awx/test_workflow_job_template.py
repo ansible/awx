@@ -144,6 +144,7 @@ def test_workflow_launch_with_prompting(run_module, admin_user, organization, in
         ask_inventory_on_launch=True,
         ask_tags_on_launch=True,
         ask_skip_tags_on_launch=True,
+        ask_nodes_job_type_on_launch=True,
     )
     result = run_module(
         'workflow_launch',
@@ -154,6 +155,7 @@ def test_workflow_launch_with_prompting(run_module, admin_user, organization, in
             extra_vars={"var1": "My First Variable", "var2": "My Second Variable", "var3": "My Third Variable"},
             tags=["my_tag"],
             skip_tags=["your_tag", "their_tag"],
+            nodes_job_type="check"
         ),
         admin_user,
     )
@@ -164,6 +166,7 @@ def test_workflow_launch_with_prompting(run_module, admin_user, organization, in
     assert job.inventory == inventory
     assert job.job_tags == "my_tag"
     assert job.skip_tags == "your_tag,their_tag"
+    assert job.nodes_job_type == "check"
 
 
 @pytest.mark.django_db

@@ -44,11 +44,13 @@ class WorkflowJobTemplate(HasCopy, HasCreate, HasNotifications, HasSurvey, Unifi
             "ask_labels_on_launch",
             "ask_skip_tags_on_launch",
             "ask_tags_on_launch",
+            'ask_nodes_job_type_on_launch',
             "limit",
             "scm_branch",
             "survey_enabled",
             "webhook_service",
             "webhook_credential",
+            'nodes_job_type',
         )
         update_payload(payload, optional_fields, kwargs)
 
