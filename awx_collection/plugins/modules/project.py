@@ -90,6 +90,11 @@ options:
         - Cache Timeout to cache prior project syncs for a certain number of seconds.
             Only valid if scm_update_on_launch is to True, otherwise ignored.
       type: int
+    galaxy_update_on_launch:
+      description:
+        - Bypass the 24-hour Galaxy response cache when installing collections during project sync.
+        - When enabled, passes --no-cache to ansible-galaxy collection install.
+      type: bool
     allow_override:
       description:
         - Allow changing the SCM branch or revision in a job template that uses this project.
@@ -189,6 +194,17 @@ EXAMPLES = '''
     state: present
     controller_config_file: "~/tower_cli.cfg"
 
+- name: Add Project with Galaxy cache bypass
+  project:
+    name: "Foo"
+    description: "Foo bar project"
+    organization: "test"
+    scm_type: git
+    scm_url: "https://github.com/ansible/test-playbooks"
+    galaxy_update_on_launch: true
+    state: present
+    controller_config_file: "~/tower_cli.cfg"
+
 - name: Copy project
   project:
     name: copy
@@ -264,6 +280,7 @@ def main():
         scm_track_submodules=dict(type='bool'),
         scm_update_on_launch=dict(type='bool'),
         scm_update_cache_timeout=dict(type='int'),
+        galaxy_update_on_launch=dict(type='bool'),
         allow_override=dict(type='bool', aliases=['scm_allow_override']),
         timeout=dict(type='int', aliases=['job_timeout']),
         default_environment=dict(),
@@ -367,6 +384,7 @@ def main():
         'scm_track_submodules',
         'scm_update_on_launch',
         'scm_update_cache_timeout',
+        'galaxy_update_on_launch',
         'timeout',
         'scm_update_cache_timeout',
         'custom_virtualenv',

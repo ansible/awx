@@ -191,7 +191,7 @@
           - "'Non_Existing_Credential' in result.msg"
           - "result.total_results == 0"
 
-    - name: Create a git project using a branch and allowing branch override
+    - name: Create a git project with galaxy_update_on_launch enabled
       project:
         name: "{{ project_name3 }}"
         organization: Default
@@ -199,6 +199,22 @@
         scm_branch: empty_branch
         scm_url: https://github.com/ansible/test-playbooks
         allow_override: true
+        galaxy_update_on_launch: true
+      register: result
+
+    - assert:
+        that:
+          - result is changed
+
+    - name: Update the project with galaxy_update_on_launch disabled
+      project:
+        name: "{{ project_name3 }}"
+        organization: Default
+        scm_type: git
+        scm_branch: empty_branch
+        scm_url: https://github.com/ansible/test-playbooks
+        allow_override: true
+        galaxy_update_on_launch: false
       register: result
 
     - assert:
