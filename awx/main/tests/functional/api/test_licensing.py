@@ -474,3 +474,109 @@ class TestSubscriptionOptionsPatterns:
         post_fields = response.data.get('actions', {}).get('POST', {})
         for field_name in ('subscriptions_client_id', 'subscriptions_username'):
             assert 'pattern' not in post_fields.get(field_name, {}), f'{field_name} should not have a pattern when disabled'
+
+
+# License data that includes both safe and sensitive fields, used to
+# verify the filtering guard added in ApiV2ConfigView.get.
+_FULL_LICENSE_DATA = {
+    'valid_key': True,
+    'license_type': 'enterprise',
+    'compliant': True,
+    'date_warning': False,
+    'date_expired': False,
+    'trial': False,
+    'product_name': 'Red Hat Ansible Automation Platform',
+    'time_remaining': 100000,
+    'grace_period_remaining': 200000,
+    # Sensitive / customer-identifying fields:
+    'account_number': '12345678',
+    'subscription_id': 'sub-abcdef',
+    'pool_id': 'pool-123',
+    'sku': 'MCT1234',
+    'support_level': 'Premium',
+    'instance_count': 100,
+    'current_instances': 5,
+    'automated_instances': 3,
+}
+
+_SENSITIVE_LICENSE_FIELDS = {
+    'account_number',
+    'subscription_id',
+    'pool_id',
+    'sku',
+    'support_level',
+    'instance_count',
+    'current_instances',
+    'automated_instances',
+}
+
+_ALLOWED_LICENSE_KEYS = {
+    'license_type',
+    'valid_key',
+    'compliant',
+    'date_warning',
+    'date_expired',
+    'trial',
+    'product_name',
+    'time_remaining',
+    'grace_period_remaining',
+}
+
+
+def _mock_get_licenser():
+    """Return a patched get_licenser whose validate() returns full data."""
+    mock_licenser = MagicMock()
+    mock_licenser.validate.return_value = dict(_FULL_LICENSE_DATA)
+    return patch(
+        'awx.api.views.root.get_licenser',
+        return_value=mock_licenser,
+    )
+
+
+@pytest.mark.django_db
+class TestApiV2ConfigViewLicenseFiltering:
+    """Verify that unprivileged users cannot read sensitive license fields
+    from GET /api/v2/config/, while privileged users still can."""
+
+    def test_unprivileged_user_sees_only_allowed_license_fields(self, get, rando):
+        """A user with no roles must not see sensitive license fields."""
+        with _mock_get_licenser():
+            response = get(
+                reverse('api:api_v2_config_view'),
+                rando,
+                expect=status.HTTP_200_OK,
+            )
+
+        license_info = response.data['license_info']
+        leaked = _SENSITIVE_LICENSE_FIELDS & set(license_info.keys())
+        assert not leaked, f"Unprivileged user can see sensitive fields: {leaked}"
+        # The allowed keys that were in the mock data must still be present.
+        for key in _ALLOWED_LICENSE_KEYS:
+            assert key in license_info, f"Allowed field '{key}' missing from unprivileged response"
+
+    def test_superuser_sees_all_license_fields(self, get, admin):
+        """A superuser must see every license field, including sensitive."""
+        with _mock_get_licenser():
+            response = get(
+                reverse('api:api_v2_config_view'),
+                admin,
+                expect=status.HTTP_200_OK,
+            )
+
+        license_info = response.data['license_info']
+        for field in _SENSITIVE_LICENSE_FIELDS:
+            assert field in license_info, f"Superuser should see sensitive field '{field}'"
+
+    def test_org_admin_sees_all_license_fields(self, get, org_admin):
+        """An org admin (not superuser) is privileged and must see all
+        license fields."""
+        with _mock_get_licenser():
+            response = get(
+                reverse('api:api_v2_config_view'),
+                org_admin,
+                expect=status.HTTP_200_OK,
+            )
+
+        license_info = response.data['license_info']
+        for field in _SENSITIVE_LICENSE_FIELDS:
+            assert field in license_info, f"Org admin should see sensitive field '{field}'"

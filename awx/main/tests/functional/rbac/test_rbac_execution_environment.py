@@ -145,3 +145,33 @@ def test_give_org_permission_to_ee(setup_managed_roles, org_ee, organization, or
 
     # Extra check, user can not remove the EE from the organization
     assert not access.can_change(org_ee, {'name': 'new', 'organization': None})
+
+
+@pytest.mark.django_db
+def test_ee_add_requires_credential_use_role(organization, credential, rando):
+    """Regression: can_add must check use_role on the attached credential."""
+    organization.execution_environment_admin_role.members.add(rando)
+    access = ExecutionEnvironmentAccess(rando)
+
+    # REJECT: user has EE admin on the org but lacks use_role on the credential
+    assert not access.can_add({'organization': organization.id, 'credential': credential.id})
+
+    # PERMIT: after granting use_role on the credential, add is allowed
+    credential.use_role.members.add(rando)
+    assert access.can_add({'organization': organization.id, 'credential': credential.id})
+
+
+@pytest.mark.django_db
+def test_ee_change_requires_credential_use_role(organization, credential, ee_rd, org_member):
+    """Regression: can_change must check use_role when setting a credential."""
+    ee = ExecutionEnvironment.objects.create(name='change-cred-ee', organization=organization)
+    organization.execution_environment_admin_role.members.add(org_member)
+    ee_rd.give_permission(org_member, ee)
+    access = ExecutionEnvironmentAccess(org_member)
+
+    # REJECT: user can change the EE but lacks use_role on the credential
+    assert not access.can_change(ee, {'credential': credential.id, 'organization': organization.id})
+
+    # PERMIT: after granting use_role on the credential, change is allowed
+    credential.use_role.members.add(org_member)
+    assert access.can_change(ee, {'credential': credential.id, 'organization': organization.id})

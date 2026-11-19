@@ -66,6 +66,21 @@ ENV_BLOCKLIST = frozenset(
         'AWX_HOST',
         'PROJECT_REVISION',
         'SUPERVISOR_CONFIG_PATH',
+        'ENV',
+        'IFS',
+        'CDPATH',
+        'PROMPT_COMMAND',
+        'SHELLOPTS',
+        'BASHOPTS',
+        'GLOBIGNORE',
+        'PERL5OPT',
+        'PERL5LIB',
+        'RUBYOPT',
+        'RUBYLIB',
+        'NODE_OPTIONS',
+        'GIT_SSH_COMMAND',
+        'GIT_EXEC_PATH',
+        'GIT_TEMPLATE_DIR',
     )
 )
 

@@ -91,6 +91,114 @@ def test_set_environ():
     assert key not in os.environ
 
 
+@pytest.mark.parametrize(
+    'key, expected',
+    [
+        # Blocked by prefix
+        ('LD_PRELOAD', True),
+        ('LD_LIBRARY_PATH', True),
+        ('DYLD_LIBRARY_PATH', True),
+        ('_DYLD_PRINT_WARNINGS', True),
+        ('PYTHONPATH', True),
+        ('PYTHONHOME', True),
+        ('NODE_OPTIONS', True),
+        ('PERL5LIB', True),
+        ('RUBYLIB', True),
+        ('OPENSSL_CONF', True),
+        ('SSL_CERT_FILE', True),
+        # Blocked by exact match
+        ('REQUESTS_CA_BUNDLE', True),
+        ('CURL_CA_BUNDLE', True),
+        ('SSLKEYLOGFILE', True),
+        ('PATH', True),
+        ('HOME', True),
+        ('USER', True),
+        ('SHELL', True),
+        ('IFS', True),
+        ('ENV', True),
+        ('BASH_ENV', True),
+        ('CDPATH', True),
+        # Case insensitive
+        ('ld_preload', True),
+        ('requests_ca_bundle', True),
+        ('path', True),
+        ('Home', True),
+        # Allowed keys
+        ('HTTP_PROXY', False),
+        ('HTTPS_PROXY', False),
+        ('NO_PROXY', False),
+        ('MY_CUSTOM_VAR', False),
+        ('ANSIBLE_STDOUT_CALLBACK', False),
+        ('GIT_SSH_COMMAND', False),
+    ],
+)
+def test_is_blocked_task_env_key(key, expected):
+    assert common.is_blocked_task_env_key(key) is expected
+
+
+def test_set_environ_filters_blocked_keys():
+    """Blocked keys must not reach os.environ; allowed keys must."""
+    old_environ = os.environ.copy()
+    with common.set_environ(
+        REQUESTS_CA_BUNDLE='/tmp/evil.pem',
+        LD_PRELOAD='/tmp/evil.so',
+        HTTP_PROXY='proxy:8080',
+    ):
+        # Blocked keys must NOT appear in the environment
+        assert 'REQUESTS_CA_BUNDLE' not in os.environ
+        assert 'LD_PRELOAD' not in os.environ
+        # Allowed key must be present
+        assert os.environ.get('HTTP_PROXY') == 'proxy:8080'
+    # Environment is restored after the context manager exits
+    assert os.environ == old_environ
+
+
+def test_set_environ_permits_all_safe_keys():
+    """When every key is safe, all are applied normally."""
+    old_environ = os.environ.copy()
+    with common.set_environ(HTTP_PROXY='proxy:8080', HTTPS_PROXY='proxy:8443'):
+        assert os.environ.get('HTTP_PROXY') == 'proxy:8080'
+        assert os.environ.get('HTTPS_PROXY') == 'proxy:8443'
+    assert os.environ == old_environ
+
+
+def test_jobs_validate_rejects_blocked_keys():
+    """jobs_validate must raise ValidationError for blocked AWX_TASK_ENV keys."""
+    from rest_framework import serializers as drf_serializers
+    from awx.main.conf import jobs_validate
+
+    attrs = {
+        'AWX_TASK_ENV': {
+            'REQUESTS_CA_BUNDLE': '/evil.pem',
+            'LD_PRELOAD': '/evil.so',
+        }
+    }
+    with pytest.raises(drf_serializers.ValidationError) as exc_info:
+        jobs_validate(None, attrs)
+    msg = str(exc_info.value)
+    assert 'LD_PRELOAD' in msg
+    assert 'REQUESTS_CA_BUNDLE' in msg
+
+
+def test_jobs_validate_allows_safe_keys():
+    """jobs_validate must return attrs unchanged when all keys are safe."""
+    from awx.main.conf import jobs_validate
+
+    attrs = {'AWX_TASK_ENV': {'HTTP_PROXY': 'proxy:8080', 'HTTPS_PROXY': 'proxy:8443'}}
+    result = jobs_validate(None, attrs)
+    assert result is attrs
+    assert result['AWX_TASK_ENV'] == {'HTTP_PROXY': 'proxy:8080', 'HTTPS_PROXY': 'proxy:8443'}
+
+
+def test_jobs_validate_no_task_env():
+    """jobs_validate with no AWX_TASK_ENV key returns attrs unchanged."""
+    from awx.main.conf import jobs_validate
+
+    attrs = {'OTHER_SETTING': 'value'}
+    result = jobs_validate(None, attrs)
+    assert result is attrs
+
+
 TEST_MODELS = [
     (Job, 'job'),
     (AdHocCommand, 'ad_hoc_command'),
@@ -293,6 +401,28 @@ def test_update_scm_url(scm_type, url, username, password, check_special_cases, 
         assert str(excinfo.value) == str(expected)
     else:
         assert common.update_scm_url(scm_type, url, username, password, check_special_cases, scp_format) == expected
+
+
+@pytest.mark.parametrize(
+    'scm_type, url, expected',
+    [
+        # Dash-prefixed URLs must be rejected (argument injection guard)
+        ('git', '--upload-pack=id>&2;echo:x', ValueError('Invalid git URL')),
+        ('git', '-malicious', ValueError('Invalid git URL')),
+        ('git', '  --upload-pack=id>&2;echo:x', ValueError('Invalid git URL')),
+        ('svn', '-option', ValueError('Invalid svn URL')),
+        # Normal URLs must still be accepted through the guard
+        ('git', 'https://example.com/repo.git', 'https://example.com/repo.git'),
+        ('git', '', ''),
+    ],
+)
+def test_update_scm_url_rejects_dash_urls(scm_type, url, expected):
+    if isinstance(expected, Exception):
+        with pytest.raises(type(expected)) as excinfo:
+            common.update_scm_url(scm_type, url)
+        assert str(excinfo.value) == str(expected)
+    else:
+        assert common.update_scm_url(scm_type, url) == expected
 
 
 class TestHostnameRegexValidator:

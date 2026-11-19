@@ -10,7 +10,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from awx.main.utils.common import parse_yaml_or_json, deepmerge
-from awx.main.utils.execution_environments import get_default_pod_spec
+from awx.main.utils.execution_environments import get_default_pod_spec, sanitize_pod_spec
 
 logger = logging.getLogger('awx.main.scheduler')
 
@@ -175,7 +175,7 @@ class PodManager(object):
             pod_spec['spec']['containers'][0]['name'] = self.pod_name
 
         # Prevent mounting of service account token in job pods in order to prevent job pods from accessing the k8s API via in cluster service account auth
-        pod_spec['spec']['automountServiceAccountToken'] = False
+        pod_spec = sanitize_pod_spec(pod_spec)
 
         return pod_spec
 

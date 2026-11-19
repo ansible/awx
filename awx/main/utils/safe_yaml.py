@@ -1,4 +1,3 @@
-import re
 import yaml
 
 __all__ = ['safe_dump', 'SafeLoader']
@@ -72,12 +71,8 @@ def sanitize_jinja(arg):
     For some string, prevent usage of Jinja-like flags
     """
     if isinstance(arg, str):
-        # If the argument looks like it contains Jinja expressions
-        # {{ x }} ...
-        if re.search(r'\{\{[^}]+}}', arg) is not None:
+        if '{{' in arg:
             raise ValueError('Inline Jinja variables are not allowed.')
-        # If the argument looks like it contains Jinja statements/control flow...
-        # {% if x.foo() %} ...
-        if re.search(r'\{%[^%]+%}', arg) is not None:
+        if '{%' in arg:
             raise ValueError('Inline Jinja variables are not allowed.')
     return arg

@@ -156,6 +156,9 @@ urlpatterns = [
     # the docs/, schema-related endpoints used to be listed here but now exposed by DAB api_documentation app
 ]
 
-from awx.api.urls.debug import urls as debug_urls
+from django.conf import settings
 
-urlpatterns += [re_path(r'^debug/', include(debug_urls))]
+if settings.DEBUG:
+    from awx.api.urls.debug import urls as debug_urls
+
+    urlpatterns += [re_path(r'^debug/', include(debug_urls))]

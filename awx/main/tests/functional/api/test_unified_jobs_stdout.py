@@ -125,6 +125,45 @@ def test_colorized_html_stdout(sqlite_copy, Parent, Child, relation, view, get, 
 
 
 @pytest.mark.django_db
+def test_osc_escape_sequences_stripped_from_html_stdout(sqlite_copy, get, admin):
+    """OSC escape sequences (e.g. OSC 8 hyperlinks with javascript: URLs)
+    are stripped from HTML stdout to prevent XSS, while normal ANSI-colored
+    content still renders correctly."""
+    job = Job()
+    job.save()
+
+    # OSC 8 hyperlink with javascript: URL using BEL (\x07) terminator
+    osc_bel = '\x1b]8;;javascript:alert(document.domain)\x07CLICKME-XSS\x1b]8;;\x07\n'
+    JobEvent(job=job, stdout=osc_bel, start_line=0).save()
+
+    # OSC 8 hyperlink using ST (ESC \) terminator
+    osc_st = '\x1b]8;;javascript:alert(2)\x1b\\STLABEL\x1b]8;;\x1b\\\n'
+    JobEvent(job=job, stdout=osc_st, start_line=1).save()
+
+    # Normal ANSI-colored output (should still render correctly)
+    JobEvent(
+        job=job,
+        stdout='\x1b[0;36mSafe output\x1b[0m\n',
+        start_line=2,
+    ).save()
+
+    url = reverse('api:job_stdout', kwargs={'pk': job.pk})
+    response = get(url + '?format=html', user=admin, expect=200)
+    body = smart_str(response.content)
+
+    # REJECT: javascript: payloads inside OSC sequences must be stripped
+    assert 'javascript:' not in body
+    assert 'alert(document.domain)' not in body
+
+    # Visible text that sat between the OSC bookends survives stripping
+    assert 'CLICKME-XSS' in body
+    assert 'STLABEL' in body
+
+    # PERMIT: ordinary ANSI colour codes still produce styled HTML spans
+    assert '<span class="ansi36">Safe output</span>' in body
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize(
     'Parent, Child, relation, view',
     [

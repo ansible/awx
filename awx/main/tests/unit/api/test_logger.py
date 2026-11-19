@@ -214,3 +214,64 @@ def test_splunk_auth():
 
     tmpl = construct_rsyslog_conf_template(mock_settings)
     assert 'httpheaderkey="Authorization" httpheadervalue="Splunk SECRET-TOKEN"' in tmpl
+
+
+@pytest.mark.parametrize(
+    'value',
+    [
+        'host"breakout',
+        'path\\evil',
+        'host(inject)',
+        'host)close',
+        'host\x00null',
+        'host\nnewline',
+    ],
+)
+def test_validate_rsyslog_safe_rejects_unsafe(value):
+    from awx.main.conf import validate_rsyslog_safe
+    from rest_framework.exceptions import ValidationError
+
+    with pytest.raises(ValidationError):
+        validate_rsyslog_safe(value)
+
+
+@pytest.mark.parametrize(
+    'value',
+    [
+        'localhost',
+        '192.168.1.1',
+        'logs.example.com',
+        '/var/lib/awx',
+        '',
+        None,
+    ],
+)
+def test_validate_rsyslog_safe_permits_safe(value):
+    from awx.main.conf import validate_rsyslog_safe
+
+    validate_rsyslog_safe(value)
+
+
+def test_escape_quotes_handles_special_chars():
+    from awx.main.utils.external_logging import escape_quotes
+
+    assert escape_quotes(None) == ''
+    assert escape_quotes('clean') == 'clean'
+    assert escape_quotes('has"quote') == 'has\\"quote'
+    assert escape_quotes('has\\slash') == 'has\\\\slash'
+    assert escape_quotes('a\nb\rc') == 'abc'
+
+
+def test_rsyslog_conf_template_escapes_tcp_host():
+    mock_settings, _ = _mock_logging_defaults()
+    logging_defaults = getattr(settings, 'LOGGING')
+    setattr(mock_settings, 'LOGGING', logging_defaults)
+    setattr(mock_settings, 'LOGGING["handlers"]["external_logger"]["address"]', '/var/run/awx-rsyslog/rsyslog.sock')
+    setattr(mock_settings, 'LOG_AGGREGATOR_ENABLED', True)
+    setattr(mock_settings, 'LOG_AGGREGATOR_TYPE', 'other')
+    setattr(mock_settings, 'LOG_AGGREGATOR_HOST', 'bad"host')
+    setattr(mock_settings, 'LOG_AGGREGATOR_PORT', 514)
+    setattr(mock_settings, 'LOG_AGGREGATOR_PROTOCOL', 'tcp')
+
+    tmpl = construct_rsyslog_conf_template(mock_settings)
+    assert 'target="bad\\"host"' in tmpl

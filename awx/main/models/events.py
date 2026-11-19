@@ -25,6 +25,8 @@ from awx.main.constants import MINIMAL_EVENTS
 from awx.main.models.base import CreatedModifiedModel
 from awx.main.utils import ignore_inventory_computed_fields, camelcase_to_underscore
 
+from ansible_base.lib.utils.models import prevent_search
+
 analytics_logger = logging.getLogger('awx.analytics.job_events')
 
 logger = logging.getLogger('awx.main.models.events')
@@ -211,7 +213,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
         max_length=100,
         choices=EVENT_CHOICES,
     )
-    event_data = JSONBlob(default=dict, blank=True)
+    event_data = prevent_search(JSONBlob(default=dict, blank=True))
     failed = models.BooleanField(
         default=False,
         editable=False,
@@ -249,9 +251,11 @@ class BasePlaybookEvent(CreatedModifiedModel):
         default=0,
         editable=False,
     )
-    stdout = models.TextField(
-        default='',
-        editable=False,
+    stdout = prevent_search(
+        models.TextField(
+            default='',
+            editable=False,
+        )
     )
     verbosity = models.PositiveIntegerField(
         default=0,
@@ -676,7 +680,7 @@ class BaseCommandEvent(CreatedModifiedModel):
     class Meta:
         abstract = True
 
-    event_data = JSONBlob(default=dict, blank=True)
+    event_data = prevent_search(JSONBlob(default=dict, blank=True))
     uuid = models.CharField(
         max_length=1024,
         default='',
@@ -686,9 +690,11 @@ class BaseCommandEvent(CreatedModifiedModel):
         default=0,
         editable=False,
     )
-    stdout = models.TextField(
-        default='',
-        editable=False,
+    stdout = prevent_search(
+        models.TextField(
+            default='',
+            editable=False,
+        )
     )
     verbosity = models.PositiveIntegerField(
         default=0,

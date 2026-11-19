@@ -164,7 +164,8 @@
     - ansible.builtin.assert:
         that:
           - results is succeeded
-          - "'active_node' in ping_data"
+          - "'ha' in ping_data"
+          - "'version' in ping_data"
 
     - name: "Make sure that expect_objects fails on an API page"
       ansible.builtin.set_fact:

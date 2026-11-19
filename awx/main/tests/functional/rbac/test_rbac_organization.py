@@ -5,6 +5,7 @@ from awx.main.access import (
     BaseAccess,
     OrganizationAccess,
 )
+from awx.main.models.credential import Credential, CredentialType
 
 
 @mock.patch.object(BaseAccess, 'check_license', return_value=None)
@@ -62,3 +63,34 @@ def test_delete_org_while_workflow_active(workflow_job_template):
     assert wj.status != 'pending'  # sanity check
     wj.status = 'pending'  # status needs to change in order to trigger workflow_job_template.save()
     wj.save(update_fields=['status'])
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "obj_perm,subobj_perm,allowed",
+    [
+        ('admin_role', 'use_role', True),
+        ('admin_role', 'read_role', False),
+        ('admin_role', 'admin_role', True),
+    ],
+)
+def test_galaxy_credential_role_based_associability(rando, organization, obj_perm, subobj_perm, allowed):
+    """Org admin must hold use_role on a galaxy credential to attach it.
+
+    Regression: without the galaxy_credentials branch in
+    OrganizationAccess.can_attach the request falls through to
+    BaseAccess.can_attach which only requires read access, allowing an
+    org admin with mere read_role on a foreign credential to bind it.
+    """
+    galaxy_ct = CredentialType.defaults['galaxy_api_token']()
+    galaxy_ct.save()
+    cred = Credential.objects.create(
+        credential_type=galaxy_ct,
+        name='test-galaxy-cred',
+        inputs={'url': 'https://galaxy.example.com/'},
+    )
+
+    getattr(organization, obj_perm).members.add(rando)
+    getattr(cred, subobj_perm).members.add(rando)
+
+    assert allowed == OrganizationAccess(rando).can_attach(organization, cred, 'galaxy_credentials', None)

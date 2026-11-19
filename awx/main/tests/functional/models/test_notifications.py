@@ -156,3 +156,44 @@ class TestJobNotificationMixin(object):
 
         context_stub = JobNotificationMixin.context_stub()
         check_structure_and_completeness(TestJobNotificationMixin.CONTEXT_STRUCTURE, context_stub)
+
+    @pytest.mark.django_db
+    def test_build_notification_error_hides_traceback(self, sqlite_copy, notification_template):
+        """When a custom notification template triggers a Jinja rendering
+        error, the returned message and body must be a generic error
+        string — never the exception traceback."""
+        notification_template.messages = {
+            'success': {
+                'message': '{% if %}',
+                'body': '{% if %}',
+            },
+        }
+        notification_template.save()
+
+        job = Job.objects.create(name='test-notification-error')
+        msg, body = job.build_notification_message(notification_template, 'succeeded')
+
+        assert msg == 'Error rendering custom notification template.'
+        assert body == 'Error rendering custom notification template.'
+        assert 'Traceback' not in msg
+        assert 'File "' not in body
+
+    @pytest.mark.django_db
+    def test_build_notification_valid_template_renders(self, sqlite_copy, notification_template):
+        """A valid custom notification template should still render
+        correctly with the job context."""
+        notification_template.messages = {
+            'success': {
+                'message': 'Job {{ job.name }} completed',
+                'body': 'Job {{ job.name }} has status {{ job.status }}',
+            },
+        }
+        notification_template.save()
+
+        job = Job.objects.create(name='test-notification-valid')
+        msg, body = job.build_notification_message(notification_template, 'succeeded')
+
+        assert 'test-notification-valid' in msg
+        assert 'test-notification-valid' in body
+        assert msg != 'Error rendering custom notification template.'
+        assert body != 'Error rendering custom notification template.'

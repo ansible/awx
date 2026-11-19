@@ -269,6 +269,10 @@ class SmartFilter(object):
                     model = get_model(relation)
                 except LookupError:
                     raise pp.ParseException('No related field named %s' % relation)
+                try:
+                    get_model('host')._meta.get_field(relation)
+                except FieldDoesNotExist:
+                    raise pp.ParseException('No related field named %s' % relation)
 
             search_kwargs = {}
             if model is not None:
