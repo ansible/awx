@@ -1267,6 +1267,7 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
 
     def test_galaxy_update_on_launch_enabled(self, private_data_dir, project_update, mock_me):
         """Test that galaxy_update_on_launch is passed to extra vars when enabled"""
+
         class RunProjectUpdate(jobs.RunProjectUpdate):
             __vars__ = {}
 
@@ -1297,6 +1298,7 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
 
     def test_galaxy_update_on_launch_disabled(self, private_data_dir, project_update, mock_me):
         """Test that galaxy_update_on_launch is passed to extra vars when disabled"""
+
         class RunProjectUpdate(jobs.RunProjectUpdate):
             __vars__ = {}
 
