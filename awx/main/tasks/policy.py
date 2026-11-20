@@ -15,6 +15,7 @@ from rest_framework import serializers
 from rest_framework import fields
 
 from awx.main import models
+from awx.main.models import WorkflowApprovalTemplate
 from awx.main.exceptions import PolicyEvaluationError
 
 # Monkey patching opa_client.base.BaseClient to fix retries and timeout settings
@@ -130,12 +131,26 @@ class _WorkflowJobTemplateSerializer(serializers.ModelSerializer):
 
 
 class _WorkflowJobSerializer(serializers.ModelSerializer):
+    approval_before_job_started = serializers.SerializerMethodField()
     class Meta:
         model = models.WorkflowJob
         fields = (
             'id',
             'name',
+            'approval_before_job_started',
         )
+
+    def get_approval_before_job_started(self, obj):
+        approvals = models.WorkflowApproval.objects.filter(
+            unified_job_node__workflow_job_id=obj.id
+        )
+
+        for approval in approvals:
+            status = getattr(approval, 'status', None)
+            if status == 'successful':
+                return True
+
+        return False
 
 
 class _OrganizationSerializer(serializers.ModelSerializer):
