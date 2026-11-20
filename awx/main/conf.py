@@ -660,6 +660,8 @@ register(
     field_class=fields.IntegerField,
     allow_null=True,
     default=None,
+    min_value=1,
+    max_value=65535,
     label=_('Logging Aggregator Port'),
     help_text=_('Port on Logging Aggregator to send logs to (if required and not provided in Logging Aggregator).'),
     category=_('Logging'),
