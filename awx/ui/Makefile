@@ -88,9 +88,9 @@ ui/src/webpack: $(UI_DIR)/src/node_modules/webpack
 $(UI_DIR)/src/node_modules/webpack:
 	@echo "=== Installing webpack ==="
 	@cd $(UI_DIR)/src && \
-	  maj=$$(node -p "process.versions.node.split('.')[0]"); \
-	  if [ "$$maj" != "18" ]; then \
-	    echo "Error: Need Node 18.x; found $$(node -v)" >&2; \
+	  meets_req=$$(node -p "process.versions.node.split('.')[0] >= 18"); \
+	  if [ "$$meets_req" != "true" ]; then \
+	    echo "Error: Need Node >=18; found $$(node -v)" >&2; \
 	    exit 1; \
 	  fi; \
 	  npm install webpack
