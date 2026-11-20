@@ -177,10 +177,17 @@ jobs:
             echo "└── Result: ✅ Running SonarCloud analysis"
           fi
 
-      - name: Add base branch
+      - name: Checkout PR merge commit
         if: env.PR_NUMBER != ''
         run: |
-          gh pr checkout ${{ env.PR_NUMBER }}
+          # Check out the same merge commit (PR head merged into base) that CI's
+          # default checkout used to generate coverage.xml. `gh pr checkout` instead
+          # checks out the raw PR head branch, which can drift from the merge commit
+          # as soon as the base branch moves, causing line-number mismatches between
+          # the checked-out files and the coverage report (Sonar then discards the
+          # report with a "Line N is out of range" error).
+          git fetch origin pull/${{ env.PR_NUMBER }}/merge
+          git checkout FETCH_HEAD
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
