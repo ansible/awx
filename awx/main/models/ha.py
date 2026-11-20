@@ -145,6 +145,12 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         editable=False,
         help_text=_('Last time instance ran its heartbeat task for main cluster nodes. Last known connection to receptor mesh for execution nodes.'),
     )
+    departed_at = models.DateTimeField(
+        null=True,
+        default=None,
+        editable=False,
+        help_text=_('When this instance announced it was leaving the cluster. Cleared by its next healthy health check.'),
+    )
     health_check_started = models.DateTimeField(
         null=True,
         editable=False,
@@ -288,7 +294,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         return vargs
 
     def is_lost(self, ref_time=None):
-        if self.last_seen is None:
+        if self.last_seen is None or self.departed_at is not None:
             return True
         if ref_time is None:
             ref_time = now()
@@ -297,10 +303,10 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             grace_period += settings.RECEPTOR_SERVICE_ADVERTISEMENT_PERIOD
         return self.last_seen < ref_time - timedelta(seconds=grace_period)
 
-    def mark_offline(self, update_last_seen=False, perform_save=True, errors=''):
+    def mark_offline(self, update_last_seen=False, perform_save=True, errors='', departed=False):
         if self.node_state not in (Instance.States.READY, Instance.States.UNAVAILABLE, Instance.States.INSTALLED):
             return []
-        if self.node_state == Instance.States.UNAVAILABLE and self.errors == errors and (not update_last_seen):
+        if self.node_state == Instance.States.UNAVAILABLE and self.errors == errors and (not update_last_seen) and (not departed):
             return []
         self.node_state = Instance.States.UNAVAILABLE
         self.cpu_capacity = self.mem_capacity = self.capacity = 0
@@ -311,6 +317,12 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         update_fields = ['node_state', 'capacity', 'cpu_capacity', 'mem_capacity', 'errors']
         if update_last_seen:
             update_fields += ['last_seen']
+        if departed:
+            # An announced departure (announce_shutdown, _startup_mark_departed_peers): is_lost() is
+            # True at once, so peers need not wait out the grace period. last_seen is left alone.
+            self.departed_at = now()
+            update_fields.append('departed_at')
+
         if perform_save:
             from awx.main.signals import disable_activity_stream
 
@@ -382,6 +394,9 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         if not errors:
             self.refresh_capacity_fields()
             self.errors = ''
+            if self.departed_at is not None:
+                self.departed_at = None
+                update_fields.append('departed_at')
             if self.node_state in (Instance.States.UNAVAILABLE, Instance.States.INSTALLED):
                 self.node_state = Instance.States.READY
                 update_fields.append('node_state')
@@ -521,7 +536,15 @@ def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs
 
 
 def schedule_write_receptor_config(broadcast=True):
+    """Regenerate receptor.conf, on every control instance when broadcast is set.
+
+    receptor.conf is generated from a K8S-only template; outside K8S it is
+    managed by the installer (or docker-compose) and must not be overwritten.
+    """
     from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
+
+    if not settings.IS_K8S:
+        return
 
     # broadcast to all control instances to update their receptor configs
     if broadcast:

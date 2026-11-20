@@ -8,7 +8,6 @@ import threading
 import time
 from unittest import mock
 
-import pytest
 
 from awx.main.tasks import receptor
 
@@ -265,15 +264,18 @@ def test_cancel_path_closes_stream_when_work_cancel_fails():
 
     job = make_process_phase_job(None)
     job.processor = blocking_processor
+    job.task.instance.cancel_flag = True  # a user cancel, so the signal path does send work cancel
 
     start = time.monotonic()
     with (
         mock.patch.object(receptor.connections, 'close_all'),
         mock.patch.object(receptor, 'signal_callback', side_effect=signal),
-        pytest.raises(RuntimeError, match='control socket is gone'),
     ):
-        job._process_phase(receptor.ReceptorWork(ctl))
+        # The signal path logs a failed cancel instead of raising; see AWXReceptorJob._process_phase.
+        res = job._process_phase(receptor.ReceptorWork(ctl))
     elapsed = time.monotonic() - start
+
+    assert res.status == 'canceled'
 
     assert 'sock-shutdown' in events
     assert 'sock-close' in events
@@ -284,7 +286,7 @@ def test_reattach_to_work_unit_orders_teardown_before_finalize_and_release():
     """The adoption caller must tear down, then finalize, then release."""
     events = []
     ctl = make_ctl(events)
-    job = mock.Mock(work_unit_id='unit-1', id=1, pk=1)
+    job = mock.Mock(work_unit_id='unit-1', id=1, pk=1, status='running')
     receptor_job = make_process_phase_job(mock.Mock(status='successful', rc=0))
     receptor_job.unit_id = 'unit-1'
 
@@ -294,7 +296,7 @@ def test_reattach_to_work_unit_orders_teardown_before_finalize_and_release():
     with (
         mock.patch.object(receptor.connections, 'close_all'),
         mock.patch.object(receptor, 'signal_callback', return_value=False),
-        mock.patch.object(receptor, '_compute_adoption_dedup', return_value=(0, [])),
+        mock.patch.object(receptor, '_compute_adoption_dedup', return_value=(0, [], 0)),
         mock.patch.object(receptor, '_build_adoption_callback', return_value=mock.Mock()),
         mock.patch.object(receptor, '_get_or_create_private_data_dir', return_value='/tmp/adoption'),
         mock.patch.object(receptor, '_AdoptionTask', return_value=mock.Mock()),

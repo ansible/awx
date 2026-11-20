@@ -17,6 +17,8 @@ from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import force_str
 
+from ansible_base.lib.utils.db import advisory_lock
+
 from awx.api.versioning import reverse
 from awx.main import consumers
 from awx.main.fields import JSONBlob
@@ -131,6 +133,11 @@ class BasePlaybookEvent(CreatedModifiedModel):
 
     class Meta:
         abstract = True
+
+    @property
+    def is_wrapup_event(self):
+        """True for the event that marks the end of the job's output and triggers stats wrapup."""
+        return self.event == self.WRAPUP_EVENT
 
     # Playbook events will be structured to form the following hierarchy:
     # - playbook_on_start (once for each playbook file)
@@ -549,6 +556,14 @@ class JobEvent(BasePlaybookEvent):
 
             from awx.main.models import Host, JobHostSummary  # circular import
 
+            # A job's playbook_on_stats can be processed more than once: when a controller is
+            # lost mid-job, the dying pod's callback receiver drains its queue while the
+            # adopting controller replays the same stream. The summaries are written all at once
+            # (one transaction below), so any summary means the first pass recorded everything;
+            # the replay is a no-op, and host metrics are not counted twice.
+            if JobHostSummary.objects.filter(job_id=job.id).exists():
+                return
+
             if self.job.inventory.kind == 'constructed':
                 all_hosts = Host.objects.filter(id__in=self.job.inventory.hosts.values_list(Cast('instance_id', output_field=models.IntegerField()))).only(
                     'id', 'name'
@@ -563,7 +578,6 @@ class JobEvent(BasePlaybookEvent):
             existing_host_ids = set(h.id for h in all_hosts)
 
             summaries = dict()
-            updated_hosts_list = list()
             for host in hostnames:
                 host_id = host_map.get(host)
                 if host_id not in existing_host_ids:
@@ -582,15 +596,21 @@ class JobEvent(BasePlaybookEvent):
                 summaries[(host_id, host)] = summary
 
                 # do not count dark / unreachable hosts as updated
-                if not bool(summary.dark):
-                    updated_hosts_list.append(host.lower())
-                else:
+                if bool(summary.dark):
                     logger.warning(f'host {host.lower()} is dark / unreachable, not marking it as updated')
 
-            JobHostSummary.objects.bulk_create(summaries.values())
+            # Two writers can both pass the check above. The lock only makes them take turns; the
+            # exists() re-check under it is what makes this once-only. bulk_create(ignore_conflicts=True)
+            # does not say which rows it kept, so the re-check decides instead. ignore_conflicts is a backstop.
+            with advisory_lock(f'job_host_summary_{job.id}'), transaction.atomic():
+                if JobHostSummary.objects.filter(job_id=job.id).exists():
+                    return
+                # do not count dark / unreachable hosts as updated
+                updated_hosts_list = [summary.host_name.lower() for summary in summaries.values() if not summary.dark]
+                JobHostSummary.objects.bulk_create(summaries.values(), ignore_conflicts=True)
 
-            # Create/update Host Metrics
-            self._update_host_metrics(updated_hosts_list)
+                # Create/update Host Metrics
+                self._update_host_metrics(updated_hosts_list)
 
     @staticmethod
     def _update_host_metrics(updated_hosts_list):
@@ -675,6 +695,11 @@ class BaseCommandEvent(CreatedModifiedModel):
 
     class Meta:
         abstract = True
+
+    @property
+    def is_wrapup_event(self):
+        """True for the event that marks the end of the job's output and triggers stats wrapup."""
+        return self.event == self.WRAPUP_EVENT
 
     event_data = JSONBlob(default=dict, blank=True)
     uuid = models.CharField(

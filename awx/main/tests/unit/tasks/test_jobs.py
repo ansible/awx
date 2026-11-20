@@ -24,6 +24,7 @@ from awx.main.models import (
     AdHocCommand,
 )
 from awx.main.tasks import jobs
+from awx.main.utils.update_model import NotOwner
 from ansible_base.lib.workload_identity.controller import AutomationControllerJobScope
 
 
@@ -723,6 +724,44 @@ def test_work_unit_not_released_if_no_receptor_work():
     assert receptor_job._receptor_release_work.call_count == 0
 
 
+def _finalizing_task():
+    task = jobs.BaseTask.__new__(jobs.BaseTask)
+    task.model = Job
+    task.instance = mock.MagicMock(log_format='job 1 (running)')
+    task.runner_callback = mock.MagicMock()
+    return task
+
+
+@mock.patch('awx.main.tasks.jobs._finalize_job_run')
+def test_finalize_and_release_releases_the_work_unit(mock_finalize):
+    task = _finalizing_task()
+    receptor_job = mock.MagicMock()
+
+    assert task._finalize_and_release(1, 'successful', receptor_job, 'task-1') is True
+    mock_finalize.assert_called_once_with(Job, 1, task.runner_callback, 'successful', owner_task_id='task-1', _required_status='running')
+    receptor_job._receptor_release_work.assert_called_once_with(receptor_job.work, 'successful')
+
+
+@mock.patch('awx.main.tasks.jobs._finalize_job_run', side_effect=NotOwner(1, 'task-1', 'adoption-task'))
+def test_finalize_and_release_leaves_an_adopted_job_alone(mock_finalize):
+    task = _finalizing_task()
+    receptor_job = mock.MagicMock()
+
+    assert task._finalize_and_release(1, 'successful', receptor_job, 'task-1') is False
+    receptor_job._receptor_release_work.assert_not_called()
+
+
+@mock.patch('awx.main.tasks.jobs._finalize_job_run', side_effect=RuntimeError('db down'))
+def test_finalize_and_release_still_releases_when_finalize_raises(mock_finalize):
+    task = _finalizing_task()
+    receptor_job = mock.MagicMock()
+    receptor_job._receptor_release_work.side_effect = Exception('receptor gone')
+
+    with pytest.raises(RuntimeError):
+        task._finalize_and_release(1, 'failed', receptor_job, None)
+    receptor_job._receptor_release_work.assert_called_once_with(receptor_job.work, 'failed')
+
+
 @mock.patch('awx.main.tasks.jobs.ScheduleWorkflowManager')
 @mock.patch('awx.main.tasks.jobs.ScheduleTaskManager')
 @mock.patch('awx.main.tasks.jobs.events_processed_hook')
@@ -811,6 +850,29 @@ def test_finalize_job_run_calls_websocket_emit(mock_update, mock_hook, mock_task
     instance.websocket_emit_status.assert_called_once_with('failed')
 
 
+@mock.patch('awx.main.tasks.jobs.ScheduleWorkflowManager')
+@mock.patch('awx.main.tasks.jobs.ScheduleTaskManager')
+@mock.patch('awx.main.tasks.jobs.events_processed_hook')
+@mock.patch('awx.main.tasks.jobs.update_model')
+def test_finalize_job_run_required_status_not_met(mock_update, mock_hook, mock_task_mgr, mock_workflow_mgr):
+    """Fix 3 (AAP-96718): when _required_status='running' is passed and the job is already in a
+    terminal state, update_model returns None and _finalize_job_run must return None without
+    calling events_processed_hook or websocket_emit_status."""
+    mock_update.return_value = None
+
+    cb = mock.MagicMock()
+    cb.get_delayed_update_fields.return_value = {}
+    cb.wrapup_event_dispatched = True
+
+    result = jobs._finalize_job_run(mock.MagicMock, pk=1, runner_callback=cb, status='successful', _required_status='running')
+
+    assert result is None
+    mock_hook.assert_not_called()
+    mock_update.assert_called_once()
+    _, kwargs = mock_update.call_args
+    assert kwargs.get('_required_status') == 'running'
+
+
 @mock.patch('awx.main.tasks.jobs.fcntl.lockf')
 @mock.patch('awx.main.tasks.jobs.os.open')
 @mock.patch('awx.main.tasks.jobs.os.path.exists')
@@ -867,3 +929,86 @@ def test_acquire_lock_exclusive(mock_exists, mock_os_open, mock_lockf):
     call_args = mock_lockf.call_args
     lock_flags = call_args[0][1]
     assert lock_flags & fcntl.LOCK_EX  # Should have LOCK_EX bit
+
+
+# ---------------------------------------------------------------------------
+# AAP-96144: pre-transmit shutdown signal cancels the job, as on devel (not put back to pending)
+#
+# When a controller task pod is shutting down, dispatcherd sends SIGUSR1 to
+# all workers. These tests pin what a worker in the pre-transmit phase (between
+# dispatch and EE submission) writes when that happens: both a shutdown signal
+# with no cancel_flag and a real user cancel mark the job 'canceled', as on
+# devel. Nothing resets it to 'pending' for re-dispatch, because the job already
+# sent its 'running' notifications.
+# ---------------------------------------------------------------------------
+
+
+class TestPreTransmitShutdownSignal:
+    """Tests for the pre-transmit signal handling in BaseTask.run() (jobs.py:761)."""
+
+    def _make_task(self):
+        """Create a minimal BaseTask with mocked internals for the pre-transmit path."""
+        task = jobs.BaseTask()
+        task.instance = mock.MagicMock()
+        task.instance.pk = 42
+        task.instance.id = 42
+        task.instance.log_format = 'job 42'
+        task.instance.cancel_flag = False
+        task.instance.status = 'running'
+        task.instance.execution_environment_id = 1
+        task.update_model = mock.MagicMock(return_value=task.instance)
+        task.build_private_data_dir = mock.MagicMock(return_value='/tmp/private')
+        task.pre_run_hook = mock.MagicMock()
+        task.build_project_dir = mock.MagicMock()
+        return task
+
+    @mock.patch('awx.main.tasks.jobs._finalize_job_run')
+    @mock.patch('awx.main.tasks.jobs.evaluate_policy')
+    @mock.patch('awx.main.tasks.jobs.signal_callback', return_value=True)
+    def test_shutdown_signal_marks_canceled_not_pending(self, mock_signal, mock_policy, mock_finalize):
+        """A shutdown before the EE cancels the job, as on devel. It is not put back to pending:
+        it already sent its 'running' notifications."""
+        task = self._make_task()
+        task.instance.cancel_flag = False
+
+        def update_model(pk, **fields):
+            task.instance.status = fields.get('status', task.instance.status)
+            return task.instance
+
+        task.update_model.side_effect = update_model
+        task.post_run_hook = mock.MagicMock()
+        task.final_run_hook = mock.MagicMock()
+
+        try:
+            task.run(42)
+        except Exception:
+            pass  # a job that never started finalizes with an error and re-raises
+
+        task.update_model.assert_any_call(42, status='canceled')
+        assert not [c for c in task.update_model.call_args_list if c[1].get('status') == 'pending']
+
+    @mock.patch('awx.main.tasks.jobs.evaluate_policy')
+    @mock.patch('awx.main.tasks.jobs.signal_callback', return_value=True)
+    def test_cancel_flag_still_marks_canceled(self, mock_signal, mock_policy):
+        """A real user cancel (cancel_flag=True) must still set status='canceled'."""
+        task = self._make_task()
+        task.instance.cancel_flag = True
+
+        task.run(42)
+
+        task.update_model.assert_any_call(42, status='canceled')
+
+    @mock.patch('awx.main.tasks.jobs.evaluate_policy')
+    @mock.patch('awx.main.tasks.jobs.signal_callback')
+    def test_signal_check_order_cancel_flag_first(self, mock_signal, mock_policy):
+        """The cancel_flag check must come before signal_callback() in the conditional.
+        With both true, cancel_flag wins — the user asked to cancel the job."""
+        task = self._make_task()
+        task.instance.cancel_flag = True
+        mock_signal.return_value = True
+
+        task.run(42)
+
+        task.update_model.assert_any_call(42, status='canceled')
+        calls_with_pending = [c for c in task.update_model.call_args_list if c[1].get('status') == 'pending']
+        assert not calls_with_pending, 'cancel_flag=True must win over shutdown signal'

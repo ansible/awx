@@ -275,7 +275,7 @@ def test_unicode_with_base64_ansi(sqlite_copy, get, admin):
     job = Job(created=created)
     job.save()
     for i in range(3):
-        JobEvent(job=job, stdout='オ{}\n'.format(i), start_line=i, job_created=created).save()
+        JobEvent(job=job, counter=i, stdout='オ{}\n'.format(i), start_line=i, job_created=created).save()
     url = reverse('api:job_stdout', kwargs={'pk': job.pk}) + '?format=json&content_encoding=base64'
 
     response = get(url, user=admin, expect=200)

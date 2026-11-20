@@ -606,3 +606,36 @@ class TestPeers:
                         peers.append(value['address'])
 
             assert set(expected_peers) == set(peers)
+
+
+@pytest.mark.django_db
+class TestWriteReceptorConfigScheduling:
+    """
+    write_receptor_config rewrites receptor.conf from the K8S-only
+    RECEPTOR_CONFIG_STARTER, so it must never be scheduled outside of K8S,
+    where receptor.conf is managed by the installer (or docker-compose).
+    """
+
+    def _save_address_peered_from_control(self):
+        control = Instance.objects.create(hostname='control1', node_type='control')
+        hop = Instance.objects.create(hostname='hop1', node_type='hop')
+        address = ReceptorAddress.objects.create(instance=hop, address='hop1', port=6789, peers_from_control_nodes=False, canonical=True)
+        control.peers.add(address)
+        # re-saving the address (e.g. awx-manage add_receptor_address) fires receptor_address_saved
+        address.save()
+
+    @pytest.mark.parametrize('is_k8s, expected_calls', [(True, 1), (False, 0)])
+    def test_broadcast_only_on_k8s(self, settings, django_capture_on_commit_callbacks, is_k8s, expected_calls):
+        settings.IS_K8S = is_k8s
+        with mock.patch('awx.main.tasks.receptor.write_receptor_config') as write_method:
+            with django_capture_on_commit_callbacks(execute=True):
+                self._save_address_peered_from_control()
+        assert write_method.apply_async.call_count == expected_calls
+
+    def test_local_write_skipped_outside_k8s(self, settings):
+        from awx.main.models.ha import schedule_write_receptor_config
+
+        settings.IS_K8S = False
+        with mock.patch('awx.main.tasks.receptor.write_receptor_config') as write_method, mock.patch('awx.main.models.ha.is_testing', return_value=False):
+            schedule_write_receptor_config(broadcast=False)
+        write_method.assert_not_called()

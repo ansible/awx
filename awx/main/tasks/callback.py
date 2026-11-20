@@ -16,7 +16,7 @@ from django.db import connections
 
 # AWX
 from awx.main.redact import UriCleaner
-from awx.main.constants import MINIMAL_EVENTS, ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE
+from awx.main.constants import ADOPTION_JOB_ENV_KEYS, MINIMAL_EVENTS, ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE
 from awx.main.utils.update_model import update_model
 from awx.main.queue import CallbackQueueDispatcher
 
@@ -87,6 +87,7 @@ class RunnerCallback:
         self.model = model
         self.update_attempts = int(getattr(settings, 'DISPATCHER_DB_DOWNTOWN_TOLLERANCE', settings.DISPATCHER_DB_DOWNTIME_TOLERANCE) / 5)
         self.wrapup_event_dispatched = False
+        self.wrapup_event_created = None  # execution node's clock on the wrapup event; see event_handler
         self.artifacts_processed = False
         self.extra_update_fields = {}
         self.dedup_threshold = None  # skip events with counter <= this (safe contiguous range already in DB)
@@ -131,10 +132,13 @@ class RunnerCallback:
         Having both paths call this method means any missing field is caught by the
         normal test suite rather than only by adoption-specific tests.
 
+        host_map is deliberately not set here — each path has a different cheapest source
+        for it. See host_map.host_map_from.
+
         Args:
             instance: the UnifiedJob model instance being run
-            safe_env: masked environment dict for log output. None → {} (adoption path,
-                where credentials are not available at reconnect time)
+            safe_env: masked environment values that win over the pattern masking applied in
+                status_handler. None → {}; status_handler still pattern-masks in that case.
             dedup_threshold: highest counter where all lower counters are in DB (contiguous
                 prefix). event_handler skips counter <= threshold with an O(1) check. None
                 disables dedup (normal jobs, zero overhead).
@@ -143,7 +147,7 @@ class RunnerCallback:
                 worker concurrency, not job size. None when dedup is disabled.
         """
         self.instance = instance
-        self.job_created = str(instance.created)  # stamped on every event (callback.py:160)
+        self.job_created = str(instance.created)  # stamped on every event by event_handler
         self.safe_env = safe_env if safe_env is not None else {}
         if getattr(instance, 'spawned_by_workflow', False):
             try:
@@ -152,20 +156,6 @@ class RunnerCallback:
                 pass
         self.dedup_threshold = dedup_threshold
         self.persisted_counters = persisted_counters
-        # Populate host_map from inventory hostvars using the same logic as normal job path.
-        # This ensures adoption respects inventory types (smart, constructed, normal),
-        # enabled state, and job slicing — the same way write_inventory_file() does.
-        if hasattr(instance, 'inventory') and instance.inventory_id:
-            try:
-                script_params = {"hostvars": True, "towervars": True}
-                if hasattr(instance, 'job_slice_number'):
-                    script_params['slice_number'] = instance.job_slice_number
-                    script_params['slice_count'] = instance.job_slice_count
-                script_data = instance.inventory.get_script_data(**script_params)
-                for hostname, hv in script_data.get('_meta', {}).get('hostvars', {}).items():
-                    self.host_map[hostname] = hv.get('remote_tower_id', '')
-            except Exception:
-                pass  # host_map stays {}; host_id won't be set on replayed events
 
     @classmethod
     def create_for_job(cls, instance, safe_env=None, dedup_threshold=None, persisted_counters=None):
@@ -278,6 +268,14 @@ class RunnerCallback:
 
         if event_data.get('event', '') == self.wrapup_event_type:
             self.wrapup_event_dispatched = True
+            # Keep the execution node's own timestamp for when the play actually wrapped up.
+            # Adoption needs it to back-date `finished`, and it cannot read it back out of the
+            # database: dispatch above is asynchronous, so at the moment adoption finalizes the
+            # job only a prefix of these events has been persisted. Measured on hadr-rosa-a,
+            # that prefix ended ~194 s short of the real last event, which back-dated `finished`
+            # into the middle of the run. This costs one dict lookup, once per job, inside a
+            # branch that already exists — the per-event budget in the warning above is untouched.
+            self.wrapup_event_created = event_data.get('created')
 
         event_data.setdefault(self.event_data_key, self.instance.id)
         self.dispatcher.dispatch(event_data)
@@ -305,18 +303,37 @@ class RunnerCallback:
         if self.wrapup_event_type == 'EOF':
             self.wrapup_event_dispatched = True
 
+    def _starting_job_env(self, runner_config):
+        """Build the job_env saved on the 'starting' event.
+
+        job_env is exposed on the job detail API. build_safe_env masks by variable name, so it
+        cannot mask a credential-plugin value whose name matches no pattern. Only the masked
+        environment of a normal run (self.safe_env, which includes those values) makes the
+        runner env safe to persist. An adopter replaying 'starting' for a job whose original
+        controller died before saving it has none, so it persists no environment at all.
+
+        The masked values win over the pattern masking: they also cover credential-plugin
+        values whose names match no pattern.
+        """
+        from awx.main.models.credential import build_safe_env  # Circular import
+
+        masked = {k: v for k, v in self.safe_env.items() if k not in ADOPTION_JOB_ENV_KEYS}
+        if masked:
+            job_env = build_safe_env(runner_config.env)
+            for k, v in masked.items():
+                if k in job_env:
+                    job_env[k] = v
+        else:
+            # An adopter replaying 'starting' has no masked env, and pattern masking alone would leak plugin values.
+            job_env = {}
+        return job_env
+
     def status_handler(self, status_data, runner_config):
         """
         Ansible runner callback triggered on status transition
         """
         if status_data['status'] == 'starting':
-            job_env = dict(runner_config.env)
-            '''
-            Take the safe environment variables and overwrite
-            '''
-            for k, v in self.safe_env.items():
-                if k in job_env:
-                    job_env[k] = v
+            job_env = self._starting_job_env(runner_config)
             from awx.main.signals import disable_activity_stream  # Circular import
 
             with disable_activity_stream():
