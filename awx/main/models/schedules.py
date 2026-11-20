@@ -4,6 +4,7 @@
 import datetime
 import logging
 import re
+import uuid
 
 import dateutil.rrule
 import dateutil.parser
@@ -14,6 +15,7 @@ from dateutil.zoneinfo import get_zonefile_instance
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.timezone import now, make_aware
+from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
 # AWX
@@ -281,13 +283,173 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
     def get_absolute_url(self, request=None):
         return reverse('api:schedule_detail', kwargs={'pk': self.pk}, request=request)
 
+    def _prompt_value_text(self, value, hidden_keys=()):
+        """Render a saved or template prompt value for the job explanation."""
+        if isinstance(value, dict):
+            if not value:
+                return gettext('none')
+            parts = []
+            for key, item in value.items():
+                shown = '********' if key in hidden_keys else item
+                parts.append('{}={}'.format(key, shown))
+            return ', '.join(parts)
+        if isinstance(value, str) or value is None:
+            return value if value else gettext('none')
+        if hasattr(value, 'all'):
+            value = list(value.all())
+        if isinstance(value, (list, tuple, set)):
+            names = [getattr(item, 'name', None) or str(item) for item in value]
+            return ', '.join(names) if names else gettext('none')
+        if getattr(value, 'name', None):
+            return value.name
+        return str(value)
+
+    def _saved_prompt_differs(self, field_name, rejected_value):
+        """Return whether a rejected schedule prompt is actually different from the template.
+
+        Credential rejections are already the credentials that are not on the template.
+        Other many-to-many prompts compare by primary key, because a list of objects
+        does not compare equal to the template relation.
+        """
+        template = self.unified_job_template
+        if field_name == 'extra_vars':
+            return bool(rejected_value)
+        if field_name == 'credentials':
+            return bool(rejected_value)
+        template_value = getattr(template, field_name, None)
+        if field_name == 'instance_groups' and hasattr(template_value, 'all'):
+            template_ids = list(template_value.values_list('pk', flat=True))
+            rejected_ids = [getattr(item, 'pk', item) for item in (rejected_value or [])]
+            return rejected_ids != template_ids
+        if hasattr(template_value, 'all'):
+            template_ids = set(template_value.values_list('pk', flat=True))
+            rejected_ids = {getattr(item, 'pk', item) for item in (rejected_value or [])}
+            return rejected_ids != template_ids
+        if getattr(rejected_value, 'pk', None) is not None and getattr(template_value, 'pk', None) is not None:
+            return rejected_value.pk != template_value.pk
+        return rejected_value != template_value
+
+    def _fields_no_longer_prompted(self, errors, rejected):
+        """Names of schedule prompts the template no longer accepts."""
+        not_prompted = str(_('Field is not configured to prompt on launch.'))
+        extra_vars_message = str(
+            _(
+                'Variables {list_of_keys} are not allowed on launch. Check the Prompt on Launch setting '
+                'on the {model_name} to include Extra Variables.'
+            )
+        )
+        prefix, rest = extra_vars_message.split('{list_of_keys}', 1)
+        suffix = rest.split('{model_name}', 1)[-1]
+        field_names = []
+        for field_name, error in errors.items():
+            if field_name in ('passwords_needed_to_start', 'resources_needed_to_start', 'variables_needed_to_start'):
+                continue
+            text = error[0] if isinstance(error, (list, tuple)) and error else error
+            text = str(text)
+            is_prompt_off = text == not_prompted or (field_name == 'extra_vars' and text.startswith(prefix) and text.endswith(suffix))
+            if is_prompt_off and self._saved_prompt_differs(field_name, rejected.get(field_name)):
+                field_names.append(field_name)
+        return field_names
+
+    def _blocked_prompt_explanation(self, rejected, field_names):
+        """Explain which saved schedule prompts can no longer be applied."""
+        template = self.unified_job_template
+        hidden_keys = set(getattr(self, 'survey_passwords', {}) or {})
+        details = []
+        for field_name in field_names:
+            rejected_value = rejected.get(field_name)
+            if field_name == 'extra_vars' and isinstance(rejected_value, dict):
+                template_vars = getattr(template, 'extra_vars_dict', {}) or {}
+                template_value = {key: template_vars.get(key, gettext('none')) for key in rejected_value}
+            else:
+                template_value = getattr(template, field_name, None)
+            details.append(
+                gettext('{field}: schedule "{schedule_value}", job template "{template_value}"').format(
+                    field=field_name,
+                    schedule_value=self._prompt_value_text(rejected_value, hidden_keys),
+                    template_value=self._prompt_value_text(template_value, hidden_keys),
+                )
+            )
+        return gettext(
+            'Scheduled job was not run. Schedule "{schedule}" saved launch-time values that job template "{template}" '
+            'is no longer set to prompt for. The job was not started, so the job template values were kept.\n{details}'
+        ).format(
+            schedule=self.name,
+            template=getattr(template, 'name', ''),
+            details='\n'.join(details),
+        )
+
     def get_job_kwargs(self):
         config_data = self.prompts_dict()
         job_kwargs, rejected, errors = self.unified_job_template._accept_or_ignore_job_kwargs(**config_data)
         if errors:
             logger.info('Errors creating scheduled job: {}'.format(errors))
+        # A saved prompt that the template no longer accepts would otherwise be dropped
+        # and the job would silently run with the template value.
+        blocked_fields = self._fields_no_longer_prompted(errors, rejected)
+        if blocked_fields:
+            job_kwargs['_blocked_explanation'] = self._blocked_prompt_explanation(rejected, blocked_fields)
         job_kwargs['_eager_fields'] = {'launch_type': 'scheduled', 'schedule': self}
         return job_kwargs
+
+    def _write_blocked_job_output(self, job, explanation):
+        """Put the refusal message in the job output pane.
+
+        That pane is rendered from job events. A job that never starts has no
+        events, so the output stays blank unless one is recorded here.
+        """
+        from django.db import connection
+
+        from awx.main.models.events import JobEvent, UnpartitionedJobEvent
+        from awx.main.utils.common import create_partition
+
+        text = explanation if str(explanation).endswith('\n') else '{}\n'.format(explanation)
+        try:
+            event_cls = job.event_class
+        except NotImplementedError:
+            return
+        if event_cls not in (JobEvent, UnpartitionedJobEvent):
+            return
+        # Playbook jobs never reach pre_run, which is what normally creates the
+        # hourly job-event partition. Inserting an event without it fails.
+        if connection.vendor == 'postgresql':
+            create_partition(event_cls._meta.db_table, start=job.created)
+        event_cls.objects.create(
+            **{
+                event_cls.JOB_REFERENCE: job.id,
+                'event': 'error',
+                'failed': True,
+                'counter': 1,
+                'stdout': text,
+                'start_line': 0,
+                'end_line': text.count('\n'),
+                'job_created': job.created,
+                'uuid': str(uuid.uuid4()),
+                'verbosity': 0,
+            }
+        )
+        job.emitted_events = 1
+        job.save(update_fields=['emitted_events'])
+
+    def create_scheduled_job(self):
+        """Create the unified job for this schedule.
+
+        Returns (job, start). ``start`` is False when the job was saved in an
+        error state and must not be started. This happens when the schedule
+        still stores a prompt that the template will no longer accept.
+        """
+        job_kwargs = self.get_job_kwargs()
+        blocked_explanation = job_kwargs.pop('_blocked_explanation', None)
+        job = self.unified_job_template.create_unified_job(**job_kwargs)
+        if blocked_explanation:
+            logger.warning('Not starting scheduled job from schedule %s: %s', self.pk, blocked_explanation)
+            job.status = 'error'
+            job.job_explanation = blocked_explanation
+            job.save(update_fields=['status', 'job_explanation'])
+            self._write_blocked_job_output(job, blocked_explanation)
+            job.websocket_emit_status('error')
+            return job, False
+        return job, True
 
     def get_end_date(ruleset):
         # if we have a complex ruleset with a lot of options getting the last index of the ruleset can take some time
