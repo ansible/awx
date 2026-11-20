@@ -88,6 +88,16 @@ def test_team_access_member(organization, team, user):
 
 
 @pytest.mark.django_db
+def test_team_delete_requires_delete_permission(team, rando, setup_managed_roles):
+    access = TeamAccess(rando)
+    with mock.patch.object(rando, 'has_obj_perm', return_value=False):
+        assert not access.can_delete(team)
+
+    with mock.patch.object(rando, 'has_obj_perm', return_value=True):
+        assert access.can_delete(team)
+
+
+@pytest.mark.django_db
 def test_team_accessible_by(team, user, project):
     u = user('team_member', False)
 
