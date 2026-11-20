@@ -310,7 +310,7 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         starting_values = {}
         for field_name in affects_fields:
             starting_values[field_name] = getattr(self, field_name)
-
+        not_fast_forward_rs = dateutil.rrule.rrulestr(self.rrule, tzinfos=UTC_TIMEZONES, forceset=True)
         future_rs = Schedule.rrulestr(self.rrule)
 
         if self.enabled:
@@ -324,11 +324,13 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
             next_run_actual = None
 
         self.next_run = next_run_actual
-        if not self.dtstart:
-            try:
-                self.dtstart = future_rs[0].astimezone(datetime.timezone.utc)
-            except IndexError:
-                self.dtstart = None
+        try:
+            # self.dtstart should be re-calculated in case the rrule was changed in the API for this schedule
+            # Note that self.dtstart is the first run, not necessarily the dtstart specified in the rrule string
+            # We need to the use the non fast-forwarded rrule to get the actual first run. Getting the first occurrence is cheap
+            self.dtstart = not_fast_forward_rs[0].astimezone(datetime.timezone.utc)
+        except IndexError:
+            self.dtstart = None
         self.dtend = Schedule.get_end_date(future_rs)
 
         changed = any(getattr(self, field_name) != starting_values[field_name] for field_name in affects_fields)
