@@ -73,3 +73,26 @@ def test_galaxy_credentials(project):
         'Ansible Galaxy 4',
         'Ansible Galaxy 5',
     ]
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    'job_type,job_tags,expect_delete',
+    [
+        ('check', None, True),  # manual project update
+        ('run', 'update_git,install_roles,install_collections', True),  # node sync with SCM update
+        ('run', 'install_roles,install_collections', False),  # galaxy-only sync
+    ],
+)
+def test_project_update_delete_tag_with_scm_delete_on_update(project, job_type, job_tags, expect_delete):
+    """AAP-94220: delete tag must apply to sync (job_type=run) SCM updates too."""
+    project.scm_delete_on_update = True
+    project.save(update_fields=['scm_delete_on_update'])
+
+    eager = {'launch_type': 'sync' if job_type == 'run' else 'manual', 'job_type': job_type, 'status': 'pending'}
+    if job_tags is not None:
+        eager['job_tags'] = job_tags
+
+    pu = project.create_project_update(_eager_fields=eager)
+    tags = set(pu.job_tags.split(',')) if pu.job_tags else set()
+    assert ('delete' in tags) is expect_delete
