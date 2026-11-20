@@ -4,7 +4,7 @@ from unittest import mock
 
 from awx.api.versioning import reverse
 from awx.main.models import Instance, ReceptorAddress
-from awx.api.views.instance_install_bundle import generate_group_vars_all_yml
+from awx.api.views.instance_install_bundle import generate_group_vars_all_yml, generate_playbook
 
 
 def has_peer(group_vars, peer):
@@ -511,6 +511,23 @@ class TestPeers:
         assert has_peer(execution_vars, 'hop2:6789')
         assert not has_peer(execution_vars, 'hop1:6789')
         assert execution_vars.get('receptor_listener', False)
+
+    @pytest.mark.parametrize('node_type', ['execution', 'hop'])
+    def test_install_playbook_receptor_user_primary_group(self, node_type):
+        """
+        The receptor group is created before the receptor user, so the user
+        must be given that group explicitly. Otherwise the user module adds -N
+        to useradd (a group with the user's name already exists) and the user
+        gets the default group, while receptor runs as the receptor group and
+        rootless podman fails in newuidmap on execution nodes.
+        """
+        instance = Instance.objects.create(hostname=node_type, node_type=node_type)
+        tasks = yaml.safe_load(generate_playbook(instance))[0]['tasks']
+        names = [task.get('name') for task in tasks]
+        assert names.index('Create the receptor group') < names.index('Create the receptor user')
+        user = tasks[names.index('Create the receptor user')]['user']
+        assert user['name'] == '{{ receptor_user }}'
+        assert user['group'] == '{{ receptor_group }}'
 
     def test_write_receptor_config_called(self):
         """

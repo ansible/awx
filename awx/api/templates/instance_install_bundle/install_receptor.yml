@@ -12,6 +12,7 @@
       user:
 {% verbatim %}
         name: "{{ receptor_user }}"
+        group: "{{ receptor_group }}"
 {% endverbatim %}
         shell: /bin/bash
 {% if instance.node_type == "execution" %}
