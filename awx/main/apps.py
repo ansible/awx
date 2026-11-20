@@ -67,4 +67,9 @@ class MainConfig(AppConfig):
 
         self.configure_dispatcherd()
         self.load_named_url_feature()
+        from awx.main.utils.validation_bypass_observability import configure_validation_bypass_observability
+
+        configure_validation_bypass_observability()
+        import awx.api.serializers  # noqa: F401 — register CleanTextMixin models for ORM bypass signal
+
         pre_migrate.connect(self.check_db_requirement, sender=self)
