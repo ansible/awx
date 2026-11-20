@@ -5781,18 +5781,15 @@ class SchedulePreviewSerializer(BaseSerializer):
         model = Schedule
         fields = ('rrule',)
 
-    # We reject rrules if:
-    # - DTSTART is not include
-    # - Multiple DTSTART
-    # - At least one of RRULE is not included
-    # - EXDATE or RDATE is included
-    # For any rule in the ruleset:
-    #   - INTERVAL is not included
-    #   - SECONDLY is used
-    #   - BYDAY prefixed with a number (MO is good but not 20MO)
-    #   - Can't contain both COUNT and UNTIL
-    #   - COUNT > 999
     def validate_rrule(self, value):
+        """
+        Validate RRULE/EXRULE syntax and reject rules that cannot be evaluated in time.
+
+        Rejects missing/naive/multiple DTSTART, missing RRULE, EXDATE/RDATE, missing
+        INTERVAL, SECONDLY, numeric-prefixed BYDAY, COUNT+UNTIL, and COUNT > 999.
+        After parse succeeds, probes occurrence expansion so pathological combinations
+        fail as ValidationError (HTTP 400) instead of hanging (AAP-95687).
+        """
         rrule_value = value
         by_day_with_numeric_prefix = r".*?BYDAY[\:\=][0-9]+[a-zA-Z]{2}"
         match_multiple_dtstart = re.findall(r".*?(DTSTART(;[^:]+)?\:[0-9]+T[0-9]+Z?)", rrule_value)
@@ -5837,6 +5834,16 @@ class SchedulePreviewSerializer(BaseSerializer):
 
             logger.error(traceback.format_exc())
             errors.append(_("rrule parsing failed validation: {}").format(e))
+
+        if not errors:
+            # Bound occurrence expansion so unsatisfiable/pathological rules fail as 400
+            # instead of hanging until a gateway/uWSGI 503 (AAP-95687).
+            from awx.main.models.schedules import ScheduleEvaluationTimeout
+
+            try:
+                Schedule.collect_occurrences(rrule_value, after=now(), count=1)
+            except ScheduleEvaluationTimeout as e:
+                errors.append(str(e))
 
         if errors:
             raise serializers.ValidationError(errors)
@@ -5933,6 +5940,26 @@ class ScheduleSerializer(PromptFieldCleanTextMixin, LaunchConfigurationBaseSeria
         if self.context['request'].method == 'PATCH' and attrs == {'enabled': False}:
             return attrs
         return super(ScheduleSerializer, self).validate(attrs)
+
+    def create(self, validated_data):
+        """Create a schedule; map evaluation timeouts to HTTP 400 ValidationError."""
+        from awx.main.models.schedules import ScheduleEvaluationTimeout
+
+        try:
+            return super().create(validated_data)
+        except ScheduleEvaluationTimeout as e:
+            # Probe in validate_rrule only expands one occurrence; end-date / computed
+            # fields during save can still time out (AAP-95687).
+            raise serializers.ValidationError({'rrule': [str(e)]})
+
+    def update(self, instance, validated_data):
+        """Update a schedule; map evaluation timeouts to HTTP 400 ValidationError."""
+        from awx.main.models.schedules import ScheduleEvaluationTimeout
+
+        try:
+            return super().update(instance, validated_data)
+        except ScheduleEvaluationTimeout as e:
+            raise serializers.ValidationError({'rrule': [str(e)]})
 
 
 class InstanceLinkSerializer(BaseSerializer):
