@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# rsyslogd on the generated config, with its queue statistics switched off for this start when the config only
+# validates without them: a conf.d drop-in already loads impstats, which rsyslog refuses to load twice.
+conf=${AWX_RSYSLOG_CONF:-/var/lib/awx/rsyslog/rsyslog.conf}
+export AWX_QUEUE_STATS=on
+if grep -q AWX_QUEUE_STATS "$conf" && ! errors=$(rsyslogd -N1 -f "$conf" 2>&1) &&
+    AWX_QUEUE_STATS=off rsyslogd -N1 -f "$conf" >/dev/null 2>&1; then
+    export AWX_QUEUE_STATS=off
+    echo "run-rsyslogd: LOG_AGGREGATOR_ACTION_QUEUE_STATS_INTERVAL is ignored, rsyslogd only accepts the configuration without it" \
+        "(usually a drop-in under /var/lib/awx/rsyslog/conf.d already loads impstats): $(grep -v -m1 'config validation run' <<<"$errors")"
+fi
+exec rsyslogd "$@" -f "$conf"
