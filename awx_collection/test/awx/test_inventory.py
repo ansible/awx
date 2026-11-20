@@ -4,7 +4,7 @@ __metaclass__ = type
 
 import pytest
 
-from awx.main.models import Inventory
+from awx.main.models import Inventory, Label
 
 
 @pytest.mark.django_db
@@ -58,3 +58,39 @@ def test_valid_smart_inventory_create(run_module, admin_user, organization):
     assert inv.host_filter == 'name=my_host'
     assert inv.kind == 'smart'
     assert inv.organization_id == organization.id
+
+
+@pytest.mark.django_db
+def test_inventory_labels_association(run_module, admin_user, organization):
+    """AAP-38666: inventory module should accept labels like job_template does."""
+    labels = [Label.objects.create(name=f'inv-label-{i}', organization=organization) for i in range(3)]
+
+    result = run_module(
+        'inventory',
+        {
+            'name': 'labeled-inventory',
+            'organization': organization.name,
+            'labels': [label.name for label in labels],
+            'state': 'present',
+        },
+        admin_user,
+    )
+    assert not result.get('failed', False), result.get('msg', result)
+    assert result['changed']
+
+    inv = Inventory.objects.get(name='labeled-inventory')
+    assert set(inv.labels.values_list('id', flat=True)) == set(label.id for label in labels)
+
+    # Re-running with the same labels should be idempotent
+    result = run_module(
+        'inventory',
+        {
+            'name': 'labeled-inventory',
+            'organization': organization.name,
+            'labels': [label.name for label in labels],
+            'state': 'present',
+        },
+        admin_user,
+    )
+    assert not result.get('failed', False), result.get('msg', result)
+    assert result['changed'] is False
