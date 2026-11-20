@@ -4,6 +4,7 @@
 
 # Python
 import pytest
+import subprocess
 
 # AWX
 from awx.api.versioning import reverse
@@ -180,7 +181,10 @@ def test_logging_aggregator_valid_settings(put, post, admin, type, host, port, u
 
 
 @pytest.mark.django_db
-def test_logging_aggregator_connection_test_valid(put, post, admin):
+def test_logging_aggregator_connection_test_valid(put, post, admin, mocker):
+    # Exercise the API response without requiring an installed rsyslog daemon
+    # and its deployment-specific configuration file.
+    check_output = mocker.patch('awx.conf.views.subprocess.check_output', return_value=b'')
     _, mock_settings = _mock_logging_defaults()
     type = 'other'
     host = 'https://localhost'
@@ -193,3 +197,4 @@ def test_logging_aggregator_connection_test_valid(put, post, admin):
     # "Test" the logger
     url = reverse('api:setting_logging_test')
     post(url, {}, user=admin, expect=202)
+    check_output.assert_called_once_with(['rsyslogd', '-N1', '-f', '/var/lib/awx/rsyslog/rsyslog.conf'], stderr=subprocess.STDOUT)
