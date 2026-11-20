@@ -6,14 +6,16 @@ import logging
 import os
 
 from django.core.validators import MinValueValidator
+from django.contrib.auth.models import User
 from django.db import models, connection
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save, post_delete, m2m_changed
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.utils.timezone import now, timedelta
 from django.db.models import Sum, Q
 
+from crum import get_current_user
 import redis
 from solo.models import SingletonModel
 
@@ -680,3 +682,54 @@ class WorkflowJobInstanceGroupMembership(models.Model):
         default=None,
         db_index=True,
     )
+
+
+@receiver(m2m_changed, sender=UnifiedJobTemplateInstanceGroupMembership)
+def update_unified_job_template_modified_on_instance_group_change(sender, instance, action, reverse=False, **kwargs):
+    """Keep the template's ``modified``/``modified_by`` in sync when its
+    instance groups are attached or detached.
+
+    Association changes made through the relationship sub-endpoint (for
+    example ``/api/v2/job_templates/<id>/instance_groups/``) do not modify any
+    editable field on the parent template, so ``PrimordialModel.save`` would
+    leave ``modified_by`` pointing at the previous editor. Explicitly stamp
+    both fields so the user making the relationship change is recorded as the
+    last modifier.
+    """
+    if reverse:
+        return
+
+    if action in ('pre_add', 'pre_remove', 'pre_clear'):
+        if action == 'pre_add':
+            changed = bool(kwargs.get('pk_set'))
+        else:
+            memberships = sender.objects.using(kwargs.get('using')).filter(unifiedjobtemplate_id=instance.pk)
+            if action == 'pre_remove':
+                memberships = memberships.filter(instancegroup_id__in=kwargs.get('pk_set') or ())
+            changed = memberships.exists()
+        instance._instance_group_membership_changed = changed
+        return
+
+    if action not in ('post_add', 'post_remove', 'post_clear'):
+        return
+
+    changed = getattr(instance, '_instance_group_membership_changed', False)
+    instance._instance_group_membership_changed = False
+    if not changed:
+        return
+
+    modified = now()
+    values = {'modified': modified}
+
+    user = get_current_user()
+    if isinstance(user, User) and user.pk:
+        values['modified_by'] = user
+        instance.modified_by = user
+
+    # Update the row directly instead of calling ``instance.save()``. Saving the
+    # parent here would fire ``post_save`` receivers (such as
+    # ``ImplicitRoleField._post_save``) that call ``refresh_from_db()`` and
+    # would therefore discard any unsaved in-memory changes on the parent --
+    # which is exactly what happens while a template is being deep copied.
+    type(instance).objects.filter(pk=instance.pk).update(**values)
+    instance.modified = modified
