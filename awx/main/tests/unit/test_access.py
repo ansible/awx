@@ -10,12 +10,16 @@ from awx.main.fields import AskForField
 
 from awx.main.models import (
     Credential,
+    CredentialInputSource,
     CredentialType,
+    ExecutionEnvironment,
     Inventory,
+    InstanceGroup,
     JobTemplate,
     Project,
     Role,
     Organization,
+    UnifiedJob,
 )
 
 
@@ -26,17 +30,20 @@ def user_unit():
 
 class TestRelatedFieldAccess:
     @pytest.fixture
-    def resource_good(self, mocker):
-        good_role = mocker.MagicMock(__contains__=lambda self, user: True)
-        return mocker.MagicMock(related=mocker.MagicMock(admin_role=good_role), admin_role=good_role)
+    def resource_good(self):
+        resource = Organization(name='allowed')
+        resource.related = Organization(name='allowed')
+        return resource
 
     @pytest.fixture
-    def resource_bad(self, mocker):
-        bad_role = mocker.MagicMock(__contains__=lambda self, user: False)
-        return mocker.MagicMock(related=mocker.MagicMock(admin_role=bad_role), admin_role=bad_role)
+    def resource_bad(self):
+        resource = Organization(name='denied')
+        resource.related = Organization(name='denied')
+        return resource
 
     @pytest.fixture
-    def access(self, user_unit):
+    def access(self, user_unit, mocker):
+        mocker.patch.object(user_unit, 'has_obj_perm', side_effect=lambda obj, codename: obj.name == 'allowed')
         return BaseAccess(user_unit)
 
     def test_new_optional_fail(self, access, resource_bad, mocker):
@@ -45,17 +52,17 @@ class TestRelatedFieldAccess:
         to the related resource they provided
         """
         data = {'related': resource_bad}
-        assert not access.check_related('related', mocker.MagicMock, data)
+        assert not access.check_related('related', Organization, data)
 
     def test_new_with_bad_data(self, access, mocker):
-        data = {'related': 3.1415}
+        data = {'related': 'invalid-id'}
         with pytest.raises(ParseError):
-            access.check_related('related', mocker.MagicMock(), data)
+            access.check_related('related', Organization, data)
 
     def test_new_mandatory_fail(self, access, mocker):
         access.user.is_superuser = False
-        assert not access.check_related('related', mocker.MagicMock, {}, mandatory=True)
-        assert not access.check_related('related', mocker.MagicMock, {'resource': None}, mandatory=True)
+        assert not access.check_related('related', Organization, {}, mandatory=True)
+        assert not access.check_related('related', Organization, {'resource': None}, mandatory=True)
 
     def test_existing_no_op(self, access, resource_bad, mocker):
         """
@@ -63,13 +70,13 @@ class TestRelatedFieldAccess:
         lack of access to related field does not block action
         """
         data = {'related': resource_bad.related}
-        assert access.check_related('related', mocker.MagicMock, data, obj=resource_bad)
-        assert access.check_related('related', mocker.MagicMock, {}, obj=resource_bad)
+        assert access.check_related('related', Organization, data, obj=resource_bad)
+        assert access.check_related('related', Organization, {}, obj=resource_bad)
 
     def test_existing_required_access(self, access, resource_bad, mocker):
         # no-op actions, but mandatory kwarg requires check to pass
-        assert not access.check_related('related', mocker.MagicMock, {}, obj=resource_bad, mandatory=True)
-        assert not access.check_related('related', mocker.MagicMock, {'related': resource_bad.related}, obj=resource_bad, mandatory=True)
+        assert not access.check_related('related', Organization, {}, obj=resource_bad, mandatory=True)
+        assert not access.check_related('related', Organization, {'related': resource_bad.related}, obj=resource_bad, mandatory=True)
 
     def test_existing_no_access_to_current(self, access, resource_good, resource_bad, mocker):
         """
@@ -77,22 +84,22 @@ class TestRelatedFieldAccess:
         not have access to _existing_ related resource, so deny action
         """
         data = {'related': resource_good}
-        assert not access.check_related('related', mocker.MagicMock, data, obj=resource_bad)
+        assert not access.check_related('related', Organization, data, obj=resource_bad)
 
     def test_existing_no_access_to_new(self, access, resource_good, resource_bad, mocker):
         data = {'related': resource_bad}
-        assert not access.check_related('related', mocker.MagicMock, data, obj=resource_good)
+        assert not access.check_related('related', Organization, data, obj=resource_good)
 
     def test_existing_not_allowed_to_remove(self, access, resource_bad, mocker):
         data = {'related': None}
-        assert not access.check_related('related', mocker.MagicMock, data, obj=resource_bad)
+        assert not access.check_related('related', Organization, data, obj=resource_bad)
 
     def test_existing_not_null_null(self, access, mocker):
         resource = mocker.MagicMock(related=None)
         data = {'related': None}
         # Not changing anything by giving null when it is already-null
         # important for PUT requests
-        assert access.check_related('related', mocker.MagicMock, data, obj=resource, mandatory=True)
+        assert access.check_related('related', Organization, data, obj=resource, mandatory=True)
 
 
 def test_encrypted_vars_detection():
@@ -203,26 +210,14 @@ def test_jt_ask_fields_are_nonsensitive(job_template_with_ids, user_unit, field_
 def test_change_jt_sensitive_data(job_template_with_ids, mocker, user_unit):
     """Assure that can_add is called with all ForeignKeys."""
 
-    class RoleReturnsTrue(Role):
-        class Meta:
-            proxy = True
-
-        def __contains__(self, accessor):
-            return True
-
-    job_template_with_ids.admin_role = RoleReturnsTrue()
-    job_template_with_ids.organization.job_template_admin_role = RoleReturnsTrue()
-
+    mocker.patch.object(user_unit, 'has_obj_perm', return_value=True)
     inv2 = Inventory()
-    inv2.use_role = RoleReturnsTrue()
     data = {'inventory': inv2}
 
     access = JobTemplateAccess(user_unit)
 
     assert not access.changes_are_non_sensitive(job_template_with_ids, data)
 
-    job_template_with_ids.inventory.use_role = RoleReturnsTrue()
-    job_template_with_ids.project.use_role = RoleReturnsTrue()
     assert access.can_change(job_template_with_ids, data)
 
 
@@ -255,7 +250,7 @@ class TestWorkflowAccessMethods:
                 raise Exception('Item requested has not been mocked')
 
         access = WorkflowJobTemplateAccess(user_unit)
-        with mock.patch('awx.main.models.rbac.Role.__contains__', return_value=True):
+        with mock.patch.object(user_unit, 'has_obj_perm', return_value=True):
             with mock.patch('awx.main.access.get_object_or_400', mock_get_object):
                 assert access.can_add({'organization': 1})
 
@@ -279,3 +274,13 @@ def test_user_capabilities_method():
     foo = object()
     foo_capabilities = foo_access.get_user_capabilities(foo, ['edit', 'copy'])
     assert foo_capabilities == {'edit': 'bar', 'copy': 'foo'}
+
+
+@pytest.mark.parametrize('model', [User, UnifiedJob, CredentialInputSource, ExecutionEnvironment, InstanceGroup])
+def test_user_capabilities_delete_uses_can_delete_for_excluded_models(model):
+    class FooAccess(BaseAccess):
+        def can_delete(self, obj):
+            return 'delete'
+
+    user = User(username='auser')
+    assert FooAccess(user).get_user_capabilities(model(), ['delete']) == {'delete': 'delete'}
