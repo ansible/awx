@@ -186,7 +186,7 @@ jobs:
           # as soon as the base branch moves, causing line-number mismatches between
           # the checked-out files and the coverage report (Sonar then discards the
           # report with a "Line N is out of range" error).
-          git fetch origin pull/${{ env.PR_NUMBER }}/merge
+          git fetch origin "pull/${PR_NUMBER}/merge"
           git checkout FETCH_HEAD
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
