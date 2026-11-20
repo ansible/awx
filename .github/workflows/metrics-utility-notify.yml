@@ -1,0 +1,85 @@
+---
+name: Metrics Utility Failure Notification
+
+on:
+  workflow_run:
+    workflows:
+      - Metrics utility tests
+    types:
+      - completed
+
+jobs:
+  notify:
+    name: Notify Slack
+    if: >-
+      (github.event.workflow_run.conclusion == 'failure'
+      || github.event.workflow_run.conclusion == 'timed_out')
+      && github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: read
+
+    steps:
+      - name: Notify Slack
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_METRICS_UTILITY_WEBHOOK_URL }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK" ]; then
+            echo "::warning::SLACK_METRICS_UTILITY_WEBHOOK_URL is not configured; skipping Slack notification"
+            exit 0
+          fi
+
+          if ! RUN_JSON=$(gh api "repos/${REPOSITORY}/actions/runs/${RUN_ID}"); then
+            echo "::warning::Unable to read workflow run ${RUN_ID}; skipping Slack notification"
+            exit 0
+          fi
+
+          HEAD_SHA=$(jq -r '.head_sha // empty' <<< "$RUN_JSON")
+          HEAD_BRANCH=$(jq -r '.head_branch // empty' <<< "$RUN_JSON")
+          HEAD_OWNER=$(jq -r '.head_repository.owner.login // empty' <<< "$RUN_JSON")
+          if [ -z "$HEAD_SHA" ] || [ -z "$HEAD_BRANCH" ] || [ -z "$HEAD_OWNER" ]; then
+            echo "::warning::Workflow run ${RUN_ID} has incomplete head metadata; skipping Slack notification"
+            exit 0
+          fi
+
+          if ! PR_LIST=$(gh api \
+            --method GET \
+            "repos/${REPOSITORY}/pulls" \
+            -f state=all \
+            -f head="${HEAD_OWNER}:${HEAD_BRANCH}" \
+            -f per_page=100); then
+            echo "::warning::Unable to find pull requests for workflow run ${RUN_ID}; skipping Slack notification"
+            exit 0
+          fi
+          PR_JSON=$(jq -c --arg head_sha "$HEAD_SHA" \
+            'map(select(.head.sha == $head_sha))[0] // .[0] // empty' <<< "$PR_LIST")
+          if [ -z "$PR_JSON" ]; then
+            echo "::warning::Workflow run ${RUN_ID} has no associated pull request; skipping Slack notification"
+            exit 0
+          fi
+
+          PR_URL=$(jq -r '.html_url' <<< "$PR_JSON")
+          PR_NUMBER=$(jq -r '.number' <<< "$PR_JSON")
+          PR_TITLE=$(jq -r '.title' <<< "$PR_JSON")
+
+          jq -n \
+            --arg pr_url "$PR_URL" \
+            --arg pr_number "$PR_NUMBER" \
+            --arg pr_title "$PR_TITLE" \
+            --arg run_url "$RUN_URL" \
+            '{text: "Metrics utility tests failed",
+              blocks: [
+                {type: "section", text: {type: "mrkdwn", text: (":x: *Metrics utility tests failed* in <" + $pr_url + "|PR #" + $pr_number + ">")}},
+                {type: "section", text: {type: "plain_text", text: ("PR title: " + $pr_title), emoji: true}},
+                {type: "context", elements: [{type: "mrkdwn", text: ("<" + $run_url + "|View GitHub Actions run>")}]}
+              ]}' \
+          | curl -sS --fail-with-body -X POST "$SLACK_WEBHOOK" \
+              -H 'Content-Type: application/json' \
+              -d @-
