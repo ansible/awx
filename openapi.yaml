@@ -32685,6 +32685,12 @@ components:
           nullable: true
           default: false
           description: Update the project when a job is launched that uses the project.
+        galaxy_update_on_launch:
+          type: boolean
+          nullable: true
+          default: false
+          description: Bypass the ansible-galaxy response cache to fetch latest collection
+            metadata when a job is launched that uses the project.
         scm_update_cache_timeout:
           type: integer
           maximum: 9223372036854775807
@@ -34094,6 +34100,12 @@ components:
           nullable: true
           default: false
           description: Update the project when a job is launched that uses the project.
+        galaxy_update_on_launch:
+          type: boolean
+          nullable: true
+          default: false
+          description: Bypass the ansible-galaxy response cache to fetch latest collection
+            metadata when a job is launched that uses the project.
         scm_update_cache_timeout:
           type: integer
           maximum: 9223372036854775807
@@ -34236,6 +34248,12 @@ components:
           nullable: true
           default: false
           description: Update the project when a job is launched that uses the project.
+        galaxy_update_on_launch:
+          type: boolean
+          nullable: true
+          default: false
+          description: Bypass the ansible-galaxy response cache to fetch latest collection
+            metadata when a job is launched that uses the project.
         scm_update_cache_timeout:
           type: integer
           maximum: 9223372036854775807
