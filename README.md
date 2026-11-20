@@ -13,6 +13,7 @@
 > * [Refactoring AWX into a Pluggable, Service-Oriented Architecture](https://forum.ansible.com/t/refactoring-awx-into-a-pluggable-service-oriented-architecture/7404)
 > * [Upcoming changes to AWX Operator installation methods](https://forum.ansible.com/t/upcoming-changes-to-awx-operator-installation-methods/7598)
 > * [AWX UI and credential types transitioning to the new pluggable architecture](https://forum.ansible.com/t/awx-ui-and-credential-types-transitioning-to-the-new-pluggable-architecture/8027)
+> * [AWX modernization: Moving forward](https://forum.ansible.com/t/awx-modernization-moving-forward/45134)
 
 AWX provides a web-based user interface, REST API, and task engine built on top of [Ansible](https://github.com/ansible/ansible). It is one of the upstream projects for [Red Hat Ansible Automation Platform](https://www.ansible.com/products/automation-platform).
 
