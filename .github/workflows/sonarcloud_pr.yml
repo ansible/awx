@@ -44,7 +44,13 @@ jobs:
       github.event.workflow_run.event == 'pull_request' &&
       github.repository == 'ansible/awx'
     steps:
+      # fetch-depth: 0 keeps full git history available so SonarCloud can get
+      # blame info and correctly tell new code from pre-existing code. Without
+      # it, Sonar can't attribute changed-file lines to their real commits and
+      # treats the whole file as new, flagging unrelated pre-existing issues.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # Download all individual coverage artifacts from CI workflow
       - name: Download coverage artifacts
@@ -215,6 +221,8 @@ jobs:
       github.repository == 'ansible/awx'
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # Download all individual coverage artifacts from CI workflow (optional for branch pushes)
       - name: Download coverage artifacts
