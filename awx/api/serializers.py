@@ -5936,6 +5936,26 @@ class ScheduleSerializer(PromptFieldCleanTextMixin, LaunchConfigurationBaseSeria
             return attrs
         return super(ScheduleSerializer, self).validate(attrs)
 
+    def create(self, validated_data):
+        """Create a schedule; map evaluation timeouts to HTTP 400 ValidationError."""
+        from awx.main.models.schedules import ScheduleEvaluationTimeout
+
+        try:
+            return super().create(validated_data)
+        except ScheduleEvaluationTimeout as e:
+            # Probe in validate_rrule only expands one occurrence; end-date / computed
+            # fields during save can still time out (AAP-95687).
+            raise serializers.ValidationError({'rrule': [str(e)]})
+
+    def update(self, instance, validated_data):
+        """Update a schedule; map evaluation timeouts to HTTP 400 ValidationError."""
+        from awx.main.models.schedules import ScheduleEvaluationTimeout
+
+        try:
+            return super().update(instance, validated_data)
+        except ScheduleEvaluationTimeout as e:
+            raise serializers.ValidationError({'rrule': [str(e)]})
+
 
 class InstanceLinkSerializer(BaseSerializer):
     class Meta:

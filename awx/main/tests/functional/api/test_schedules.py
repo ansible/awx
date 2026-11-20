@@ -268,6 +268,50 @@ def test_preview_minutely_exrule_bysetpos_two_rejected(post, admin_user, mocker)
 
 
 @pytest.mark.django_db
+def test_schedule_create_end_date_timeout_returns_400(post, project, inventory, admin_user, mocker):
+    """AAP-95687: end-date timeout during save must be HTTP 400, not 500."""
+    from awx.main.models.schedules import ScheduleEvaluationTimeout
+
+    job_template = JobTemplate.objects.create(name='timeout-jt', project=project, playbook='helloworld.yml', inventory=inventory)
+    mocker.patch(
+        'awx.main.models.schedules.Schedule.get_end_date_bounded',
+        side_effect=ScheduleEvaluationTimeout(
+            'RRULE/EXRULE could not be evaluated in time; the recurrence may be invalid or too complex '
+            '(check BYSETPOS against FREQ/INTERVAL).'
+        ),
+    )
+    url = reverse('api:job_template_schedules_list', kwargs={'pk': job_template.id})
+    r = post(url, {'name': 'timeout sch', 'rrule': RRULE_EXAMPLE}, admin_user, expect=400)
+    assert 'rrule' in r.data
+    assert 'could not be evaluated in time' in smart_str(r.data['rrule'])
+
+
+@pytest.mark.django_db
+def test_schedule_update_end_date_timeout_returns_400(post, patch, project, inventory, admin_user, mocker):
+    """AAP-95687: end-date timeout during update must be HTTP 400, not 500."""
+    from awx.main.models.schedules import ScheduleEvaluationTimeout
+
+    job_template = JobTemplate.objects.create(name='timeout-jt-upd', project=project, playbook='helloworld.yml', inventory=inventory)
+    url = reverse('api:job_template_schedules_list', kwargs={'pk': job_template.id})
+    created = post(url, {'name': 'ok sch', 'rrule': RRULE_EXAMPLE}, admin_user, expect=201)
+    mocker.patch(
+        'awx.main.models.schedules.Schedule.get_end_date_bounded',
+        side_effect=ScheduleEvaluationTimeout(
+            'RRULE/EXRULE could not be evaluated in time; the recurrence may be invalid or too complex '
+            '(check BYSETPOS against FREQ/INTERVAL).'
+        ),
+    )
+    r = patch(
+        reverse('api:schedule_detail', kwargs={'pk': created.data['id']}),
+        data={'rrule': 'DTSTART:20151117T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=2'},
+        user=admin_user,
+        expect=400,
+    )
+    assert 'rrule' in r.data
+    assert 'could not be evaluated in time' in smart_str(r.data['rrule'])
+
+
+@pytest.mark.django_db
 def test_nyc_with_dst(post, admin_user):
     url = reverse('api:schedule_rrule')
     r = post(url, {'rrule': get_rrule('America/New_York')}, admin_user, expect=200)
