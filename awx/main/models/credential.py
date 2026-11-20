@@ -304,6 +304,18 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         :param default(optional[str]): A default return value to use.
         """
         if self.credential_type.kind != 'external' and field_name in self.dynamic_input_fields:
+            # If a direct (non-placeholder) value exists in inputs, prefer it
+            # over the dynamic input_source. This allows PATCH requests to
+            # override an externally-sourced field without triggering a live
+            # call to the external credential backend (AAP-89036).
+            direct_value = self.inputs.get(field_name)
+            if direct_value not in (None, '', '$encrypted$'):
+                if field_name in self.credential_type.secret_fields:
+                    try:
+                        return decrypt_field(self, field_name)
+                    except AttributeError:
+                        pass
+                return direct_value
             return self._get_dynamic_input(field_name)
         if field_name in self.credential_type.secret_fields:
             try:
