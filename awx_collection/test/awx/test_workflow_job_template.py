@@ -4,7 +4,7 @@ __metaclass__ = type
 
 import pytest
 
-from awx.main.models import WorkflowJobTemplate, WorkflowJob, NotificationTemplate
+from awx.main.models import WorkflowJobTemplate, WorkflowJob, NotificationTemplate, Inventory, InventorySource, Organization
 
 
 @pytest.mark.django_db
@@ -174,3 +174,56 @@ def test_delete_with_spec(run_module, admin_user, organization, survey_spec):
     assert result.get('changed', True), result
 
     assert WorkflowJobTemplate.objects.filter(name='foo-workflow', organization=organization).count() == 0
+
+
+def _inventory_source_node(inventory):
+    return {
+        'identifier': 'sync',
+        'unified_job_template': {'name': 'ldap', 'type': 'inventory_source', 'inventory': inventory},
+    }
+
+
+@pytest.mark.django_db
+def test_inventory_source_node_qualified_by_inventory(run_module, admin_user, organization):
+    # Two inventories in one organization, each with a source named 'ldap'
+    internal = Inventory.objects.create(name='internal', organization=organization)
+    dmz = Inventory.objects.create(name='dmz', organization=organization)
+    InventorySource.objects.create(name='ldap', inventory=dmz, source='ec2')
+    wanted = InventorySource.objects.create(name='ldap', inventory=internal, source='ec2')
+
+    result = run_module(
+        'workflow_job_template',
+        {
+            'name': 'foo-workflow',
+            'organization': organization.name,
+            'workflow_nodes': [_inventory_source_node({'name': 'internal', 'organization': {'name': organization.name}})],
+        },
+        admin_user,
+    )
+    assert not result.get('failed', False), result.get('msg', result)
+
+    node = WorkflowJobTemplate.objects.get(name='foo-workflow').workflow_job_template_nodes.get(identifier='sync')
+    assert node.unified_job_template_id == wanted.id
+
+
+@pytest.mark.django_db
+def test_inventory_source_node_after_inventory_changed_organization(run_module, admin_user, organization):
+    # A source keeps the organization it was created with; move its inventory afterwards
+    other = Organization.objects.create(name='other-org')
+    inventory = Inventory.objects.create(name='internal', organization=organization)
+    wanted = InventorySource.objects.create(name='ldap', inventory=inventory, source='ec2')
+    Inventory.objects.filter(pk=inventory.pk).update(organization=other)
+
+    result = run_module(
+        'workflow_job_template',
+        {
+            'name': 'foo-workflow',
+            'organization': other.name,
+            'workflow_nodes': [_inventory_source_node({'name': 'internal', 'organization': {'name': other.name}})],
+        },
+        admin_user,
+    )
+    assert not result.get('failed', False), result.get('msg', result)
+
+    node = WorkflowJobTemplate.objects.get(name='foo-workflow').workflow_job_template_nodes.get(identifier='sync')
+    assert node.unified_job_template_id == wanted.id
