@@ -45,6 +45,49 @@ def test_create_manual_project(run_module, admin_user, organization, mocker):
 
 
 @pytest.mark.django_db
+def test_create_project_with_galaxy_update_on_launch(run_module, admin_user, organization):
+    '''Test creating a project with galaxy_update_on_launch enabled'''
+    result = run_module(
+        'project',
+        dict(name='foo', organization=organization.name, scm_type='git', scm_url='https://foo.invalid', galaxy_update_on_launch=True, wait=False),
+        admin_user,
+    )
+    assert result.pop('changed', None), result
+
+    proj = Project.objects.get(name='foo')
+    assert proj.scm_url == 'https://foo.invalid'
+    assert proj.galaxy_update_on_launch is True
+    assert proj.organization == organization
+
+    result.pop('invocation')
+    assert result == {'name': 'foo', 'id': proj.id}
+
+
+@pytest.mark.django_db
+def test_update_project_galaxy_update_on_launch(run_module, admin_user, organization):
+    '''Test updating galaxy_update_on_launch on an existing project'''
+    # Create project without galaxy_update_on_launch
+    result = run_module(
+        'project',
+        dict(name='foo', organization=organization.name, scm_type='git', scm_url='https://foo.invalid', wait=False),
+        admin_user,
+    )
+    assert result.pop('changed', None), result
+    proj = Project.objects.get(name='foo')
+    assert proj.galaxy_update_on_launch is False
+
+    # Update to enable galaxy_update_on_launch
+    result = run_module(
+        'project',
+        dict(name='foo', organization=organization.name, scm_type='git', scm_url='https://foo.invalid', galaxy_update_on_launch=True, wait=False),
+        admin_user,
+    )
+    assert result.pop('changed', None), result
+    proj = Project.objects.get(name='foo')
+    assert proj.galaxy_update_on_launch is True
+
+
+@pytest.mark.django_db
 def test_create_project_copy_from(run_module, admin_user, organization, silence_warning):
     '''Test the copy_from functionality'''
     result = run_module(
