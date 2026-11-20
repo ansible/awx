@@ -14,7 +14,7 @@ on:
       - stable-**
     paths:
       - 'openapi.yaml'
-      - '.github/workflows/oasdiff-breaking-changes*.yml'
+      - '.github/workflows/oasdiff-breaking-change*.yml'
 
 concurrency:
   group: oasdiff-breaking-changes-${{ github.head_ref || github.run_id }}

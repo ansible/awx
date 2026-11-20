@@ -16,4 +16,5 @@ permissions:
 
 jobs:
   comment:
+    if: github.event.workflow_run.conclusion != 'cancelled'
     uses: ansible/actions/.github/workflows/oasdiff-post-breaking-change-comment.yml@364fabf5470712ced6b63e1a27c9bcfac66f81e6
