@@ -29,7 +29,7 @@ from django.db import connection, DatabaseError, transaction, ProgrammingError, 
 from django.db.models.fields.related import ForeignObjectRel, ManyToManyField
 from django.db.models.fields.related_descriptors import ForwardManyToOneDescriptor, ManyToManyDescriptor
 from django.db.models.query import QuerySet
-from django.db.models import Q
+from django.db.models import Exists, OuterRef, Q
 from django.db import connection as django_connection
 from django.core.cache import cache as django_cache
 
@@ -605,10 +605,15 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
       --> prefetch logical combination of use permission to inventory AND
           project, put into cache dictionary as 'copy'
     """
+    from awx.main.access import UserAccess
+
     page_ids = [obj.id for obj in page]
     mapping = {}
     for obj in page:
         mapping[obj.id] = {}
+
+    admin_org_ids = system_auditor_ids = org_ct = None
+    target_permissions = actor_permissions = orphan_allowed_ids = None
 
     for prefetch_entry in prefetch_list:
         display_method = None
@@ -623,6 +628,7 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
 
         # Build the query for access_qs according the user & permission(s)
         filter_args = []
+        ids_with_role = None
         for perm_path in paths:
             if '.' in perm_path:
                 res_path = '__'.join(perm_path.split('.')[:-1])
@@ -634,7 +640,84 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
                 filter_args.append(Q(Q(**{'%s__in' % res_path: access_qs}) | Q(**{'%s__isnull' % res_path: True})))
             else:
                 action = perm_path
-                if hasattr(model, 'access_qs'):
+                if model._meta.model_name == 'user':
+                    # User has no DAB access_qs. User capabilities for an
+                    # Organization Admin are derived from membership in an
+                    # organization the actor can administer.
+                    from awx.main.models.organization import Organization
+
+                    from ansible_base.rbac.models import RoleEvaluation, RoleUserAssignment
+                    from ansible_base.rbac.permission_registry import permission_registry
+
+                    admin_org_ids = set(Organization.access_qs(user, 'change').values_list('id', flat=True)) if admin_org_ids is None else admin_org_ids
+                    superuser_count = model.objects.filter(is_superuser=True).count() if display_method == 'delete' else 0
+                    target_ids = {target.pk for target in page}
+                    system_auditor_ids = (
+                        set(
+                            RoleUserAssignment.objects.filter(
+                                user_id__in=target_ids,
+                                role_definition__name='Platform Auditor',
+                            ).values_list('user_id', flat=True)
+                        )
+                        if system_auditor_ids is None
+                        else system_auditor_ids
+                    )
+                    org_ct = permission_registry.content_type_model.objects.get_for_model(Organization) if org_ct is None else org_ct
+                    memberships = {}
+                    target_permissions = target_permissions if target_permissions is not None else {}
+                    member_assignments = (
+                        RoleUserAssignment.objects.filter(
+                            user_id__in=target_ids,
+                            object_role__permission_partials__content_type_id=org_ct.id,
+                            object_role__permission_partials__codename='member_organization',
+                        )
+                        .values_list('user_id', 'object_role__permission_partials__object_id')
+                        .distinct()
+                    )
+                    for target_id, org_id in member_assignments:
+                        memberships.setdefault(target_id, set()).add(org_id)
+                    if display_method == 'delete' and orphan_allowed_ids is None:
+                        protected_target_ids = set(model.objects.filter(pk__in=target_ids, is_superuser=True).values_list('pk', flat=True))
+                        orphan_target_ids = target_ids - memberships.keys() - protected_target_ids - system_auditor_ids - {user.pk}
+                        if orphan_target_ids:
+                            actor_role_ids = RoleUserAssignment.objects.filter(user_id=user.pk).values('object_role_id')
+                            actor_match = RoleEvaluation.objects.filter(
+                                role_id__in=actor_role_ids,
+                                object_id=OuterRef('object_role__permission_partials__object_id'),
+                                content_type_id=OuterRef('object_role__permission_partials__content_type_id'),
+                                codename=OuterRef('object_role__permission_partials__codename'),
+                            )
+                            violating_target_ids = set(
+                                RoleUserAssignment.objects.filter(
+                                    user_id__in=orphan_target_ids,
+                                    object_role__permission_partials__isnull=False,
+                                )
+                                .annotate(actor_match=Exists(actor_match))
+                                .filter(actor_match=False)
+                                .values_list('user_id', flat=True)
+                                .distinct()
+                            )
+                            orphan_allowed_ids = orphan_target_ids - violating_target_ids
+                        else:
+                            orphan_allowed_ids = set()
+                    user_access = UserAccess(user)
+                    allowed_ids = {
+                        target.pk
+                        for target in page
+                        if user_access.prefetched_capability_allowed(
+                            target,
+                            display_method,
+                            admin_org_ids,
+                            memberships,
+                            system_auditor_ids,
+                            target_permissions,
+                            actor_permissions,
+                            superuser_count,
+                            orphan_allowed_ids,
+                        )
+                    }
+                    ids_with_role = allowed_ids
+                elif hasattr(model, 'access_qs'):
                     filter_args.append(Q(**{'pk__in': model.access_qs(user, action)}))
                 else:
                     # UnifiedJobTemplate is not registered with the permission registry,
@@ -645,8 +728,9 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
             display_method = action
 
         # Union that query with the list of items on page
-        filter_args.append(Q(pk__in=page_ids))
-        ids_with_role = set(model.objects.filter(*filter_args).values_list('pk', flat=True))
+        if ids_with_role is None:
+            filter_args.append(Q(pk__in=page_ids))
+            ids_with_role = set(model.objects.filter(*filter_args).values_list('pk', flat=True))
 
         # Save data item-by-item
         for obj in page:
