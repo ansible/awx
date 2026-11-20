@@ -67,7 +67,7 @@ redoc = [
     {
         'name': 'AWX OpenAPI Reference',
         'page': 'open_api/explorer',
-        'spec': 'rst/open_api/schema.json',
+        'spec': 'rst/open_api/openapi.yaml',
         'embed': True,
         'opts': {
             'suppress-warnings': True,

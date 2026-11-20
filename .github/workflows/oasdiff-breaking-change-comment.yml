@@ -1,0 +1,20 @@
+---
+# Companion workflow: posts oasdiff breaking change results as PR comments.
+# Uses workflow_run trigger (fork-safe pattern).
+# Jira: AAP-86434 (AC1)
+name: "API: Breaking Change Comment"
+
+on:
+  workflow_run:
+    workflows: ["API: Breaking Change Detection"]
+    types:
+      - completed
+
+permissions:
+  pull-requests: write
+  actions: read
+
+jobs:
+  comment:
+    if: github.event.workflow_run.conclusion != 'cancelled'
+    uses: ansible/actions/.github/workflows/oasdiff-post-breaking-change-comment.yml@364fabf5470712ced6b63e1a27c9bcfac66f81e6

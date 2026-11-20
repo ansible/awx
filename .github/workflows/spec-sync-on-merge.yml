@@ -50,11 +50,11 @@ jobs:
           DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} \
           COMPOSE_TAG=${BASE_REF:-${REF_NAME}} \
           docker run -u $(id -u) --rm -v ${{ github.workspace }}:/awx_devel/:Z \
-            --workdir=/awx_devel `make print-DEVEL_IMAGE_NAME` /start_tests.sh genschema
+            --workdir=/awx_devel $(make print-DEVEL_IMAGE_NAME) /start_tests.sh genschema
 
       - name: Verify spec file exists
         run: |
-          SPEC_FILE="./schema.json"
+          SPEC_FILE="./openapi.yaml"
           if [ ! -f "$SPEC_FILE" ]; then
             echo "❌ Spec file not found at $SPEC_FILE"
             echo "Contents of workspace:"
@@ -83,10 +83,15 @@ jobs:
           echo "##[error]This branch must be created in the spec repo before specs can be synced."
           exit 1
 
+      - name: Convert spec to JSON
+        run: |
+          python3 -c "import json, yaml, sys; json.dump(yaml.safe_load(open(sys.argv[1])), open(sys.argv[2], 'w'), indent=2)" ./openapi.yaml ./openapi.json
+          echo "✅ Converted openapi.yaml to JSON"
+
       - name: Compare specs
         id: compare
         run: |
-          COMPONENT_SPEC="./schema.json"
+          COMPONENT_SPEC="./openapi.json"
           SPEC_REPO_FILE="spec-repo/controller.json"
 
           # Check if spec file exists in spec repo
@@ -109,7 +114,7 @@ jobs:
       - name: Update spec file
         if: steps.compare.outputs.has_diff == 'true'
         run: |
-          cp "./schema.json" "spec-repo/controller.json"
+          cp "./openapi.json" "spec-repo/controller.json"
           echo "✅ Updated spec-repo/controller.json"
 
       - name: Create or update PR in spec repo

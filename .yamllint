@@ -2,6 +2,7 @@
 ignore: |
   .github
   .tox
+  openapi.yaml
   awx/main/tests/data/inventory/plugins/**
   # vault files
   awx/main/tests/data/ansible_utils/playbooks/valid/vault.yml
