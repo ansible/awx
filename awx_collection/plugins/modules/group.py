@@ -73,7 +73,7 @@ options:
       description:
         - A new name for this group (for renaming)
       type: str
-extends_documentation_fragment: awx.awx.auth
+extends_documentation_fragment: awx.awx.auth_session_id, awx.awx.auth
 '''
 
 
