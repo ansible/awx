@@ -424,11 +424,13 @@ def _log_shipping_response(response, path):
     filename = os.path.basename(path)
     try:
         data = response.json()
+        if not isinstance(data, dict):
+            raise ValueError('Analytics response is not an object')
         request_id = data.get('request_id', 'unknown')
         account_number = data.get('account_number', 'unknown')
         org_id = data.get('org_id', 'unknown')
         logger.info(f"Analytics upload successful: file={filename} request_id={request_id} account_number={account_number} org_id={org_id}")
-    except Exception:
+    except ValueError:
         logger.info(f"Analytics upload successful: file={filename} status={response.status_code}")
 
 
