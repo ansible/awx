@@ -512,20 +512,32 @@ class Command(BaseCommand):
             group_names = all_group_names[offset : (offset + self._batch_size)]
             for group in self.inventory.groups.filter(name__in=group_names):
                 mem_group = self.all_group.all_groups[group.name]
+                mem_variables = mem_group.variables
+                # Special import directive (same as create path); not a normal group var.
+                group_desc = mem_variables.pop('_awx_description', None)
                 db_variables = group.variables_dict
+                update_fields = []
                 if self.overwrite_vars:
-                    db_variables = mem_group.variables
+                    db_variables = mem_variables
                 else:
-                    db_variables.update(mem_group.variables)
+                    db_variables.update(mem_variables)
                 if db_variables != group.variables_dict:
                     group.variables = json.dumps(db_variables)
-                    group.save(update_fields=['variables'])
+                    update_fields.append('variables')
+                if group_desc is not None and self.overwrite_vars and group.description != group_desc:
+                    group.description = group_desc
+                    update_fields.append('description')
+                if update_fields:
+                    group.save(update_fields=update_fields)
+                if 'variables' in update_fields:
                     if self.overwrite_vars:
                         logger.debug('Group "%s" variables replaced', group.name)
                     else:
                         logger.debug('Group "%s" variables updated', group.name)
                 else:
                     logger.debug('Group "%s" variables unmodified', group.name)
+                if 'description' in update_fields:
+                    logger.debug('Group "%s" description updated', group.name)
                 existing_group_names.add(group.name)
                 self._batch_add_m2m(self.inventory_source.groups, group)
         for group_name in all_group_names:
@@ -547,6 +559,11 @@ class Command(BaseCommand):
         db_variables = db_host.variables_dict
         mem_variables = mem_host.variables
         update_fields = []
+
+        # Special import directive (same as create path); not a normal host var.
+        # Without popping, overwrite_vars stores it in host.variables and never
+        # updates Host.description (AAP-58010).
+        host_desc = mem_variables.pop('_awx_description', None)
 
         # Update host instance_id.
         instance_id = self._get_instance_id(mem_variables)
@@ -579,6 +596,10 @@ class Command(BaseCommand):
             old_name = db_host.name
             db_host.name = mem_host.name
             update_fields.append('name')
+        # Update host description from _awx_description when overwrite_vars is set.
+        if host_desc is not None and self.overwrite_vars and db_host.description != host_desc:
+            db_host.description = host_desc
+            update_fields.append('description')
         # Update host and display message(s) on what changed.
         if update_fields:
             db_host.save(update_fields=update_fields)
@@ -601,6 +622,8 @@ class Command(BaseCommand):
                 logger.debug('Host "%s" is now enabled', mem_host.name)
             else:
                 logger.debug('Host "%s" is now disabled', mem_host.name)
+        if 'description' in update_fields:
+            logger.debug('Host "%s" description updated', mem_host.name)
         self._batch_add_m2m(self.inventory_source.hosts, db_host)
 
     def _build_pk_mem_host_map(self):

@@ -357,6 +357,32 @@ class TestINIImports:
         cmd = inventory_import.Command()
         cmd.handle(inventory_id=inventory.pk, source=__file__)
 
+    @mock.patch.object(inventory_import, 'AnsibleInventoryLoader', MockLoader)
+    def test_awx_description_updates_on_overwrite_vars(self, inventory):
+        """AAP-58010: _awx_description must update Host.description on re-import with overwrite_vars."""
+        inventory_import.AnsibleInventoryLoader._data = {
+            "_meta": {"hostvars": {"host1.example.com": {}}},
+            "all": {"children": ["ungrouped"]},
+            "ungrouped": {"hosts": ["host1.example.com"]},
+        }
+        cmd = inventory_import.Command()
+        cmd.handle(inventory_id=inventory.pk, source=__file__)
+        host = inventory.hosts.get(name='host1.example.com')
+        assert host.description == 'imported'
+        assert '_awx_description' not in host.variables_dict
+
+        inventory_import.AnsibleInventoryLoader._data = {
+            "_meta": {"hostvars": {"host1.example.com": {"_awx_description": "updated-from-scm", "env": "lab"}}},
+            "all": {"children": ["ungrouped"]},
+            "ungrouped": {"hosts": ["host1.example.com"]},
+        }
+        cmd = inventory_import.Command()
+        cmd.handle(inventory_id=inventory.pk, source=__file__, overwrite_vars=True)
+        host.refresh_from_db()
+        assert host.description == 'updated-from-scm'
+        assert host.variables_dict == {"env": "lab"}
+        assert '_awx_description' not in host.variables_dict
+
 
 @pytest.mark.django_db
 @pytest.mark.inventory_import
