@@ -1132,6 +1132,15 @@ class CredentialAccess(BaseAccess):
 
     @check_superuser
     def can_add(self, data):
+        """
+        Determine if the user can create a credential from the given data.
+
+        Accepts either raw field data (user, team, organization keys) or a
+        reference object (the source credential on a copy). When a
+        reference_obj is provided, the copy can only inherit organization
+        ownership, because user and team are write-only fields that are not
+        stored on the credential itself.
+        """
         if not data:  # So the browseable API will work
             return True
         if data and data.get('user', None):
@@ -1142,11 +1151,14 @@ class CredentialAccess(BaseAccess):
             team_obj = get_object_from_data('team', Team, data)
             if not check_user_access(self.user, Team, 'change', team_obj, None):
                 return False
-        if data and data.get('organization', None):
-            organization_obj = get_object_from_data('organization', Organization, data)
-            if not any([check_user_access(self.user, Organization, 'change', organization_obj, None), self.user in organization_obj.credential_admin_role]):
-                return False
-        if not any(data.get(key, None) for key in ('user', 'team', 'organization')):
+        if not self.check_related('organization', Organization, data, role_field='credential_admin_role'):
+            return False
+        reference_obj = data.get('reference_obj', None)
+        if reference_obj:
+            has_owner = reference_obj.organization_id is not None
+        else:
+            has_owner = any(data.get(key, None) for key in ('user', 'team', 'organization'))
+        if not has_owner:
             return False  # you have to provide 1 owner field
         return True
 

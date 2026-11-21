@@ -2,9 +2,21 @@ import pytest
 
 from unittest import mock
 
+from awx.api.versioning import reverse
 from awx.main.access import CredentialAccess
 from awx.main.models.credential import Credential
 from django.contrib.auth.models import User
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
+
+# Role lookup, its organization, cached permission codenames, one role evaluation
+CAN_COPY_QUERY_BUDGET = 4
+# add_credential (copy) evaluation, use_credential (use) evaluation, credential lookup
+LIST_QUERIES_PER_CREDENTIAL = 3
+# Row counts for the list view slope; both pages stay under the default page size of 25
+WARMUP_ROWS = 1
+SMALL_PAGE_ROWS = 10
+LARGE_PAGE_ROWS = 20
 
 
 @pytest.mark.django_db
@@ -69,6 +81,45 @@ def test_org_credential_access_admin(role_name, alice, org_credential):
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize("role_name", ["admin_role", "credential_admin_role"])
+def test_org_credential_copy_capability(role_name, alice, org_credential):
+    """Org credential admins must be able to copy credentials (AAP-64683)."""
+    role = getattr(org_credential.organization, role_name)
+    role.members.add(alice)
+    access = CredentialAccess(alice)
+    assert access.can_copy(org_credential)
+
+
+@pytest.mark.django_db
+def test_org_credential_copy_denied_for_plain_member(alice, org_credential):
+    """Plain org members (non-admin) must NOT be able to copy credentials."""
+    org_credential.organization.member_role.members.add(alice)
+    access = CredentialAccess(alice)
+    assert not access.can_copy(org_credential)
+
+
+@pytest.mark.django_db
+def test_credential_without_org_not_copyable_by_non_superuser(alice, credential):
+    """Credentials with no organization must not be copyable by non-superusers.
+    Verifies that the can_copy fallback path does not regress.
+    The `credential` fixture has no organization set (organization_id is None)."""
+    access = CredentialAccess(alice)
+    assert not access.can_copy(credential)
+
+
+@pytest.mark.django_db
+def test_org_credential_copy_denied_for_direct_admin(alice, org_credential):
+    """A direct credential admin (admin_role on the credential itself, no org role)
+    cannot copy an org credential even though can_change passes for them.
+    Copying routes through can_add which requires org-level creation rights;
+    being in obj.admin_role alone is not sufficient."""
+    org_credential.admin_role.members.add(alice)
+    access = CredentialAccess(alice)
+    assert access.can_change(org_credential, {'description': 'updated'})
+    assert not access.can_copy(org_credential)
+
+
+@pytest.mark.django_db
 def test_org_and_user_credential_access(alice, organization):
     """Address specific bug where any user could make an org credential
     in another org without any permissions to that org
@@ -93,3 +144,49 @@ def test_cred_no_org(user, credential):
     su = user('su', True)
     access = CredentialAccess(su)
     assert access.can_change(credential, {'user': su.pk})
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("role_name", ["admin_role", "credential_admin_role", "member_role", None])
+def test_org_credential_can_copy_query_budget(role_name, alice, org_credential):
+    """can_copy on an org credential evaluates a single organization permission.
+
+    The budget is the role lookup, its organization, the cached permission
+    codenames and one role evaluation. Passing the organization by pk, or also
+    evaluating change_organization, doubles it to 8 queries.
+    """
+    if role_name:
+        getattr(org_credential.organization, role_name).members.add(alice)
+    cred = Credential.objects.select_related('organization').get(pk=org_credential.pk)
+    access = CredentialAccess(alice)
+    with CaptureQueriesContext(connection) as ctx:
+        access.can_copy(cred)
+    sql = [q['sql'] for q in ctx.captured_queries]
+    assert len(sql) <= CAN_COPY_QUERY_BUDGET, sql
+    assert not [q for q in sql if "'change_organization'" in q]
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("role_name", ["credential_admin_role", "auditor_role"])
+def test_credential_list_capabilities_query_slope(role_name, get, alice, organization, credentialtype_ssh):
+    """Each extra credential on the list view costs at most 3 queries.
+
+    user_capabilities.copy is not prefetched for credentials, so it is paid per
+    row: one add_credential evaluation, alongside the use_credential evaluation
+    and the credential lookup that already existed. A can_copy that re-fetches
+    the organization and evaluates two roles costs 9 per row. The first request
+    pays one-time lazy RBAC setup, so it is issued as a warmup before measuring.
+    """
+    getattr(organization, role_name).members.add(alice)
+    url = reverse('api:credential_list')
+
+    def list_query_count(total):
+        for i in range(Credential.objects.count(), total):
+            Credential.objects.create(name=f'cred-{i}', organization=organization, credential_type=credentialtype_ssh)
+        with CaptureQueriesContext(connection) as ctx:
+            assert get(url, alice, expect=200).data['count'] == total
+        return len(ctx)
+
+    list_query_count(WARMUP_ROWS)
+    small, large = list_query_count(SMALL_PAGE_ROWS), list_query_count(LARGE_PAGE_ROWS)
+    assert (large - small) / (LARGE_PAGE_ROWS - SMALL_PAGE_ROWS) <= LIST_QUERIES_PER_CREDENTIAL
