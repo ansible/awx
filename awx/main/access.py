@@ -9,7 +9,7 @@ from functools import reduce
 
 # Django
 from django.conf import settings
-from django.db.models import Q, Prefetch
+from django.db.models import Exists, OuterRef, Q, Prefetch
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
@@ -2697,6 +2697,114 @@ class ActivityStreamAccess(BaseAccess):
         'workflow_job_template_node',
     )
 
+    def __init__(self, user, save_messages=False, activity_stream_queryset=None, activity_stream_object_type=None, activity_stream_object_types=None):
+        super().__init__(user, save_messages=save_messages)
+        self.activity_stream_queryset = activity_stream_queryset
+        if activity_stream_object_types is not None:
+            self.activity_stream_object_types = set(activity_stream_object_types)
+        elif activity_stream_object_type is not None:
+            self.activity_stream_object_types = {activity_stream_object_type}
+        else:
+            self.activity_stream_object_types = None
+
+    def get_queryset(self):
+        if self.activity_stream_queryset is not None and (self.user.is_superuser or self.user.is_system_auditor):
+            qs = self.activity_stream_queryset
+            if self.prefetch_related:
+                qs = qs.prefetch_related(*self.prefetch_related)
+            return qs
+        return super().get_queryset()
+
+    def _activity_stream_visibility_q(self):
+        AS = ActivityStream
+        object_types = self.activity_stream_object_types
+        visibility = [AS.user.through.objects.filter(activitystream_id=OuterRef('pk'), user=self.user)]
+
+        def branch_enabled(*branch_types):
+            return object_types is None or bool(object_types.intersection(branch_types))
+
+        inventory_set = (
+            Inventory.access_ids_qs(self.user, 'view')
+            if branch_enabled('inventory', 'host', 'group', 'inventory_source', 'inventory_update', 'ad_hoc_command')
+            else Inventory.objects.none()
+        )
+        if inventory_set.exists():
+            visibility.extend(
+                [
+                    AS.ad_hoc_command.through.objects.filter(activitystream_id=OuterRef('pk'), adhoccommand__inventory__in=inventory_set),
+                    AS.inventory.through.objects.filter(activitystream_id=OuterRef('pk'), inventory__in=inventory_set),
+                    AS.host.through.objects.filter(activitystream_id=OuterRef('pk'), host__inventory__in=inventory_set),
+                    AS.group.through.objects.filter(activitystream_id=OuterRef('pk'), group__inventory__in=inventory_set),
+                    AS.inventory_source.through.objects.filter(activitystream_id=OuterRef('pk'), inventorysource__inventory__in=inventory_set),
+                    AS.inventory_update.through.objects.filter(
+                        activitystream_id=OuterRef('pk'), inventoryupdate__inventory_source__inventory__in=inventory_set
+                    ),
+                ]
+            )
+
+        credential_set = Credential.access_ids_qs(self.user, 'view') if branch_enabled('credential') else Credential.objects.none()
+        if credential_set.exists():
+            visibility.append(AS.credential.through.objects.filter(activitystream_id=OuterRef('pk'), credential__in=credential_set))
+
+        auditing_orgs = (
+            (Organization.access_qs(self.user, 'change') | Organization.access_qs(self.user, 'audit')).distinct().values_list('id', flat=True)
+            if branch_enabled('user', 'organization', 'notification_template', 'notification', 'label', 'role')
+            else Organization.objects.none().values_list('id', flat=True)
+        )
+        if auditing_orgs.exists():
+            visibility.extend(
+                [
+                    AS.user.through.objects.filter(activitystream_id=OuterRef('pk'), user__in=auditing_orgs.values('member_role__members')),
+                    AS.organization.through.objects.filter(activitystream_id=OuterRef('pk'), organization__in=auditing_orgs),
+                    AS.notification_template.through.objects.filter(activitystream_id=OuterRef('pk'), notificationtemplate__organization__in=auditing_orgs),
+                    AS.notification.through.objects.filter(
+                        activitystream_id=OuterRef('pk'), notification__notification_template__organization__in=auditing_orgs
+                    ),
+                    AS.label.through.objects.filter(activitystream_id=OuterRef('pk'), label__organization__in=auditing_orgs),
+                    AS.role.through.objects.filter(activitystream_id=OuterRef('pk'), role__in=Role.visible_roles(self.user)),
+                ]
+            )
+
+        project_set = Project.access_ids_qs(self.user, 'view') if branch_enabled('project', 'project_update') else Project.objects.none()
+        if project_set.exists():
+            visibility.extend(
+                [
+                    AS.project.through.objects.filter(activitystream_id=OuterRef('pk'), project__in=project_set),
+                    AS.project_update.through.objects.filter(activitystream_id=OuterRef('pk'), projectupdate__project__in=project_set),
+                ]
+            )
+
+        jt_set = JobTemplate.access_ids_qs(self.user, 'view') if branch_enabled('job_template', 'job') else JobTemplate.objects.none()
+        if jt_set.exists():
+            visibility.extend(
+                [
+                    AS.job_template.through.objects.filter(activitystream_id=OuterRef('pk'), jobtemplate__in=jt_set),
+                    AS.job.through.objects.filter(activitystream_id=OuterRef('pk'), job__job_template__in=jt_set),
+                ]
+            )
+
+        wfjt_set = (
+            WorkflowJobTemplate.access_ids_qs(self.user, 'view')
+            if branch_enabled('workflow_job_template', 'workflow_job_template_node', 'workflow_job')
+            else WorkflowJobTemplate.objects.none()
+        )
+        if wfjt_set.exists():
+            visibility.extend(
+                [
+                    AS.workflow_job_template.through.objects.filter(activitystream_id=OuterRef('pk'), workflowjobtemplate__in=wfjt_set),
+                    AS.workflow_job_template_node.through.objects.filter(
+                        activitystream_id=OuterRef('pk'), workflowjobtemplatenode__workflow_job_template__in=wfjt_set
+                    ),
+                    AS.workflow_job.through.objects.filter(activitystream_id=OuterRef('pk'), workflowjob__workflow_job_template__in=wfjt_set),
+                ]
+            )
+
+        team_set = Team.access_ids_qs(self.user, 'view') if branch_enabled('team') else Team.objects.none()
+        if team_set.exists():
+            visibility.append(AS.team.through.objects.filter(activitystream_id=OuterRef('pk'), team__in=team_set))
+
+        return reduce(lambda left, right: left | Q(Exists(right)), visibility[1:], Q(Exists(visibility[0])))
+
     def filtered_queryset(self):
         """
         The full set is returned if the user is:
@@ -2718,7 +2826,9 @@ class ActivityStreamAccess(BaseAccess):
          - schedules
          - custom inventory scripts
         """
-        qs = self.model.objects.all()
+        qs = self.activity_stream_queryset if self.activity_stream_queryset is not None else self.model.objects.all()
+        if self.activity_stream_queryset is not None:
+            return qs.filter(self._activity_stream_visibility_q())
         # FIXME: the following fields will be attached to the wrong object
         # if they are included in prefetch_related because of
         # https://github.com/django-polymorphic/django-polymorphic/issues/68
