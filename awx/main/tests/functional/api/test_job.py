@@ -62,6 +62,38 @@ def test_label_sublist(get, admin_user, organization):
 
 
 @pytest.mark.django_db
+def test_job_template_rejects_non_integer_label_id(post, admin_user, inventory, project):
+    job_template = JobTemplate.objects.create(name='test-jt-invalid-label-id', inventory=inventory, project=project)
+
+    response = post(
+        reverse('api:job_template_label_list', kwargs={'pk': job_template.pk}),
+        {'id': 'not-a-number'},
+        user=admin_user,
+        expect=400,
+    )
+
+    assert response.data['msg'] == '"id" field must be an integer.'
+    assert job_template.labels.count() == 0
+
+
+@pytest.mark.django_db
+def test_job_template_rejects_101st_label(post, admin_user, organization, inventory, project):
+    job_template = JobTemplate.objects.create(name='test-jt-label-limit', inventory=inventory, project=project)
+    labels = [Label.objects.create(organization=organization, name=f'label-{i}') for i in range(101)]
+    job_template.labels.add(*labels[:100])
+
+    response = post(
+        reverse('api:job_template_label_list', kwargs={'pk': job_template.pk}),
+        {'id': labels[100].pk},
+        user=admin_user,
+        expect=400,
+    )
+
+    assert 'Maximum number of labels' in response.data['msg']
+    assert job_template.labels.count() == 100
+
+
+@pytest.mark.django_db
 def test_job_relaunch_prompts_not_accepted_response(post, get, inventory, project, credential, net_credential, machine_credential):
     jt = JobTemplate.objects.create(name='testjt', inventory=inventory, project=project)
     jt.credentials.add(machine_credential)
