@@ -3,6 +3,7 @@ from copy import deepcopy
 import datetime
 
 import pytest
+from django.test import override_settings
 
 # from awx.main.models import NotificationTemplates, Notifications, JobNotificationMixin
 from awx.main.models import AdHocCommand, InventoryUpdate, Job, JobNotificationMixin, ProjectUpdate, Schedule, SystemJob, WorkflowJob
@@ -130,6 +131,27 @@ class TestJobNotificationMixin(object):
         job_serialization = UnifiedJobSerializer(job).to_representation(job)
         context = job.context(job_serialization)
         assert '批量安装项目' in context['job_metadata']
+
+    @pytest.mark.parametrize('prefix', ['', 'myprefix', '/myprefix/', '///'])
+    def test_context_stub_url_prefix(self, prefix):
+        with override_settings(OPTIONAL_API_URLPATTERN_PREFIX=prefix):
+            context = JobNotificationMixin.context_stub()
+        normalized = prefix.strip('/')
+        expected = f'/api/{normalized + "/" if normalized else ""}v2/jobs/13/'
+        assert context['job']['url'] == expected
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize('prefix', ['', 'myprefix', '/myprefix/', '///'])
+    def test_build_notification_message_url_prefix(self, prefix, notification_template):
+        notification_template.messages = {'started': {'message': '{{ job.url }}', 'body': '{{ job.url }}'}}
+        notification_template.save()
+        job = Job.objects.create(name='test-job')
+        normalized = prefix.strip('/')
+        expected = f'/api/{normalized + "/" if normalized else ""}v2/jobs/{job.pk}/'
+        with override_settings(OPTIONAL_API_URLPATTERN_PREFIX=prefix):
+            msg, body = job.build_notification_message(notification_template, 'running')
+        assert msg == expected
+        assert body == expected
 
     def test_context_stub(self):
         """The context stub is a fake context used to validate custom notification messages. Ensure that
