@@ -31,7 +31,7 @@ When running this command, specify either an ``--inventory-id`` or ``--inventory
 
     awx-manage inventory_import --source=/ansible/inventory/ --inventory-id=1 
 
-By default, inventory data already stored in AWX blends with data from the external source. To use only the external data, specify ``--overwrite``. To specify that any existing hosts get variable data exclusively from the ``--source``, specify ``--overwrite_vars``. The default behavior adds any new variables from the external source, overwriting keys that already exist, but preserves any variables that were not sourced from the external data source.
+By default, inventory data already stored in AWX blends with data from the external source. To use only the external data, specify ``--overwrite``. To specify that any existing hosts get variable data exclusively from the ``--source``, specify ``--overwrite-vars``. The default behavior adds any new variables from the external source, overwriting keys that already exist, but preserves any variables that were not sourced from the external data source.
 
 ::
 
@@ -40,7 +40,7 @@ By default, inventory data already stored in AWX blends with data from the exter
 
 .. note::
 
-    Edits and additions to Inventory host variables persist beyond an inventory sync as long as ``--overwrite_vars`` is **not** set. 
+    Edits and additions to Inventory host variables persist beyond an inventory sync as long as ``--overwrite-vars`` is **not** set.
 
 
 Cleanup of old data
@@ -143,7 +143,7 @@ For customers with disconnected environments who want to collect usage informati
 
 ::
 
-  awx-manage host_metric --since YYYY-MM-DD --until YYYY-MM-DD --json
+  awx-manage host_metric --since YYYY-MM-DD --json
 
 
-The parameters ``--since`` and ``--until`` specify date ranges and are optional, but one of them has to be present. The ``--json`` flag specifies the output format and is optional.
+The ``--since`` parameter sets a start date in ISO format (YYYY-MM-DD) and is optional. The ``--json`` flag specifies the output format and is optional.
