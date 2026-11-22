@@ -10,7 +10,19 @@ from django.db.models.signals import post_save
 from awx.conf import settings_registry
 from awx.conf.models import Setting
 from awx.conf.signals import on_post_save_setting
-from awx.main.models import UnifiedJob, Credential, NotificationTemplate, Job, JobTemplate, WorkflowJob, WorkflowJobTemplate
+from awx.main.models import (
+    UnifiedJob,
+    Credential,
+    NotificationTemplate,
+    Job,
+    JobTemplate,
+    WorkflowJob,
+    WorkflowJobTemplate,
+    InventorySource,
+    InventoryUpdate,
+    Project,
+    ProjectUpdate,
+)
 from awx.main.utils.encryption import encrypt_field, decrypt_field, encrypt_value, decrypt_value, get_encryption_key
 
 
@@ -47,6 +59,7 @@ class Command(BaseCommand):
         self._unified_jobs()
         self._settings()
         self._survey_passwords()
+        self._proxy_fields()
         return self.new_key
 
     def _notification_templates(self):
@@ -81,6 +94,13 @@ class Command(BaseCommand):
                 setting.value = decrypt_field(setting, 'value', secret_key=self.old_key)
                 setting.value = encrypt_field(setting, 'value', secret_key=self.new_key)
                 setting.save()
+
+    def _proxy_fields(self):
+        for model in (InventorySource, InventoryUpdate, Project, ProjectUpdate):
+            for obj in model.objects.exclude(proxy='').iterator():
+                obj.proxy = decrypt_field(obj, 'proxy', secret_key=self.old_key)
+                obj.proxy = encrypt_field(obj, 'proxy', secret_key=self.new_key)
+                obj.save(update_fields=['proxy'])
 
     def _survey_passwords(self):
         for _type in (JobTemplate, WorkflowJobTemplate):
