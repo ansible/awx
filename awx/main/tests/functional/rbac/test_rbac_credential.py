@@ -4,6 +4,8 @@ from unittest import mock
 
 from awx.main.access import CredentialAccess
 from awx.main.models.credential import Credential
+from ansible_base.rbac import permission_registry
+from ansible_base.rbac.models import RoleDefinition
 from django.contrib.auth.models import User
 
 
@@ -93,3 +95,30 @@ def test_cred_no_org(user, credential):
     su = user('su', True)
     access = CredentialAccess(su)
     assert access.can_change(credential, {'user': su.pk})
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('credential_fixture', ['credential', 'org_credential'])
+def test_credential_delete_requires_delete_permission(request, alice, credential_fixture, setup_managed_roles):
+    credential = request.getfixturevalue(credential_fixture)
+    content_type = permission_registry.content_type_model.objects.get_for_model(Credential)
+    change_role = RoleDefinition.objects.create_from_permissions(
+        name=f'{credential_fixture}-change-only',
+        permissions=['view_credential', 'change_credential'],
+        content_type=content_type,
+    )
+    delete_role = RoleDefinition.objects.create_from_permissions(
+        name=f'{credential_fixture}-delete',
+        permissions=['view_credential', 'change_credential', 'delete_credential'],
+        content_type=content_type,
+    )
+
+    change_role.give_permission(alice, credential)
+    access = CredentialAccess(alice)
+    assert alice.has_obj_perm(credential, 'change')
+    assert not alice.has_obj_perm(credential, 'delete')
+    assert not access.can_delete(credential)
+
+    delete_role.give_permission(alice, credential)
+    assert alice.has_obj_perm(credential, 'delete')
+    assert access.can_delete(credential)
