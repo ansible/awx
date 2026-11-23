@@ -320,3 +320,17 @@ def test_run_job_hook_falls_back_to_job_env_on_a_normal_run(tmp_path):
 
     job.refresh_from_db.assert_called_once_with(fields=['job_env'])
     assert finish_fact_cache.call_args[1]['artifacts_dir'].startswith(str(tmp_path))
+
+
+@patch('awx.main.tasks.jobs.os.close')
+@patch('awx.main.tasks.jobs.fcntl.lockf')
+def test_release_lock_is_a_no_op_for_a_task_that_never_took_it(lockf, os_close):
+    """The adoption hook runs post_run_hook on a fresh task whose pre_run_hook never took the
+    project lock, as when a controller re-adopts its own project update. Releasing must not raise,
+    or the adopted update is marked failed."""
+    from awx.main.tasks.jobs import RunProjectUpdate
+
+    RunProjectUpdate().release_lock(Mock())
+
+    lockf.assert_not_called()
+    os_close.assert_not_called()

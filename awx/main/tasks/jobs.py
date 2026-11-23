@@ -590,6 +590,8 @@ class BaseTask(object):
         return expect_passwords
 
     def release_lock(self, project):
+        if getattr(self, 'lock_fd', None) is None:
+            return  # never taken, e.g. post_run_hook run by an adopter that skipped pre_run_hook
         try:
             fcntl.lockf(self.lock_fd, fcntl.LOCK_UN)
         except IOError as e:
