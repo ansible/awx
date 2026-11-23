@@ -77,11 +77,12 @@ def test_deque_reverse():
     assert len(log) == 1
 
 
-def test_sql_not_recorded_by_default():
+def test_sql_not_recorded_by_default(mocker):
     db = FakeDatabase()
     log = RecordedQueryLog(collections.deque(maxlen=100), db)
     assert log.maxlen == 100
-    assert log.threshold is None
+    # Simulate that profiling is not enabled via the key in Redis
+    mocker.patch('awx.main.db.profiled_pg.base.cache.get', return_value=None)
     log.append(QUERY)
     assert len(log) == 1
     assert [x for x in log] == [QUERY]
@@ -109,11 +110,11 @@ def test_sqlite_failure(tmpdir):
     assert os.listdir(tmpdir) == []
 
 
-def test_sql_above_threshold(tmpdir):
+def test_sql_above_threshold(tmpdir, mocker):
     tmpdir = str(tmpdir)
     db = FakeDatabase()
     log = RecordedQueryLog(collections.deque(maxlen=100), db, dest=tmpdir)
-    log.threshold = 0.00000001
+    mocker.patch('awx.main.db.profiled_pg.base.get_threshold_value', return_value=0.00000001)
 
     for _ in range(5):
         log.append(QUERY)
