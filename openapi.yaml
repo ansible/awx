@@ -25216,7 +25216,6 @@ components:
             source, special to constructed inventory
       required:
       - name
-      - organization
     ConstructedInventoryRequest:
       type: object
       properties:
@@ -25275,7 +25274,6 @@ components:
             source, special to constructed inventory
       required:
       - name
-      - organization
     Copy:
       type: object
       description: |-
@@ -26829,7 +26827,6 @@ components:
           maxLength: 128
       required:
       - name
-      - organization
     InventoryRequest:
       type: object
       properties:
@@ -26887,7 +26884,6 @@ components:
           maxLength: 128
       required:
       - name
-      - organization
     InventorySource:
       type: object
       description: |-
@@ -29919,7 +29915,6 @@ components:
       required:
       - name
       - notification_type
-      - organization
     NotificationTemplateRequest:
       type: object
       properties:
@@ -29975,7 +29970,6 @@ components:
       required:
       - name
       - notification_type
-      - organization
     Organization:
       type: object
       properties:
