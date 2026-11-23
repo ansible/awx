@@ -1,0 +1,3 @@
+- name: Foo
+  ansible.builtin.debug:
+    msg: Do nothing
