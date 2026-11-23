@@ -142,7 +142,6 @@ def test_cred_type_input_schema_validity(input_, valid):
         ({'env': {'AWX_SECRET=': '{{awx_secret}}'}}, False),
         ({'env': {'ANSIBLE_SETTING': '{{awx_secret}}'}}, False),
         # Adoption keys stored in job_env are reserved
-        ({'env': {'AWX_ADOPTION_SUBMIT_STARTED': '{{awx_secret}}'}}, False),
         ({'env': {'DRAGON': '🐉'}}, False),
         ({'env': {'🐉': 'DRAGON'}}, False),
         ({'extra_vars': 123}, False),

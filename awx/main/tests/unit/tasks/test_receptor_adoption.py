@@ -198,8 +198,8 @@ def test_run_internal_streams_through_receptor_work(mock_transmit, mock_process)
 @patch.object(AWXReceptorJob, 'sign_work', new=False)
 @patch.object(AWXReceptorJob, 'receptor_params', new={})
 @patch.object(AWXReceptorJob, 'work_type', new='local')
-def test_transmit_phase_marks_the_job_submitted_before_receptor_can_start_a_unit(mock_transmit):
-    # receptor starts the unit before it replies, so the marker must be saved before the call (AAP-99320).
+def test_transmit_phase_saves_the_work_unit_after_submission(mock_transmit):
+    # Submission needs no job_env bookkeeping; save the returned work unit id.
     rj = _make_receptor_job(unit_id=None)
     rj.task.instance.job_env = {}
     order = []
@@ -209,8 +209,7 @@ def test_transmit_phase_marks_the_job_submitted_before_receptor_can_start_a_unit
 
     rj._transmit_phase(ctl)
 
-    assert order[0] == ('update_model', {'job_env': {'AWX_ADOPTION_SUBMIT_STARTED': True}})
-    assert order[1] == ('submit_work', None)
+    assert order == [('submit_work', None), ('update_model', {'work_unit_id': 'unit-9'})]
 
 
 def test_no_route_to_drops_the_connection_when_status_fails():
@@ -1212,8 +1211,8 @@ def test_status_handler_persists_no_environment_when_there_is_no_masked_one():
     from awx.main.tasks.callback import RunnerCallback
 
     callback = RunnerCallback(model=None)
-    callback.safe_env = {'AWX_ADOPTION_SUBMIT_STARTED': True}  # adoption seeded this from a job_env with only adoption keys
-    callback.instance = Mock(pk=7, job_env={'AWX_ADOPTION_SUBMIT_STARTED': True})
+    callback.safe_env = {}  # no saved environment from the original controller
+    callback.instance = Mock(pk=7, job_env={})
     callback.update_model = Mock(return_value=callback.instance)
 
     runner_config = Mock(env={'MY_VAULT_PASSWORD': 'hunter2', 'CUSTOM_VALUE': 'plugin-secret', 'PATH': '/usr/bin'}, command=['ansible-playbook'], cwd='/tmp')

@@ -43,11 +43,6 @@ STANDARD_INVENTORY_UPDATE_ENV = {
 CAN_CANCEL = ('new', 'pending', 'waiting', 'running')
 ACTIVE_STATES = CAN_CANCEL
 ERROR_STATES = ('error',)
-# job_env key written just before the work is submitted to receptor; a reaped job that has it is warned that its playbook may still run
-RECEPTOR_SUBMIT_STARTED = 'AWX_ADOPTION_SUBMIT_STARTED'
-# job_env keys that belong to adoption, not to the job's environment: hidden from the API, and
-# in ENV_BLOCKLIST so a credential injector cannot set one and collide with it
-ADOPTION_JOB_ENV_KEYS = frozenset({RECEPTOR_SUBMIT_STARTED})
 MINIMAL_EVENTS = set(['playbook_on_play_start', 'playbook_on_task_start', 'playbook_on_stats', 'EOF'])
 CENSOR_VALUE = '************'
 ENV_BLOCKLIST = frozenset(
@@ -71,7 +66,6 @@ ENV_BLOCKLIST = frozenset(
         'AWX_HOST',
         'PROJECT_REVISION',
         'SUPERVISOR_CONFIG_PATH',
-        *ADOPTION_JOB_ENV_KEYS,
     )
 )
 

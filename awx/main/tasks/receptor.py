@@ -39,7 +39,7 @@ from awx.main.utils.common import (
     parse_yaml_or_json,
     cleanup_new_process,
 )
-from awx.main.constants import JOB_FOLDER_PREFIX, MAX_ISOLATED_PATH_COLON_DELIMITER, RECEPTOR_SUBMIT_STARTED
+from awx.main.constants import JOB_FOLDER_PREFIX, MAX_ISOLATED_PATH_COLON_DELIMITER
 from awx.main.tasks.signals import signal_state, signal_callback, SignalExit
 from awx.main.tasks import host_map
 from awx.main.tasks.callback import RunnerCallback
@@ -764,10 +764,6 @@ class AWXReceptorJob:
             work_submit_kw['node'] = self.task.instance.execution_node
             use_stream_tls = get_conn_type(work_submit_kw['node'], receptor_ctl).name == "STREAMTLS"
             work_submit_kw['tlsclient'] = get_tls_client(self.config_data, use_stream_tls)
-
-        # receptor starts the unit before it replies, so a job reaped from here on is warned that its playbook may still run
-        instance = self.task.instance
-        self.task.instance = self.task.update_model(instance.pk, job_env={**(instance.job_env or {}), RECEPTOR_SUBMIT_STARTED: True})
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
             transmitter_future = executor.submit(self.transmit, sockin)

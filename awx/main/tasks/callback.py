@@ -16,7 +16,7 @@ from django.db import connections
 
 # AWX
 from awx.main.redact import UriCleaner
-from awx.main.constants import ADOPTION_JOB_ENV_KEYS, MINIMAL_EVENTS, ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE
+from awx.main.constants import MINIMAL_EVENTS, ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE
 from awx.main.utils.update_model import update_model
 from awx.main.queue import CallbackQueueDispatcher
 
@@ -317,7 +317,7 @@ class RunnerCallback:
         """
         from awx.main.models.credential import build_safe_env  # Circular import
 
-        masked = {k: v for k, v in self.safe_env.items() if k not in ADOPTION_JOB_ENV_KEYS}
+        masked = self.safe_env
         if masked:
             job_env = build_safe_env(runner_config.env)
             for k, v in masked.items():

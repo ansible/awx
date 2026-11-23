@@ -17,22 +17,6 @@ from awx.main.models import JobTemplate, User, Job, AdHocCommand, ProjectUpdate,
 
 
 @pytest.mark.django_db
-def test_job_detail_hides_the_adoption_keys_from_job_env(get, inventory, admin_user):
-    """job_env.AWX_ADOPTION_SUBMIT_STARTED is internal to adoption.
-
-    job_env is shown as the job's environment, so it would read as a variable the playbook
-    ran with. The detail API strips it while the DB copy stays intact for adoption to read.
-    """
-    job = Job.objects.create(inventory=inventory, status='successful', job_env={'ANSIBLE_FOO': 'bar', 'AWX_ADOPTION_SUBMIT_STARTED': True})
-
-    r = get(job.get_absolute_url(), admin_user, expect=200)
-
-    assert r.data['job_env'] == {'ANSIBLE_FOO': 'bar'}
-    job.refresh_from_db()
-    assert job.job_env['AWX_ADOPTION_SUBMIT_STARTED'] is True
-
-
-@pytest.mark.django_db
 def test_job_relaunch_permission_denied_response(post, get, inventory, project, net_credential, machine_credential):
     jt = JobTemplate.objects.create(name='testjt', inventory=inventory, project=project, ask_credential_on_launch=True)
     jt.credentials.add(machine_credential)

@@ -13,8 +13,6 @@ from enum import Enum
 
 from django.utils.timezone import timedelta
 
-from awx.main.constants import RECEPTOR_SUBMIT_STARTED
-
 
 class JobAction(str, Enum):
     SKIP = 'skip'
@@ -153,17 +151,12 @@ def execution_node_reachable(execution_node, routed):
     return not execution_node or routed is None or execution_node in routed
 
 
-def submitted_to_receptor(job):
-    """Did a controller start to submit this job to receptor? receptor may then run its unit with no work_unit_id saved."""
-    return bool((getattr(job, 'job_env', None) or {}).get(RECEPTOR_SUBMIT_STARTED))
-
-
 def reap_explanation(job, default=None):
     """The job_explanation for reaping job: a warning when its playbook may still run, else default."""
-    if job.work_unit_id or not submitted_to_receptor(job):
+    if job.work_unit_id:
         return default
     return (
-        f'Controller was lost while it submitted the job; its playbook may still be running on '
+        f'Controller was lost before a work unit id was saved; its playbook may still be running on '
         f'{job.execution_node or "its execution node"} and its result is lost.'
     )
 
