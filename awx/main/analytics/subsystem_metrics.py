@@ -458,6 +458,8 @@ def merge_metric_families(*texts):
     """
     families = {}  # insertion ordered: family name -> list of lines
     for text in texts:
+        if not text:
+            continue
         current = None
         skip_header = False
         for line in text.splitlines():

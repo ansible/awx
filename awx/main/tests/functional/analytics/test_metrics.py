@@ -274,3 +274,37 @@ def test_subsystem_metrics_output_is_valid_with_shared_families(mock_redis, mock
         for subsystem in ('dispatcherd', 'callback_receiver', 'indirect_counting'):
             assert f'{field}{{node="awx-1",subsystem="{subsystem}"}} 1' in output
     assert 'dispatcher_messages_received_total 1.0' in output
+
+
+def test_merge_metric_families_ignores_none_inputs():
+    """A collector returning None (instead of '') must not break the merge."""
+    text = '# HELP g Gauge\n# TYPE g gauge\ng 1\n'
+    assert subsystem_metrics_module.merge_metric_families(None, text, None) == text
+
+
+@mock.patch.object(subsystem_metrics_module, 'get_dispatcherd_metrics', return_value='')
+@mock.patch.object(subsystem_metrics_module, 'get_redis_client')
+def test_subsystem_metrics_metric_filter_with_shared_families(mock_redis, mock_dispatcherd):
+    """The ?metric= filter still applies, and a shared family keeps a single header."""
+    shared = 'subsystem_metrics_pipe_execute_seconds'
+
+    def fake_load_other_metrics(self, request):
+        data = {}
+        for field, metric in self.METRICS.items():
+            if isinstance(metric, subsystem_metrics_module.HistogramM):
+                data[field] = {'counts': [0] * len(metric.buckets), 'sum': 0, 'inf': 0}
+            else:
+                data[field] = 1
+        return {'awx-1': data}
+
+    request = mock.MagicMock()
+    request.query_params.getlist.side_effect = lambda key: [shared] if key == 'metric' else []
+    with mock.patch.object(subsystem_metrics_module.Metrics, 'load_other_metrics', autospec=True, side_effect=fake_load_other_metrics):
+        output = subsystem_metrics_module.metrics(request)
+
+    assert_valid_exposition(output)
+    assert output.count(f'# HELP {shared} ') == 1
+    assert output.count(f'# TYPE {shared} ') == 1
+    for subsystem in ('dispatcherd', 'callback_receiver', 'indirect_counting'):
+        assert f'{shared}{{node="awx-1",subsystem="{subsystem}"}} 1' in output
+    assert output.count('# HELP ') == 1
