@@ -107,7 +107,6 @@ class TestConstructedInventoryCascadingSync:
         assert inv_s1_source.id in dep_source_ids, "invS1-source should be in dependencies"
         assert inv_s2_source.id in dep_source_ids, "invS2-source should be in dependencies"
 
-
     def test_gen_dep_for_constructed_inventory_cache_timeout_honored(self):
         """
         Test that cache timeout is respected - recent updates are reused instead of creating new ones.
@@ -167,7 +166,6 @@ class TestConstructedInventoryCascadingSync:
         assert len(dependencies) == 1, "Should reuse existing update"
         assert dependencies[0].id == recent_update.id, "Should return the recent update"
 
-
     def test_gen_dep_for_constructed_inventory_mixed_update_on_launch(self):
         """
         Test that only sources with update_on_launch=True are synced.
@@ -222,7 +220,6 @@ class TestConstructedInventoryCascadingSync:
         assert len(dependencies) == 1, f"Expected 1 dependency, got {len(dependencies)}"
         assert dependencies[0].inventory_source_id == inv_s1_source.id
 
-
     def test_gen_dep_for_constructed_inventory_no_input_sources(self):
         """
         Test that constructed inventory with no input inventory sources doesn't break.
@@ -247,7 +244,6 @@ class TestConstructedInventoryCascadingSync:
 
         # Should return empty list (no dependencies)
         assert dependencies == [], "Should return empty list when no input inventories"
-
 
     def test_gen_dep_for_constructed_inventory_no_sources_on_inputs(self):
         """
@@ -277,7 +273,6 @@ class TestConstructedInventoryCascadingSync:
 
         # Should return empty list (no sources to sync)
         assert dependencies == [], "Should handle input inventories with no sources"
-
 
     def test_gen_dep_for_normal_inventory_unchanged(self):
         """
@@ -315,7 +310,6 @@ class TestConstructedInventoryCascadingSync:
         # Should return project dependencies (existing behavior)
         assert len(dependencies) == 1, "Should return project dependency for SCM source"
         assert dependencies == mock_project_update
-
 
     def test_gen_dep_for_constructed_with_scm_source(self):
         """

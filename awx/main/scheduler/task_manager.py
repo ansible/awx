@@ -391,26 +391,19 @@ class DependencyManager(TaskBase):
         if inventory_task.source == "scm":
             invsrc = inventory_task.inventory_source
             if invsrc:
-                dependencies.extend(
-                    self.get_or_create_project_update(invsrc.source_project_id)
-                )
+                dependencies.extend(self.get_or_create_project_update(invsrc.source_project_id))
 
         # Handle constructed inventory input dependencies
         if inventory_task.inventory.kind == 'constructed':
             # Iterate through all input inventories
             for input_inv in inventory_task.inventory.input_inventories.all():
                 # Find inventory sources with update_on_launch enabled
-                for inv_src in input_inv.inventory_sources.filter(
-                    update_on_launch=True,
-                    source__in=CLOUD_INVENTORY_SOURCES
-                ):
+                for inv_src in input_inv.inventory_sources.filter(update_on_launch=True, source__in=CLOUD_INVENTORY_SOURCES):
                     # Respect cache timeout - only update if needed
                     latest_update = inv_src.inventory_updates.order_by("-created").first()
                     if self.should_update_again(latest_update, inv_src.update_cache_timeout):
                         # Create new inventory update as dependency
-                        input_task = inv_src.create_inventory_update(
-                            _eager_fields=dict(launch_type='dependency')
-                        )
+                        input_task = inv_src.create_inventory_update(_eager_fields=dict(launch_type='dependency'))
                         input_task.signal_start()
                         dependencies.append(input_task)
                     else:
