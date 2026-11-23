@@ -151,16 +151,6 @@ def execution_node_reachable(execution_node, routed):
     return not execution_node or routed is None or execution_node in routed
 
 
-def reap_explanation(job, default=None):
-    """The job_explanation for reaping job: a warning when its playbook may still run, else default."""
-    if job.work_unit_id:
-        return default
-    return (
-        f'Controller was lost before a work unit id was saved; its playbook may still be running on '
-        f'{job.execution_node or "its execution node"} and its result is lost.'
-    )
-
-
 def lost_instance_job_action(job, lost_hostname, slot_available, route_available=lambda: True):
     """What to do with a running job whose controller or execution node was lost.
 

@@ -1055,13 +1055,15 @@ def test_process_startup_jobs_reaps_undispatched_job(me_inst, settings):
 
 
 @pytest.mark.django_db
-def test_process_startup_jobs_warns_that_a_submitted_job_may_still_run(me_inst):
-    """A controller that died between submit and the work_unit_id save left a playbook that may still be running."""
+def test_process_startup_jobs_reaps_with_the_startup_explanation(me_inst):
+    """With no work_unit_id there is no telling whether the job reached receptor, so it gets the plain startup explanation."""
     job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id=None)
     _process_startup_jobs(me_inst)
     job.refresh_from_db()
     assert job.status == 'failed'
-    assert 'may still be running' in job.job_explanation
+    assert job.job_explanation == (
+        'Task was marked as running at system start up. The system must have not shut down properly, so it has been marked as failed.'
+    )
 
 
 @pytest.mark.django_db

@@ -83,7 +83,6 @@ from awx.main.tasks.adoption_decisions import (
     gate_lost_instances,
     live_controller_hostnames,
     mesh_hostnames,
-    reap_explanation,
     routed_hostnames,
     room_for_another_controllers_job,
     lost_instance_disposition,
@@ -940,7 +939,7 @@ def _handle_lost_instance_job(j, other_inst):
             f'Reaping job {j.id} of lost instance {other_inst.hostname}: controller={j.controller_node!r} execution_node={j.execution_node!r} '
             f'work_unit_id={j.work_unit_id!r} started={j.started} cancel_flag={j.cancel_flag}'
         )
-        reaper.reap_job(j, 'failed', job_explanation=reap_explanation(j, 'Job reaped due to instance shutdown'))
+        reaper.reap_job(j, 'failed', job_explanation='Job reaped due to instance shutdown')
         return
 
     task_id = claim_for_adoption(j, new_controller=settings.CLUSTER_HOST_ID)
@@ -1058,9 +1057,7 @@ def _startup_reap_undispatched(hostname):
         reaper.reap_job(
             j,
             'failed',
-            job_explanation=reap_explanation(
-                j, 'Task was marked as running at system start up. The system must have not shut down properly, so it has been marked as failed.'
-            ),
+            job_explanation='Task was marked as running at system start up. The system must have not shut down properly, so it has been marked as failed.',
         )
     if job_ids:
         logger.error(f'Unified jobs {job_ids} were reaped on dispatch startup')
@@ -1087,9 +1084,7 @@ def _process_startup_jobs(this_inst):
                 reaper.reap_job(
                     j,
                     'failed',
-                    job_explanation=reap_explanation(
-                        j, 'Task was marked as running at system start up. The system must have not shut down properly, so it has been marked as failed.'
-                    ),
+                    job_explanation='Task was marked as running at system start up. The system must have not shut down properly, so it has been marked as failed.',
                 )
         except Exception:
             logger.exception(f'Failed processing job {j.id} in startup job loop')
@@ -1132,7 +1127,7 @@ def _process_running_jobs(this_inst, active_task_ids, ref_time):
             if action == JobAction.ADOPT:
                 _dispatch_adoption(j)
             elif action == JobAction.REAP:
-                reaper.reap_job(j, 'failed', job_explanation=reap_explanation(j))
+                reaper.reap_job(j, 'failed')
         except Exception:
             logger.exception(f'Failed processing job {j.id} in heartbeat job loop')
 

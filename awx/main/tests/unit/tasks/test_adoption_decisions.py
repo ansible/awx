@@ -14,7 +14,6 @@ from awx.main.tasks.adoption_decisions import (
     find_lost_instances,
     live_controller_hostnames,
     mesh_hostnames,
-    reap_explanation,
     routed_hostnames,
     room_for_another_controllers_job,
     drop_mesh_connected_control_nodes,
@@ -218,17 +217,6 @@ class TestLostInstanceDecisions:
     def test_started_job_that_never_got_a_work_unit_is_reaped(self, work_unit_id):
         assert self.decide(make_job(controller_node=PEER, work_unit_id=work_unit_id)) == JobAction.REAP
 
-    @pytest.mark.parametrize('job_fields', [{'started': None}, {}])
-    def test_job_submitted_to_receptor_without_a_saved_work_unit_is_reaped_with_a_warning(self, job_fields):
-        # receptor may have started the unit before the controller died, so the playbook may still run.
-        job = make_job(controller_node=PEER, work_unit_id='', **job_fields)
-        assert self.decide(job) == JobAction.REAP
-        assert f'may still be running on {EXEC}' in reap_explanation(job, 'default')
-
-    def test_reap_explanation_warns_when_submission_outcome_is_unknown(self):
-        assert 'may still be running' in reap_explanation(make_job(work_unit_id=''), 'default')
-        assert reap_explanation(make_job(), 'default') == 'default'
-
     def test_capacity_is_asked_only_for_a_job_that_would_be_adopted(self):
         def slot_available():
             raise AssertionError('capacity was read for a job that is reaped anyway')
@@ -381,9 +369,6 @@ class TestRunningJobAction:
     def test_running_orphan_that_never_got_a_work_unit_is_reaped(self, work_unit_id):
         # Not put back to pending: a running job has already sent its 'running' notifications.
         assert self.decide(make_job(work_unit_id=work_unit_id, execution_node='')) == JobAction.REAP
-
-    def test_running_orphan_submitted_to_receptor_without_a_saved_work_unit_is_reaped(self):
-        assert self.decide(make_job(work_unit_id='', execution_node='')) == JobAction.REAP
 
     def test_orphan_this_instance_only_executes_is_left_to_the_sweep(self):
         # A dispatched job this instance only executes, for a controller that isn't live: this

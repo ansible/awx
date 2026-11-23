@@ -34,7 +34,6 @@ from awx.main.dispatch.reaper import reap_job
 from awx.main.models import UnifiedJob
 from awx.main.scheduler.kubernetes import PodManager
 from awx.main.tasks.adoption import invoke_adoption_hooks
-from awx.main.tasks.adoption_decisions import reap_explanation
 from awx.main.tasks.receptor import (
     ReceptorWork,
     AWXReceptorJob,
@@ -466,7 +465,7 @@ def _adopt_absent_pod_job(job, clock, owner_task_id=None):
         return True
     if not job.work_unit_id and not job.cancel_flag:
         # The controller died before it created the pod, so nothing ran and nothing will appear.
-        reap_job(job, 'failed', job_explanation=reap_explanation(job, 'Job pod was never created before its controller was lost.'), owner_task_id=owner_task_id)
+        reap_job(job, 'failed', job_explanation='Job pod was never created before its controller was lost.', owner_task_id=owner_task_id)
         return True
     # Deferred for one of two reasons, both of which need the pod to be looked at again rather than
     # failed here. With a work unit the pod may simply not have been created yet when the controller
@@ -517,9 +516,8 @@ def adopt_container_group_job(job, receptor_ctl=None, owner_task_id=None, clock=
             # the pod behind would leak it with nothing left to delete it.
             logger.warning(f'{job.log_format}: wedged pod {pod_name} could not be deleted, deferring')
             return False
-        # No reap_explanation: the worker wedged before its private data dir existed, so no playbook
-        # can be running and there is nothing to warn about. The pod is deleted first, so a crash
-        # between the two leaves an ABSENT pod, which the next triage settles on the pod-absent budget.
+        # The pod is deleted first, so a crash between the two leaves an ABSENT pod, which the next
+        # triage settles on the pod-absent budget.
         reap_job(job, 'failed', job_explanation='Job pod never received its private data dir before its controller was lost.', owner_task_id=owner_task_id)
         return True
 
