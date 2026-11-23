@@ -3437,7 +3437,12 @@ class CredentialInputSourceSerializer(CleanTextMixin, BaseSerializer):
     class Meta:
         model = CredentialInputSource
         fields = ('*', 'input_field_name', 'metadata', 'target_credential', 'source_credential', '-name')
-        extra_kwargs = {'input_field_name': {'required': True}, 'target_credential': {'required': True}, 'source_credential': {'required': True}}
+        extra_kwargs = {
+            'input_field_name': {'required': True},
+            # DRF infers a None default for the nullable field in the unique constraint.
+            'target_credential': {'required': True, 'default': serializers.empty},
+            'source_credential': {'required': True},
+        }
 
     def get_related(self, obj):
         res = super(CredentialInputSourceSerializer, self).get_related(obj)
