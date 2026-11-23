@@ -15,6 +15,7 @@ Have questions about this document or anything not covered here? Create a topic 
   - [Build and Run the Development Environment](#build-and-run-the-development-environment)
     - [Fork and clone the AWX repo](#fork-and-clone-the-awx-repo)
   - [Building API Documentation](#building-api-documentation)
+  - [Making API changes](#making-api-changes)
   - [Accessing the AWX web interface](#accessing-the-awx-web-interface)
   - [Purging containers and images](#purging-containers-and-images)
   - [Pre commit hooks](#pre-commit-hooks)
@@ -86,6 +87,10 @@ AWX includes support for building [Swagger/OpenAPI documentation](https://swagge
 ```
 
 This will write a file named `swagger.json` that contains the API specification in OpenAPI format. A variety of online tools are available for translating this data into more consumable formats (such as HTML). http://editor.swagger.io is an example of one such service.
+
+### Making API changes
+
+If your change modifies the REST API, additional CI checks apply: breaking change detection (oasdiff), changelog fragment enforcement, and schema drift detection. You will need to regenerate and commit the committed OpenAPI spec (`openapi.yaml`) and, for consumer-visible changes, add a changelog fragment. See [Making API changes](https://github.com/ansible/awx/blob/devel/docs/docsite/rst/contributor/api-changes.rst) in the contributor guide for the full workflow.
 
 ### Accessing the AWX web interface
 

@@ -20,4 +20,5 @@ Need help or want to discuss AWX including the documentation? See the :ref:`Comm
    communication
    setting_up
    work_items
+   api-changes
    report_issues
