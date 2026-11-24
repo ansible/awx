@@ -43,6 +43,9 @@ from django.apps import apps
 # AWX
 from awx.conf.license import get_license
 
+# ansible-runner
+from ansible_runner.utils.capacity import get_mem_in_bytes, get_cpu_count
+
 logger = logging.getLogger('awx.main.utils')
 
 __all__ = [
@@ -90,6 +93,7 @@ __all__ = [
     'get_event_partition_epoch',
     'cleanup_new_process',
     'unified_job_class_to_event_table_name',
+    'get_job_variable_prefixes',
 ]
 
 
@@ -145,14 +149,6 @@ def is_testing(argv=None):
     elif len(argv) >= 2 and argv[1] == 'test':
         return True
     return False
-
-
-def bypass_in_test(func):
-    def fn(*args, **kwargs):
-        if not is_testing():
-            return func(*args, **kwargs)
-
-    return fn
 
 
 class RequireDebugTrueOrTest(logging.Filter):
@@ -337,16 +333,16 @@ def update_scm_url(scm_type, url, username=True, password=True, check_special_ca
             netloc_password = ''
 
     if netloc_username and parts.scheme != 'file' and scm_type not in ("insights", "archive"):
-        netloc = u':'.join([urllib.parse.quote(x, safe='') for x in (netloc_username, netloc_password) if x])
+        netloc = ':'.join([urllib.parse.quote(x, safe='') for x in (netloc_username, netloc_password) if x])
     else:
-        netloc = u''
+        netloc = ''
     # urllib.parse strips brackets from IPv6 addresses, so we need to add them back in
     hostname = parts.hostname
     if hostname and ':' in hostname and '[' in url and ']' in url:
         hostname = f'[{hostname}]'
-    netloc = u'@'.join(filter(None, [netloc, hostname]))
+    netloc = '@'.join(filter(None, [netloc, hostname]))
     if parts.port:
-        netloc = u':'.join([netloc, str(parts.port)])
+        netloc = ':'.join([netloc, str(parts.port)])
     new_url = urllib.parse.urlunsplit([parts.scheme, netloc, parts.path, parts.query, parts.fragment])
     if scp_format and parts.scheme == 'git+ssh':
         new_url = new_url.replace('git+ssh://', '', 1).replace('/', ':', 1)
@@ -382,7 +378,7 @@ def _convert_model_field_for_display(obj, field_name, password_fields=None):
     if password_fields is None:
         password_fields = set(getattr(type(obj), 'PASSWORD_FIELDS', [])) | set(['password'])
     if field_name in password_fields or (isinstance(field_val, str) and field_val.startswith('$encrypted$')):
-        return u'hidden'
+        return 'hidden'
     if hasattr(obj, 'display_%s' % field_name):
         field_val = getattr(obj, 'display_%s' % field_name)()
     if isinstance(field_val, (list, dict)):
@@ -596,18 +592,18 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
         4: {'edit': True, 'start': True},
         6: {'edit': False, 'start': False}
     }
-    Each capability is produced for all items in the page in a single query
+    Each capability is produced for all items in the page in a single query.
 
-    Examples of prefetch language:
-    prefetch_list = ['admin', 'execute']
-      --> prefetch the admin (edit) and execute (start) permissions for
+    Examples of prefetch language (permission-based):
+    prefetch_list = [{'edit': 'change'}, {'start': 'execute'}]
+      --> prefetch change (edit) and execute (start) permissions for
           items in list for current user
-    prefetch_list = ['inventory.admin']
-      --> prefetch the related inventory FK permissions for current user,
+    prefetch_list = [{'edit': 'inventory.change'}]
+      --> prefetch related inventory FK change permissions for current user,
           and put it into the object's cache
-    prefetch_list = [{'copy': ['inventory.admin', 'project.admin']}]
-      --> prefetch logical combination of admin permission to inventory AND
-          project, put into cache dictionary as "copy"
+    prefetch_list = [{'copy': ['inventory.use', 'project.use']}]
+      --> prefetch logical combination of use permission to inventory AND
+          project, put into cache dictionary as 'copy'
     """
     page_ids = [obj.id for obj in page]
     mapping = {}
@@ -625,29 +621,28 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
         if type(paths) is not list:
             paths = [paths]
 
-        # Build the query for accessible_objects according the user & role(s)
+        # Build the query for access_qs according the user & permission(s)
         filter_args = []
-        for role_path in paths:
-            if '.' in role_path:
-                res_path = '__'.join(role_path.split('.')[:-1])
-                role_type = role_path.split('.')[-1]
+        for perm_path in paths:
+            if '.' in perm_path:
+                res_path = '__'.join(perm_path.split('.')[:-1])
+                action = perm_path.split('.')[-1]
                 parent_model = model
-                for subpath in role_path.split('.')[:-1]:
+                for subpath in perm_path.split('.')[:-1]:
                     parent_model = parent_model._meta.get_field(subpath).related_model
-                filter_args.append(
-                    Q(Q(**{'%s__pk__in' % res_path: parent_model.accessible_pk_qs(user, '%s_role' % role_type)}) | Q(**{'%s__isnull' % res_path: True}))
-                )
+                access_qs = parent_model.access_qs(user, action)
+                filter_args.append(Q(Q(**{'%s__in' % res_path: access_qs}) | Q(**{'%s__isnull' % res_path: True})))
             else:
-                role_type = role_path
-                filter_args.append(Q(**{'pk__in': model.accessible_pk_qs(user, '%s_role' % role_type)}))
+                action = perm_path
+                if hasattr(model, 'access_qs'):
+                    filter_args.append(Q(**{'pk__in': model.access_qs(user, action)}))
+                else:
+                    # UnifiedJobTemplate is not registered with the permission registry,
+                    # so it only has access_ids_qs (not access_qs)
+                    filter_args.append(Q(**{'pk__in': model.access_ids_qs(user, action)}))
 
         if display_method is None:
-            # Role name translation to UI names for methods
-            display_method = role_type
-            if role_type == 'admin':
-                display_method = 'edit'
-            elif role_type in ['execute', 'update']:
-                display_method = 'start'
+            display_method = action
 
         # Union that query with the list of items on page
         filter_args.append(Q(pk__in=page_ids))
@@ -768,6 +763,21 @@ def get_cpu_effective_capacity(cpu_count, is_control_node=False):
         forkcpu = 4
 
     return max(1, int(cpu_count * forkcpu))
+
+
+def get_job_variable_prefixes():
+    """Return the list of active job variable prefixes based on INCLUDE_DEPRECATED_AWX_VAR_PREFIX setting.
+
+    When True (default), returns both 'awx' and 'tower' prefixes for backward compatibility.
+    When False, returns only 'tower'. The 'awx' prefix is deprecated and this setting
+    will default to False in a future release.
+    """
+    from django.conf import settings
+
+    include_awx = getattr(settings, 'INCLUDE_DEPRECATED_AWX_VAR_PREFIX', True)
+    if include_awx:
+        return ['awx', 'tower']
+    return ['tower']
 
 
 def convert_mem_str_to_bytes(mem_str):
@@ -997,9 +1007,15 @@ def getattrd(obj, name, default=NoDefaultProvided):
         raise
 
 
-def getattr_dne(obj, name, notfound=ObjectDoesNotExist):
+empty = object()
+
+
+def getattr_dne(obj, name, default=empty, notfound=ObjectDoesNotExist):
     try:
-        return getattr(obj, name)
+        if default is empty:
+            return getattr(obj, name)
+        else:
+            return getattr(obj, name, default)
     except notfound:
         return None
 
@@ -1109,15 +1125,15 @@ def truncate_stdout(stdout, size):
     if size <= 0 or len(stdout) <= size:
         return stdout
 
-    stdout = stdout[: (size - 1)] + u'\u2026'
+    stdout = stdout[: (size - 1)] + '\u2026'
     set_count, reset_count = 0, 0
     for m in ANSI_SGR_PATTERN.finditer(stdout):
-        if m.group() == u'\u001b[0m':
+        if m.group() == '\u001b[0m':
             reset_count += 1
         else:
             set_count += 1
 
-    return stdout + u'\u001b[0m' * (set_count - reset_count)
+    return stdout + '\u001b[0m' * (set_count - reset_count)
 
 
 def deepmerge(a, b):
@@ -1220,3 +1236,38 @@ def unified_job_class_to_event_table_name(job_class):
 
 def load_all_entry_points_for(entry_point_subsections: list[str], /) -> dict[str, EntryPoint]:
     return {ep.name: ep for entry_point_category in entry_point_subsections for ep in entry_points(group=f'awx_plugins.{entry_point_category}')}
+
+
+def get_auto_max_workers():
+    """Method we normally rely on to get max_workers
+
+    Uses almost same logic as Instance.local_health_check
+    The important thing is to be MORE than Instance.capacity
+    so that the task-manager does not over-schedule this node
+
+    Ideally we would just use the capacity from the database plus reserve workers,
+    but this poses some bootstrap problems where OCP task containers
+    register themselves after startup
+    """
+    # Get memory from ansible-runner
+    total_memory_gb = get_mem_in_bytes()
+
+    # This may replace memory calculation with a user override
+    corrected_memory = get_corrected_memory(total_memory_gb)
+
+    # Get same number as max forks based on memory, this function takes memory as bytes
+    mem_capacity = get_mem_effective_capacity(corrected_memory, is_control_node=True)
+
+    # Follow same process for CPU capacity constraint
+    cpu_count = get_cpu_count()
+    corrected_cpu = get_corrected_cpu(cpu_count)
+    cpu_capacity = get_cpu_effective_capacity(corrected_cpu, is_control_node=True)
+
+    # Here is what is different from health checks,
+    auto_max = max(mem_capacity, cpu_capacity)
+
+    # add magic number of extra workers to ensure
+    # we have a few extra workers to run the heartbeat
+    auto_max += 7
+
+    return auto_max

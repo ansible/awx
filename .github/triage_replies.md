@@ -70,10 +70,10 @@ Thank you for your submission and for supporting AWX!
 - Hello, we'd love to help, but we need a little more information about the problem you're having. Screenshots, log outputs, or any reproducers would be very helpful.
 
 ### Code of Conduct
-- Hello. Please keep in mind that Ansible adheres to a Code of Conduct in its community spaces. The spirit of the code of conduct is to be kind, and this is your friendly reminder to be so. Please see the full code of conduct here if you have questions: https://docs.ansible.com/ansible/latest/community/code_of_conduct.html
+- Hello. Please keep in mind that Ansible adheres to a Code of Conduct in its community spaces. The spirit of the code of conduct is to be kind, and this is your friendly reminder to be so. Please see the full code of conduct here if you have questions: https://docs.ansible.com/projects/ansible/latest/community/code_of_conduct.html
 
 ### EE Contents / Community General
-- Hello. The awx-ee contains the collections and dependencies needed for supported AWX features to function. Anything beyond that (like the community.general package) will require you to build your own EE. For information on how to do that, see https://ansible-builder.readthedocs.io/en/stable/ \
+- Hello. The awx-ee contains the collections and dependencies needed for supported AWX features to function. Anything beyond that (like the community.general package) will require you to build your own EE. For information on how to do that, see https://docs.ansible.com/projects/builder/en/stable/ \
 \
 The Ansible Community is looking at building an EE that corresponds to all of the collections inside the ansible package. That may help you if and when it happens; see https://github.com/ansible-community/community-topics/issues/31 for details.
 
@@ -88,7 +88,7 @@ The Ansible Community is looking at building an EE that corresponds to all of th
 - Hello, we think your idea is good! Please consider contributing a PR for this following our contributing guidelines: https://github.com/ansible/awx/blob/devel/CONTRIBUTING.md
 
 ### Receptor
-- You can find the receptor docs here: https://receptor.readthedocs.io/en/latest/
+- You can find the receptor docs here: https://docs.ansible.com/projects/receptor/en/latest/
 - Hello, your issue seems related to receptor. Could you please open an issue in the receptor repository? https://github.com/ansible/receptor. Thanks!
 
 ### Ansible Engine not AWX

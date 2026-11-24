@@ -33,7 +33,6 @@ from awx.main.notifications.rocketchat_backend import RocketChatBackend
 from awx.main.notifications.irc_backend import IrcBackend
 from awx.main.notifications.awssns_backend import AWSSNSBackend
 
-
 logger = logging.getLogger('awx.main.models.notifications')
 
 __all__ = ['NotificationTemplate', 'Notification']
@@ -100,7 +99,7 @@ class NotificationTemplate(CommonModelNameNotUnique):
 
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
-        update_fields = kwargs.get('update_fields', [])
+        update_fields = kwargs.get('update_fields') or []
 
         # preserve existing notification messages if not overwritten by new messages
         if not new_instance:
@@ -528,7 +527,7 @@ class JobNotificationMixin(object):
             return
 
         for nt in set(notification_templates.get(self.STATUS_TO_TEMPLATE_TYPE[status], [])):
-            (msg, body) = self.build_notification_message(nt, status)
+            msg, body = self.build_notification_message(nt, status)
 
             # Use kwargs to force late-binding
             # https://stackoverflow.com/a/3431699/10669572

@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 from awx.main.models.credential import ManagedCredentialType, CredentialType as ModernCredentialType
 
-
 logger = logging.getLogger(__name__)
 
 

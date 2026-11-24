@@ -17,9 +17,7 @@ def upload_inventory(ansible_runner, nhosts=10, ini=False):
         copy_content = '''#!/bin/bash
 cat <<EOF
 %s
-EOF''' % json_inventory(
-            nhosts
-        )
+EOF''' % json_inventory(nhosts)
 
     # Copy script to test system
     contacted = ansible_runner.copy(dest=copy_dest, force=True, mode=copy_mode, content=copy_content)

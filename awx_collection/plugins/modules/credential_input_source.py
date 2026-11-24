@@ -93,7 +93,15 @@ def main():
     metadata = module.params.get('metadata')
     state = module.params.get('state')
 
-    target_credential_id = module.resolve_name_to_id('credentials', target_credential)
+    # The target credential lookup should not fail if the target credential is absent and the
+    # state on the credential input source is also absent. If the credential input source has a
+    # state of present, then this should fail as the target credential cannot be nonexistent.
+    target_credential_lookup = module.get_one('credentials', name_or_id=target_credential, allow_none=(state == 'absent'))
+
+    if target_credential_lookup is None:
+        module.exit_json(**{'changed': False})
+    else:
+        target_credential_id = target_credential_lookup['id']
 
     # Attempt to look up the object based on the target credential and input field
     lookup_data = {

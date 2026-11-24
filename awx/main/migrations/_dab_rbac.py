@@ -13,7 +13,6 @@ from awx.main.constants import role_name_to_perm_mapping
 
 from ansible_base.rbac.permission_registry import permission_registry
 
-
 logger = logging.getLogger('awx.main.migrations._dab_rbac')
 
 
@@ -194,7 +193,7 @@ def migrate_to_new_rbac(apps, schema_editor):
     # NOTE: this import is expected to break at some point, and then just move the data here
     from awx.main.models.rbac import role_descriptions
 
-    for role in Role.objects.prefetch_related('members', 'parents').iterator():
+    for role in Role.objects.prefetch_related('members', 'parents').iterator(chunk_size=1000):
         if role.singleton_name:
             continue  # only bothering to migrate object roles
 
@@ -269,7 +268,7 @@ def migrate_to_new_rbac(apps, schema_editor):
     if old_system_auditor:
         # if the system auditor role is not present, this is a new install and no users should exist
         ct = 0
-        for user in role.members.all():
+        for user in old_system_auditor.members.all():
             RoleUserAssignment.objects.create(user=user, role_definition=new_system_auditor)
             ct += 1
         if ct:
@@ -423,7 +422,11 @@ def setup_managed_role_definitions(apps, schema_editor):
         )
     )
 
-    unexpected_role_definitions = RoleDefinition.objects.filter(managed=True).exclude(pk__in=[rd.pk for rd in managed_role_definitions])
+    unexpected_role_definitions = (
+        RoleDefinition.objects.filter(managed=True)
+        .exclude(pk__in=[rd.pk for rd in managed_role_definitions])
+        .exclude(name__in=settings.ANSIBLE_BASE_JWT_MANAGED_ROLES)
+    )
     for role_definition in unexpected_role_definitions:
         logger.info(f'Deleting old managed role definition {role_definition.name}, pk={role_definition.pk}')
         role_definition.delete()

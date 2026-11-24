@@ -23,7 +23,7 @@ def test_encrypt_field_without_pk():
 
 
 def test_encrypt_field_with_unicode_string():
-    value = u'Iñtërnâtiônàlizætiøn'
+    value = 'Iñtërnâtiônàlizætiøn'
     field = Setting(value=value)
     encrypted = field.value = encryption.encrypt_field(field, 'value')
     assert encryption.decrypt_field(field, 'value') == value

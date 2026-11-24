@@ -8,7 +8,6 @@ LOCAL_SETTINGS = (
     'CACHES',
     'DEBUG',
     'NAMED_URL_GRAPH',
-    'DISPATCHER_MOCK_PUBLISH',
 )
 
 
@@ -28,7 +27,7 @@ def test_default_settings():
             continue
         default_val = getattr(settings.default_settings, k, None)
         snapshot_val = settings.DEFAULTS_SNAPSHOT[k]
-        assert default_val == snapshot_val, f'Setting for {k} does not match shapshot:\nsnapshot: {snapshot_val}\ndefault: {default_val}'
+        assert default_val == snapshot_val, f'Setting for {k} does not match snapshot:\nsnapshot: {snapshot_val}\ndefault: {default_val}'
 
 
 def test_django_conf_settings_is_awx_settings():

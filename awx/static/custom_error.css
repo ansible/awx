@@ -28,7 +28,6 @@ body {
 .upper_div {
     background-color: #F8EBA7;
     justify-content: center;
-    align-items: center;
     text-align: center;
     height: 50%;
     align-items: flex-end;
@@ -48,7 +47,7 @@ body {
     right: 90px;
     font-size:200px;
     color: #FDBA48;
-    font-family: Impact, Haettenschweiler, "Franklin Gothic Bold", Charcoal, "Helvetica Inserat", "Bitstream Vera Sans Bold", "Arial Black", "sans serif";
+    font-family: Impact, Haettenschweiler, "Franklin Gothic Bold", Charcoal, "Helvetica Inserat", "Bitstream Vera Sans Bold", "Arial Black", sans-serif;
 }
 
 .message_div {
@@ -62,7 +61,7 @@ body {
 .m1,.m2,.m3 {
     color: #151515;
     width: 100%;
-    font-family: redhat-display-medium;
+    font-family: redhat-display-medium, sans-serif;
 }
 
 .m1 {
@@ -78,5 +77,5 @@ body {
 .m3 {
     font-size: 16px;
     padding-top: 20px;
-    font-family: redhat-display-regular;
+    font-family: redhat-display-regular, sans-serif;
 }

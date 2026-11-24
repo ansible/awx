@@ -1,6 +1,7 @@
 import sys
 import os
 import shlex
+import warnings
 
 from datetime import datetime
 from importlib import import_module
@@ -8,10 +9,10 @@ from importlib import import_module
 sys.path.insert(0, os.path.abspath('./rst/rest_api/_swagger'))
 
 project = u'Ansible AWX'
-copyright = u'2024, Red Hat'
+copyright = u'2026, Red Hat'
 author = u'Red Hat'
 
-pubdateshort = '2024-11-22'
+pubdateshort = '2026-01-07'
 pubdate = datetime.strptime(pubdateshort, '%Y-%m-%d').strftime('%B %d, %Y')
 
 # The name for this set of Sphinx documents.  If None, it defaults to
@@ -35,6 +36,7 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.ifconfig',
     'sphinx_ansible_theme',
+    'sphinxcontrib.redoc',
     'notfound.extension',
     'swagger',
 ]
@@ -60,6 +62,27 @@ language = 'en'
 
 locale_dirs = ['locale/']  # path is example but recommended.
 gettext_compact = False  # optional.
+
+redoc = [
+    {
+        'name': 'AWX OpenAPI Reference',
+        'page': 'open_api/explorer',
+        'spec': 'rst/open_api/schema.json',
+        'embed': True,
+        'opts': {
+            'suppress-warnings': True,
+            'hide-hostname': True,
+        }
+    }
+]
+
+# Suppress pkg_resources deprecation from sphinxcontrib-redoc
+warnings.filterwarnings(
+    'ignore',
+    message='pkg_resources is deprecated',
+    category=UserWarning,
+    module='sphinxcontrib.redoc',
+)
 
 rst_epilog = """
 .. |atapi| replace:: *AWX API Guide*
@@ -89,3 +112,4 @@ rst_epilog = """
     pubdateshort,
     pubdate,
 )
+

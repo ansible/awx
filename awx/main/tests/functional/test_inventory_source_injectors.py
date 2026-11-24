@@ -230,9 +230,9 @@ def test_inventory_update_injected_content(product_name, this_kind, inventory, f
 
         # Assert inventory plugin inventory file is in private_data_dir
         inventory_filename = InventorySource.injectors[inventory_update.source]().filename
-        assert (
-            len([True for k in content.keys() if k.endswith(inventory_filename)]) > 0
-        ), f"'{inventory_filename}' file not found in inventory update runtime files {content.keys()}"
+        assert len([True for k in content.keys() if k.endswith(inventory_filename)]) > 0, (
+            f"'{inventory_filename}' file not found in inventory update runtime files {content.keys()}"
+        )
 
         env.pop('ANSIBLE_COLLECTIONS_PATH', None)
         base_dir = os.path.join(DATA, 'plugins')

@@ -48,6 +48,12 @@ def create_clearsessions_jt(apps, schema_editor):
 
 def delete_clear_tokens_sjt(apps, schema_editor):
     SystemJobTemplate = apps.get_model('main', 'SystemJobTemplate')
+    Schedule = apps.get_model('main', 'Schedule')
+    UnifiedJobTemplate = apps.get_model('main', 'UnifiedJobTemplate')
     for sjt in SystemJobTemplate.objects.filter(job_type='cleanup_tokens'):
         logger.info(f'Deleting system job template id={sjt.id} due to removal of local OAuth2 tokens')
+        schedule_ids = list(Schedule.objects.filter(unified_job_template_id=sjt.pk).values_list('pk', flat=True))
+        if schedule_ids:
+            UnifiedJobTemplate.objects.filter(next_schedule_id__in=schedule_ids).update(next_schedule=None)
+            Schedule.objects.filter(pk__in=schedule_ids).delete()
         sjt.delete()

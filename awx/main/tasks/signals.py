@@ -2,7 +2,6 @@ import signal
 import functools
 import logging
 
-
 logger = logging.getLogger('awx.main.tasks.signals')
 
 
@@ -70,7 +69,7 @@ def signal_callback():
 
 def with_signal_handling(f):
     """
-    Change signal handling to make signal_callback return True in event of SIGTERM or SIGINT.
+    Change signal handling to make signal_callback return True in event of SIGTERM, SIGINT, or SIGUSR1.
     """
 
     @functools.wraps(f)

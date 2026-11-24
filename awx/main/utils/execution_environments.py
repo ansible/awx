@@ -4,7 +4,6 @@ from django.conf import settings
 
 from awx.main.models.execution_environments import ExecutionEnvironment
 
-
 logger = logging.getLogger(__name__)
 
 

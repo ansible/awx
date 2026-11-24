@@ -1,0 +1,102 @@
+---
+name: API Schema Change Detection
+env:
+  LC_ALL: "C.UTF-8" # prevent ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
+  CI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  DEV_DOCKER_OWNER: ${{ github.repository_owner }}
+  COMPOSE_TAG: ${{ github.base_ref || 'devel' }}
+  UPSTREAM_REPOSITORY_ID: 91594105
+
+on:
+  pull_request:
+    branches:
+      - devel
+      - release_**
+      - feature_**
+      - stable-**
+
+jobs:
+  api-schema-detection:
+    name: Detect API Schema Changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+          fetch-depth: 0  
+
+      - name: Build awx_devel image for schema check
+        uses: ./.github/actions/awx_devel_image
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          private-github-key: ${{ secrets.PRIVATE_GITHUB_KEY }}
+
+      - name: Detect API schema changes
+        id: schema-check
+        continue-on-error: true
+        run: |
+          AWX_DOCKER_ARGS='-e GITHUB_ACTIONS' \
+          AWX_DOCKER_CMD='make detect-schema-change SCHEMA_DIFF_BASE_BRANCH=${{ github.event.pull_request.base.ref }}' \
+          make docker-runner 2>&1 | tee schema-diff.txt
+          exit ${PIPESTATUS[0]}
+
+      - name: Validate OpenAPI schema
+        id: schema-validation
+        continue-on-error: true
+        run: |
+          AWX_DOCKER_ARGS='-e GITHUB_ACTIONS' \
+          AWX_DOCKER_CMD='make validate-openapi-schema' \
+          make docker-runner 2>&1 | tee schema-validation.txt
+          exit ${PIPESTATUS[0]}
+
+      - name: Add schema validation and diff to job summary
+        if: always()
+        # show text and if for some reason, it can't be generated, state that it can't be.
+        run: |
+          echo "## API Schema Check Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Show validation status
+          echo "### OpenAPI Validation" >> $GITHUB_STEP_SUMMARY
+          if [ -f schema-validation.txt ] && grep -q "✓ Schema is valid" schema-validation.txt; then
+            echo "✅ **Status:** PASSED - Schema is valid OpenAPI 3.0.3" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Status:** FAILED - Schema validation failed" >> $GITHUB_STEP_SUMMARY
+            if [ -f schema-validation.txt ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "<details><summary>Validation errors</summary>" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              cat schema-validation.txt >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              echo "</details>" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Show schema changes
+          echo "### Schema Changes" >> $GITHUB_STEP_SUMMARY
+          if [ -f schema-diff.txt ]; then
+            if grep -q "^+" schema-diff.txt || grep -q "^-" schema-diff.txt; then
+              echo "**Changes detected** between this PR and the base branch" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              # Truncate to first 1000 lines to stay under GitHub's 1MB summary limit
+              TOTAL_LINES=$(wc -l < schema-diff.txt)
+              if [ $TOTAL_LINES -gt 1000 ]; then
+                echo "_Showing first 1000 of ${TOTAL_LINES} lines. See job logs or download artifact for full diff._" >> $GITHUB_STEP_SUMMARY
+                echo "" >> $GITHUB_STEP_SUMMARY
+              fi
+              echo '```diff' >> $GITHUB_STEP_SUMMARY
+              head -n 1000 schema-diff.txt >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+            else
+              echo "No schema changes detected" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "Unable to generate schema diff" >> $GITHUB_STEP_SUMMARY
+          fi

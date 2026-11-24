@@ -15,7 +15,6 @@ from awx.api.views import (
     WorkflowJobTemplateNodeInstanceGroupsList,
 )
 
-
 urls = [
     re_path(r'^$', WorkflowJobTemplateNodeList.as_view(), name='workflow_job_template_node_list'),
     re_path(r'^(?P<pk>[0-9]+)/$', WorkflowJobTemplateNodeDetail.as_view(), name='workflow_job_template_node_detail'),

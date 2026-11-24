@@ -96,8 +96,8 @@ class TestSurveyVariableValidation:
 def job(mocker):
     ret = mocker.MagicMock(
         **{
-            'decrypted_extra_vars.return_value': '{\"secret_key\": \"my_password\"}',
-            'display_extra_vars.return_value': '{\"secret_key\": \"$encrypted$\"}',
+            'decrypted_extra_vars.return_value': '{"secret_key": "my_password"}',
+            'display_extra_vars.return_value': '{"secret_key": "$encrypted$"}',
             'extra_vars_dict': {"secret_key": "my_password"},
             'pk': 1,
             'job_template.pk': 1,
@@ -176,22 +176,22 @@ def test_display_survey_spec_encrypts_default(survey_spec_factory):
 
 @pytest.mark.survey
 @pytest.mark.parametrize(
-    "question_type,default,min,max,expect_use,expect_value",
+    "question_type,default,min,max,expect_valid,expect_use,expect_value",
     [
-        ("text", "", 0, 0, True, ''),  # default used
-        ("text", "", 1, 0, False, 'N/A'),  # value less than min length
-        ("password", "", 1, 0, False, 'N/A'),  # passwords behave the same as text
-        ("multiplechoice", "", 0, 0, False, 'N/A'),  # historical bug
-        ("multiplechoice", "zeb", 0, 0, False, 'N/A'),  # zeb not in choices
-        ("multiplechoice", "coffee", 0, 0, True, 'coffee'),
-        ("multiselect", None, 0, 0, False, 'N/A'),  # NOTE: Behavior is arguable, value of [] may be prefered
-        ("multiselect", "", 0, 0, False, 'N/A'),
-        ("multiselect", ["zeb"], 0, 0, False, 'N/A'),
-        ("multiselect", ["milk"], 0, 0, True, ["milk"]),
-        ("multiselect", ["orange\nmilk"], 0, 0, False, 'N/A'),  # historical bug
+        ("text", "", 0, 0, True, False, 'N/A'),  # valid but empty default not sent for optional question
+        ("text", "", 1, 0, False, False, 'N/A'),  # value less than min length
+        ("password", "", 1, 0, False, False, 'N/A'),  # passwords behave the same as text
+        ("multiplechoice", "", 0, 0, False, False, 'N/A'),  # historical bug
+        ("multiplechoice", "zeb", 0, 0, False, False, 'N/A'),  # zeb not in choices
+        ("multiplechoice", "coffee", 0, 0, True, True, 'coffee'),
+        ("multiselect", None, 0, 0, False, False, 'N/A'),  # NOTE: Behavior is arguable, value of [] may be prefered
+        ("multiselect", "", 0, 0, False, False, 'N/A'),
+        ("multiselect", ["zeb"], 0, 0, False, False, 'N/A'),
+        ("multiselect", ["milk"], 0, 0, True, True, ["milk"]),
+        ("multiselect", ["orange\nmilk"], 0, 0, False, False, 'N/A'),  # historical bug
     ],
 )
-def test_optional_survey_question_defaults(survey_spec_factory, question_type, default, min, max, expect_use, expect_value):
+def test_optional_survey_question_defaults(survey_spec_factory, question_type, default, min, max, expect_valid, expect_use, expect_value):
     spec = survey_spec_factory(
         [
             {
@@ -208,7 +208,7 @@ def test_optional_survey_question_defaults(survey_spec_factory, question_type, d
     jt = JobTemplate(name="test-jt", survey_spec=spec, survey_enabled=True)
     defaulted_extra_vars = jt._update_unified_job_kwargs({}, {})
     element = spec['spec'][0]
-    if expect_use:
+    if expect_valid:
         assert jt._survey_element_validation(element, {element['variable']: element['default']}) == []
     else:
         assert jt._survey_element_validation(element, {element['variable']: element['default']})
@@ -216,6 +216,28 @@ def test_optional_survey_question_defaults(survey_spec_factory, question_type, d
         assert json.loads(defaulted_extra_vars['extra_vars'])['c'] == expect_value
     else:
         assert 'c' not in defaulted_extra_vars['extra_vars']
+
+
+@pytest.mark.survey
+def test_optional_survey_empty_default_with_runtime_extra_var(survey_spec_factory):
+    """When a user explicitly provides an empty string at runtime for an optional
+    survey question, the variable should still be included in extra_vars."""
+    spec = survey_spec_factory(
+        [
+            {
+                "required": False,
+                "default": "",
+                "choices": "",
+                "variable": "c",
+                "min": 0,
+                "max": 0,
+                "type": "text",
+            },
+        ]
+    )
+    jt = JobTemplate(name="test-jt", survey_spec=spec, survey_enabled=True)
+    defaulted_extra_vars = jt._update_unified_job_kwargs({}, {'extra_vars': json.dumps({'c': ''})})
+    assert json.loads(defaulted_extra_vars['extra_vars'])['c'] == ''
 
 
 @pytest.mark.survey
@@ -291,7 +313,7 @@ class TestWorkflowSurveys:
         ({'tmpl_var': 'bar2'}, False),  # different value from template, not okay
         ({'tmpl_var': 'bar', 'a': 2}, False),  # extra key, not okay
         ({'tmpl_var': 'bar', False: 2}, False),  # Falsy key
-        ({'tmpl_var': 'bar', u'🐉': u'🐉'}, False),  # dragons
+        ({'tmpl_var': 'bar', '🐉': '🐉'}, False),  # dragons
     ],
 )
 class TestExtraVarsNoPrompt:

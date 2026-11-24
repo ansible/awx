@@ -487,7 +487,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='role',
             name='ancestors',
-            field=models.ManyToManyField(related_name='descendents', through='main.RoleAncestorEntry', to='main.Role'),
+            field=models.ManyToManyField(
+                related_name='descendents', through='main.RoleAncestorEntry', through_fields=('descendent', 'ancestor'), to='main.Role'
+            ),
         ),
         migrations.AlterIndexTogether(
             name='role',

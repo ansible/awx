@@ -14,7 +14,6 @@ from awx.api.views import (
     SystemJobTemplateNotificationTemplatesSuccessList,
 )
 
-
 urls = [
     re_path(r'^$', SystemJobTemplateList.as_view(), name='system_job_template_list'),
     re_path(r'^(?P<pk>[0-9]+)/$', SystemJobTemplateDetail.as_view(), name='system_job_template_detail'),

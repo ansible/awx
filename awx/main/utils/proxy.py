@@ -5,7 +5,6 @@
 # DRF
 from rest_framework.request import Request
 
-
 """
 Note that these methods operate on request.environ. This data is from uwsgi.
 It is the source data from which request.headers (read-only) is constructed.

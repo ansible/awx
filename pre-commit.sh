@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-if [ -z $AWX_IGNORE_BLACK ] ; then
+if [ -z "$AWX_IGNORE_BLACK" ] && [ -z "$AWX_IGNORE_RUFF" ] ; then
 	python_files_changed=$(git diff --cached --name-only --diff-filter=AM awx/ awxkit/ tools/ | grep -E '\.py$')
 	if [ "x$python_files_changed" != "x" ] ; then
-        	black --check $python_files_changed || \
+		ruff format --check $python_files_changed || \
 		if [ $? != 0 ] ; then
-        		echo 'To fix this, run `make black` to auto-format your code prior to commit, or set AWX_IGNORE_BLACK=1'
-        		exit 1
+			echo 'To fix this, run `make format` to auto-format your code prior to commit, or set AWX_IGNORE_RUFF=1'
+			exit 1
 		fi
 	fi
 fi

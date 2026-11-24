@@ -7,7 +7,6 @@ from rest_framework import serializers
 # AWX
 from awx.conf import fields, register, register_validate
 
-
 register(
     'SESSION_COOKIE_AGE',
     field_class=fields.IntegerField,

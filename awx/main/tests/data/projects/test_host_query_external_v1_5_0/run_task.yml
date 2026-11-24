@@ -1,0 +1,8 @@
+---
+- hosts: all
+  gather_facts: false
+  connection: local
+  tasks:
+    - demo.external.example:
+      register: result
+    - debug: var=result

@@ -9,7 +9,7 @@ except ImportError:
 SOSREPORT_CONTROLLER_COMMANDS = [
     "awx-manage --version",  # controller version
     "awx-manage list_instances",  # controller cluster configuration
-    "awx-manage run_dispatcher --status",  # controller dispatch worker status
+    "awx-manage dispatcherctl status",  # controller dispatch comprehensive status
     "awx-manage run_callback_receiver --status",  # controller callback worker status
     "awx-manage check_license --data",  # controller license status
     "awx-manage run_wsrelay --status",  # controller websocket relay status

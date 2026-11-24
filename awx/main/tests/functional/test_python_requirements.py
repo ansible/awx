@@ -64,7 +64,7 @@ def test_env_matches_requirements_txt():
         if skip_line(x):
             continue
         x = x.lower()
-        (pkg_name, pkg_version) = x.split('==')
+        pkg_name, pkg_version = x.split('==')
         reqs_actual.append([pkg_name, pkg_version])
 
     reqs_expected = []
@@ -80,7 +80,7 @@ def test_env_matches_requirements_txt():
             Special case pkg_name[pkg_subname]==version
             For this case, we strip out [pkg_subname]
             '''
-            (pkg_name, pkg_version) = line.split('==')
+            pkg_name, pkg_version = line.split('==')
             pkg_name = re.sub(r'\[.*\]', '', pkg_name)
             reqs_expected.append([pkg_name, pkg_version])
 

@@ -9,7 +9,6 @@ from awx.main.models import (
 
 import logging
 
-
 logger = logging.getLogger('awx.main.scheduler.dependency_graph')
 
 

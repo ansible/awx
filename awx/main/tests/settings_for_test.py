@@ -1,14 +1,19 @@
 # Python
+import sys
 import uuid
+
+try:
+    import sqlean
+except ImportError:
+    pass
+else:
+    sys.modules['sqlite3'] = sqlean
 
 # Load development settings for base variables.
 from awx.settings.development import *  # NOQA
 
 # Some things make decisions based on settings.SETTINGS_MODULE, so this is done for that
 SETTINGS_MODULE = 'awx.settings.development'
-
-# Turn off task submission, because sqlite3 does not have pg_notify
-DISPATCHER_MOCK_PUBLISH = True
 
 # Use SQLite for unit tests instead of PostgreSQL.  If the lines below are
 # commented out, Django will create the test_awx-dev database in PostgreSQL to

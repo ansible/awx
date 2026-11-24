@@ -12,6 +12,10 @@ def pytest_sigterm():
     pytest_sigterm.called_count += 1
 
 
+def pytest_sigusr1():
+    pytest_sigusr1.called_count += 1
+
+
 def tmp_signals_for_test(func):
     """
     When we run our internal signal handlers, it will call the original signal
@@ -26,13 +30,17 @@ def tmp_signals_for_test(func):
     def wrapper():
         original_sigterm = signal.getsignal(signal.SIGTERM)
         original_sigint = signal.getsignal(signal.SIGINT)
+        original_sigusr1 = signal.getsignal(signal.SIGUSR1)
         signal.signal(signal.SIGTERM, pytest_sigterm)
         signal.signal(signal.SIGINT, pytest_sigint)
+        signal.signal(signal.SIGUSR1, pytest_sigusr1)
         pytest_sigterm.called_count = 0
         pytest_sigint.called_count = 0
+        pytest_sigusr1.called_count = 0
         func()
         signal.signal(signal.SIGTERM, original_sigterm)
         signal.signal(signal.SIGINT, original_sigint)
+        signal.signal(signal.SIGUSR1, original_sigusr1)
 
     return wrapper
 
@@ -58,11 +66,13 @@ def test_outer_inner_signal_handling():
     assert signal_callback() is False
     assert pytest_sigterm.called_count == 0
     assert pytest_sigint.called_count == 0
+    assert pytest_sigusr1.called_count == 0
     f1()
     assert signal_callback() is False
     assert signal.getsignal(signal.SIGTERM) is original_sigterm
     assert pytest_sigterm.called_count == 1
     assert pytest_sigint.called_count == 0
+    assert pytest_sigusr1.called_count == 0
 
 
 @tmp_signals_for_test
@@ -87,8 +97,31 @@ def test_inner_outer_signal_handling():
     assert signal_callback() is False
     assert pytest_sigterm.called_count == 0
     assert pytest_sigint.called_count == 0
+    assert pytest_sigusr1.called_count == 0
     f1()
     assert signal_callback() is False
     assert signal.getsignal(signal.SIGTERM) is original_sigterm
     assert pytest_sigterm.called_count == 0
     assert pytest_sigint.called_count == 1
+    assert pytest_sigusr1.called_count == 0
+
+
+@tmp_signals_for_test
+def test_sigusr1_signal_handling():
+    @with_signal_handling
+    def f1():
+        assert signal_callback() is False
+        signal_state.set_signal_flag(for_signal=signal.SIGUSR1)
+        assert signal_callback()
+
+    original_sigusr1 = signal.getsignal(signal.SIGUSR1)
+    assert signal_callback() is False
+    assert pytest_sigterm.called_count == 0
+    assert pytest_sigint.called_count == 0
+    assert pytest_sigusr1.called_count == 0
+    f1()
+    assert signal_callback() is False
+    assert signal.getsignal(signal.SIGUSR1) is original_sigusr1
+    assert pytest_sigterm.called_count == 0
+    assert pytest_sigint.called_count == 0
+    assert pytest_sigusr1.called_count == 1

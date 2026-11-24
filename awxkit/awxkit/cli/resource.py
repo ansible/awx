@@ -8,7 +8,6 @@ from awxkit.api.pages.api import EXPORTABLE_RESOURCES
 from awxkit.cli.format import format_response, add_formatting_import_export
 from awxkit.cli.utils import CustomRegistryMeta
 
-
 CONTROL_RESOURCES = ['ping', 'config', 'me', 'metrics', 'mesh_visualizer']
 
 DEPRECATED_RESOURCES = {
@@ -168,7 +167,9 @@ def parse_resource(client, skip_deprecated=False):
                 if k in DEPRECATED_RESOURCES:
                     kwargs['aliases'] = [DEPRECATED_RESOURCES[k]]
 
-            client.subparsers[k] = subparsers.add_parser(k, help='', **kwargs)
+            # Disable automatic help handling for resource subparsers to prevent
+            # premature help display before action subparsers are built
+            client.subparsers[k] = subparsers.add_parser(k, help='', add_help=False, **kwargs)
 
     resource = client.parser.parse_known_args()[0].resource
     if resource in DEPRECATED_RESOURCES.values():

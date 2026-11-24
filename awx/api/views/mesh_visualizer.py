@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 from django.utils.translation import gettext_lazy as _
+from ansible_base.lib.utils.schema import extend_schema_if_available
 
 from awx.api.generics import APIView, Response
 from awx.api.permissions import IsSystemAdminOrAuditor
@@ -13,7 +14,9 @@ class MeshVisualizer(APIView):
     name = _("Mesh Visualizer")
     permission_classes = (IsSystemAdminOrAuditor,)
     swagger_topic = "System Configuration"
+    resource_purpose = 'mesh network topology visualization data'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get mesh network topology visualization data"})
     def get(self, request, format=None):
         data = {
             'nodes': InstanceNodeSerializer(Instance.objects.all(), many=True).data,

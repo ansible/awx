@@ -1,6 +1,78 @@
 from django.db import migrations
 
 
+class AlterIndexTogether(migrations.AlterIndexTogether):
+    """
+    Database-aware AlterIndexTogether that handles SQLite's missing indexes gracefully.
+
+    In Django 5.2+, SQLite table rewrites (triggered by AlterField operations)
+    can drop multi-column indexes. For SQLite, this catches the ValueError and
+    ignores it when the index doesn't exist. For PostgreSQL, uses standard behavior.
+    """
+
+    def database_forwards(self, app_label, schema_editor, from_state, to_state):
+        if not schema_editor.connection.vendor.startswith('postgres'):
+            # SQLite-specific handling: ignore missing indexes from table rewrites
+            try:
+                super().database_forwards(app_label, schema_editor, from_state, to_state)
+            except ValueError as exc:
+                if "Found wrong number (0) of constraints" in str(exc) or "Found wrong number (0) of indexes" in str(exc):
+                    return
+                raise
+        else:
+            # PostgreSQL: standard behavior
+            super().database_forwards(app_label, schema_editor, from_state, to_state)
+
+    def database_backwards(self, app_label, schema_editor, from_state, to_state):
+        if not schema_editor.connection.vendor.startswith('postgres'):
+            # SQLite-specific handling: ignore missing indexes from table rewrites
+            try:
+                super().database_backwards(app_label, schema_editor, from_state, to_state)
+            except ValueError as exc:
+                if "Found wrong number (0) of constraints" in str(exc) or "Found wrong number (0) of indexes" in str(exc):
+                    return
+                raise
+        else:
+            # PostgreSQL: standard behavior
+            super().database_backwards(app_label, schema_editor, from_state, to_state)
+
+
+class RenameIndex(migrations.RenameIndex):
+    """
+    Database-aware RenameIndex that handles SQLite's missing indexes gracefully.
+
+    In Django 5.2+, SQLite table rewrites (triggered by AlterField operations)
+    can drop multi-column indexes. For SQLite, this catches the ValueError and
+    ignores it when the index doesn't exist. For PostgreSQL, uses standard behavior.
+    """
+
+    def database_forwards(self, app_label, schema_editor, from_state, to_state):
+        if not schema_editor.connection.vendor.startswith('postgres'):
+            # SQLite-specific handling: ignore missing indexes from table rewrites
+            try:
+                super().database_forwards(app_label, schema_editor, from_state, to_state)
+            except ValueError as exc:
+                if "Found wrong number (0) of constraints" in str(exc) or "wrong number (0) of indexes" in str(exc):
+                    return
+                raise
+        else:
+            # PostgreSQL: standard behavior
+            super().database_forwards(app_label, schema_editor, from_state, to_state)
+
+    def database_backwards(self, app_label, schema_editor, from_state, to_state):
+        if not schema_editor.connection.vendor.startswith('postgres'):
+            # SQLite-specific handling: ignore missing indexes from table rewrites
+            try:
+                super().database_backwards(app_label, schema_editor, from_state, to_state)
+            except ValueError as exc:
+                if "Found wrong number (0) of constraints" in str(exc) or "wrong number (0) of indexes" in str(exc):
+                    return
+                raise
+        else:
+            # PostgreSQL: standard behavior
+            super().database_backwards(app_label, schema_editor, from_state, to_state)
+
+
 class RunSQL(migrations.operations.special.RunSQL):
     """
     Bit of a hack here. Django actually wants this decision made in the router
@@ -56,6 +128,8 @@ class RunPython(migrations.operations.special.RunPython):
 class _sqlitemigrations:
     RunPython = RunPython
     RunSQL = RunSQL
+    AlterIndexTogether = AlterIndexTogether
+    RenameIndex = RenameIndex
 
 
 dbawaremigrations = _sqlitemigrations()

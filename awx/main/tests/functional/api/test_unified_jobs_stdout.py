@@ -168,8 +168,9 @@ def test_text_stdout_with_max_stdout(sqlite_copy, get, admin):
     url = reverse('api:system_job_detail', kwargs={'pk': job.pk})
     response = get(url, user=admin, expect=200)
     assert response.data['result_stdout'] == (
-        'Standard Output too large to display ({actual} bytes), only download '
-        'supported for sizes over {max} bytes.'.format(actual=total_bytes, max=settings.STDOUT_MAX_BYTES_DISPLAY)
+        'Standard Output too large to display ({actual} bytes), only download supported for sizes over {max} bytes.'.format(
+            actual=total_bytes, max=settings.STDOUT_MAX_BYTES_DISPLAY
+        )
     )
 
 
@@ -196,8 +197,9 @@ def test_max_bytes_display(sqlite_copy, Parent, Child, relation, view, fmt, get,
 
     response = get(url + '?format={}'.format(fmt), user=admin, expect=200)
     assert smart_str(response.content) == (
-        'Standard Output too large to display ({actual} bytes), only download '
-        'supported for sizes over {max} bytes.'.format(actual=total_bytes, max=settings.STDOUT_MAX_BYTES_DISPLAY)
+        'Standard Output too large to display ({actual} bytes), only download supported for sizes over {max} bytes.'.format(
+            actual=total_bytes, max=settings.STDOUT_MAX_BYTES_DISPLAY
+        )
     )
 
     response = get(url + '?format={}_download'.format(fmt), user=admin, expect=200)
@@ -236,8 +238,9 @@ def test_legacy_result_stdout_with_max_bytes(Cls, view, fmt, get, admin):
 
     response = get(url + '?format={}'.format(fmt), user=admin, expect=200)
     assert smart_str(response.content) == (
-        'Standard Output too large to display ({actual} bytes), only download '
-        'supported for sizes over {max} bytes.'.format(actual=total_bytes, max=settings.STDOUT_MAX_BYTES_DISPLAY)
+        'Standard Output too large to display ({actual} bytes), only download supported for sizes over {max} bytes.'.format(
+            actual=total_bytes, max=settings.STDOUT_MAX_BYTES_DISPLAY
+        )
     )
 
     response = get(url + '?format={}'.format(fmt + '_download'), user=admin, expect=200)
@@ -259,7 +262,7 @@ def test_text_with_unicode_stdout(sqlite_copy, Parent, Child, relation, view, ge
     job = Parent()
     job.save()
     for i in range(3):
-        Child(**{relation: job, 'stdout': u'オ{}\n'.format(i), 'start_line': i}).save()
+        Child(**{relation: job, 'stdout': 'オ{}\n'.format(i), 'start_line': i}).save()
     url = reverse(view, kwargs={'pk': job.pk}) + '?format=' + fmt
 
     response = get(url, user=admin, expect=200)

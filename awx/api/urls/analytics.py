@@ -5,7 +5,6 @@ from django.urls import re_path
 
 import awx.api.views.analytics as analytics
 
-
 urls = [
     re_path(r'^$', analytics.AnalyticsRootView.as_view(), name='analytics_root_view'),
     re_path(r'^authorized/$', analytics.AnalyticsAuthorizedView.as_view(), name='analytics_authorized'),

@@ -227,7 +227,7 @@ def counts(since, **kwargs):
     counts['pending_jobs'] = models.UnifiedJob.objects.exclude(launch_type='sync').filter(status__in=('pending',)).count()
     if connection.vendor == 'postgresql':
         with connection.cursor() as cursor:
-            cursor.execute(f"select count(*) from pg_stat_activity where datname=\'{connection.settings_dict['NAME']}\'")
+            cursor.execute(f"select count(*) from pg_stat_activity where datname='{connection.settings_dict['NAME']}'")
             counts['database_connections'] = cursor.fetchone()[0]
     else:
         # We should be using postgresql, but if we do that change that ever we should change the below value
@@ -441,7 +441,7 @@ def _events_table(since, full_path, until, tbl, where_column, project_job_create
                           WHERE ({tbl}.{where_column} > '{since.isoformat()}' AND {tbl}.{where_column} <= '{until.isoformat()}')) TO STDOUT WITH CSV HEADER'''
         return query
 
-    return _copy_table(table='events', query=query(fr"replace({tbl}.event_data, '\u', '\u005cu')::jsonb"), path=full_path)
+    return _copy_table(table='events', query=query(rf"replace({tbl}.event_data, '\u', '\u005cu')::jsonb"), path=full_path)
 
 
 @register('events_table', '1.5', format='csv', description=_('Automation task records'), expensive=four_hour_slicing)
@@ -487,9 +487,7 @@ def unified_jobs_table(since, full_path, until, **kwargs):
                                        OR (main_unifiedjob.finished > '{0}' AND main_unifiedjob.finished <= '{1}'))
                                        AND main_unifiedjob.launch_type != 'sync'
                                  ORDER BY main_unifiedjob.id ASC) TO STDOUT WITH CSV HEADER
-                        '''.format(
-        since.isoformat(), until.isoformat()
-    )
+                        '''.format(since.isoformat(), until.isoformat())
     return _copy_table(table='unified_jobs', query=unified_job_query, path=full_path)
 
 
@@ -550,9 +548,7 @@ def workflow_job_node_table(since, full_path, until, **kwargs):
                                  ) always_nodes ON main_workflowjobnode.id = always_nodes.from_workflowjobnode_id
                                  WHERE (main_workflowjobnode.modified > '{}' AND main_workflowjobnode.modified <= '{}')
                                  ORDER BY main_workflowjobnode.id ASC) TO STDOUT WITH CSV HEADER
-                              '''.format(
-        since.isoformat(), until.isoformat()
-    )
+                              '''.format(since.isoformat(), until.isoformat())
     return _copy_table(table='workflow_job_node', query=workflow_job_node_query, path=full_path)
 
 

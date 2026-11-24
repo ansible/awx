@@ -1,30 +1,32 @@
-aiohttp>=3.9.4 # CVE-2024-30251
+aiohttp>=3.14.4 # CVE-2026-111064
 ansi2html  # Used to format the stdout from jobs into html for display
 jq  # used for indirect host counting feature
-asciichartpy
 asn1
 azure-identity
 azure-keyvault
 boto3
 botocore
+Brotli>=1.2.1  # CVE-2026-111497, required by aiohttp[speedups]
+cachetools  # Used by awx/conf/settings.py for TTLCache
 channels
 channels-redis
 cryptography
 Cython
-daphne
+daphne>=4.2.2
 distro
-django==4.2.21  # CVE-2025-32873
+django>=5.2.17,<5.3  # Django 5.2 LTS, allow patch updates, CVE-2026-15307
 django-cors-headers
 django-crum
 django-extensions
 django-guid
 django-polymorphic
 django-solo
-djangorestframework==3.15.2  # upgrading to 3.16+ throws NOT_REQUIRED_DEFAULT error on required fields in serializer that have no default
+djangorestframework>=3.18.2
 djangorestframework-yaml
+drf-spectacular>=0.27.0
 dynaconf
 filelock
-GitPython>=3.1.37  # CVE-2023-41040
+GitPython>=3.2.1 # CVE-2026-114145
 grpcio
 irc
 jinja2>=3.1.6  # CVE-2025-27516
@@ -35,44 +37,44 @@ maturin  # pydantic-core build dep
 msgpack
 msrestazure
 OPA-python-client==2.0.2 # upgrading requires urllib3 2.5.0+ which is blocked by other deps
+kubernetes>=36.0.2  # fixes NO_PROXY silently being reset to None
 openshift
 opentelemetry-api~=1.37     # new y streams can be drastically different, in a good way
 opentelemetry-sdk~=1.37
 opentelemetry-instrumentation-logging
 opentelemetry-exporter-otlp
 pexpect
-prometheus_client
+prometheus-client
 psycopg
 psutil
+pyasn1>=0.6.4  # CVE-2026-59886
 pygerduty
 PyGithub
+PyJWT>=2.14.0  # CVE-2026-102268
 pyopenssl
-pyparsing==2.4.7 # Upgrading to v3 of pyparsing introduce errors on smart host filtering: Expected 'or' term, found 'or'  (at char 15), (line:1, col:16)
+pyparsing>3.0 # Upgraded to v3 and changed import patterns
 python-daemon
 python-dsv-sdk>=1.0.4
 python-tss-sdk>=1.2.1
 pyyaml>=6.0.2  # require packing fix for cython 3 or higher
 pyzstd  # otel collector log file compression library
 receptorctl
-sqlparse>=0.4.4   # Required by django https://github.com/ansible/awx/security/dependabot/96
-redis[hiredis]
+sqlparse>=0.6.1
+redis[hiredis]>=7.0  # requires 7.0+ for retry functionality on connection errors
 requests
 slack-sdk
 twilio
 twisted[tls]>=24.7.0  # CVE-2024-41810
-urllib3<2.4.0, >=1.26.19 # CVE-2024-37891. capped by kubernetes 34.1.0 reqs
+urllib3>=2.8.0
 uWSGI>=2.0.28
 uwsgitop
-wheel>=0.38.1  # CVE-2022-40898
-pip==21.2.4  # see UPGRADE BLOCKERs
+wheel>=0.46.2  # CVE-2026-24049
+pip==25.3  # see UPGRADE BLOCKERs
 setuptools==80.9.0  # see UPGRADE BLOCKERs
-setuptools_scm[toml]
+setuptools-scm[toml]
 setuptools-rust>=0.11.4  # cryptography build dep
 pkgconfig>=1.5.1  # xmlsec build dep - needed for offline build
 django-flags>=5.0.13
-dispatcherd  # tasking system, previously part of AWX code base
+dispatcherd[pg-notify]  # tasking system, previously part of AWX code base
 protobuf>=4.25.8 # CVE-2025-4565
 idna>=3.10 # CVE-2024-3651
-# Temporarily added to use ansible-runner from git branch, to be removed
-# when ansible-runner moves from requirements_git.txt to here
-pbr

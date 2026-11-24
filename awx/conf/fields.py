@@ -6,7 +6,7 @@ import urllib.parse as urlparse
 from collections import OrderedDict
 
 # Django
-from django.core.validators import URLValidator, _lazy_re_compile
+from django.core.validators import URLValidator, DomainNameValidator, _lazy_re_compile
 from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
@@ -160,10 +160,11 @@ class StringListIsolatedPathField(StringListField):
 class URLField(CharField):
     # these lines set up a custom regex that allow numbers in the
     # top-level domain
+
     tld_re = (
         r'\.'  # dot
         r'(?!-)'  # can't start with a dash
-        r'(?:[a-z' + URLValidator.ul + r'0-9' + '-]{2,63}'  # domain label, this line was changed from the original URLValidator
+        r'(?:[a-z' + DomainNameValidator.ul + r'0-9' + '-]{2,63}'  # domain label, this line was changed from the original URLValidator
         r'|xn--[a-z0-9]{1,59})'  # or punycode label
         r'(?<!-)'  # can't end with a dash
         r'\.?'  # may have a trailing dot

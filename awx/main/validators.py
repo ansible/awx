@@ -181,6 +181,8 @@ def validate_ssh_private_key(data):
     certificates; should handle any valid options for ssh_private_key on a
     credential.
     """
+    # Strip leading and trailing whitespace/newlines to handle common copy-paste issues
+    data = data.strip()
     return validate_pem(data, min_keys=1)
 
 

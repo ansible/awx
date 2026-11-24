@@ -1,7 +1,6 @@
 import logging
 import re
 
-
 log = logging.getLogger(__name__)
 
 descRE = re.compile(r'^[*] `(\w+)`: [^(]*\((\w+), ([^)]+)\)')

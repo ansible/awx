@@ -1,5 +1,7 @@
 # Python
+import ipaddress
 import logging
+import re
 
 # Django
 from django.core.checks import Error
@@ -30,6 +32,16 @@ register(
     field_class=fields.BooleanField,
     label=_('Enable Activity Stream for Inventory Sync'),
     help_text=_('Enable capturing activity for the activity stream when running inventory sync.'),
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
+    'INDIRECT_NODE_COUNTING_ENABLED',
+    field_class=fields.BooleanField,
+    default=True,
+    label=_('Enable Indirect Node Counting'),
+    help_text=_('Controls whether Controller processes indirect managed nodes reported by jobs.'),
     category=_('System'),
     category_slug='system',
 )
@@ -91,6 +103,27 @@ register(
     ),
     category=_('System'),
     category_slug='system',
+)
+
+register(
+    'NOTIFICATION_IP_ALLOW_LIST',
+    field_class=fields.StringListField,
+    default=[],
+    label=_('Notification Connections Allowed List'),
+    help_text=_(
+        "List of IP addresses, CIDR ranges, and hostnames allowed as notification destinations. "
+        "By default, notifications to private, loopback, link-local, and reserved "
+        "addresses are blocked to prevent server-side request forgery (SSRF). "
+        "Add entries here to permit specific internal endpoints. "
+        "IP/CIDR entries (e.g. 10.50.0.0/24) allow matching resolved addresses. "
+        "Hostname entries (e.g. elastic.internal.example.com) bypass address checking for that host. "
+        "Use a dot prefix (e.g. .internal.example.com) to allow all subdomains. "
+        "Note: hostname entries trust DNS resolution for the named host; "
+        "use IP/CIDR entries where possible for stronger guarantees."
+    ),
+    category=_('System'),
+    category_slug='system',
+    required=False,
 )
 
 register(
@@ -214,6 +247,40 @@ register(
 )
 
 register(
+    'AWX_ANALYTICS_CANDLEPIN_CA',
+    field_class=fields.CharField,
+    default='/etc/rhsm/ca/redhat-uep.pem',
+    allow_blank=True,
+    label=_('Candlepin CA Certificate Path'),
+    help_text=_('Path to the CA certificate file for verifying TLS connections to Candlepin. Leave blank to use system certificates.'),
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
+    'AWX_ANALYTICS_CANDLEPIN_RENEWAL_THRESHOLD_DAYS',
+    field_class=fields.IntegerField,
+    default=90,
+    min_value=1,
+    label=_('Candlepin Certificate Renewal Threshold'),
+    help_text=_('Number of days before certificate expiry to trigger automatic renewal of Candlepin identity certificates.'),
+    category=_('System'),
+    category_slug='system',
+    unit=_('days'),
+)
+
+register(
+    'AWX_ANALYTICS_CANDLEPIN_PROXY_URL',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    label=_('Candlepin Proxy URL'),
+    help_text=_('HTTP/HTTPS proxy URL for Candlepin API requests (e.g., http://proxy.example.com:8080). Leave blank for no proxy.'),
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
     'INSTALL_UUID',
     field_class=fields.CharField,
     label=_('Unique identifier for an installation'),
@@ -286,6 +353,22 @@ register(
         'risk where users with the ability to specify extra vars at job '
         'launch time can use Jinja2 templates to run arbitrary Python.  It is '
         'recommended that this value be set to "template" or "never".'
+    ),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
+    'INCLUDE_DEPRECATED_AWX_VAR_PREFIX',
+    field_class=fields.BooleanField,
+    default=True,
+    label=_('Include Deprecated AWX Variable Prefix'),
+    help_text=_(
+        'When enabled (default), auto-generated job variables are emitted '
+        'with both the tower_ prefix and the deprecated awx_ prefix for '
+        'backward compatibility. Disable to emit only tower_ prefixed '
+        'variables and eliminate duplicates. The awx_ prefix is deprecated '
+        'and this setting will default to False in a future release.'
     ),
     category=_('Jobs'),
     category_slug='jobs',
@@ -438,7 +521,7 @@ register(
     min_value=0,
     label=_('Job Event Standard Output Maximum Display Size'),
     help_text=_(
-        u'Maximum Size of Standard Output in bytes to display for a single job or ad hoc command event. `stdout` will end with `\u2026` when truncated.'
+        'Maximum Size of Standard Output in bytes to display for a single job or ad hoc command event. `stdout` will end with `\u2026` when truncated.'
     ),
     category=_('Jobs'),
     category_slug='jobs',
@@ -672,9 +755,7 @@ register(
     default='https',
     label=_('Logging Aggregator Protocol'),
     help_text=_(
-        'Protocol used to communicate with log aggregator.  '
-        'HTTPS/HTTP assumes HTTPS unless http:// is explicitly used in '
-        'the Logging Aggregator hostname.'
+        'Protocol used to communicate with log aggregator.  HTTPS/HTTP assumes HTTPS unless http:// is explicitly used in the Logging Aggregator hostname.'
     ),
     category=_('Logging'),
     category_slug='logging',
@@ -822,6 +903,58 @@ register(
     category=_('System'),
     category_slug='system',
     unit=_('seconds'),
+)
+
+register(
+    'CANDLEPIN_CONSUMER_UUID',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    encrypted=False,
+    label=_('Candlepin Consumer UUID'),
+    help_text=_('UUID of the registered Candlepin consumer for this AAP instance.'),
+    category=_('System'),
+    category_slug='system',
+    hidden=True,
+)
+
+register(
+    'CANDLEPIN_CERT_PEM',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    encrypted=True,
+    label=_('Candlepin Identity Certificate'),
+    help_text=_('PEM-encoded Candlepin identity certificate for mTLS authentication.'),
+    category=_('System'),
+    category_slug='system',
+    hidden=True,
+)
+
+register(
+    'CANDLEPIN_KEY_PEM',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    encrypted=True,
+    label=_('Candlepin Identity Key'),
+    help_text=_('PEM-encoded private key for Candlepin identity certificate.'),
+    category=_('System'),
+    category_slug='system',
+    hidden=True,
+)
+
+register(
+    'CANDLEPIN_SERIAL_NUMBER',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    encrypted=False,
+    label=_('Candlepin Certificate Serial Number'),
+    help_text=_('Serial number of the Candlepin identity certificate for tracking.'),
+    category=_('System'),
+    category_slug='system',
+    hidden=True,
 )
 
 register(
@@ -1004,6 +1137,29 @@ def csrf_trusted_origins_validate(serializer, attrs):
 
 
 register_validate('system', csrf_trusted_origins_validate)
+
+
+_HOSTNAME_RE = re.compile(r'^\.?(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z]{2,}$')
+
+
+def notification_ip_allow_list_validate(serializer, attrs):
+    if 'NOTIFICATION_IP_ALLOW_LIST' not in attrs:
+        return attrs
+    errors = []
+    for entry in attrs['NOTIFICATION_IP_ALLOW_LIST']:
+        try:
+            ipaddress.ip_network(entry, strict=False)
+            continue
+        except ValueError:
+            pass
+        if not _HOSTNAME_RE.match(entry):
+            errors.append(f"{entry!r} is not a valid IP address, CIDR range, or hostname.")
+    if errors:
+        raise serializers.ValidationError(_('\n'.join(errors)))
+    return attrs
+
+
+register_validate('system', notification_ip_allow_list_validate)
 
 
 register(

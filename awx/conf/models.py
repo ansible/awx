@@ -27,11 +27,11 @@ class Setting(CreatedModifiedModel):
             json_value = json.dumps(self.value)
         except ValueError:
             # In the rare case the DB value is invalid JSON.
-            json_value = u'<Invalid JSON>'
+            json_value = '<Invalid JSON>'
         if self.user:
-            return u'{} ({}) = {}'.format(self.key, self.user, json_value)
+            return '{} ({}) = {}'.format(self.key, self.user, json_value)
         else:
-            return u'{} = {}'.format(self.key, json_value)
+            return '{} = {}'.format(self.key, json_value)
 
     def save(self, *args, **kwargs):
         encrypted = settings_registry.is_setting_encrypted(self.key)

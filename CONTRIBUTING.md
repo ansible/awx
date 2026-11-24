@@ -31,7 +31,7 @@ Have questions about this document or anything not covered here? Create a topic 
 - Take care to make sure no merge commits are in the submission, and use `git rebase` vs `git merge` for this reason.
   - If collaborating with someone else on the same branch, consider using `--force-with-lease` instead of `--force`. This will prevent you from accidentally overwriting commits pushed by someone else. For more information, see [git push docs](https://git-scm.com/docs/git-push#git-push---force-with-leaseltrefnamegt).
 - If submitting a large code change, it's a good idea to create a [forum topic tagged with 'awx'](https://forum.ansible.com/tag/awx), and talk about what you would like to do or add first. This not only helps everyone know what's going on, it also helps save time and effort, if the community decides some changes are needed.
-- We ask all of our community members and contributors to adhere to the [Ansible code of conduct](http://docs.ansible.com/ansible/latest/community/code_of_conduct.html). If you have questions, or need assistance, please reach out to our community team at [codeofconduct@ansible.com](mailto:codeofconduct@ansible.com)
+- We ask all of our community members and contributors to adhere to the [Ansible code of conduct](https://docs.ansible.com/projects/ansible/latest/community/code_of_conduct.html). If you have questions, or need assistance, please reach out to our community team at [codeofconduct@ansible.com](mailto:codeofconduct@ansible.com)
 
 ## Setting up your development environment
 
@@ -103,7 +103,13 @@ When necessary, remove any AWX containers and images by running the following:
 
 ### Pre commit hooks
 
-When you attempt to perform a `git commit` there will be a pre-commit hook that gets run before the commit is allowed to your local repository. For example, python's [black](https://pypi.org/project/black/) will be run to test the formatting of any python files.
+Install the pre-commit hook before contributing:
+
+```
+make pre-commit
+```
+
+When you attempt to perform a `git commit` there will be a pre-commit hook that gets run before the commit is allowed to your local repository. For example, [ruff](https://docs.astral.sh/ruff/) will be run to check the formatting of any python files.
 
 While you can use environment variables to skip the pre-commit hooks GitHub will run similar tests and prevent merging of PRs if the tests do not pass.
 
@@ -142,7 +148,7 @@ Fixes and Features for AWX will go through the Github pull request process. Subm
 Here are a few things you can do to help the visibility of your change, and increase the likelihood that it will be accepted:
 
 - No issues when running linters/code checkers
-  - Python: black: `(container)/awx_devel$ make black`
+  - Python: ruff: `(container)/awx_devel$ make format`
 - No issues from unit tests
   - Python: py.test: `(container)/awx_devel$ make test`
 - Write tests for new functionality, update/add tests for bug fixes

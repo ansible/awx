@@ -74,16 +74,16 @@ class TestSmartFilterQueryFromString:
     @pytest.mark.parametrize(
         "filter_string,q_expected",
         [
-            ('facts__facts__blank=""', Q(**{u"facts__facts__blank": u""})),
-            ('"facts__facts__ space "="f"', Q(**{u"facts__facts__ space ": u"f"})),
-            ('"facts__facts__ e "=no_quotes_here', Q(**{u"facts__facts__ e ": u"no_quotes_here"})),
-            ('a__b__c=3', Q(**{u"a__b__c": 3})),
-            ('a__b__c=3.14', Q(**{u"a__b__c": 3.14})),
-            ('a__b__c=true', Q(**{u"a__b__c": True})),
-            ('a__b__c=false', Q(**{u"a__b__c": False})),
-            ('a__b__c=null', Q(**{u"a__b__c": None})),
-            ('ansible_facts__a="true"', Q(**{u"ansible_facts__contains": {u"a": u"true"}})),
-            ('ansible_facts__a__exact="true"', Q(**{u"ansible_facts__contains": {u"a": u"true"}})),
+            ('facts__facts__blank=""', Q(**{"facts__facts__blank": ""})),
+            ('"facts__facts__ space "="f"', Q(**{"facts__facts__ space ": "f"})),
+            ('"facts__facts__ e "=no_quotes_here', Q(**{"facts__facts__ e ": "no_quotes_here"})),
+            ('a__b__c=3', Q(**{"a__b__c": 3})),
+            ('a__b__c=3.14', Q(**{"a__b__c": 3.14})),
+            ('a__b__c=true', Q(**{"a__b__c": True})),
+            ('a__b__c=false', Q(**{"a__b__c": False})),
+            ('a__b__c=null', Q(**{"a__b__c": None})),
+            ('ansible_facts__a="true"', Q(**{"ansible_facts__contains": {"a": "true"}})),
+            ('ansible_facts__a__exact="true"', Q(**{"ansible_facts__contains": {"a": "true"}})),
             # ('"a__b\"__c"="true"', Q(**{u"a__b\"__c": "true"})),
             # ('a__b\"__c="true"', Q(**{u"a__b\"__c": "true"})),
         ],
@@ -101,7 +101,7 @@ class TestSmartFilterQueryFromString:
     def test_invalid_filter_strings(self, mock_get_host_model, filter_string):
         with pytest.raises(RuntimeError) as e:
             SmartFilter.query_from_string(filter_string)
-        assert str(e.value) == u"Invalid query " + filter_string
+        assert str(e.value) == "Invalid query " + filter_string
 
     @pytest.mark.parametrize(
         "filter_string",
@@ -118,8 +118,8 @@ class TestSmartFilterQueryFromString:
     @pytest.mark.parametrize(
         "filter_string,q_expected",
         [
-            (u'(a=abc\u1f5e3def)', Q(**{u"a": u"abc\u1f5e3def"})),
-            (u'(ansible_facts__a=abc\u1f5e3def)', Q(**{u"ansible_facts__contains": {u"a": u"abc\u1f5e3def"}})),
+            ('(a=abc\u1f5e3def)', Q(**{"a": "abc\u1f5e3def"})),
+            ('(ansible_facts__a=abc\u1f5e3def)', Q(**{"ansible_facts__contains": {"a": "abc\u1f5e3def"}})),
         ],
     )
     def test_unicode(self, mock_get_host_model, filter_string, q_expected):
@@ -129,17 +129,14 @@ class TestSmartFilterQueryFromString:
     @pytest.mark.parametrize(
         "filter_string,q_expected",
         [
-            ('(a=b)', Q(**{u"a": u"b"})),
-            ('a=b and c=d', Q(**{u"a": u"b"}) & Q(**{u"c": u"d"})),
-            ('(a=b and c=d)', Q(**{u"a": u"b"}) & Q(**{u"c": u"d"})),
-            ('a=b or c=d', Q(**{u"a": u"b"}) | Q(**{u"c": u"d"})),
-            ('(a=b and c=d) or (e=f)', (Q(**{u"a": u"b"}) & Q(**{u"c": u"d"})) | (Q(**{u"e": u"f"}))),
+            ('(a=b)', Q(**{"a": "b"})),
+            ('a=b and c=d', Q(**{"a": "b"}) & Q(**{"c": "d"})),
+            ('(a=b and c=d)', Q(**{"a": "b"}) & Q(**{"c": "d"})),
+            ('a=b or c=d', Q(**{"a": "b"}) | Q(**{"c": "d"})),
+            ('(a=b and c=d) or (e=f)', (Q(**{"a": "b"}) & Q(**{"c": "d"})) | (Q(**{"e": "f"}))),
             (
                 'a=b or a=d or a=e or a=z and b=h and b=i and b=j and b=k',
-                Q(**{u"a": u"b"})
-                | Q(**{u"a": u"d"})
-                | Q(**{u"a": u"e"})
-                | Q(**{u"a": u"z"}) & Q(**{u"b": u"h"}) & Q(**{u"b": u"i"}) & Q(**{u"b": u"j"}) & Q(**{u"b": u"k"}),
+                Q(**{"a": "b"}) | Q(**{"a": "d"}) | Q(**{"a": "e"}) | Q(**{"a": "z"}) & Q(**{"b": "h"}) & Q(**{"b": "i"}) & Q(**{"b": "j"}) & Q(**{"b": "k"}),
             ),
         ],
     )
@@ -150,21 +147,21 @@ class TestSmartFilterQueryFromString:
     @pytest.mark.parametrize(
         "filter_string,q_expected",
         [
-            ('ansible_facts__a__b__c[]=3', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [3]}}}})),
-            ('ansible_facts__a__b__c[]=3.14', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [3.14]}}}})),
-            ('ansible_facts__a__b__c[]=true', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [True]}}}})),
-            ('ansible_facts__a__b__c[]=false', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [False]}}}})),
-            ('ansible_facts__a__b__c[]="true"', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [u"true"]}}}})),
-            ('ansible_facts__a__b__c[]="hello world"', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [u"hello world"]}}}})),
-            ('ansible_facts__a__b__c[]__d[]="foobar"', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [{u"d": [u"foobar"]}]}}}})),
-            ('ansible_facts__a__b__c[]__d="foobar"', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [{u"d": u"foobar"}]}}}})),
-            ('ansible_facts__a__b__c[]__d__e="foobar"', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [{u"d": {u"e": u"foobar"}}]}}}})),
-            ('ansible_facts__a__b__c[]__d__e[]="foobar"', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [{u"d": {u"e": [u"foobar"]}}]}}}})),
-            ('ansible_facts__a__b__c[]__d__e__f[]="foobar"', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [{u"d": {u"e": {u"f": [u"foobar"]}}}]}}}})),
+            ('ansible_facts__a__b__c[]=3', Q(**{"ansible_facts__contains": {"a": {"b": {"c": [3]}}}})),
+            ('ansible_facts__a__b__c[]=3.14', Q(**{"ansible_facts__contains": {"a": {"b": {"c": [3.14]}}}})),
+            ('ansible_facts__a__b__c[]=true', Q(**{"ansible_facts__contains": {"a": {"b": {"c": [True]}}}})),
+            ('ansible_facts__a__b__c[]=false', Q(**{"ansible_facts__contains": {"a": {"b": {"c": [False]}}}})),
+            ('ansible_facts__a__b__c[]="true"', Q(**{"ansible_facts__contains": {"a": {"b": {"c": ["true"]}}}})),
+            ('ansible_facts__a__b__c[]="hello world"', Q(**{"ansible_facts__contains": {"a": {"b": {"c": ["hello world"]}}}})),
+            ('ansible_facts__a__b__c[]__d[]="foobar"', Q(**{"ansible_facts__contains": {"a": {"b": {"c": [{"d": ["foobar"]}]}}}})),
+            ('ansible_facts__a__b__c[]__d="foobar"', Q(**{"ansible_facts__contains": {"a": {"b": {"c": [{"d": "foobar"}]}}}})),
+            ('ansible_facts__a__b__c[]__d__e="foobar"', Q(**{"ansible_facts__contains": {"a": {"b": {"c": [{"d": {"e": "foobar"}}]}}}})),
+            ('ansible_facts__a__b__c[]__d__e[]="foobar"', Q(**{"ansible_facts__contains": {"a": {"b": {"c": [{"d": {"e": ["foobar"]}}]}}}})),
+            ('ansible_facts__a__b__c[]__d__e__f[]="foobar"', Q(**{"ansible_facts__contains": {"a": {"b": {"c": [{"d": {"e": {"f": ["foobar"]}}}]}}}})),
             (
                 '(ansible_facts__a__b__c[]__d__e__f[]="foobar") and (ansible_facts__a__b__c[]__d__e[]="foobar")',
-                Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [{u"d": {u"e": {u"f": [u"foobar"]}}}]}}}})
-                & Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [{u"d": {u"e": [u"foobar"]}}]}}}}),
+                Q(**{"ansible_facts__contains": {"a": {"b": {"c": [{"d": {"e": {"f": ["foobar"]}}}]}}}})
+                & Q(**{"ansible_facts__contains": {"a": {"b": {"c": [{"d": {"e": ["foobar"]}}]}}}}),
             ),
             # ('"a__b\"__c"="true"', Q(**{u"a__b\"__c": "true"})),
             # ('a__b\"__c="true"', Q(**{u"a__b\"__c": "true"})),
@@ -178,7 +175,7 @@ class TestSmartFilterQueryFromString:
         "filter_string,q_expected",
         [
             # ('a__b__c[]="true"', Q(**{u"a__b__c__contains": u"\"true\""})),
-            ('ansible_facts__a="true"', Q(**{u"ansible_facts__contains": {u"a": u"true"}})),
+            ('ansible_facts__a="true"', Q(**{"ansible_facts__contains": {"a": "true"}})),
             # ('"a__b\"__c"="true"', Q(**{u"a__b\"__c": "true"})),
             # ('a__b\"__c="true"', Q(**{u"a__b\"__c": "true"})),
         ],
@@ -190,8 +187,8 @@ class TestSmartFilterQueryFromString:
     @pytest.mark.parametrize(
         "filter_string,q_expected",
         [
-            ('ansible_facts__a=null', Q(**{u"ansible_facts__contains": {u"a": None}})),
-            ('ansible_facts__c="null"', Q(**{u"ansible_facts__contains": {u"c": u"\"null\""}})),
+            ('ansible_facts__a=null', Q(**{"ansible_facts__contains": {"a": None}})),
+            ('ansible_facts__c="null"', Q(**{"ansible_facts__contains": {"c": "\"null\""}})),
         ],
     )
     def test_contains_query_generated_null(self, mock_get_host_model, filter_string, q_expected):
@@ -201,17 +198,17 @@ class TestSmartFilterQueryFromString:
     @pytest.mark.parametrize(
         "filter_string,q_expected",
         [
-            ('group__search=foo', Q(Q(**{u"group__name__icontains": u"foo"}) | Q(**{u"group__description__icontains": u"foo"}))),
+            ('group__search=foo', Q(Q(**{"group__name__icontains": "foo"}) | Q(**{"group__description__icontains": "foo"}))),
             (
                 'search=foo and group__search=foo',
                 Q(
-                    Q(**{u"name__icontains": u"foo"}) | Q(**{u"description__icontains": u"foo"}),
-                    Q(**{u"group__name__icontains": u"foo"}) | Q(**{u"group__description__icontains": u"foo"}),
+                    Q(**{"name__icontains": "foo"}) | Q(**{"description__icontains": "foo"}),
+                    Q(**{"group__name__icontains": "foo"}) | Q(**{"group__description__icontains": "foo"}),
                 ),
             ),
             (
                 'search=foo or ansible_facts__a=null',
-                Q(Q(**{u"name__icontains": u"foo"}) | Q(**{u"description__icontains": u"foo"})) | Q(**{u"ansible_facts__contains": {u"a": None}}),
+                Q(Q(**{"name__icontains": "foo"}) | Q(**{"description__icontains": "foo"})) | Q(**{"ansible_facts__contains": {"a": None}}),
             ),
         ],
     )

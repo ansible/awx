@@ -3,16 +3,30 @@ import pytest
 # AWX
 from awx.main.ha import is_ha_environment
 from awx.main.models.ha import Instance
-from awx.main.dispatch.pool import get_auto_max_workers
+from awx.main.utils.common import get_auto_max_workers
 
 # Django
 from django.test.utils import override_settings
 
 
 @pytest.mark.django_db
-def test_multiple_instances():
-    for i in range(2):
+def test_multiple_hybrid_instances():
+    for i in range(3):
         Instance.objects.create(hostname=f'foo{i}', node_type='hybrid')
+    assert is_ha_environment()
+
+
+@pytest.mark.django_db
+def test_double_control_instances():
+    for i in range(2):
+        Instance.objects.create(hostname=f'foo{i}', node_type='control')
+    assert is_ha_environment()
+
+
+@pytest.mark.django_db
+def test_mix_hybrid_control_instances():
+    Instance.objects.create(hostname='control_node', node_type='control')
+    Instance.objects.create(hostname='hybrid_node', node_type='hybrid')
     assert is_ha_environment()
 
 

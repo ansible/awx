@@ -37,6 +37,7 @@ from awx_plugins.interfaces._temporary_private_licensing_api import detect_serve
 from ansible_base.rest_filters.rest_framework.field_lookup_backend import FieldLookupBackend
 from ansible_base.lib.utils.models import get_all_field_names
 from ansible_base.lib.utils.requests import get_remote_host, is_proxied_request
+from ansible_base.lib.utils.views.deprecation import deprecated, mark_deprecated
 from ansible_base.rbac.models import RoleEvaluation, RoleDefinition
 from ansible_base.rbac.permission_registry import permission_registry
 from ansible_base.jwt_consumer.common.util import validate_x_trusted_proxy_header
@@ -81,7 +82,6 @@ analytics_logger = logging.getLogger('awx.analytics.performance')
 
 
 class LoggedLoginView(auth_views.LoginView):
-
     def get(self, request, *args, **kwargs):
         if is_proxied_request():
             next = request.GET.get('next', "")
@@ -116,7 +116,7 @@ class LoggedLoginView(auth_views.LoginView):
         ret = super(LoggedLoginView, self).post(request, *args, **kwargs)
         ip = get_remote_host(request)  # request.META.get('REMOTE_ADDR', None)
         if request.user.is_authenticated:
-            logger.info(smart_str(u"User {} logged in from {}".format(self.request.user.username, ip)))
+            logger.info(smart_str("User {} logged in from {}".format(self.request.user.username, ip)))
             ret.set_cookie(
                 'userLoggedIn', 'true', secure=getattr(settings, 'SESSION_COOKIE_SECURE', False), samesite=getattr(settings, 'USER_COOKIE_SAMESITE', 'Lax')
             )
@@ -125,13 +125,19 @@ class LoggedLoginView(auth_views.LoginView):
             return ret
         else:
             if 'username' in self.request.POST:
-                logger.warning(smart_str(u"Login failed for user {} from {}".format(self.request.POST.get('username'), ip)))
+                logger.warning(smart_str("Login failed for user {} from {}".format(self.request.POST.get('username'), ip)))
             ret.status_code = 401
             return ret
 
 
 class LoggedLogoutView(auth_views.LogoutView):
+    # Override http_method_names to allow GET requests (Django 5.2+ defaults to POST only)
+    http_method_names = ["get", "post", "options"]
     success_url_allowed_hosts = set(settings.LOGOUT_ALLOWED_HOSTS.split(",")) if settings.LOGOUT_ALLOWED_HOSTS else set()
+
+    def get(self, request, *args, **kwargs):
+        """Handle GET requests for logout (for backward compatibility)."""
+        return self.post(request, *args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
         if is_proxied_request():
@@ -161,16 +167,14 @@ def get_view_description(view, html=False):
 
 
 def get_default_schema():
-    if settings.DYNACONF.is_development_mode:
-        from awx.api.swagger import schema_view
-
-        return schema_view
-    else:
-        return views.APIView.schema
+    # drf-spectacular is configured via REST_FRAMEWORK['DEFAULT_SCHEMA_CLASS']
+    # Just use the DRF default, which will pick up our CustomAutoSchema
+    return views.APIView.schema
 
 
 class APIView(views.APIView):
-    schema = get_default_schema()
+    # Schema is inherited from DRF's APIView, which uses DEFAULT_SCHEMA_CLASS
+    # No need to override it here - drf-spectacular will handle it
     versioning_class = URLPathVersioning
 
     def initialize_request(self, request, *args, **kwargs):
@@ -268,7 +272,10 @@ class APIView(views.APIView):
                 response = self.handle_exception(self.__init_request_error__)
             if response.status_code == 401:
                 if response.data and 'detail' in response.data:
-                    response.data['detail'] += _(' To establish a login session, visit') + ' /api/login/.'
+                    if getattr(settings, 'RESOURCE_SERVER__URL', None):
+                        response.data['detail'] += _(' Direct access is not allowed, authenticate via the platform gateway.')
+                    else:
+                        response.data['detail'] += _(' To establish a login session, visit') + ' /api/login/.'
                 logger.info(status_msg)
             else:
                 logger.warning(status_msg)
@@ -291,6 +298,15 @@ class APIView(views.APIView):
 
         if getattr(self, 'deprecated', False):
             response['Warning'] = '299 awx "This resource has been deprecated and will be removed in a future release."'
+
+        deprecation = getattr(self, 'deprecation', None)
+        if deprecation or getattr(self, 'deprecated', False):
+            if deprecation:
+                detail = deprecation['detail']
+            else:
+                detail = 'This resource has been deprecated and will be removed in a future release.'
+
+            mark_deprecated(response, detail)
 
         return response
 
@@ -722,7 +738,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
             return Response(attach_errors, status=status.HTTP_400_BAD_REQUEST)
 
         # Attach the object to the collection.
-        if sub not in relationship.all():
+        if not relationship.contains(sub):
             relationship.add(sub)
 
         if created:
@@ -766,7 +782,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def unattach(self, request, *args, **kwargs):
-        (sub_id, res) = self.unattach_validate(request)
+        sub_id, res = self.unattach_validate(request)
         if res:
             return res
         return self.unattach_by_id(request, sub_id)
@@ -831,6 +847,7 @@ class RetrieveUpdateDestroyAPIView(RetrieveUpdateAPIView, DestroyAPIView):
     pass
 
 
+@deprecated(detail='Resource Access List has been deprecated.')
 class ResourceAccessList(ParentMixin, ListAPIView):
     deprecated = True
     serializer_class = ResourceAccessListElementSerializer
@@ -993,6 +1010,8 @@ class CopyAPIView(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
+        if not request.user.can_access(obj.__class__, 'read', obj):
+            raise PermissionDenied()
         create_kwargs = self._build_create_dict(obj)
         create_kwargs_check = {}
         for key in create_kwargs:
@@ -1024,6 +1043,9 @@ class CopyAPIView(GenericAPIView):
 class GenericCancelView(RetrieveAPIView):
     # In subclass set model, serializer_class
     obj_permission_type = 'cancel'
+
+    def get(self, request, *args, **kwargs):
+        return super(GenericCancelView, self).get(request, *args, **kwargs)
 
     @transaction.non_atomic_requests
     def dispatch(self, *args, **kwargs):

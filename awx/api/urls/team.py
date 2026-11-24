@@ -15,7 +15,6 @@ from awx.api.views import (
     TeamAccessList,
 )
 
-
 urls = [
     re_path(r'^$', TeamList.as_view(), name='team_list'),
     re_path(r'^(?P<pk>[0-9]+)/$', TeamDetail.as_view(), name='team_detail'),

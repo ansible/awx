@@ -1,7 +1,6 @@
 import re
 import yaml
 
-
 __all__ = ['safe_dump', 'SafeLoader']
 
 
@@ -21,7 +20,7 @@ class SafeLoader(yaml.Loader):
         return node
 
 
-SafeLoader.add_constructor(u'!unsafe', SafeLoader.construct_yaml_unsafe)
+SafeLoader.add_constructor('!unsafe', SafeLoader.construct_yaml_unsafe)
 
 
 def safe_dump(x, safe_dict=None):

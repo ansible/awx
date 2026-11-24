@@ -31,7 +31,9 @@ def mock_organization():
 @pytest.fixture
 def parent_relationship_factory(mocker):
     def rf(serializer_class, relationship_name, relationship_value=mocker.Mock()):
-        mock_parent_relationship = mocker.MagicMock(**{'%s.add.return_value' % relationship_name: relationship_value})
+        mock_parent_relationship = mocker.MagicMock(
+            **{'%s.add.return_value' % relationship_name: relationship_value, '%s.contains.return_value' % relationship_name: False}
+        )
         mocker.patch('awx.api.generics.ParentMixin.get_parent_object', return_value=mock_parent_relationship)
 
         serializer = serializer_class()
@@ -50,7 +52,7 @@ class TestSubListCreateAttachDetachAPIView:
         mock_request = mocker.MagicMock(data=dict(id=1))
         serializer = SubListCreateAttachDetachAPIView()
 
-        (sub_id, res) = serializer.attach_validate(mock_request)
+        sub_id, res = serializer.attach_validate(mock_request)
 
         assert sub_id == 1
         assert res is None
@@ -59,12 +61,12 @@ class TestSubListCreateAttachDetachAPIView:
         mock_request = mocker.MagicMock(data=dict(id='foobar'))
         serializer = SubListCreateAttachDetachAPIView()
 
-        (sub_id, res) = serializer.attach_validate(mock_request)
+        sub_id, res = serializer.attach_validate(mock_request)
 
         assert type(res) is Response
 
     def test_attach_create_and_associate(self, mocker, get_object_or_400, parent_relationship_factory):
-        (serializer, mock_parent_relationship) = parent_relationship_factory(SubListCreateAttachDetachAPIView, 'wife')
+        serializer, mock_parent_relationship = parent_relationship_factory(SubListCreateAttachDetachAPIView, 'wife')
         create_return_value = mocker.MagicMock(status_code=status.HTTP_201_CREATED)
         serializer.create = mocker.Mock(return_value=create_return_value)
 
@@ -75,7 +77,7 @@ class TestSubListCreateAttachDetachAPIView:
         mock_parent_relationship.wife.add.assert_called_with(get_object_or_400.return_value)
 
     def test_attach_associate_only(self, mocker, get_object_or_400, parent_relationship_factory):
-        (serializer, mock_parent_relationship) = parent_relationship_factory(SubListCreateAttachDetachAPIView, 'wife')
+        serializer, mock_parent_relationship = parent_relationship_factory(SubListCreateAttachDetachAPIView, 'wife')
         serializer.create = mocker.Mock(return_value=mocker.MagicMock())
 
         mock_request = mocker.MagicMock(data=dict(id=1))
@@ -88,7 +90,7 @@ class TestSubListCreateAttachDetachAPIView:
         mock_request = mocker.MagicMock(data=dict(id=1))
         serializer = SubListCreateAttachDetachAPIView()
 
-        (sub_id, res) = serializer.unattach_validate(mock_request)
+        sub_id, res = serializer.unattach_validate(mock_request)
 
         assert sub_id == 1
         assert res is None
@@ -97,7 +99,7 @@ class TestSubListCreateAttachDetachAPIView:
         mock_request = mocker.MagicMock(data=dict(id='foobar'))
         serializer = SubListCreateAttachDetachAPIView()
 
-        (sub_id, res) = serializer.unattach_validate(mock_request)
+        sub_id, res = serializer.unattach_validate(mock_request)
 
         assert type(res) is Response
 
@@ -105,13 +107,13 @@ class TestSubListCreateAttachDetachAPIView:
         mock_request = mocker.MagicMock(data=dict())
         serializer = SubListCreateAttachDetachAPIView()
 
-        (sub_id, res) = serializer.unattach_validate(mock_request)
+        sub_id, res = serializer.unattach_validate(mock_request)
 
         assert sub_id is None
         assert type(res) is Response
 
     def test_unattach_by_id_ok(self, mocker, parent_relationship_factory, get_object_or_400):
-        (serializer, mock_parent_relationship) = parent_relationship_factory(SubListCreateAttachDetachAPIView, 'wife')
+        serializer, mock_parent_relationship = parent_relationship_factory(SubListCreateAttachDetachAPIView, 'wife')
         mock_request = mocker.MagicMock()
         mock_sub = mocker.MagicMock(name="object to unattach")
         get_object_or_400.return_value = mock_sub
@@ -207,3 +209,53 @@ def test_related_search_reverse_FK_field():
     view = ListAPIView()
     view.model = Credential
     assert 'unifiedjobtemplates__search' in view.related_search_fields
+
+
+class TestFinalizeResponseDeprecation:
+    """Unit tests for deprecation header logic in APIView.finalize_response."""
+
+    def _make_view(self, mocker, deprecated=False, deprecation=None):
+        from awx.api.generics import APIView
+
+        view = APIView()
+        view.request = mocker.MagicMock()
+        view.request.query_params = {}
+        view.headers = {}
+        view.kwargs = {}
+        view.format_kwarg = None
+        if deprecated:
+            view.deprecated = True
+        if deprecation:
+            view.deprecation = deprecation
+        return view
+
+    def test_deprecated_flag_sets_warning_header(self, mocker):
+        view = self._make_view(mocker, deprecated=True)
+        response = Response(status=200)
+        result = view.finalize_response(view.request, response)
+        result.render()
+        assert '299 awx' in result['Warning']
+
+    def test_deprecated_flag_sets_new_headers(self, mocker):
+        view = self._make_view(mocker, deprecated=True)
+        response = Response(status=200)
+        result = view.finalize_response(view.request, response)
+        result.render()
+        assert result['X-API-Deprecated'] == 'true'
+        assert 'X-API-Deprecated-Detail' in result
+
+    def test_deprecation_dict_sets_custom_detail(self, mocker):
+        view = self._make_view(mocker, deprecation={'detail': 'Use /api/v2/new/ instead.'})
+        response = Response(status=200)
+        result = view.finalize_response(view.request, response)
+        result.render()
+        assert result['X-API-Deprecated'] == 'true'
+        assert 'Use /api/v2/new/ instead.' in result['X-API-Deprecated-Detail']
+
+    def test_no_deprecation_no_headers(self, mocker):
+        view = self._make_view(mocker)
+        response = Response(status=200)
+        result = view.finalize_response(view.request, response)
+        result.render()
+        assert 'Warning' not in result
+        assert 'X-API-Deprecated' not in result

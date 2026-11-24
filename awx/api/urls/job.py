@@ -19,7 +19,6 @@ from awx.api.views import (
     JobHostSummaryDetail,
 )
 
-
 urls = [
     re_path(r'^$', JobList.as_view(), name='job_list'),
     re_path(r'^(?P<pk>[0-9]+)/$', JobDetail.as_view(), name='job_detail'),

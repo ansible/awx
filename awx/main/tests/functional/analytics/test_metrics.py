@@ -1,8 +1,16 @@
+from unittest import mock
+
 import pytest
 
+from django.test import RequestFactory
 from prometheus_client.parser import text_string_to_metric_families
+from rest_framework.request import Request
 from awx.main import models
 from awx.main.analytics.metrics import metrics
+from awx.main.analytics.analytics_tasks import send_subsystem_metrics
+import awx.main.analytics.subsystem_metrics as subsystem_metrics_module
+from awx.main.analytics.subsystem_metrics import IndirectCountingMetrics
+from awx.main.analytics.dispatcherd_metrics import get_dispatcherd_metrics
 from awx.api.versioning import reverse
 
 EXPECTED_VALUES = {
@@ -77,3 +85,89 @@ def test_metrics_http_methods(get, post, patch, put, options, admin):
     assert patch(get_metrics_view_db_only(), user=admin).status_code == 405
     assert post(get_metrics_view_db_only(), user=admin).status_code == 405
     assert options(get_metrics_view_db_only(), user=admin).status_code == 200
+
+
+class DummyMetricsResponse:
+    def __init__(self, payload):
+        self._payload = payload
+
+    def read(self):
+        return self._payload
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        return False
+
+
+def test_dispatcherd_metrics_node_filter_match(mocker, settings):
+    settings.CLUSTER_HOST_ID = "awx-1"
+    payload = b'# HELP test_metric A test metric\n# TYPE test_metric gauge\ntest_metric 1\n'
+
+    def fake_urlopen(url, timeout=1.0):
+        return DummyMetricsResponse(payload)
+
+    mocker.patch('urllib.request.urlopen', fake_urlopen)
+
+    request = Request(RequestFactory().get('/api/v2/metrics/', {'node': 'awx-1'}))
+
+    assert get_dispatcherd_metrics(request) == payload.decode('utf-8')
+
+
+def test_dispatcherd_metrics_node_filter_excludes_local(mocker, settings):
+    settings.CLUSTER_HOST_ID = "awx-1"
+
+    def fake_urlopen(*args, **kwargs):
+        raise AssertionError("urlopen should not be called when node filter excludes local node")
+
+    mocker.patch('urllib.request.urlopen', fake_urlopen)
+
+    request = Request(RequestFactory().get('/api/v2/metrics/', {'node': 'awx-2'}))
+
+    assert get_dispatcherd_metrics(request) == ''
+
+
+def test_dispatcherd_metrics_metric_filter_excludes_unrelated(mocker):
+    def fake_urlopen(*args, **kwargs):
+        raise AssertionError("urlopen should not be called when metric filter excludes dispatcherd metrics")
+
+    mocker.patch('urllib.request.urlopen', fake_urlopen)
+
+    request = Request(RequestFactory().get('/api/v2/metrics/', {'metric': 'awx_system_info'}))
+
+    assert get_dispatcherd_metrics(request) == ''
+
+
+@mock.patch('awx.main.analytics.analytics_tasks.IndirectCountingMetrics')
+@mock.patch('awx.main.analytics.analytics_tasks.CallbackReceiverMetrics')
+@mock.patch('awx.main.analytics.analytics_tasks.DispatcherMetrics')
+def test_send_subsystem_metrics(mock_dispatcher, mock_callback, mock_indirect):
+    """send_subsystem_metrics calls send_metrics on all subsystem metric classes."""
+    send_subsystem_metrics()
+    mock_dispatcher.return_value.send_metrics.assert_called_once()
+    mock_callback.return_value.send_metrics.assert_called_once()
+    mock_indirect.return_value.send_metrics.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_indirect_counting_metrics_init():
+    """IndirectCountingMetrics can be instantiated and has expected metric fields."""
+    m = IndirectCountingMetrics(metrics_have_changed=False)
+    assert 'indirect_node_audit_records_created' in m.METRICS
+    assert 'indirect_node_query_execution_seconds' in m.METRICS
+    assert 'indirect_node_jq_query_errors' in m.METRICS
+    assert 'indirect_node_fallback_cleanup_seconds' in m.METRICS
+
+
+@mock.patch.object(subsystem_metrics_module, 'IndirectCountingMetrics')
+@mock.patch.object(subsystem_metrics_module, 'CallbackReceiverMetrics')
+@mock.patch.object(subsystem_metrics_module, 'DispatcherMetrics')
+@mock.patch.object(subsystem_metrics_module, 'get_dispatcherd_metrics', return_value='')
+def test_subsystem_metrics_function_includes_indirect_counting(mock_dispatcherd, mock_dispatcher, mock_callback, mock_indirect):
+    """subsystem_metrics.metrics() calls generate_metrics on IndirectCountingMetrics."""
+    for m in (mock_dispatcher, mock_callback, mock_indirect):
+        m.return_value.generate_metrics.return_value = ''
+    request = mock.MagicMock()
+    subsystem_metrics_module.metrics(request)
+    mock_indirect.return_value.generate_metrics.assert_called_once_with(request)

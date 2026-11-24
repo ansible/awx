@@ -6,11 +6,13 @@ from django.forms.models import model_to_dict
 from rest_framework.exceptions import ParseError
 
 from awx.main.access import BaseAccess, check_superuser, JobTemplateAccess, WorkflowJobTemplateAccess, vars_are_encrypted
+from awx.main.fields import AskForField
 
 from awx.main.models import (
     Credential,
     CredentialType,
     Inventory,
+    JobTemplate,
     Project,
     Role,
     Organization,
@@ -150,6 +152,31 @@ def test_not_superuser(mocker):
     assert can_add(access, None) is False
 
 
+def test_jt_clearing_unset_fk_with_empty_string_is_nonsensitive(job_template_with_ids, user_unit):
+    """Posting '' for an FK field that is already None (e.g. execution_environment)
+    should be treated as a no-op, not a sensitive change, since the UI sometimes
+    sends '' instead of null.
+    """
+    access = JobTemplateAccess(user_unit)
+    assert job_template_with_ids.execution_environment_id is None
+    data = {'execution_environment': ''}
+    assert access.changes_are_non_sensitive(job_template_with_ids, data)
+
+
+@pytest.mark.parametrize(
+    'field_name, new_value, expected',
+    [
+        ('inventory', 11, True),  # matches current inventory_id
+        ('inventory', 12, False),  # different id
+        ('execution_environment', '', True),  # '' equated to None
+        ('execution_environment', 5, False),  # not None, and not equal
+    ],
+)
+def test_fk_value_unchanged(job_template_with_ids, user_unit, field_name, new_value, expected):
+    access = JobTemplateAccess(user_unit)
+    assert access._fk_value_unchanged(job_template_with_ids, field_name, new_value) is expected
+
+
 def test_jt_existing_values_are_nonsensitive(job_template_with_ids, user_unit):
     """Assure that permission checks are not required if submitted data is
     identical to what the job template already has."""
@@ -157,6 +184,19 @@ def test_jt_existing_values_are_nonsensitive(job_template_with_ids, user_unit):
     data = model_to_dict(job_template_with_ids, exclude=['unifiedjobtemplate_ptr'])
     access = JobTemplateAccess(user_unit)
 
+    assert access.changes_are_non_sensitive(job_template_with_ids, data)
+
+
+@pytest.mark.parametrize('field_name', [f.name for f in JobTemplate._meta.get_fields() if isinstance(f, AskForField)])
+def test_jt_ask_fields_are_nonsensitive(job_template_with_ids, user_unit, field_name):
+    """Toggling any ask_*_on_launch field should be considered a non-sensitive
+    change so that JT admins without project/inventory use_role can still
+    modify these boolean prompt fields.
+    """
+    access = JobTemplateAccess(user_unit)
+    # The field defaults to False on the template; flipping it to True should
+    # still be treated as non-sensitive.
+    data = {field_name: True}
     assert access.changes_are_non_sensitive(job_template_with_ids, data)
 
 

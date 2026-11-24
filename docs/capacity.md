@@ -68,7 +68,7 @@ The value `fork_per_cpu` can be controlled by setting the AWX settings value (or
 
 When selecting the capacity, it's important to understand how each job type affects it.
 
-It's helpful to understand what `forks` mean to Ansible: http://docs.ansible.com/ansible/latest/intro_configuration.html#forks
+It's helpful to understand what `forks` mean to Ansible: https://docs.ansible.com/projects/ansible/latest/intro_configuration.html#forks
 
 The default forks value for ansible is `5`. However, if AWX knows that you're running against fewer systems than that, then the actual concurrency value
 will be lower.

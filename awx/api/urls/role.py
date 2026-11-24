@@ -5,7 +5,6 @@ from django.urls import re_path
 
 from awx.api.views import RoleList, RoleDetail, RoleUsersList, RoleTeamsList
 
-
 urls = [
     re_path(r'^$', RoleList.as_view(), name='role_list'),
     re_path(r'^(?P<pk>[0-9]+)/$', RoleDetail.as_view(), name='role_detail'),

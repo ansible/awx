@@ -27,7 +27,6 @@ from awx.api.views.organization import (
 )
 from awx.api.views import OrganizationCredentialList
 
-
 urls = [
     re_path(r'^$', OrganizationList.as_view(), name='organization_list'),
     re_path(r'^(?P<pk>[0-9]+)/$', OrganizationDetail.as_view(), name='organization_detail'),

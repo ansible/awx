@@ -6,7 +6,6 @@ import re
 import logging
 from collections import OrderedDict
 
-
 # Logger is used for any data-related messages so that the log level
 # can be adjusted on command invocation
 logger = logging.getLogger('awx.main.commands.inventory_import')
@@ -135,7 +134,7 @@ class MemInventory(object):
             try:
                 port = int(name.split(':')[1])
             except (ValueError, UnicodeDecodeError):
-                logger.warning(u'Invalid port "%s" for host "%s"', name.split(':')[1], host_name)
+                logger.warning('Invalid port "%s" for host "%s"', name.split(':')[1], host_name)
                 port = None
         else:
             host_name = name

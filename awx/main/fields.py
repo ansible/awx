@@ -40,7 +40,6 @@ from awx.main.validators import validate_ssh_private_key
 from awx.main.constants import ENV_BLOCKLIST
 from awx.main import utils
 
-
 __all__ = [
     'JSONBlob',
     'AutoOneToOneField',
@@ -429,6 +428,9 @@ class CredentialInputField(JSONSchemaField):
         # determine the defined fields for the associated credential type
         properties = {}
         for field in model_instance.credential_type.inputs.get('fields', []):
+            # Prevent users from providing values for internally resolved fields
+            if 'internal' in field:
+                continue
             field = field.copy()
             properties[field['id']] = field
             if field.get('choices', []):
@@ -567,6 +569,7 @@ class CredentialTypeInputField(JSONSchemaField):
                             },
                             'label': {'type': 'string'},
                             'help_text': {'type': 'string'},
+                            'internal': {'type': 'boolean'},
                             'multiline': {'type': 'boolean'},
                             'secret': {'type': 'boolean'},
                             'ask_at_runtime': {'type': 'boolean'},

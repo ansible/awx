@@ -16,7 +16,7 @@ from rest_framework.exceptions import ValidationError
 
 # DAB
 from ansible_base.jwt_consumer.common.util import generate_x_trusted_proxy_header
-from ansible_base.lib.testing.fixtures import rsa_keypair_factory, rsa_keypair  # noqa: F401; pylint: disable=unused-import
+from ansible_base.lib.testing.fixtures import rsa_keypair_factory, rsa_keypair  # noqa: F401  # pylint: disable=unused-import
 
 
 @pytest.mark.django_db
@@ -161,7 +161,7 @@ def test_invalid_json_body(patch, job_template_factory, alice, json_body):
     objs = job_template_factory('jt', organization='org1')
     objs.job_template.admin_role.members.add(alice)
     resp = patch(reverse('api:job_template_detail', kwargs={'pk': objs.job_template.id}), json_body, alice, expect=400)
-    assert resp.data['detail'] == (u'JSON parse error - not a JSON object')
+    assert resp.data['detail'] == ('JSON parse error - not a JSON object')
 
 
 @pytest.mark.django_db
@@ -432,7 +432,7 @@ class TestJobTemplateCallbackProxyIntegration:
             data={'host_config_key': 'abcd'},
             user=admin_user,
             expect=expected,
-            **headers
+            **headers,
         )
 
     @override_settings(REMOTE_HOST_HEADERS=['HTTP_X_FROM_THE_LOAD_BALANCER', 'REMOTE_ADDR', 'REMOTE_HOST'], PROXY_IP_ALLOWED_LIST=[])
@@ -462,7 +462,7 @@ class TestJobTemplateCallbackProxyIntegration:
                     data={'host_config_key': 'abcd'},
                     user=admin_user,
                     expect=201,
-                    **headers
+                    **headers,
                 )
 
     @override_settings(REMOTE_HOST_HEADERS=['HTTP_X_FROM_THE_LOAD_BALANCER', 'REMOTE_ADDR', 'REMOTE_HOST'], PROXY_IP_ALLOWED_LIST=['my.proxy.example.org'])
@@ -483,5 +483,5 @@ class TestJobTemplateCallbackProxyIntegration:
                     data={'host_config_key': 'abcd'},
                     user=admin_user,
                     expect=400,
-                    **headers
+                    **headers,
                 )

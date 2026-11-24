@@ -83,7 +83,6 @@ class ActionModule(ActionBase):
         password = self._task.args.get('password', None)
         client_id = self._task.args.get('client_id', None)
         client_secret = self._task.args.get('client_secret', None)
-        oidc_endpoint = self._task.args.get('oidc_endpoint', DEFAULT_OIDC_ENDPOINT)
 
         session.headers.update(
             {
@@ -93,7 +92,7 @@ class ActionModule(ActionBase):
         )
 
         if authentication == 'service_account' or (client_id and client_secret):
-            data = self._obtain_auth_token(oidc_endpoint, client_id, client_secret)
+            data = self._obtain_auth_token(DEFAULT_OIDC_ENDPOINT, client_id, client_secret)
             if 'token' not in data:
                 result['failed'] = data['failed']
                 result['msg'] = data['msg']

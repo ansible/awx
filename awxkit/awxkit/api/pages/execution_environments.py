@@ -11,7 +11,6 @@ from awxkit.utils import random_title, PseudoNamespace, filter_by_class
 from . import base
 from . import page
 
-
 log = logging.getLogger(__name__)
 
 
@@ -43,7 +42,7 @@ class ExecutionEnvironment(HasCreate, HasCopy, base.Base):
             organization=organization.id if organization else None,
             credential=credential.id if credential else None,
             pull=pull,
-            **kwargs
+            **kwargs,
         )
 
         return payload

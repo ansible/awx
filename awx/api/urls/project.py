@@ -22,7 +22,6 @@ from awx.api.views import (
     ProjectCopy,
 )
 
-
 urls = [
     re_path(r'^$', ProjectList.as_view(), name='project_list'),
     re_path(r'^(?P<pk>[0-9]+)/$', ProjectDetail.as_view(), name='project_detail'),

@@ -14,6 +14,8 @@ from rest_framework.request import Request
 
 from awx.main.consumers import emit_channel_notification
 from awx.main.utils import is_testing
+from awx.main.utils.redis import get_redis_client
+from .dispatcherd_metrics import get_dispatcherd_metrics
 
 root_key = settings.SUBSYSTEM_METRICS_REDIS_KEY_PREFIX
 logger = logging.getLogger('awx.main.analytics')
@@ -179,7 +181,9 @@ class HistogramM(BaseM):
             node_label = f'node="{instance}"'
             subsystem_label = f',subsystem="{namespace}"' if namespace else ''
             for i, b in enumerate(self.buckets):
-                output_text += f'{self.field}_bucket{{le="{b}",{node_label}{subsystem_label}}} {sum(instance_data[instance][self.field]["counts"][0:i+1])}\n'
+                output_text += (
+                    f'{self.field}_bucket{{le="{b}",{node_label}{subsystem_label}}} {sum(instance_data[instance][self.field]["counts"][0 : i + 1])}\n'
+                )
             output_text += f'{self.field}_bucket{{le="+Inf",{node_label}{subsystem_label}}} {instance_data[instance][self.field]["inf"]}\n'
             output_text += f'{self.field}_count{{{node_label}{subsystem_label}}} {instance_data[instance][self.field]["inf"]}\n'
             output_text += f'{self.field}_sum{{{node_label}{subsystem_label}}} {instance_data[instance][self.field]["sum"]}\n'
@@ -198,8 +202,8 @@ class Metrics(MetricsNamespace):
     def __init__(self, namespace, auto_pipe_execute=False, instance_name=None, metrics_have_changed=True, **kwargs):
         MetricsNamespace.__init__(self, namespace)
 
-        self.pipe = redis.Redis.from_url(settings.BROKER_URL).pipeline()
-        self.conn = redis.Redis.from_url(settings.BROKER_URL)
+        self.conn = get_redis_client()
+        self.pipe = self.conn.pipeline()
         self.last_pipe_execute = time.time()
         # track if metrics have been modified since last saved to redis
         # start with True so that we get an initial save to redis
@@ -397,15 +401,24 @@ class DispatcherMetrics(Metrics):
         SetFloatM('workflow_manager_recorded_timestamp', 'Unix timestamp when metrics were last recorded'),
         SetFloatM('workflow_manager_spawn_workflow_graph_jobs_seconds', 'Time spent spawning workflow tasks'),
         SetFloatM('workflow_manager_get_tasks_seconds', 'Time spent loading workflow tasks from db'),
-        # dispatcher subsystem metrics
-        SetIntM('dispatcher_pool_scale_up_events', 'Number of times local dispatcher scaled up a worker since startup'),
-        SetIntM('dispatcher_pool_active_task_count', 'Number of active tasks in the worker pool when last task was submitted'),
-        SetIntM('dispatcher_pool_max_worker_count', 'Highest number of workers in worker pool in last collection interval, about 20s'),
-        SetFloatM('dispatcher_availability', 'Fraction of time (in last collection interval) dispatcher was able to receive messages'),
     ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(settings.METRICS_SERVICE_DISPATCHER, *args, **kwargs)
+
+
+class IndirectCountingMetrics(Metrics):
+    """Subsystem metrics for indirect node counting performance and error tracking."""
+
+    METRICSLIST = [
+        IntM('indirect_node_audit_records_created', 'Number of indirect node audit records created'),
+        FloatM('indirect_node_query_execution_seconds', 'Time spent executing jq queries for indirect node counting'),
+        IntM('indirect_node_jq_query_errors', 'Number of jq query execution errors during indirect node counting'),
+        SetFloatM('indirect_node_fallback_cleanup_seconds', 'Time spent in the fallback cleanup job for indirect node counting'),
+    ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(settings.METRICS_SERVICE_INDIRECT_COUNTING, *args, **kwargs)
 
 
 class CallbackReceiverMetrics(Metrics):
@@ -429,8 +442,13 @@ class CallbackReceiverMetrics(Metrics):
 
 def metrics(request):
     output_text = ''
-    for m in [DispatcherMetrics(), CallbackReceiverMetrics()]:
-        output_text += m.generate_metrics(request)
+    output_text += DispatcherMetrics().generate_metrics(request)
+    output_text += CallbackReceiverMetrics().generate_metrics(request)
+    output_text += IndirectCountingMetrics().generate_metrics(request)
+
+    dispatcherd_metrics = get_dispatcherd_metrics(request)
+    if dispatcherd_metrics:
+        output_text += dispatcherd_metrics
     return output_text
 
 
@@ -478,13 +496,6 @@ class CallbackReceiverMetricsServer(MetricsServer):
         registry = CollectorRegistry(auto_describe=True)
         registry.register(CustomToPrometheusMetricsCollector(CallbackReceiverMetrics(metrics_have_changed=False)))
         super().__init__(settings.METRICS_SERVICE_CALLBACK_RECEIVER, registry)
-
-
-class DispatcherMetricsServer(MetricsServer):
-    def __init__(self):
-        registry = CollectorRegistry(auto_describe=True)
-        registry.register(CustomToPrometheusMetricsCollector(DispatcherMetrics(metrics_have_changed=False)))
-        super().__init__(settings.METRICS_SERVICE_DISPATCHER, registry)
 
 
 class WebsocketsMetricsServer(MetricsServer):

@@ -1,6 +1,7 @@
 # Ignore generated schema
 swagger.json
 schema.json
+schema.yaml
 reference-schema.json
 
 # Tags

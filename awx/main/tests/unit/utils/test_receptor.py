@@ -1,4 +1,6 @@
-from awx.main.tasks.receptor import _convert_args_to_cli
+from unittest.mock import patch
+
+from awx.main.tasks.receptor import _convert_args_to_cli, should_update_config
 
 
 def test_file_cleanup_scenario():
@@ -20,3 +22,8 @@ def test_image_cleanup_scenario():
         ' '.join(args)
         == 'cleanup --remove-images "quay.invalid/foo/bar:latest" "quay.invalid/foo/bar:devel" --image-prune --process-isolation-executable=podman'
     )
+
+
+def test_should_update_config_missing_file():
+    with patch('awx.main.tasks.receptor.read_receptor_config', side_effect=FileNotFoundError):
+        assert should_update_config([{'node': {}}]) is True

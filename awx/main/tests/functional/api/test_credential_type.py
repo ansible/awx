@@ -1,7 +1,9 @@
 import json
 
 import pytest
+from django.test import override_settings
 
+from ansible_base.lib.testing.util import feature_flag_enabled
 from awx.main.models.credential import CredentialType, Credential
 from awx.api.versioning import reverse
 
@@ -159,7 +161,8 @@ def test_create_as_admin(get, post, admin):
     response = get(reverse('api:credential_type_list'), admin)
     assert response.data['count'] == 1
     assert response.data['results'][0]['name'] == 'Custom Credential Type'
-    assert response.data['results'][0]['inputs'] == {}
+    # Serializer normalizes empty inputs to {'fields': []}
+    assert response.data['results'][0]['inputs'] == {'fields': []}
     assert response.data['results'][0]['injectors'] == {}
     assert response.data['results'][0]['managed'] is False
 
@@ -474,3 +477,162 @@ def test_credential_type_rbac_external_test(post, alice, admin, credentialtype_e
     data = {'inputs': {}, 'metadata': {}}
     assert post(url, data, admin).status_code == 202
     assert post(url, data, alice).status_code == 403
+
+
+# --- Tests for internal field filtering with None/invalid inputs ---
+
+
+@pytest.mark.django_db
+def test_credential_type_with_none_inputs(get, admin):
+    """Test that credential type with empty inputs dict works correctly."""
+    # Create a credential type with empty dict
+    ct = CredentialType.objects.create(
+        kind='cloud',
+        name='Test Type',
+        managed=False,
+        inputs={},  # Empty dict, not None (DB has NOT NULL constraint)
+    )
+
+    url = reverse('api:credential_type_detail', kwargs={'pk': ct.pk})
+    response = get(url, admin)
+    assert response.status_code == 200
+    # Should have normalized inputs to empty dict
+    assert 'inputs' in response.data
+    assert isinstance(response.data['inputs'], dict)
+    assert response.data['inputs']['fields'] == []
+
+
+@pytest.mark.django_db
+def test_credential_type_with_invalid_inputs_type(get, admin):
+    """Test that credential type with non-dict inputs doesn't cause errors."""
+    # Create a credential type with invalid inputs type
+    ct = CredentialType.objects.create(kind='cloud', name='Test Type', managed=False, inputs={'fields': 'not-a-list'})
+
+    url = reverse('api:credential_type_detail', kwargs={'pk': ct.pk})
+    response = get(url, admin)
+    assert response.status_code == 200
+    # Should gracefully handle invalid fields type
+    assert 'inputs' in response.data
+    assert response.data['inputs']['fields'] == []
+
+
+@pytest.mark.django_db
+def test_credential_type_filters_internal_fields(get, admin):
+    """Test that internal fields are filtered from API responses."""
+    ct = CredentialType.objects.create(
+        kind='cloud',
+        name='Test OIDC Type',
+        managed=False,
+        inputs={
+            'fields': [
+                {'id': 'url', 'label': 'URL', 'type': 'string'},
+                {'id': 'token', 'label': 'Token', 'type': 'string', 'secret': True, 'internal': True},
+                {'id': 'public_field', 'label': 'Public', 'type': 'string'},
+            ]
+        },
+    )
+
+    url = reverse('api:credential_type_detail', kwargs={'pk': ct.pk})
+    with feature_flag_enabled('FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED'):
+        response = get(url, admin)
+        assert response.status_code == 200
+
+        field_ids = [f['id'] for f in response.data['inputs']['fields']]
+        # Internal field should be filtered out
+        assert 'token' not in field_ids
+        assert 'url' in field_ids
+        assert 'public_field' in field_ids
+
+
+@pytest.mark.django_db
+def test_credential_type_list_filters_internal_fields(get, admin):
+    """Test that internal fields are filtered in list view."""
+    CredentialType.objects.create(
+        kind='cloud',
+        name='Test OIDC Type',
+        managed=False,
+        inputs={
+            'fields': [
+                {'id': 'url', 'label': 'URL', 'type': 'string'},
+                {'id': 'workload_identity_token', 'label': 'Token', 'type': 'string', 'secret': True, 'internal': True},
+            ]
+        },
+    )
+
+    url = reverse('api:credential_type_list')
+    with feature_flag_enabled('FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED'):
+        response = get(url, admin)
+        assert response.status_code == 200
+
+        # Find our credential type in the results
+        test_ct = next((ct for ct in response.data['results'] if ct['name'] == 'Test OIDC Type'), None)
+        assert test_ct is not None
+
+        field_ids = [f['id'] for f in test_ct['inputs']['fields']]
+        # Internal field should be filtered out
+        assert 'workload_identity_token' not in field_ids
+        assert 'url' in field_ids
+
+
+FAKE_TIER2_PATTERN = r'^(?!.*<[a-zA-Z/!][^>]*>)[\s\S]*$'
+
+
+@pytest.fixture
+def fake_tier2_pattern(monkeypatch):
+    monkeypatch.setattr('awx.api.validation_patterns.build_tier2_frontend_pattern', lambda: FAKE_TIER2_PATTERN)
+
+
+@pytest.mark.django_db
+def test_credential_type_fields_include_patterns_when_toggle_on(get, admin, fake_tier2_pattern):
+    ct = CredentialType.objects.create(
+        kind='cloud',
+        name='Pattern Type',
+        managed=False,
+        inputs={
+            'fields': [
+                {'id': 'username', 'label': 'Username', 'type': 'string'},
+                {'id': 'api_token', 'label': 'API Token', 'type': 'string', 'secret': True},
+                {'id': 'verify_ssl', 'label': 'Verify SSL', 'type': 'boolean'},
+            ]
+        },
+    )
+    url = reverse('api:credential_type_detail', kwargs={'pk': ct.pk})
+    with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+        response = get(url, admin)
+    assert response.status_code == 200
+    fields = {f['id']: f for f in response.data['inputs']['fields']}
+    assert fields['username']['pattern'] == FAKE_TIER2_PATTERN
+    assert 'patternDescription' in fields['username']
+    assert 'pattern' not in fields['api_token']
+    assert 'pattern' not in fields['verify_ssl']
+
+
+@pytest.mark.django_db
+def test_credential_type_fields_omit_patterns_when_toggle_off(get, admin, fake_tier2_pattern):
+    ct = CredentialType.objects.create(
+        kind='cloud',
+        name='Pattern Type Off',
+        managed=False,
+        inputs={'fields': [{'id': 'username', 'label': 'Username', 'type': 'string'}]},
+    )
+    url = reverse('api:credential_type_detail', kwargs={'pk': ct.pk})
+    with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=False):
+        response = get(url, admin)
+    assert response.status_code == 200
+    username = response.data['inputs']['fields'][0]
+    assert 'pattern' not in username
+    assert 'patternDescription' not in username
+
+
+@pytest.mark.django_db
+def test_credential_type_metadata_includes_patterns_when_toggle_on(get, admin, credentialtype_external, fake_tier2_pattern):
+    url = reverse('api:credential_type_detail', kwargs={'pk': credentialtype_external.pk})
+    with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+        response = get(url, admin)
+    assert response.status_code == 200
+    metadata = {f['id']: f for f in response.data['inputs']['metadata']}
+    assert metadata['key']['pattern'] == FAKE_TIER2_PATTERN
+    assert metadata['version']['pattern'] == FAKE_TIER2_PATTERN
+    fields = {f['id']: f for f in response.data['inputs']['fields']}
+    assert fields['url']['pattern'] == FAKE_TIER2_PATTERN
+    assert 'pattern' not in fields['token']

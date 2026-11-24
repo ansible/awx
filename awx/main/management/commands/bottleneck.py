@@ -23,8 +23,7 @@ class Command(BaseCommand):
 
         print('## ' + JobTemplate.objects.get(pk=jt).name + f' (last {history} runs)\n')
         with connection.cursor() as cursor:
-            cursor.execute(
-                f'''
+            cursor.execute(f'''
                 SELECT
                     b.id, b.job_id, b.host_name, b.created - a.created delta,
                     b.task task,
@@ -44,8 +43,7 @@ class Command(BaseCommand):
                         LIMIT {history}
                     )
                 ORDER BY delta DESC;
-                '''
-            )
+                ''')
             slowest_events = cursor.fetchall()
 
         def format_td(x):

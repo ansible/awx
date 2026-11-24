@@ -132,6 +132,25 @@ def test_cert_with_key():
     assert not pem_objects[1]['key_enc']
 
 
+def test_ssh_key_with_whitespace():
+    # Test that SSH keys with leading/trailing whitespace/newlines are properly sanitized
+    # This addresses issue #14219 where copy-paste can introduce hidden newlines
+    valid_key_with_whitespace = "\n\n" + TEST_SSH_KEY_DATA + "\n\n"
+    pem_objects = validate_ssh_private_key(valid_key_with_whitespace)
+    assert pem_objects[0]['key_type'] == 'rsa'
+    assert not pem_objects[0]['key_enc']
+
+    # Test with just leading whitespace
+    valid_key_leading = "\n\n\n" + TEST_SSH_KEY_DATA
+    pem_objects = validate_ssh_private_key(valid_key_leading)
+    assert pem_objects[0]['key_type'] == 'rsa'
+
+    # Test with just trailing whitespace
+    valid_key_trailing = TEST_SSH_KEY_DATA + "\n\n\n"
+    pem_objects = validate_ssh_private_key(valid_key_trailing)
+    assert pem_objects[0]['key_type'] == 'rsa'
+
+
 @pytest.mark.parametrize(
     "var_str",
     [

@@ -1,32 +1,11 @@
-from datetime import timedelta
 import logging
 
 from django.db.models import Q
-from django.conf import settings
-from django.utils.timezone import now as tz_now
 from django.contrib.contenttypes.models import ContentType
 
 from awx.main.models import Instance, UnifiedJob, WorkflowJob
 
 logger = logging.getLogger('awx.main.dispatch')
-
-
-def startup_reaping():
-    """
-    If this particular instance is starting, then we know that any running jobs are invalid
-    so we will reap those jobs as a special action here
-    """
-    jobs = UnifiedJob.objects.filter(status='running', controller_node=Instance.objects.my_hostname())
-    job_ids = []
-    for j in jobs:
-        job_ids.append(j.id)
-        reap_job(
-            j,
-            'failed',
-            job_explanation='Task was marked as running at system start up. The system must have not shut down properly, so it has been marked as failed.',
-        )
-    if job_ids:
-        logger.error(f'Unified jobs {job_ids} were reaped on dispatch startup')
 
 
 def reap_job(j, status, job_explanation=None):
@@ -50,29 +29,12 @@ def reap_job(j, status, job_explanation=None):
     logger.error(f'{j.log_format} is no longer {status_before}; reaping')
 
 
-def reap_waiting(instance=None, status='failed', job_explanation=None, grace_period=None, excluded_uuids=None, ref_time=None):
-    """
-    Reap all jobs in waiting for this instance.
-    """
-    if grace_period is None:
-        grace_period = settings.JOB_WAITING_GRACE_PERIOD + settings.TASK_MANAGER_TIMEOUT
-
-    if instance is None:
-        hostname = Instance.objects.my_hostname()
-    else:
-        hostname = instance.hostname
-    if ref_time is None:
-        ref_time = tz_now()
-    jobs = UnifiedJob.objects.filter(status='waiting', modified__lte=ref_time - timedelta(seconds=grace_period), controller_node=hostname)
-    if excluded_uuids:
-        jobs = jobs.exclude(celery_task_id__in=excluded_uuids)
-    for j in jobs:
-        reap_job(j, status, job_explanation=job_explanation)
-
-
 def reap(instance=None, status='failed', job_explanation=None, excluded_uuids=None, ref_time=None):
-    """
-    Reap all jobs in running for this instance.
+    """Reap all running jobs for this instance.
+
+    Per-job adopt-or-reap decisions (based on work_unit_id) belong in the caller's loop,
+    not here as a queryset filter. See _process_startup_jobs and _process_running_jobs
+    in awx.main.tasks.system for the unified loops that replaced undispatched_only filtering.
     """
     if instance is None:
         hostname = Instance.objects.my_hostname()

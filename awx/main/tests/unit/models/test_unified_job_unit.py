@@ -1,8 +1,7 @@
-import pytest
 from unittest import mock
 
 from awx.main.models import UnifiedJob, UnifiedJobTemplate, WorkflowJob, WorkflowJobNode, WorkflowApprovalTemplate, Job, User, Project, JobTemplate, Inventory
-from awx.main.constants import JOB_VARIABLE_PREFIXES
+from awx.main.utils.common import get_job_variable_prefixes
 
 
 def test_incorrectly_formatted_variables():
@@ -20,52 +19,6 @@ def test_unified_job_workflow_attributes():
 
         assert job.spawned_by_workflow is True
         assert job.workflow_job_id == 1
-
-
-def mock_on_commit(f):
-    f()
-
-
-@pytest.fixture
-def unified_job(mocker):
-    mocker.patch.object(UnifiedJob, 'can_cancel', return_value=True)
-    j = UnifiedJob()
-    j.status = 'pending'
-    j.cancel_flag = None
-    j.save = mocker.MagicMock()
-    j.websocket_emit_status = mocker.MagicMock()
-    j.fallback_cancel = mocker.MagicMock()
-    return j
-
-
-def test_cancel(unified_job):
-    with mock.patch('awx.main.models.unified_jobs.connection.on_commit', wraps=mock_on_commit):
-        unified_job.cancel()
-
-    assert unified_job.cancel_flag is True
-    assert unified_job.status == 'canceled'
-    assert unified_job.job_explanation == ''
-    # Note: the websocket emit status check is just reflecting the state of the current code.
-    # Some more thought may want to go into only emitting canceled if/when the job record
-    # status is changed to canceled. Unlike, currently, where it's emitted unconditionally.
-    unified_job.websocket_emit_status.assert_called_with("canceled")
-    assert [(args, kwargs) for args, kwargs in unified_job.save.call_args_list] == [
-        ((), {'update_fields': ['cancel_flag', 'start_args']}),
-        ((), {'update_fields': ['status']}),
-    ]
-
-
-def test_cancel_job_explanation(unified_job):
-    job_explanation = 'giggity giggity'
-
-    with mock.patch('awx.main.models.unified_jobs.connection.on_commit'):
-        unified_job.cancel(job_explanation=job_explanation)
-
-    assert unified_job.job_explanation == job_explanation
-    assert [(args, kwargs) for args, kwargs in unified_job.save.call_args_list] == [
-        ((), {'update_fields': ['cancel_flag', 'start_args', 'job_explanation']}),
-        ((), {'update_fields': ['status']}),
-    ]
 
 
 def test_organization_copy_to_jobs():
@@ -97,7 +50,7 @@ class TestMetaVars:
         maker = User(username='joe', pk=47, id=47)
         inv = Inventory(name='example-inv', id=45)
         result_hash = {}
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             result_hash['{}_job_id'.format(name)] = 42
             result_hash['{}_job_launch_type'.format(name)] = 'manual'
             result_hash['{}_user_name'.format(name)] = 'joe'
@@ -122,8 +75,48 @@ class TestMetaVars:
             project=Project(name='jobs-sync', scm_revision='12345444'),
             job_template=JobTemplate(name='jobs-jt', id=92, pk=92),
         ).awx_meta_vars()
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             assert data['{}_project_revision'.format(name)] == '12345444'
             assert '{}_job_template_id'.format(name) in data
             assert data['{}_job_template_id'.format(name)] == 92
             assert data['{}_job_template_name'.format(name)] == 'jobs-jt'
+
+
+class TestGetJobVariablePrefixes:
+    """Tests for the get_job_variable_prefixes() helper function."""
+
+    def test_default_returns_both(self):
+        from django.conf import settings
+
+        with mock.patch.object(settings, 'INCLUDE_DEPRECATED_AWX_VAR_PREFIX', True, create=True):
+            assert get_job_variable_prefixes() == ['awx', 'tower']
+
+    def test_disabled_returns_tower_only(self):
+        from django.conf import settings
+
+        with mock.patch.object(settings, 'INCLUDE_DEPRECATED_AWX_VAR_PREFIX', False, create=True):
+            assert get_job_variable_prefixes() == ['tower']
+
+    def test_fallback_when_setting_not_available(self):
+        """When setting is not available, falls back to both prefixes for backward compatibility."""
+        fake_settings = mock.MagicMock(spec=[])
+        with mock.patch('django.conf.settings', fake_settings):
+            assert get_job_variable_prefixes() == ['awx', 'tower']
+
+    def test_job_metavars_both_prefixes(self):
+        """With INCLUDE_DEPRECATED_AWX_VAR_PREFIX=True, both awx_ and tower_ variables."""
+        from django.conf import settings
+
+        with mock.patch.object(settings, 'INCLUDE_DEPRECATED_AWX_VAR_PREFIX', True, create=True):
+            data = Job(name='fake-job', pk=1, id=1, launch_type='manual').awx_meta_vars()
+            assert 'awx_job_id' in data
+            assert 'tower_job_id' in data
+
+    def test_job_metavars_tower_only(self):
+        """With INCLUDE_DEPRECATED_AWX_VAR_PREFIX=False, only tower_ prefixed variables."""
+        from django.conf import settings
+
+        with mock.patch.object(settings, 'INCLUDE_DEPRECATED_AWX_VAR_PREFIX', False, create=True):
+            data = Job(name='fake-job', pk=1, id=1, launch_type='manual').awx_meta_vars()
+            assert 'tower_job_id' in data
+            assert 'awx_job_id' not in data

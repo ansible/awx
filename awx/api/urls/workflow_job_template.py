@@ -22,7 +22,6 @@ from awx.api.views import (
     WorkflowJobTemplateLabelList,
 )
 
-
 urls = [
     re_path(r'^$', WorkflowJobTemplateList.as_view(), name='workflow_job_template_list'),
     re_path(r'^(?P<pk>[0-9]+)/$', WorkflowJobTemplateDetail.as_view(), name='workflow_job_template_detail'),

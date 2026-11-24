@@ -3,19 +3,15 @@ from django.db import migrations, models
 from awx.main.migrations._create_system_jobs import delete_clear_tokens_sjt
 
 
-# --- START of function merged from 0203_rename_github_app_kind.py ---
 def update_github_app_kind(apps, schema_editor):
     """
-    Updates the 'kind' field for CredentialType records
+    Updates the 'namespace' field for CredentialType records
     from 'github_app' to 'github_app_lookup'.
     This addresses a change in the entry point key for the GitHub App plugin.
     """
     CredentialType = apps.get_model('main', 'CredentialType')
     db_alias = schema_editor.connection.alias
-    CredentialType.objects.using(db_alias).filter(kind='github_app').update(kind='github_app_lookup')
-
-
-# --- END of function merged from 0203_rename_github_app_kind.py ---
+    CredentialType.objects.using(db_alias).filter(namespace='github_app').update(namespace='github_app_lookup')
 
 
 class Migration(migrations.Migration):
@@ -41,7 +37,7 @@ class Migration(migrations.Migration):
         # delete all sso application content permissions
         # Added reverse_sql=migrations.RunSQL.noop to make this reversible for tests
         migrations.RunSQL(
-            "DELETE FROM auth_permission " "WHERE content_type_id IN (SELECT id FROM django_content_type WHERE app_label = 'sso');",
+            "DELETE FROM auth_permission WHERE content_type_id IN (SELECT id FROM django_content_type WHERE app_label = 'sso');",
             reverse_sql=migrations.RunSQL.noop,
         ),
         # delete sso application content type
@@ -118,7 +114,5 @@ class Migration(migrations.Migration):
                 max_length=32,
             ),
         ),
-        # --- START of operations merged from 0203_rename_github_app_kind.py ---
         migrations.RunPython(update_github_app_kind, migrations.RunPython.noop),
-        # --- END of operations merged from 0203_rename_github_app_kind.py ---
     ]

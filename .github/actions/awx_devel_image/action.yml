@@ -11,8 +11,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: ./.github/actions/setup-python
-
     - name: Set lower case owner name
       shell: bash
       run: echo "OWNER_LC=${OWNER,,}" >> $GITHUB_ENV

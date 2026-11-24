@@ -1,9 +1,9 @@
+import datetime
 import logging
 
 from awx.main import analytics
 from dateutil import parser
 from django.core.management.base import BaseCommand
-from django.utils import timezone
 
 
 class Command(BaseCommand):
@@ -38,10 +38,10 @@ class Command(BaseCommand):
 
         since = parser.parse(opt_since) if opt_since else None
         if since and since.tzinfo is None:
-            since = since.replace(tzinfo=timezone.utc)
+            since = since.replace(tzinfo=datetime.timezone.utc)
         until = parser.parse(opt_until) if opt_until else None
         if until and until.tzinfo is None:
-            until = until.replace(tzinfo=timezone.utc)
+            until = until.replace(tzinfo=datetime.timezone.utc)
 
         if opt_ship and opt_dry_run:
             self.logger.error('Both --ship and --dry-run cannot be processed at the same time.')

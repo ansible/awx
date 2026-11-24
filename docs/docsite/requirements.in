@@ -3,6 +3,8 @@
 sphinx # Tooling to build HTML from RST source.
 sphinx-ansible-theme # Ansible community theme for Sphinx doc builds.
 sphinx-notfound-page # Sphinx extension for custom 404 page.
+sphinxcontrib-redoc # Renders OpenAPI spec in human readable format.
+setuptools >= 65.0 # Provides pkg_resources module for compatibility. Needed by sphinxcontrib-redoc.
 docutils # Tooling for RST processing and the swagger extension.
 Jinja2 # Requires investigation. Possibly inherited from previous repo with a custom theme.
 PyYaml # Requires investigation. Possibly used as tooling for swagger API reference content.

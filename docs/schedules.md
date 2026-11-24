@@ -129,14 +129,14 @@ the following dates are saved in the database:
 - `main_schedule.rrule` - the original `RRULE` string provided by the user
 - `main_schedule.dtstart` - the _first_ datetime in the list of all occurrences (coerced to UTC)
 - `main_schedule.dtend` - the _last_ datetime in the list of all occurrences (coerced to UTC)
-- `main_schedule.next_run` - the _next_ datetime in list after `utcnow()` (coerced to UTC)
+- `main_schedule.next_run` - the _next_ datetime in list after `now(datetime.UTC)` (coerced to UTC)
 
 AWX makes use of [Celery Periodic Tasks
 (celerybeat)](http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html)
 to run a periodic task that discovers new jobs that need to run at a regular
 interval (by default, every 30 seconds). When this task starts, it queries the
 database for Schedules where `Schedule.next_run` is between
-`scheduler_last_runtime()` and `utcnow()`. For each of these, a new job is
+`scheduler_last_runtime()` and `now(datetime.UTC)`. For each of these, a new job is
 launched, and `Schedule.next_run` is changed to the next chronological datetime
 in the list of all occurrences.
 

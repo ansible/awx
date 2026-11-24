@@ -36,7 +36,7 @@ runs:
 
     - name: Upgrade ansible-core
       shell: bash
-      run: python3 -m pip install --upgrade ansible-core
+      run: python -m pip install --upgrade ansible-core
 
     - name: Install system deps
       shell: bash

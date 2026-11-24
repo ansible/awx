@@ -1581,7 +1581,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='job',
             name='hosts',
-            field=models.ManyToManyField(related_name='jobs', editable=False, through='main.JobHostSummary', to='main.Host'),
+            field=models.ManyToManyField(related_name='jobs', editable=False, through='main.JobHostSummary', through_fields=('job', 'host'), to='main.Host'),
         ),
         migrations.AddField(
             model_name='job',

@@ -12,8 +12,8 @@ The page you are looking for is not in the current AWX documentation.
 You can find different versions of the AWX documentation by opening the Read the Docs fly out menu at the bottom right.
 For your convenience, here are some links:
 
-* `AWX latest <https://ansible.readthedocs.io/projects/awx/en/latest/>`_ documentation, includes release notes and known issues, contributor's guide, and API reference.
-* `AWX 24.6.1 <https://ansible.readthedocs.io/projects/awx/en/24.6.1/>`_ documentation, includes release notes, contributor's guide, AWX quickstart, user guide, API reference, and administrator guide.
+* `AWX latest <https://docs.ansible.com/projects/awx/en/latest/>`_ documentation, includes release notes and known issues, contributor's guide, and API reference.
+* `AWX 24.6.1 <https://docs.ansible.com/projects/awx/en/24.6.1/>`_ documentation, includes release notes, contributor's guide, AWX quickstart, user guide, API reference, and administrator guide.
 
 If you have more questions or still can't find the docs you're looking for, join the `Ansible Forum <https://forum.ansible.com>`_.
 Here are some useful links for AWX users:

@@ -6,7 +6,6 @@ from collections import deque
 from django.db import models
 from django.conf import settings
 
-
 NAMED_URL_RES_DILIMITER = "++"
 NAMED_URL_RES_INNER_DILIMITER = "+"
 NAMED_URL_RES_DILIMITER_ENCODE = "%2B"

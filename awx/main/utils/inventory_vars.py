@@ -3,7 +3,6 @@ from typing import TypeAlias, Any
 
 from awx.main.models import InventoryGroupVariablesWithHistory
 
-
 var_value: TypeAlias = Any
 update_queue: TypeAlias = list[tuple[int, var_value]]
 

@@ -6,7 +6,6 @@ import time
 
 from awx.main.tasks.signals import signal_callback
 
-
 logger = logging.getLogger('awx.main.tasks.utils')
 
 

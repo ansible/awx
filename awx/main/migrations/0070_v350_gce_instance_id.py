@@ -8,7 +8,6 @@ from django.db import migrations
 
 from awx.main.migrations._inventory_source import set_new_instance_id, back_out_new_instance_id
 
-
 logger = logging.getLogger('awx.main.migrations')
 
 

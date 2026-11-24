@@ -1,0 +1,5 @@
+---
+collections:
+  - name: 'file:///tmp/live_tests/host_query_external_v1_0_0'
+    type: git
+    version: devel

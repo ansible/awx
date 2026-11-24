@@ -23,15 +23,17 @@ from rest_framework import status
 
 import requests
 
-from awx import MODE
+from ansible_base.lib.utils.schema import extend_schema_if_available
+
 from awx.api.generics import APIView
+from awx.api.serializers import SubscriptionCredentialsSerializer
 from awx.conf.registry import settings_registry
 from awx.main.analytics import all_collectors
 from awx.main.ha import is_ha_environment
 from awx.main.tasks.system import clear_setting_cache
 from awx.main.utils import get_awx_version, get_custom_venv_choices
 from awx.main.utils.licensing import validate_entitlement_manifest
-from awx.api.versioning import URLPathVersioning, reverse, drf_reverse
+from awx.api.versioning import URLPathVersioning, reverse
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
 from awx.main.models import Project, Organization, Instance, InstanceGroup, JobTemplate
 from awx.main.utils import set_environ
@@ -46,8 +48,10 @@ class ApiRootView(APIView):
     name = _('REST API')
     versioning_class = URLPathVersioning
     swagger_topic = 'Versioning'
+    resource_purpose = 'api root and version information'
 
     @method_decorator(ensure_csrf_cookie)
+    @extend_schema_if_available(extensions={"x-ai-description": "List supported API versions"})
     def get(self, request, format=None):
         '''List supported API versions'''
         v2 = reverse('api:api_v2_root_view', request=request, kwargs={'version': 'v2'})
@@ -58,15 +62,15 @@ class ApiRootView(APIView):
         data['custom_logo'] = settings.CUSTOM_LOGO
         data['custom_login_info'] = settings.CUSTOM_LOGIN_INFO
         data['login_redirect_override'] = settings.LOGIN_REDIRECT_OVERRIDE
-        if MODE == 'development':
-            data['swagger'] = drf_reverse('api:schema-swagger-ui')
         return Response(data)
 
 
 class ApiVersionRootView(APIView):
     permission_classes = (AllowAny,)
     swagger_topic = 'Versioning'
+    resource_purpose = 'api top-level resources'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "List top-level API resources"})
     def get(self, request, format=None):
         '''List top level resources'''
         data = OrderedDict()
@@ -126,6 +130,7 @@ class ApiVersionRootView(APIView):
 
 class ApiV2RootView(ApiVersionRootView):
     name = _('Version 2')
+    resource_purpose = 'api v2 root'
 
 
 class ApiV2PingView(APIView):
@@ -137,7 +142,11 @@ class ApiV2PingView(APIView):
     authentication_classes = ()
     name = _('Ping')
     swagger_topic = 'System Configuration'
+    resource_purpose = 'basic instance information'
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Return basic information about this instance'},
+    )
     def get(self, request, format=None):
         """Return some basic information about this instance
 
@@ -169,17 +178,49 @@ class ApiV2PingView(APIView):
 
 
 class ApiV2SubscriptionView(APIView):
+    """Validate and list AAP subscription credentials via the Red Hat portal."""
+
     permission_classes = (IsAuthenticated,)
+    serializer_class = SubscriptionCredentialsSerializer
     name = _('Subscriptions')
     swagger_topic = 'System Configuration'
+    resource_purpose = 'aap subscription validation'
 
     def check_permissions(self, request):
+        """Restrict mutating methods to superusers; allow OPTIONS/HEAD for all authenticated users."""
         super(ApiV2SubscriptionView, self).check_permissions(request)
         if not request.user.is_superuser and request.method.lower() not in {'options', 'head'}:
             self.permission_denied(request)  # Raises PermissionDenied exception.
 
+    def get_serializer(self, *args, **kwargs):
+        """Expose the serializer for OPTIONS metadata.
+
+        Plain APIView has no get_serializer(); this minimal implementation lets
+        Metadata.determine_actions() discover the serializer's fields and inject
+        CleanText validation patterns into OPTIONS responses.
+
+        Request and view context is included so that CleanTextMixin's audit
+        logging can attribute rejected input to the authenticated user and
+        client IP.
+        """
+        kwargs.setdefault(
+            'context',
+            {
+                'request': self.request,
+                'format': self.format_kwarg,
+                'view': self,
+            },
+        )
+        return self.serializer_class(*args, **kwargs)
+
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'List valid AAP subscriptions'},
+    )
     def post(self, request):
-        data = request.data.copy()
+        """Validate subscription credentials against the Red Hat portal and persist them on success."""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
 
         try:
             user = None
@@ -234,7 +275,7 @@ class ApiV2SubscriptionView(APIView):
             elif isinstance(exc, (ValueError, OSError)) and exc.args:
                 msg = exc.args[0]
             else:
-                logger.exception(smart_str(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
+                logger.exception(smart_str("Invalid subscription submitted."), extra=dict(actor=request.user.username))
             return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(validated)
@@ -244,12 +285,16 @@ class ApiV2AttachView(APIView):
     permission_classes = (IsAuthenticated,)
     name = _('Attach Subscription')
     swagger_topic = 'System Configuration'
+    resource_purpose = 'subscription attachment'
 
     def check_permissions(self, request):
         super(ApiV2AttachView, self).check_permissions(request)
         if not request.user.is_superuser and request.method.lower() not in {'options', 'head'}:
             self.permission_denied(request)  # Raises PermissionDenied exception.
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Attach a subscription'},
+    )
     def post(self, request):
         data = request.data.copy()
         subscription_id = data.get('subscription_id', None)
@@ -282,7 +327,7 @@ class ApiV2AttachView(APIView):
                 elif isinstance(exc, (ValueError, OSError)) and exc.args:
                     msg = exc.args[0]
                 else:
-                    logger.exception(smart_str(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
+                    logger.exception(smart_str("Invalid subscription submitted."), extra=dict(actor=request.user.username))
                 return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
 
         for sub in validated:
@@ -299,12 +344,16 @@ class ApiV2ConfigView(APIView):
     permission_classes = (IsAuthenticated,)
     name = _('Configuration')
     swagger_topic = 'System Configuration'
+    resource_purpose = 'system configuration and license management'
 
     def check_permissions(self, request):
         super(ApiV2ConfigView, self).check_permissions(request)
         if not request.user.is_superuser and request.method.lower() not in {'options', 'head', 'get'}:
             self.permission_denied(request)  # Raises PermissionDenied exception.
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Returns platform-level configuration and license info.'},
+    )
     def get(self, request, format=None):
         '''Return various sitewide configuration settings'''
 
@@ -324,13 +373,22 @@ class ApiV2ConfigView(APIView):
             become_methods=PRIVILEGE_ESCALATION_METHODS,
         )
 
-        if (
-            request.user.is_superuser
-            or request.user.is_system_auditor
-            or Organization.accessible_objects(request.user, 'admin_role').exists()
-            or Organization.accessible_objects(request.user, 'auditor_role').exists()
-            or Organization.accessible_objects(request.user, 'project_admin_role').exists()
-        ):
+        # Check superuser/auditor first
+        if request.user.is_superuser or request.user.is_system_auditor:
+            has_org_access = True
+        else:
+            # Single query checking all three organization role types at once
+            has_org_access = (
+                (
+                    Organization.access_qs(request.user, 'change')
+                    | Organization.access_qs(request.user, 'audit')
+                    | Organization.access_qs(request.user, 'add_project')
+                )
+                .distinct()
+                .exists()
+            )
+
+        if has_org_access:
             data.update(
                 dict(
                     project_base_dir=settings.PROJECTS_ROOT,
@@ -338,18 +396,21 @@ class ApiV2ConfigView(APIView):
                     custom_virtualenvs=get_custom_venv_choices(),
                 )
             )
-        elif JobTemplate.accessible_objects(request.user, 'admin_role').exists():
-            data['custom_virtualenvs'] = get_custom_venv_choices()
+        else:
+            # Only check JobTemplate access if org check failed
+            if JobTemplate.access_qs(request.user, 'change').exists():
+                data['custom_virtualenvs'] = get_custom_venv_choices()
 
         return Response(data)
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Add or update a subscription manifest license"})
     def post(self, request):
         if not isinstance(request.data, dict):
             return Response({"error": _("Invalid subscription data")}, status=status.HTTP_400_BAD_REQUEST)
         try:
             data_actual = json.dumps(request.data)
         except Exception:
-            logger.info(smart_str(u"Invalid JSON submitted for license."), extra=dict(actor=request.user.username))
+            logger.info(smart_str("Invalid JSON submitted for license."), extra=dict(actor=request.user.username))
             return Response({"error": _("Invalid JSON")}, status=status.HTTP_400_BAD_REQUEST)
 
         license_data = json.loads(data_actual)
@@ -374,7 +435,7 @@ class ApiV2ConfigView(APIView):
                 license_data_validated = get_licenser().license_from_manifest(license_data)
                 connection.on_commit(lambda: clear_setting_cache.delay(['LICENSE']))
             except Exception:
-                logger.warning(smart_str(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
+                logger.warning(smart_str("Invalid subscription submitted."), extra=dict(actor=request.user.username))
                 return Response({"error": _("Invalid License")}, status=status.HTTP_400_BAD_REQUEST)
         else:
             license_data_validated = get_licenser().validate()
@@ -385,9 +446,12 @@ class ApiV2ConfigView(APIView):
                 settings.TOWER_URL_BASE = "{}://{}".format(request.scheme, request.get_host())
             return Response(license_data_validated)
 
-        logger.warning(smart_str(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
+        logger.warning(smart_str("Invalid subscription submitted."), extra=dict(actor=request.user.username))
         return Response({"error": _("Invalid subscription")}, status=status.HTTP_400_BAD_REQUEST)
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Remove the current subscription'},
+    )
     def delete(self, request):
         try:
             settings.LICENSE = {}

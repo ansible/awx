@@ -22,7 +22,7 @@ Join the `Ansible Forum <https://forum.ansible.com>`_ as a single starting point
 
 * `Get Help <https://forum.ansible.com/c/help/6>`_: get help or help others. Please add appropriate tags if you start new discussions, for example `awx`, `ee`, and  `documentation`.
 * `Posts tagged with 'awx' <https://forum.ansible.com/tag/awx>`_: subscribe to participate in project/technology-related conversations. There are other related tags in the forum you can use.
-* `Bullhorn newsletter <https://docs.ansible.com/ansible/devel/community/communication.html#the-bullhorn>`_: used to announce releases and important changes.
+* `Bullhorn newsletter <https://docs.ansible.com/projects/ansible/latest/community/communication.html#the-bullhorn>`_: used to announce releases and important changes.
 * `Social Spaces <https://forum.ansible.com/c/chat/4>`_: gather and interact with fellow enthusiasts.
 * `News & Announcements <https://forum.ansible.com/c/news/5>`_: track project-wide announcements including social events.
 

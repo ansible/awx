@@ -18,7 +18,6 @@ from awx.api.views import (
     InventorySourceNotificationTemplatesSuccessList,
 )
 
-
 urls = [
     re_path(r'^$', InventorySourceList.as_view(), name='inventory_source_list'),
     re_path(r'^(?P<pk>[0-9]+)/$', InventorySourceDetail.as_view(), name='inventory_source_detail'),

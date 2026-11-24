@@ -4,7 +4,6 @@ from django.db import migrations, models
 import uuid
 import logging
 
-
 logger = logging.getLogger('awx.main.migrations')
 
 

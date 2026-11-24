@@ -34,13 +34,15 @@ options:
     aliases: [ tower_password , aap_password ]
   aap_token:
     description:
-    - The OAuth token to use.
+    - The OAuth token to use, sent as a Bearer token in the Authorization header.
+    - When connecting through the AAP gateway, use a token issued by the gateway.
     - This value can be in one of two formats.
     - A string which is the token itself. (i.e. bqV5txm97wqJqtkxlMkhQz0pKhRMMX)
-    - A dictionary structure as returned by the token module.
+    - A dictionary structure as set as a fact by the M(ansible.platform.token) module.
     - If value not set, will try environment variable C(CONTROLLER_OAUTH_TOKEN) and then config files
     type: raw
     version_added: "3.7.0"
+    aliases: [ oauth_token, controller_oauthtoken, tower_oauthtoken ]
   validate_certs:
     description:
     - Whether to allow insecure connections to AWX.
@@ -55,6 +57,20 @@ options:
     - Defaults to 10s, but this is handled by the shared module_utils code
     type: float
     aliases: [ aap_request_timeout ]
+  max_retries:
+    description:
+    - Specify the max retries to be used with some connection issues.
+    - Defaults to 5.
+    - If value not set, will try environment variable C(AAP_MAX_RETRIES) and then config files.
+    type: int
+    aliases: [ aap_max_retries ]
+  retry_backoff_factor:
+    description:
+    - Backoff factor used when retrying connections.
+    - Defaults to 2.
+    - If value not set, will try environment variable C(AAP_RETRY_BACKOFF_FACTOR) and then config files.
+    type: int
+    aliases: [ aap_retry_backoff_factor ]
   controller_config_file:
     description:
     - Path to the controller config file.

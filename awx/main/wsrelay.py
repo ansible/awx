@@ -94,7 +94,7 @@ class WebsocketRelayConnection:
         except asyncio.CancelledError:
             # TODO: Check if connected and disconnect
             # Possibly use run_until_complete() if disconnect is async
-            logger.warning(f"Connection from {self.name} to {self.remote_host} cancelled.")
+            logger.warning(f"Connection from {self.name} to {self.remote_host} canceled.")
         except client_exceptions.ClientConnectorError as e:
             logger.warning(f"Connection from {self.name} to {self.remote_host} failed: '{e}'.", exc_info=True)
         except asyncio.TimeoutError:
@@ -139,7 +139,7 @@ class WebsocketRelayConnection:
                 except json.JSONDecodeError:
                     logmsg = "Failed to decode message from web node"
                     if logger.isEnabledFor(logging.DEBUG):
-                        logmsg = "{} {}".format(logmsg, payload)
+                        logmsg = "{} {}".format(logmsg, msg.data)
                     logger.warning(logmsg)
                     continue
 
@@ -242,7 +242,7 @@ class WebSocketRelayManager(object):
                 except json.JSONDecodeError:
                     logmsg = "Failed to decode message from pg_notify channel `web_ws_heartbeat`"
                     if logger.isEnabledFor(logging.DEBUG):
-                        logmsg = "{} {}".format(logmsg, payload)
+                        logmsg = "{} {}".format(logmsg, notif.payload)
                     logger.warning(logmsg)
                     continue
 
@@ -291,7 +291,7 @@ class WebSocketRelayManager(object):
             except asyncio.TimeoutError:
                 logger.warning(f"Tried to cancel relay connection for {hostname} but it timed out during cleanup.")
             except asyncio.CancelledError:
-                # Handle the case where the task was already cancelled by the time we got here.
+                # Handle the case where the task was already canceled by the time we got here.
                 pass
 
             del self.relay_connections[hostname]

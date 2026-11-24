@@ -25,7 +25,7 @@ class UriCleaner(object):
                     if o.netloc and ":" in o.netloc:
                         # Handle the special case url http://username:password that can appear in SCM url
                         # on account of a bug? in ansible redaction
-                        (username, password) = o.netloc.split(':')
+                        username, password = o.netloc.split(':')
                     else:
                         text_index += len(match.group(1))
                         continue

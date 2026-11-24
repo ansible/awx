@@ -1,20 +1,19 @@
 import pytest
 
 from django.conf import settings
-from datetime import timedelta
 
 
 @pytest.mark.parametrize(
-    "job_name,function_path",
+    "task_name",
     [
-        ('tower_scheduler', 'awx.main.tasks.system.awx_periodic_scheduler'),
+        'awx.main.tasks.system.awx_periodic_scheduler',
     ],
 )
-def test_CELERYBEAT_SCHEDULE(mocker, job_name, function_path):
-    assert job_name in settings.CELERYBEAT_SCHEDULE
-    assert 'schedule' in settings.CELERYBEAT_SCHEDULE[job_name]
-    assert type(settings.CELERYBEAT_SCHEDULE[job_name]['schedule']) is timedelta
-    assert settings.CELERYBEAT_SCHEDULE[job_name]['task'] == function_path
+def test_DISPATCHER_SCHEDULE(mocker, task_name):
+    assert task_name in settings.DISPATCHER_SCHEDULE
+    assert 'schedule' in settings.DISPATCHER_SCHEDULE[task_name]
+    assert type(settings.DISPATCHER_SCHEDULE[task_name]['schedule']) in (int, float)
+    assert settings.DISPATCHER_SCHEDULE[task_name]['task'] == task_name
 
     # Ensures that the function exists
-    mocker.patch(function_path)
+    mocker.patch(task_name)

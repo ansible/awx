@@ -7,12 +7,12 @@ import logging
 # Django
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+from ansible_base.lib.utils.schema import extend_schema_if_available
 
 # Django REST Framework
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
-
 
 # AWX
 # from awx.main.analytics import collectors
@@ -22,13 +22,13 @@ from awx.api import renderers
 
 from awx.api.generics import APIView
 
-
 logger = logging.getLogger('awx.analytics')
 
 
 class MetricsView(APIView):
     name = _('Metrics')
     swagger_topic = 'Metrics'
+    resource_purpose = 'prometheus metrics data'
 
     renderer_classes = [renderers.PlainTextRenderer, renderers.PrometheusJSONRenderer, renderers.BrowsableAPIRenderer]
 
@@ -37,6 +37,7 @@ class MetricsView(APIView):
             self.permission_classes = (AllowAny,)
         return super(APIView, self).initialize_request(request, *args, **kwargs)
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get Prometheus metrics data"})
     def get(self, request):
         '''Show Metrics Details'''
         if settings.ALLOW_METRICS_FOR_ANONYMOUS_USERS or request.user.is_superuser or request.user.is_system_auditor:

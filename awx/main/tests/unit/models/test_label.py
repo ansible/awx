@@ -11,7 +11,6 @@ from awx.main.models import (
     WorkflowJobNode,
 )
 
-
 mock_query_set = mock.MagicMock()
 
 mock_objects = mock.MagicMock(filter=mock.MagicMock(return_value=mock_query_set))

@@ -1,11 +1,12 @@
 import subprocess
 import base64
+import json
 from collections import namedtuple
 
 from unittest import mock  # noqa
 import pytest
 
-from awx.main.tasks.receptor import AWXReceptorJob
+from awx.main.tasks.receptor import AWXReceptorJob, upsert_pod_container_env
 from awx.main.utils import (
     create_temporary_fifo,
 )
@@ -101,3 +102,220 @@ def test_kubectl_ssl_verification(containerized_job, default_job_execution_envir
     receptor_job = AWXReceptorJob(rj, runner_params={'settings': {}})
     ca_data = receptor_job.kube_config['clusters'][0]['cluster']['certificate-authority-data']
     assert cert.stdout == base64.b64decode(ca_data.encode())
+
+
+def _pod_env_map(pod_spec):
+    """Map worker-container env names to literal values (valueFrom entries map to None)."""
+    return {item['name']: item.get('value') for item in pod_spec['spec']['containers'][0].get('env', [])}
+
+
+def _receptor_job_for_containerized(containerized_job):
+    """Build an AWXReceptorJob around a container-group job with empty runner settings."""
+    RunJob = namedtuple('RunJob', ['instance', 'build_execution_environment_params'])
+    rj = RunJob(instance=containerized_job, build_execution_environment_params=lambda x: {})
+    return AWXReceptorJob(rj, runner_params={'settings': {}})
+
+
+def test_upsert_pod_container_env_appends_and_replaces():
+    """New names are appended; a second write of the same name replaces in the original position."""
+    container = {}
+    upsert_pod_container_env(container, 'HTTP_PROXY', 'http://first:3128')
+    upsert_pod_container_env(container, 'HTTPS_PROXY', 1)
+    upsert_pod_container_env(container, 'HTTP_PROXY', 'http://second:3128')
+    assert container['env'] == [
+        {'name': 'HTTP_PROXY', 'value': 'http://second:3128'},
+        {'name': 'HTTPS_PROXY', 'value': '1'},
+    ]
+
+
+def test_upsert_pod_container_env_removes_duplicate_names():
+    """Matching names are collapsed to one entry at the first-match index."""
+    container = {
+        'env': [
+            {'name': 'HTTP_PROXY', 'value': 'http://first:3128'},
+            {'name': 'KEEP_ME', 'value': '1'},
+            {'name': 'HTTP_PROXY', 'value': 'http://second:3128'},
+        ]
+    }
+    upsert_pod_container_env(container, 'HTTP_PROXY', 'http://global-proxy:3128')
+    assert container['env'] == [
+        {'name': 'HTTP_PROXY', 'value': 'http://global-proxy:3128'},
+        {'name': 'KEEP_ME', 'value': '1'},
+    ]
+
+
+def test_upsert_pod_container_env_normalizes_non_list_env():
+    """env that is missing, null, or not a list is replaced with a list so upsert can proceed."""
+    containers = [{}, {'env': None}, {'env': {'HTTP_PROXY': 'nope'}}]
+    for container in containers:
+        upsert_pod_container_env(container, 'HTTP_PROXY', 'http://p:3128')
+        assert container['env'] == [{'name': 'HTTP_PROXY', 'value': 'http://p:3128'}]
+
+
+def test_upsert_pod_container_env_escapes_kubelet_expansion():
+    """Every $ is doubled so kubelet does not expand $(VAR); $$ in the settings value becomes $$$$, then kubelet restores $$."""
+    container = {}
+    upsert_pod_container_env(container, 'PATH_PREFIX', '$(HOME)/bin')
+    upsert_pod_container_env(container, 'ALREADY_ESCAPED', '$$(HOME)')
+    assert container['env'] == [
+        {'name': 'PATH_PREFIX', 'value': '$$(HOME)/bin'},
+        {'name': 'ALREADY_ESCAPED', 'value': '$$$$(HOME)'},
+    ]
+
+
+@pytest.mark.django_db
+def test_pod_definition_includes_awx_task_env(containerized_job, default_job_execution_environment, settings):
+    """AWX_TASK_ENV keys appear on the worker container; keepalive is omitted when disabled."""
+    containerized_job.execution_environment = default_job_execution_environment
+    settings.AWX_TASK_ENV = {'RUNNER_OMIT_EVENTS': 'True', 'HTTP_PROXY': 'http://proxy:3128'}
+    settings.AWX_RUNNER_KEEPALIVE_SECONDS = 0
+
+    pod_spec = _receptor_job_for_containerized(containerized_job).pod_definition
+    env_map = _pod_env_map(pod_spec)
+    assert env_map['RUNNER_OMIT_EVENTS'] == 'True'
+    assert env_map['HTTP_PROXY'] == 'http://proxy:3128'
+    assert 'ANSIBLE_RUNNER_KEEPALIVE_SECONDS' not in env_map
+
+
+@pytest.mark.django_db
+def test_pod_definition_empty_awx_task_env_omits_env(containerized_job, default_job_execution_environment, settings):
+    """No env list is created when AWX_TASK_ENV is empty and keepalive is off."""
+    containerized_job.execution_environment = default_job_execution_environment
+    settings.AWX_TASK_ENV = {}
+    settings.AWX_RUNNER_KEEPALIVE_SECONDS = 0
+
+    pod_spec = _receptor_job_for_containerized(containerized_job).pod_definition
+    assert 'env' not in pod_spec['spec']['containers'][0]
+
+
+@pytest.mark.django_db
+def test_pod_definition_keepalive_and_task_env(containerized_job, default_job_execution_environment, settings):
+    """Keepalive seconds and AWX_TASK_ENV are both present on the worker container."""
+    containerized_job.execution_environment = default_job_execution_environment
+    settings.AWX_TASK_ENV = {'RUNNER_OMIT_EVENTS': 'True'}
+    settings.AWX_RUNNER_KEEPALIVE_SECONDS = 30
+
+    env_map = _pod_env_map(_receptor_job_for_containerized(containerized_job).pod_definition)
+    assert env_map['RUNNER_OMIT_EVENTS'] == 'True'
+    assert env_map['ANSIBLE_RUNNER_KEEPALIVE_SECONDS'] == '30'
+
+
+@pytest.mark.django_db
+def test_pod_definition_keepalive_wins_over_task_env(containerized_job, default_job_execution_environment, settings):
+    """AWX_RUNNER_KEEPALIVE_SECONDS overwrites the same name from AWX_TASK_ENV."""
+    containerized_job.execution_environment = default_job_execution_environment
+    settings.AWX_TASK_ENV = {'ANSIBLE_RUNNER_KEEPALIVE_SECONDS': '5'}
+    settings.AWX_RUNNER_KEEPALIVE_SECONDS = 30
+
+    env_list = _receptor_job_for_containerized(containerized_job).pod_definition['spec']['containers'][0]['env']
+    assert [item for item in env_list if item['name'] == 'ANSIBLE_RUNNER_KEEPALIVE_SECONDS'] == [
+        {'name': 'ANSIBLE_RUNNER_KEEPALIVE_SECONDS', 'value': '30'},
+    ]
+
+
+@pytest.mark.django_db
+def test_pod_definition_awx_task_env_when_override_env_is_null(containerized_job, default_job_execution_environment, settings):
+    """A pod_spec_override env of null does not prevent AWX_TASK_ENV from being applied."""
+    containerized_job.execution_environment = default_job_execution_environment
+    containerized_job.instance_group.pod_spec_override = json.dumps({'spec': {'containers': [{'name': 'worker', 'env': None}]}})
+    containerized_job.instance_group.save()
+    settings.AWX_TASK_ENV = {'HTTP_PROXY': 'http://p:3128'}
+    settings.AWX_RUNNER_KEEPALIVE_SECONDS = 0
+
+    env_map = _pod_env_map(_receptor_job_for_containerized(containerized_job).pod_definition)
+    assert env_map['HTTP_PROXY'] == 'http://p:3128'
+
+
+@pytest.mark.django_db
+def test_pod_definition_awx_task_env_overrides_pod_spec(containerized_job, default_job_execution_environment, settings):
+    """Jobs settings extra env wins over instance-group pod_spec_override on the same name."""
+    containerized_job.execution_environment = default_job_execution_environment
+    containerized_job.instance_group.pod_spec_override = json.dumps(
+        {
+            'spec': {
+                'containers': [
+                    {
+                        'name': 'worker',
+                        'env': [
+                            {'name': 'HTTP_PROXY', 'value': 'http://ig-proxy:3128'},
+                            {'name': 'KEEP_ME', 'value': '1'},
+                        ],
+                    }
+                ]
+            }
+        }
+    )
+    containerized_job.instance_group.save()
+    settings.AWX_TASK_ENV = {'HTTP_PROXY': 'http://global-proxy:3128'}
+    settings.AWX_RUNNER_KEEPALIVE_SECONDS = 0
+
+    pod_spec = _receptor_job_for_containerized(containerized_job).pod_definition
+    env_list = pod_spec['spec']['containers'][0]['env']
+    env_map = _pod_env_map(pod_spec)
+    assert env_map['HTTP_PROXY'] == 'http://global-proxy:3128'
+    assert env_map['KEEP_ME'] == '1'
+    names = [item['name'] for item in env_list]
+    assert names.index('HTTP_PROXY') < names.index('KEEP_ME')
+
+
+@pytest.mark.django_db
+def test_pod_definition_awx_task_env_wins_over_duplicate_override(containerized_job, default_job_execution_environment, settings):
+    """AWX_TASK_ENV wins even when pod_spec_override lists the same name more than once."""
+    containerized_job.execution_environment = default_job_execution_environment
+    containerized_job.instance_group.pod_spec_override = json.dumps(
+        {
+            'spec': {
+                'containers': [
+                    {
+                        'name': 'worker',
+                        'env': [
+                            {'name': 'HTTP_PROXY', 'value': 'http://first:3128'},
+                            {'name': 'KEEP_ME', 'value': '1'},
+                            {'name': 'HTTP_PROXY', 'value': 'http://second:3128'},
+                        ],
+                    }
+                ]
+            }
+        }
+    )
+    containerized_job.instance_group.save()
+    settings.AWX_TASK_ENV = {'HTTP_PROXY': 'http://global-proxy:3128'}
+    settings.AWX_RUNNER_KEEPALIVE_SECONDS = 0
+
+    env_list = _receptor_job_for_containerized(containerized_job).pod_definition['spec']['containers'][0]['env']
+    assert [item for item in env_list if item.get('name') == 'HTTP_PROXY'] == [{'name': 'HTTP_PROXY', 'value': 'http://global-proxy:3128'}]
+    assert any(item.get('name') == 'KEEP_ME' and item.get('value') == '1' for item in env_list)
+
+
+@pytest.mark.django_db
+def test_pod_definition_awx_task_env_replaces_value_from(containerized_job, default_job_execution_environment, settings, caplog):
+    """A colliding AWX_TASK_ENV key replaces a valueFrom entry with a plain value."""
+    containerized_job.execution_environment = default_job_execution_environment
+    containerized_job.instance_group.pod_spec_override = json.dumps(
+        {
+            'spec': {
+                'containers': [
+                    {
+                        'name': 'worker',
+                        'env': [
+                            {
+                                'name': 'HTTP_PROXY',
+                                'valueFrom': {'secretKeyRef': {'name': 'proxy-secret', 'key': 'http_proxy'}},
+                            },
+                            {'name': 'KEEP_ME', 'value': '1'},
+                        ],
+                    }
+                ]
+            }
+        }
+    )
+    containerized_job.instance_group.save()
+    settings.AWX_TASK_ENV = {'HTTP_PROXY': 'http://global-proxy:3128'}
+    settings.AWX_RUNNER_KEEPALIVE_SECONDS = 0
+
+    with caplog.at_level('WARNING', logger='awx.main.tasks.receptor'):
+        env_list = _receptor_job_for_containerized(containerized_job).pod_definition['spec']['containers'][0]['env']
+    proxy_entry = next(item for item in env_list if item['name'] == 'HTTP_PROXY')
+    assert proxy_entry == {'name': 'HTTP_PROXY', 'value': 'http://global-proxy:3128'}
+    assert any(item.get('name') == 'KEEP_ME' and item.get('value') == '1' for item in env_list)
+    assert 'valueFrom' in caplog.text

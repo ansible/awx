@@ -8,7 +8,7 @@ import logging.handlers
 import sys
 import traceback
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Django
 from django.conf import settings
@@ -26,7 +26,6 @@ from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
 from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
 from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
 from opentelemetry.sdk.resources import Resource
-
 
 __all__ = ['RSysLogHandler', 'SpecialInventoryHandler', 'ColorHandler']
 
@@ -50,7 +49,7 @@ class RSysLogHandler(logging.handlers.SysLogHandler):
         # because the alternative is blocking the
         # socket.send() in the Python process, which we definitely don't
         # want to do)
-        dt = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+        dt = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
         msg = f'{dt} ERROR rsyslogd was unresponsive: '
         exc = traceback.format_exc()
         try:

@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import shutil
 import stat
+import tarfile
 import yaml
 import tempfile
 import traceback
@@ -17,7 +18,6 @@ import urllib.parse as urlparse
 
 # Django
 from django.conf import settings
-from django.db import transaction
 
 # Shared code for the AWX platform
 from awx_plugins.interfaces._temporary_private_container_api import CONTAINER_ROOT, get_incontainer_path
@@ -36,7 +36,6 @@ from dispatcherd.publish import task
 from dispatcherd.utils import serialize_task
 
 # AWX
-from awx.main.dispatch.publish import task as task_awx
 from awx.main.dispatch import get_task_queuename
 from awx.main.constants import (
     PRIVILEGE_ESCALATION_METHODS,
@@ -46,9 +45,10 @@ from awx.main.constants import (
     CONTAINER_VOLUMES_MOUNT_TYPES,
     HOST_FACTS_FIELDS,
 )
+
+SCM_REVISION_FILE = '.scm_revision'
 from awx.main.models import (
     Instance,
-    Inventory,
     InventorySource,
     UnifiedJob,
     Job,
@@ -85,6 +85,7 @@ from awx.main.utils.common import (
     create_partition,
     ScheduleWorkflowManager,
     ScheduleTaskManager,
+    getattr_dne,
 )
 from awx.conf.license import get_license
 from awx.main.utils.handlers import SpecialInventoryHandler
@@ -93,7 +94,88 @@ from awx.main.utils.update_model import update_model
 # Django flags
 from flags.state import flag_enabled
 
+# Workload Identity
+from ansible_base.lib.workload_identity.controller import AutomationControllerJobScope
+from awx.main.utils.workload_identity import retrieve_workload_identity_jwt_with_claims
+
 logger = logging.getLogger('awx.main.tasks.jobs')
+
+
+def populate_claims_for_workload(unified_job) -> dict:
+    """
+    Extract JWT claims from a Controller workload for the aap_controller_automation_job scope.
+    """
+
+    claims = {
+        AutomationControllerJobScope.CLAIM_JOB_ID: unified_job.id,
+        AutomationControllerJobScope.CLAIM_JOB_NAME: unified_job.name,
+        AutomationControllerJobScope.CLAIM_LAUNCH_TYPE: unified_job.launch_type,
+    }
+
+    # Related objects in the UnifiedJob model, applies to all job types
+    # null cases are omitted because of OIDC
+    if organization := getattr_dne(unified_job, 'organization'):
+        claims[AutomationControllerJobScope.CLAIM_ORGANIZATION_NAME] = organization.name
+        claims[AutomationControllerJobScope.CLAIM_ORGANIZATION_ID] = organization.id
+
+    if ujt := getattr_dne(unified_job, 'unified_job_template'):
+        claims[AutomationControllerJobScope.CLAIM_UNIFIED_JOB_TEMPLATE_NAME] = ujt.name
+        claims[AutomationControllerJobScope.CLAIM_UNIFIED_JOB_TEMPLATE_ID] = ujt.id
+
+    if instance_group := getattr_dne(unified_job, 'instance_group'):
+        claims[AutomationControllerJobScope.CLAIM_INSTANCE_GROUP_NAME] = instance_group.name
+        claims[AutomationControllerJobScope.CLAIM_INSTANCE_GROUP_ID] = instance_group.id
+
+    # Related objects on concrete models, may not be valid for type of unified_job
+    if inventory := getattr_dne(unified_job, 'inventory', None):
+        claims[AutomationControllerJobScope.CLAIM_INVENTORY_NAME] = inventory.name
+        claims[AutomationControllerJobScope.CLAIM_INVENTORY_ID] = inventory.id
+
+    if execution_environment := getattr_dne(unified_job, 'execution_environment', None):
+        claims[AutomationControllerJobScope.CLAIM_EXECUTION_ENVIRONMENT_NAME] = execution_environment.name
+        claims[AutomationControllerJobScope.CLAIM_EXECUTION_ENVIRONMENT_ID] = execution_environment.id
+
+    if project := getattr_dne(unified_job, 'project', None):
+        claims[AutomationControllerJobScope.CLAIM_PROJECT_NAME] = project.name
+        claims[AutomationControllerJobScope.CLAIM_PROJECT_ID] = project.id
+
+    if jt := getattr_dne(unified_job, 'job_template', None):
+        claims[AutomationControllerJobScope.CLAIM_JOB_TEMPLATE_NAME] = jt.name
+        claims[AutomationControllerJobScope.CLAIM_JOB_TEMPLATE_ID] = jt.id
+
+    # Only valid for job templates
+    if hasattr(unified_job, 'playbook'):
+        claims[AutomationControllerJobScope.CLAIM_PLAYBOOK_NAME] = unified_job.playbook
+
+    # Not valid for inventory updates and system jobs
+    if hasattr(unified_job, 'job_type'):
+        claims[AutomationControllerJobScope.CLAIM_JOB_TYPE] = unified_job.job_type
+
+    launched_by: dict = unified_job.launched_by
+    if 'name' in launched_by:
+        claims[AutomationControllerJobScope.CLAIM_LAUNCHED_BY_NAME] = launched_by['name']
+    if 'id' in launched_by:
+        claims[AutomationControllerJobScope.CLAIM_LAUNCHED_BY_ID] = launched_by['id']
+
+    return claims
+
+
+def retrieve_workload_identity_jwt(
+    unified_job: UnifiedJob,
+    audience: str,
+    scope: str,
+    workload_ttl_seconds: int | None = None,
+) -> str:
+    """Retrieve JWT token from workload claims.
+    Raises:
+        RuntimeError: if the workload identity client is not configured.
+    """
+    return retrieve_workload_identity_jwt_with_claims(
+        populate_claims_for_workload(unified_job),
+        audience,
+        scope,
+        workload_ttl_seconds,
+    )
 
 
 def with_path_cleanup(f):
@@ -122,6 +204,52 @@ def dispatch_waiting_jobs(binder):
         if not kwargs:
             kwargs = {}
         binder.control('run', data={'task': serialize_task(uj._get_task_class()), 'args': [uj.id], 'kwargs': kwargs, 'uuid': uj.celery_task_id})
+        UnifiedJob.objects.filter(pk=uj.pk, status='waiting').update(status='running', start_args='')
+
+
+def _finalize_job_run(model, pk, runner_callback, status, extra_fields=None):
+    """Commit terminal status, trigger notifications, and emit websocket status.
+
+    Shared by BaseTask.run() (normal path) and adoption (reattach_to_work_unit path).
+    Uses duck typing on the instance to schedule dependent task/workflow managers.
+    """
+    all_fields = runner_callback.get_delayed_update_fields()
+    if extra_fields:
+        all_fields.update(extra_fields)
+    instance = update_model(model, pk, status=status, select_for_update=True, **all_fields)
+    if not instance:
+        return None
+    if (instance.host_status_counts is not None) or (not runner_callback.wrapup_event_dispatched):
+        events_processed_hook(instance)
+    instance.websocket_emit_status(status)
+
+    # Schedule dependent task/workflow managers via duck typing on the instance.
+    # This works for all job types: Job, ProjectUpdate, InventoryUpdate, etc.
+    instance.log_lifecycle("finalize_run")
+
+    if hasattr(instance, 'unifiedjob_blocked_jobs') and instance.unifiedjob_blocked_jobs.exists():
+        ScheduleTaskManager().schedule()
+
+    if hasattr(instance, 'spawned_by_workflow') and instance.spawned_by_workflow:
+        ScheduleWorkflowManager().schedule()
+
+    # For jobs with inventory, schedule computed fields update (RunJob-specific finalization)
+    if hasattr(instance, 'inventory_id') and instance.inventory_id:
+        try:
+            update_inventory_computed_fields.delay(instance.inventory_id)
+        except Exception:
+            logger.exception(f'{instance.log_format} Error scheduling inventory computed fields update')
+
+    return instance
+
+
+def env_flag_enabled(env, name):
+    """Return True when env maps name to a common truthy string.
+
+    Missing and unrecognized values are False (does not raise). Truthy spellings
+    match distutils.util.strtobool: 1, true, yes, on, y, t.
+    """
+    return str(env.get(name, '')).strip().lower() in ('1', 'true', 'yes', 'on', 'y', 't')
 
 
 class BaseTask(object):
@@ -135,6 +263,63 @@ class BaseTask(object):
         self.cleanup_paths = []
         self.update_attempts = int(getattr(settings, 'DISPATCHER_DB_DOWNTOWN_TOLLERANCE', settings.DISPATCHER_DB_DOWNTIME_TOLERANCE) / 5)
         self.runner_callback = self.callback_class(model=self.model)
+
+    @functools.cached_property
+    def _credentials(self):
+        """
+        Credentials for the task execution.
+        Fetches credentials once using build_credentials_list() and stores
+        them for the duration of the task to avoid redundant database queries.
+        """
+        credentials_list = self.build_credentials_list(self.instance)
+        # Convert to list to prevent re-evaluation of QuerySet
+        return list(credentials_list)
+
+    def populate_workload_identity_tokens(self, additional_credentials=None):
+        """
+        Populate credentials with workload identity tokens.
+
+        Sets the context on Credential objects that have input sources
+        using compatible external credential types.
+        """
+        credentials = list(self._credentials)
+        if additional_credentials:
+            credentials.extend(additional_credentials)
+        credential_input_sources = (
+            (credential.context, src)
+            for credential in credentials
+            for src in credential.input_sources.all()
+            if any(
+                field.get('id') == 'workload_identity_token' and field.get('internal')
+                for field in src.source_credential.credential_type.inputs.get('fields', [])
+            )
+        )
+        for credential_ctx, input_src in credential_input_sources:
+            if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
+                effective_timeout = self.get_instance_timeout(self.instance)
+                workload_ttl = effective_timeout if effective_timeout else None
+                try:
+                    jwt = retrieve_workload_identity_jwt(
+                        self.instance,
+                        audience=input_src.source_credential.get_input('url'),
+                        scope=AutomationControllerJobScope.name,
+                        workload_ttl_seconds=workload_ttl,
+                    )
+                    # Store token keyed by input source PK, since a credential can have
+                    # multiple input sources (one per field), each potentially with a different audience
+                    credential_ctx[input_src.pk] = {"workload_identity_token": jwt}
+                except Exception as e:
+                    self.instance.job_explanation = (
+                        f'Could not generate workload identity token for credential {input_src.source_credential.name} used in this job. Error:\n{e}'
+                    )
+                    self.instance.status = 'error'
+                    self.instance.save()
+            else:
+                self.instance.job_explanation = (
+                    f'Flag FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED is not enabled, required for credential {input_src.source_credential.name} used in this job.'
+                )
+                self.instance.status = 'error'
+                self.instance.save()
 
     def update_model(self, pk, _attempt=0, **updates):
         return update_model(self.model, pk, _attempt=0, _max_attempts=self.update_attempts, **updates)
@@ -287,6 +472,19 @@ class BaseTask(object):
                     private_data_files['credentials'][credential] = self.write_private_data_file(private_data_dir, None, data, sub_dir='env')
             for credential, data in private_data.get('certificates', {}).items():
                 self.write_private_data_file(private_data_dir, 'ssh_key_data-cert.pub', data, sub_dir=os.path.join('artifacts', str(self.instance.id)))
+
+        # Copy vendor collections to private_data_dir for indirect node counting
+        # This makes external query files available to the callback plugin in EEs
+        if settings.INDIRECT_NODE_COUNTING_ENABLED:
+            vendor_src = '/var/lib/awx/vendor_collections'
+            vendor_dest = os.path.join(private_data_dir, 'vendor_collections')
+            if os.path.exists(vendor_src):
+                try:
+                    shutil.copytree(vendor_src, vendor_dest)
+                    logger.debug(f"Copied vendor collections from {vendor_src} to {vendor_dest}")
+                except Exception as e:
+                    logger.warning(f"Failed to copy vendor collections: {e}")
+
         return private_data_files, ssh_key_data
 
     def build_passwords(self, instance, runtime_passwords):
@@ -335,15 +533,11 @@ class BaseTask(object):
 
     def write_inventory_file(self, inventory, private_data_dir, file_name, script_params):
         script_data = inventory.get_script_data(**script_params)
-        for hostname, hv in script_data.get('_meta', {}).get('hostvars', {}).items():
-            # maintain a list of host_name --> host_id
-            # so we can associate emitted events to Host objects
-            self.runner_callback.host_map[hostname] = hv.get('remote_tower_id', '')
         file_content = '#! /usr/bin/env python3\n# -*- coding: utf-8 -*-\nprint(%r)\n' % json.dumps(script_data)
         return self.write_private_data_file(private_data_dir, file_name, file_content, sub_dir='inventory', file_permissions=0o700)
 
     def build_inventory(self, instance, private_data_dir):
-        script_params = dict(hostvars=True, towervars=True)
+        script_params = {"hostvars": True, "towervars": True}
         if hasattr(instance, 'job_slice_number'):
             script_params['slice_number'] = instance.job_slice_number
             script_params['slice_count'] = instance.job_slice_count
@@ -360,6 +554,7 @@ class BaseTask(object):
         return []
 
     def get_instance_timeout(self, instance):
+        """Return the effective job timeout in seconds."""
         global_timeout_setting_name = instance._global_timeout_setting()
         if global_timeout_setting_name:
             global_timeout = getattr(settings, global_timeout_setting_name, 0)
@@ -395,7 +590,13 @@ class BaseTask(object):
         os.close(self.lock_fd)
         self.lock_fd = None
 
-    def acquire_lock(self, project, unified_job_id=None):
+    def acquire_lock(self, project, unified_job_id=None, exclusive=True):
+        """Acquire a file lock on the project's local source tree.
+
+        Uses LOCK_EX (exclusive) when the tree will be modified, or LOCK_SH (shared)
+        when only reading (e.g. copying). Polls until the lock is granted, checking
+        for cancellation on each iteration.
+        """
         if not os.path.exists(settings.PROJECTS_ROOT):
             os.mkdir(settings.PROJECTS_ROOT)
 
@@ -405,7 +606,7 @@ class BaseTask(object):
             project.save()
             lock_path = project.get_lock_file()
             if lock_path is None:
-                raise RuntimeError(u'Invalid lock file path')
+                raise RuntimeError('Invalid lock file path')
 
         try:
             self.lock_fd = os.open(lock_path, os.O_RDWR | os.O_CREAT)
@@ -413,16 +614,17 @@ class BaseTask(object):
             logger.error("I/O error({0}) while trying to open lock file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
             raise
 
+        lock_type = fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH
         emitted_lockfile_log = False
         start_time = time.time()
         while True:
             try:
-                fcntl.lockf(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                fcntl.lockf(self.lock_fd, lock_type | fcntl.LOCK_NB)
                 break
             except IOError as e:
                 if e.errno not in (errno.EAGAIN, errno.EACCES):
                     os.close(self.lock_fd)
-                    logger.error("I/O error({0}) while trying to aquire lock on file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
+                    logger.error("I/O error({0}) while trying to acquire lock on file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
                     raise
                 else:
                     if not emitted_lockfile_log:
@@ -453,45 +655,8 @@ class BaseTask(object):
         """
         instance.log_lifecycle("post_run")
 
-    def final_run_hook(self, instance, status, private_data_dir):
-        """
-        Hook for any steps to run after job/task is marked as complete.
-        """
-        instance.log_lifecycle("finalize_run")
-
-        # Run task manager appropriately for speculative dependencies
-        if instance.unifiedjob_blocked_jobs.exists():
-            ScheduleTaskManager().schedule()
-        if instance.spawned_by_workflow:
-            ScheduleWorkflowManager().schedule()
-
     def should_use_fact_cache(self):
         return False
-
-    def transition_status(self, pk: int) -> bool:
-        """Atomically transition status to running, if False returned, another process got it"""
-        with transaction.atomic():
-            # Explanation of parts for the fetch:
-            # .values - avoid loading a full object, this is known to lead to deadlocks due to signals
-            #   the signals load other related rows which another process may be locking, and happens in practice
-            # of=('self',) - keeps FK tables out of the lock list, another way deadlocks can happen
-            # .get - just load the single job
-            instance_data = UnifiedJob.objects.select_for_update(of=('self',)).values('status', 'cancel_flag').get(pk=pk)
-
-            # If status is not waiting (obtained under lock) then this process does not have clearence to run
-            if instance_data['status'] == 'waiting':
-                if instance_data['cancel_flag']:
-                    updated_status = 'canceled'
-                else:
-                    updated_status = 'running'
-                # Explanation of the update:
-                # .filter - again, do not load the full object
-                # .update - a bulk update on just that one row, avoid loading unintended data
-                UnifiedJob.objects.filter(pk=pk).update(status=updated_status, start_args='')
-            elif instance_data['status'] == 'running':
-                logger.info(f'Job {pk} is being ran by another process, exiting')
-                return False
-        return True
 
     @with_path_cleanup
     @with_signal_handling
@@ -499,15 +664,24 @@ class BaseTask(object):
         """
         Run the job/task and capture its output.
         """
-        if not self.instance:  # Used to skip fetch for local runs
-            if not self.transition_status(pk):
-                logger.info(f'Job {pk} is being ran by another process, exiting')
-                return
 
-        # Load the instance
-        self.instance = self.update_model(pk)
+        if not self.instance:  # Used to skip fetch for local runs
+            # Load the instance
+            self.instance = self.update_model(pk)
+
+        # status should be "running" from dispatch_waiting_jobs,
+        # but may still be "waiting" if the worker picked this up before the status update landed.
+        if self.instance.status == 'waiting':
+            UnifiedJob.objects.filter(pk=pk).update(status="running", start_args='')
+            self.instance.refresh_from_db()
+
         if self.instance.status != 'running':
             logger.error(f'Not starting {self.instance.status} task pk={pk} because its status "{self.instance.status}" is not expected')
+            return
+
+        if self.instance.cancel_flag:
+            self.instance = self.update_model(pk, status='canceled')
+            self.instance.websocket_emit_status('canceled')
             return
 
         self.instance.websocket_emit_status("running")
@@ -520,6 +694,7 @@ class BaseTask(object):
 
         self.safe_cred_env = {}
         private_data_dir = None
+        receptor_job = None
 
         try:
             if self.instance.execution_environment_id is None:
@@ -548,24 +723,23 @@ class BaseTask(object):
             if not os.path.exists(settings.AWX_ISOLATION_BASE_PATH):
                 raise RuntimeError('AWX_ISOLATION_BASE_PATH=%s does not exist' % settings.AWX_ISOLATION_BASE_PATH)
 
+            if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
+                logger.info(f'Generating workload identity tokens for {self.instance.log_format}')
+                self.populate_workload_identity_tokens()
+                if self.instance.status == 'error':
+                    raise RuntimeError('not starting %s task' % self.instance.status)
+
             # May have to serialize the value
             private_data_files, ssh_key_data = self.build_private_data_files(self.instance, private_data_dir)
             passwords = self.build_passwords(self.instance, kwargs)
             self.build_extra_vars_file(self.instance, private_data_dir)
             args = self.build_args(self.instance, private_data_dir, passwords)
             env = self.build_env(self.instance, private_data_dir, private_data_files=private_data_files)
-            self.runner_callback.safe_env = build_safe_env(env)
+            # Initialize common callback fields so that the normal job path exercises
+            # the same configuration code as adoption.
+            self.runner_callback.configure_for_job(self.instance, safe_env=build_safe_env(env))
 
-            self.runner_callback.instance = self.instance
-
-            # store a reference to the parent workflow job (if any) so we can include
-            # it in event data JSON
-            if self.instance.spawned_by_workflow:
-                self.runner_callback.parent_workflow_job_id = self.instance.get_workflow_job().id
-
-            self.runner_callback.job_created = str(self.instance.created)
-
-            credentials = self.build_credentials_list(self.instance)
+            credentials = self._credentials
 
             container_root = None
             if settings.IS_K8S and isinstance(self.instance, ProjectUpdate):
@@ -590,6 +764,11 @@ class BaseTask(object):
                 'passwords': expect_passwords,
                 'suppress_env_files': getattr(settings, 'AWX_RUNNER_OMIT_ENV_FILES', True),
                 'envvars': env,
+                # ansible-runner overwrites RUNNER_OMIT_EVENTS / RUNNER_ONLY_FAILED_EVENTS from
+                # these kwargs after merging envvars, so AWX_TASK_ENV flags only take effect here.
+                # Project updates need event metadata for SCM credential redaction and revision tracking.
+                'omit_event_data': (not isinstance(self.instance, ProjectUpdate) and env_flag_enabled(env, 'RUNNER_OMIT_EVENTS')),
+                'only_failed_event_data': (not isinstance(self.instance, ProjectUpdate) and env_flag_enabled(env, 'RUNNER_ONLY_FAILED_EVENTS')),
             }
 
             if ssh_key_data is not None:
@@ -646,6 +825,13 @@ class BaseTask(object):
                 self.unit_id = receptor_job.unit_id
 
                 if not res:
+                    # res is None when quota exceeded or other early-return condition.
+                    # Must release work unit here before returning, or it will leak.
+                    if receptor_job and getattr(receptor_job, 'work', None):
+                        try:
+                            receptor_job._receptor_release_work(receptor_job.work, 'error')
+                        except Exception:
+                            logger.exception(f'Failed to release work unit {getattr(receptor_job, "unit_id", "unknown")} on early return')
                     return
 
             status = res.status
@@ -683,23 +869,21 @@ class BaseTask(object):
         except Exception:
             logger.exception('{} Post run hook errored.'.format(self.instance.log_format))
 
-        self.instance = self.update_model(pk)
-        self.instance = self.update_model(pk, status=status, select_for_update=True, **self.runner_callback.get_delayed_update_fields())
+        self.private_data_dir = private_data_dir
+        try:
+            self.instance = _finalize_job_run(self.model, pk, self.runner_callback, status)
+        finally:
+            # Guarantee work unit release even if finalization throws
+            if receptor_job and getattr(receptor_job, 'work', None):
+                try:
+                    receptor_job._receptor_release_work(receptor_job.work, status)
+                except Exception:
+                    logger.exception(f'Failed to release work unit {getattr(receptor_job, "unit_id", "unknown")}')
 
-        # Field host_status_counts is used as a metric to check if event processing is finished
-        # we send notifications if it is, if not, callback receiver will send them
         if not self.instance:
             logger.error(f'Unified job pk={pk} appears to be deleted while running')
             return
-        if (self.instance.host_status_counts is not None) or (not self.runner_callback.wrapup_event_dispatched):
-            events_processed_hook(self.instance)
 
-        try:
-            self.final_run_hook(self.instance, status, private_data_dir)
-        except Exception:
-            logger.exception('{} Final run hook errored.'.format(self.instance.log_format))
-
-        self.instance.websocket_emit_status(status)
         if status != 'successful':
             if status == 'canceled':
                 raise AwxTaskError.TaskCancel(self.instance, rc)
@@ -710,40 +894,61 @@ class BaseTask(object):
 class SourceControlMixin(BaseTask):
     """Utility methods for tasks that run use content from source control"""
 
+    def _git_revision_matches(self, project_path, job_revision):
+        try:
+            git_repo = git.Repo(project_path)
+            return job_revision == git_repo.head.commit.hexsha
+        except (ValueError, BadGitName, git.exc.InvalidGitRepositoryError):
+            return False
+
+    def _marker_revision_matches(self, project_path, job_revision):
+        marker_path = os.path.join(project_path, SCM_REVISION_FILE)
+        try:
+            fd = os.open(marker_path, os.O_RDONLY | os.O_NOFOLLOW)
+            with os.fdopen(fd) as f:
+                local_revision = f.read(256).strip()
+            return job_revision == local_revision
+        except OSError:
+            return False
+
+    def _needs_source_update(self, project, project_path, branch_override):
+        """Determine whether a source update sync is needed for this project."""
+        if isinstance(self.instance, InventoryUpdate):
+            return True
+        if not project.scm_type:
+            return False
+        if not os.path.exists(project_path):
+            logger.debug(f'Performing fresh clone of {project.id} for unified job {self.instance.id} on this instance.')
+            return True
+        if branch_override:
+            logger.debug(f'Project not available locally, {self.instance.id} will sync with remote')
+            return True
+        if not project.scm_revision:
+            logger.debug(f'Project not available locally, {self.instance.id} will sync with remote')
+            return True
+        if project.scm_type == 'git':
+            if self._git_revision_matches(project_path, project.scm_revision):
+                logger.debug(f'Skipping project sync for {self.instance.id} because commit is locally available')
+                return False
+            logger.debug(f'Needed commit for {self.instance.id} not in local source tree, will sync with remote')
+            return True
+        if self._marker_revision_matches(project_path, project.scm_revision):
+            logger.debug(f'Skipping project sync for {self.instance.id} because revision marker matches')
+            return False
+        logger.debug(f'No revision marker for {self.instance.id}, will sync with remote')
+        return True
+
     def get_sync_needs(self, project, scm_branch=None):
         project_path = project.get_project_path(check_if_exists=False)
-        job_revision = project.scm_revision
         sync_needs = []
         source_update_tag = 'update_{}'.format(project.scm_type)
         branch_override = bool(scm_branch and scm_branch != project.scm_branch)
-        # TODO: skip syncs for inventory updates. Now, UI needs a link added so clients can link to project
-        # source_project is only a field on inventory sources.
-        if isinstance(self.instance, InventoryUpdate):
-            sync_needs.append(source_update_tag)
-        elif not project.scm_type:
-            pass  # manual projects are not synced, user has responsibility for that
-        elif not os.path.exists(project_path):
-            logger.debug(f'Performing fresh clone of {project.id} for unified job {self.instance.id} on this instance.')
-            sync_needs.append(source_update_tag)
-        elif project.scm_type == 'git' and project.scm_revision and (not branch_override):
-            try:
-                git_repo = git.Repo(project_path)
 
-                if job_revision == git_repo.head.commit.hexsha:
-                    logger.debug(f'Skipping project sync for {self.instance.id} because commit is locally available')
-                else:
-                    sync_needs.append(source_update_tag)
-            except (ValueError, BadGitName, git.exc.InvalidGitRepositoryError):
-                logger.debug(f'Needed commit for {self.instance.id} not in local source tree, will sync with remote')
-                sync_needs.append(source_update_tag)
-        else:
-            logger.debug(f'Project not available locally, {self.instance.id} will sync with remote')
+        if self._needs_source_update(project, project_path, branch_override):
             sync_needs.append(source_update_tag)
 
-        # Determine whether or not this project sync needs to populate the cache for Ansible content, roles and collections
         has_cache = os.path.exists(os.path.join(project.get_cache_path(), project.cache_id))
-        # Galaxy requirements are not supported for manual projects
-        if project.scm_type and ((not has_cache) or branch_override):
+        if project.scm_type and (not has_cache or branch_override or source_update_tag in sync_needs):
             sync_needs.extend(['install_roles', 'install_collections'])
 
         return sync_needs
@@ -785,12 +990,14 @@ class SourceControlMixin(BaseTask):
                 self.instance = self.update_model(self.instance.pk, source_project_update=local_project_sync)
 
             try:
-                # the job private_data_dir is passed so sync can download roles and collections there
-                sync_task = RunProjectUpdate(job_private_data_dir=private_data_dir)
+                sync_task = RunProjectUpdate()
                 sync_task.instance = local_project_sync  # avoids "waiting" status check, performance
                 sync_task.run(local_project_sync.id)
                 local_project_sync.refresh_from_db()
+                if local_project_sync.status != 'successful':
+                    raise RuntimeError(f'Project sync failed with status: {local_project_sync.status}')
                 self.instance = self.update_model(self.instance.pk, scm_revision=local_project_sync.scm_revision)
+                RunProjectUpdate.make_local_copy(local_project_sync, private_data_dir)
             except Exception:
                 local_project_sync.refresh_from_db()
                 if local_project_sync.status != 'canceled':
@@ -814,10 +1021,35 @@ class SourceControlMixin(BaseTask):
             RunProjectUpdate.make_local_copy(project, private_data_dir)
 
     def sync_and_copy(self, project, private_data_dir, scm_branch=None):
-        self.acquire_lock(project, self.instance.id)
+        """Copy project content to private_data_dir, syncing from SCM only if needed.
+
+        Acquires a shared lock first so concurrent copy-only jobs (e.g. slice jobs) can
+        run in parallel. Upgrades to an exclusive lock only when the project tree needs
+        to be modified (fresh clone, revision mismatch, or missing cache). DB state is
+        refreshed after each lock acquisition to account for concurrent updates.
+        """
+        # Always start with a shared lock so concurrent copy-only jobs don't serialize.
+        # LOCK_SH waits for any in-flight LOCK_EX to drain, making the tree stable.
+        # Refresh DB state after acquiring so get_sync_needs sees the current revision,
+        # then upgrade to LOCK_EX only if a sync is actually required.
+        self.acquire_lock(project, self.instance.id, exclusive=False)
         is_commit = False
         try:
             original_branch = None
+            if project.pk:
+                project.refresh_from_db()
+            sync_needs = self.get_sync_needs(project, scm_branch=scm_branch)
+            if sync_needs:
+                # Tree needs modification — upgrade to exclusive.
+                # POSIX advisory locks cannot be upgraded atomically: LOCK_SH must be
+                # released before LOCK_EX can be granted, leaving a window where another
+                # process may sync the project. Refresh after re-acquiring so
+                # sync_and_copy_without_lock operates on current DB state.
+                self.release_lock(project)
+                self.acquire_lock(project, self.instance.id, exclusive=True)
+                if project.pk:
+                    project.refresh_from_db()
+
             failed_reason = project.get_reason_if_failed()
             if failed_reason:
                 self.update_model(self.instance.pk, status='failed', job_explanation=failed_reason)
@@ -851,7 +1083,7 @@ class SourceControlMixin(BaseTask):
             self.release_lock(project)
 
 
-@task_awx(queue=get_task_queuename)
+@task(queue=get_task_queuename)
 class RunJob(SourceControlMixin, BaseTask):
     """
     Run a job using ansible-playbook.
@@ -859,6 +1091,29 @@ class RunJob(SourceControlMixin, BaseTask):
 
     model = Job
     event_model = JobEvent
+
+    def _extract_credentials_of_kind(self, kind: str):
+        return (cred for cred in self._credentials if cred.credential_type.kind == kind)
+
+    @property
+    def _machine_credential(self) -> object:
+        """Get machine credential."""
+        return next(self._extract_credentials_of_kind('ssh'), None)
+
+    @property
+    def _vault_credentials(self) -> list[object]:
+        """Get vault credentials."""
+        return list(self._extract_credentials_of_kind('vault'))
+
+    @property
+    def _network_credentials(self) -> list[object]:
+        """Get network credentials."""
+        return list(self._extract_credentials_of_kind('net'))
+
+    @property
+    def _cloud_credentials(self) -> list[object]:
+        """Get cloud credentials."""
+        return list(self._extract_credentials_of_kind('cloud'))
 
     def build_private_data(self, job, private_data_dir):
         """
@@ -877,7 +1132,7 @@ class RunJob(SourceControlMixin, BaseTask):
         }
         """
         private_data = {'credentials': {}}
-        for credential in job.credentials.prefetch_related('input_sources__source_credential').all():
+        for credential in self._credentials:
             # If we were sent SSH credentials, decrypt them and send them
             # back (they will be written to a temporary file).
             if credential.has_input('ssh_key_data'):
@@ -893,14 +1148,14 @@ class RunJob(SourceControlMixin, BaseTask):
         and ansible-vault.
         """
         passwords = super(RunJob, self).build_passwords(job, runtime_passwords)
-        cred = job.machine_credential
+        cred = self._machine_credential
         if cred:
             for field in ('ssh_key_unlock', 'ssh_password', 'become_password', 'vault_password'):
                 value = runtime_passwords.get(field, cred.get_input('password' if field == 'ssh_password' else field, default=''))
                 if value not in ('', 'ASK'):
                     passwords[field] = value
 
-        for cred in job.vault_credentials:
+        for cred in self._vault_credentials:
             field = 'vault_password'
             vault_id = cred.get_input('vault_id', default=None)
             if vault_id:
@@ -916,7 +1171,7 @@ class RunJob(SourceControlMixin, BaseTask):
         key unlock over network key unlock.
         '''
         if 'ssh_key_unlock' not in passwords:
-            for cred in job.network_credentials:
+            for cred in self._network_credentials:
                 if cred.inputs.get('ssh_key_unlock'):
                     passwords['ssh_key_unlock'] = runtime_passwords.get('ssh_key_unlock', cred.get_input('ssh_key_unlock', default=''))
                     break
@@ -951,11 +1206,11 @@ class RunJob(SourceControlMixin, BaseTask):
 
         # Set environment variables for cloud credentials.
         cred_files = private_data_files.get('credentials', {})
-        for cloud_cred in job.cloud_credentials:
+        for cloud_cred in self._cloud_credentials:
             if cloud_cred and cloud_cred.credential_type.namespace == 'openstack' and cred_files.get(cloud_cred, ''):
                 env['OS_CLIENT_CONFIG_FILE'] = get_incontainer_path(cred_files.get(cloud_cred, ''), private_data_dir)
 
-        for network_cred in job.network_credentials:
+        for network_cred in self._network_credentials:
             env['ANSIBLE_NET_USERNAME'] = network_cred.get_input('username', default='')
             env['ANSIBLE_NET_PASSWORD'] = network_cred.get_input('password', default='')
 
@@ -973,12 +1228,11 @@ class RunJob(SourceControlMixin, BaseTask):
             ('ANSIBLE_COLLECTIONS_PATH', 'collections_path', 'requirements_collections', '~/.ansible/collections:/usr/share/ansible/collections'),
         ]
 
-        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
-            path_vars.append(
-                ('ANSIBLE_CALLBACK_PLUGINS', 'callback_plugins', 'plugins_path', '~/.ansible/plugins:/plugins/callback:/usr/share/ansible/plugins/callback'),
-            )
+        path_vars.append(
+            ('ANSIBLE_CALLBACK_PLUGINS', 'callback_plugins', 'plugins_path', '~/.ansible/plugins:/plugins/callback:/usr/share/ansible/plugins/callback'),
+        )
 
-        config_values = read_ansible_config(os.path.join(private_data_dir, 'project'), list(map(lambda x: x[1], path_vars)))
+        config_values = read_ansible_config(os.path.join(private_data_dir, 'project'), list(map(lambda x: x[1], path_vars)) + ['callbacks_enabled'])
 
         for env_key, config_setting, folder, default in path_vars:
             paths = default.split(':')
@@ -993,10 +1247,16 @@ class RunJob(SourceControlMixin, BaseTask):
             paths = [os.path.join(CONTAINER_ROOT, folder)] + paths
             env[env_key] = os.pathsep.join(paths)
 
-        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
-            env['ANSIBLE_CALLBACKS_ENABLED'] = 'indirect_instance_count'
-            if 'callbacks_enabled' in config_values:
-                env['ANSIBLE_CALLBACKS_ENABLED'] += ':' + config_values['callbacks_enabled']
+        env['ANSIBLE_CALLBACKS_ENABLED'] = 'indirect_instance_count'
+        if 'callbacks_enabled' in config_values:
+            env['ANSIBLE_CALLBACKS_ENABLED'] += ',' + config_values['callbacks_enabled']
+
+        if settings.INDIRECT_NODE_COUNTING_ENABLED:
+            env['AWX_COLLECT_HOST_QUERIES'] = '1'
+            # Add vendor collections path for external query file discovery
+            vendor_collections_path = os.path.join(CONTAINER_ROOT, 'vendor_collections')
+            env['ANSIBLE_COLLECTIONS_PATH'] = f"{vendor_collections_path}:{env['ANSIBLE_COLLECTIONS_PATH']}"
+            logger.debug(f"ANSIBLE_COLLECTIONS_PATH updated for vendor collections: {env['ANSIBLE_COLLECTIONS_PATH']}")
 
         return env
 
@@ -1005,7 +1265,7 @@ class RunJob(SourceControlMixin, BaseTask):
         Build command line argument list for running ansible-playbook,
         optionally using ssh-agent for public/private key authentication.
         """
-        creds = job.machine_credential
+        creds = self._machine_credential
 
         ssh_username, become_username, become_method = '', '', ''
         if creds:
@@ -1157,32 +1417,25 @@ class RunJob(SourceControlMixin, BaseTask):
             return
         if self.should_use_fact_cache() and self.runner_callback.artifacts_processed:
             job.log_lifecycle("finish_job_fact_cache")
+            if job.inventory.kind == 'constructed':
+                hosts_qs = job.get_source_hosts_for_constructed_inventory()
+            else:
+                hosts_qs = job.inventory.hosts
+            hosts_qs = hosts_qs.only(*HOST_FACTS_FIELDS)
             finish_fact_cache(
+                hosts_qs,
                 artifacts_dir=os.path.join(private_data_dir, 'artifacts', str(job.id)),
                 job_id=job.id,
                 inventory_id=job.inventory_id,
+                job_created=job.created,
             )
 
-    def final_run_hook(self, job, status, private_data_dir):
-        super(RunJob, self).final_run_hook(job, status, private_data_dir)
-        try:
-            inventory = job.inventory
-        except Inventory.DoesNotExist:
-            pass
-        else:
-            if inventory is not None:
-                update_inventory_computed_fields.delay(inventory.id)
 
-
-@task_awx(queue=get_task_queuename)
+@task(queue=get_task_queuename)
 class RunProjectUpdate(BaseTask):
     model = ProjectUpdate
     event_model = ProjectUpdateEvent
     callback_class = RunnerCallbackForProjectUpdate
-
-    def __init__(self, *args, job_private_data_dir=None, **kwargs):
-        super(RunProjectUpdate, self).__init__(*args, **kwargs)
-        self.job_private_data_dir = job_private_data_dir
 
     def build_private_data(self, project_update, private_data_dir):
         """
@@ -1329,7 +1582,6 @@ class RunProjectUpdate(BaseTask):
                 'local_path': os.path.basename(project_update.project.local_path),
                 'project_path': project_update.get_project_path(check_if_exists=False),  # deprecated
                 'insights_url': settings.INSIGHTS_URL_BASE,
-                'oidc_endpoint': settings.INSIGHTS_OIDC_ENDPOINT,
                 'awx_license_type': get_license().get('license_type', 'UNLICENSED'),
                 'awx_version': get_awx_version(),
                 'scm_url': scm_url,
@@ -1339,6 +1591,7 @@ class RunProjectUpdate(BaseTask):
                 'roles_enabled': galaxy_creds_are_defined and settings.AWX_ROLES_ENABLED,
                 'collections_enabled': galaxy_creds_are_defined and settings.AWX_COLLECTIONS_ENABLED,
                 'galaxy_task_env': settings.GALAXY_TASK_ENV,
+                'galaxy_update_on_launch': project_update.project.galaxy_update_on_launch,
             }
         )
         # apply custom refspec from user for PR refs and the like
@@ -1346,7 +1599,7 @@ class RunProjectUpdate(BaseTask):
             extra_vars['scm_refspec'] = project_update.scm_refspec
         elif project_update.project.allow_override:
             # If branch is override-able, do extra fetch for all branches
-            extra_vars['scm_refspec'] = 'refs/heads/*:refs/remotes/origin/*'
+            extra_vars['scm_refspec'] = '+refs/heads/*:refs/remotes/origin/*'
 
         if project_update.scm_type == 'archive':
             # for raw archive, prevent error moving files between volumes
@@ -1398,18 +1651,97 @@ class RunProjectUpdate(BaseTask):
         shutil.copytree(awx_playbooks, os.path.join(private_data_dir, 'project'))
 
     @staticmethod
-    def clear_project_cache(cache_dir, keep_value):
+    def clear_project_cache(cache_dir, keep_value, max_reqcache=10):
         if os.path.isdir(cache_dir):
+            # Read the current requirements hash from stage so we don't evict it
+            current_reqcache = None
+            stage_hash_file = os.path.join(cache_dir, 'stage', '.requirements_hash')
+            try:
+                if os.path.exists(stage_hash_file):
+                    with open(stage_hash_file) as f:
+                        req_hash = f.read().strip()
+                    if req_hash:
+                        current_reqcache = f'reqcache_{req_hash}'
+            except OSError:
+                pass
+
+            reqcache_entries = []
             for entry in os.listdir(cache_dir):
                 old_path = os.path.join(cache_dir, entry)
-                if entry not in (keep_value, 'stage'):
-                    # invalidate, then delete
+                if entry.startswith('reqcache_'):
+                    reqcache_entries.append(old_path)
+                elif entry not in (keep_value, 'stage'):
                     new_path = os.path.join(cache_dir, '.~~delete~~' + entry)
                     try:
                         os.rename(old_path, new_path)
                         shutil.rmtree(new_path)
                     except OSError:
                         logger.warning(f"Could not remove cache directory {old_path}")
+            if len(reqcache_entries) > max_reqcache:
+                reqcache_entries.sort(key=lambda p: os.path.getmtime(p))
+                for stale in reqcache_entries[: len(reqcache_entries) - max_reqcache]:
+                    if current_reqcache and os.path.basename(stale) == current_reqcache:
+                        continue
+                    try:
+                        shutil.rmtree(stale)
+                        logger.debug(f'Evicted stale requirements cache {stale}')
+                    except OSError:
+                        logger.warning(f"Could not remove stale requirements cache {stale}")
+
+    @staticmethod
+    def _sync_requirements_cache(base_path, cache_path):
+        """After a successful install, sync the requirements hash cache.
+
+        If galaxy install ran (collections/roles exist in cache_path), save them
+        to a hash-keyed reqcache directory for reuse across commits.
+        If galaxy install was skipped (cache hit), the reqcache already has the content.
+        """
+        hash_file = os.path.join(cache_path, '.requirements_hash')
+        if not os.path.exists(hash_file):
+            return
+
+        try:
+            with open(hash_file) as f:
+                req_hash = f.read().strip()
+        except OSError:
+            return
+
+        if not req_hash:
+            return
+
+        reqcache_path = os.path.join(base_path, f'reqcache_{req_hash}')
+
+        for subfolder in ('requirements_collections', 'requirements_roles'):
+            src = os.path.join(cache_path, subfolder)
+            dst = os.path.join(reqcache_path, subfolder)
+            if os.path.exists(src) and not os.path.exists(dst):
+                tmp_path = tempfile.mkdtemp(dir=base_path, prefix=f'.reqcache_{req_hash}_tmp_')
+                try:
+                    tmp_dst = os.path.join(tmp_path, subfolder)
+                    shutil.copytree(src, tmp_dst, symlinks=True)
+                    os.makedirs(reqcache_path, exist_ok=True)
+                    os.rename(tmp_dst, dst)
+                    logger.debug(f'Saved {subfolder} to requirements cache {reqcache_path}')
+                except Exception:
+                    logger.warning(f'Failed to save {subfolder} to requirements cache, cleaning up')
+                    raise
+                finally:
+                    shutil.rmtree(tmp_path, ignore_errors=True)
+
+            # Create a cached tarball for faster per-job copies (AAP-96176)
+            tar_path = os.path.join(reqcache_path, f'{subfolder}.tar')
+            if os.path.exists(dst) and not os.path.exists(tar_path):
+                tmp_tar = tar_path + '.tmp'
+                try:
+                    with tarfile.open(tmp_tar, 'w') as tar:
+                        tar.add(dst, arcname=subfolder)
+                    os.rename(tmp_tar, tar_path)
+                    logger.debug(f'Created tarball cache {tar_path}')
+                except Exception:
+                    logger.warning(f'Failed to create tarball cache {tar_path}')
+                    if os.path.exists(tmp_tar):
+                        os.remove(tmp_tar)
+                    # Non-fatal: copytree fallback still works
 
     @staticmethod
     def make_local_copy(project, job_private_data_dir):
@@ -1431,21 +1763,45 @@ class RunProjectUpdate(BaseTask):
             subfolders.append('requirements_roles')
         for subfolder in subfolders:
             cache_subpath = os.path.join(cache_path, subfolder)
+            if not os.path.exists(cache_subpath):
+                # Fall back to requirements-hash-keyed cache (reqcache)
+                hash_file = os.path.join(cache_path, '.requirements_hash')
+                if os.path.exists(hash_file):
+                    try:
+                        with open(hash_file) as f:
+                            req_hash = f.read().strip()
+                        if req_hash:
+                            reqcache_subpath = os.path.join(project.get_cache_path(), f'reqcache_{req_hash}', subfolder)
+                            if os.path.exists(reqcache_subpath):
+                                cache_subpath = reqcache_subpath
+                                logger.debug(f'Using requirements cache for {subfolder} (hash {req_hash[:12]})')
+                    except OSError:
+                        pass
             if os.path.exists(cache_subpath):
                 dest_subpath = os.path.join(job_private_data_dir, subfolder)
+                # Prefer cached tarball for fewer file operations on SAN storage
+                tar_path = cache_subpath + '.tar'
+                if os.path.exists(tar_path):
+                    try:
+                        with tarfile.open(tar_path, 'r') as tar:
+                            tar.extractall(path=job_private_data_dir, filter='data')
+                        logger.debug('{0} {1} prepared {2} from tarball'.format(type(project).__name__, project.pk, dest_subpath))
+                        continue
+                    except Exception:
+                        logger.warning(f'Failed to extract tarball {tar_path}, falling back to copytree')
+                        if os.path.exists(dest_subpath):
+                            shutil.rmtree(dest_subpath)
                 shutil.copytree(cache_subpath, dest_subpath, symlinks=True)
                 logger.debug('{0} {1} prepared {2} from cache'.format(type(project).__name__, project.pk, dest_subpath))
 
-        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
-            # copy the special callback (not stdout type) plugin to get list of collections
-            pdd_plugins_path = os.path.join(job_private_data_dir, 'plugins_path')
-            if not os.path.exists(pdd_plugins_path):
-                os.mkdir(pdd_plugins_path)
-            from awx.playbooks import library
+        pdd_plugins_path = os.path.join(job_private_data_dir, 'plugins_path')
+        if not os.path.exists(pdd_plugins_path):
+            os.mkdir(pdd_plugins_path)
+        from awx.playbooks import library
 
-            plugin_file_source = os.path.join(library.__path__._path[0], 'indirect_instance_count.py')
-            plugin_file_dest = os.path.join(pdd_plugins_path, 'indirect_instance_count.py')
-            shutil.copyfile(plugin_file_source, plugin_file_dest)
+        plugin_file_source = os.path.join(library.__path__[0], 'indirect_instance_count.py')
+        plugin_file_dest = os.path.join(pdd_plugins_path, 'indirect_instance_count.py')
+        shutil.copyfile(plugin_file_source, plugin_file_dest)
 
     def post_run_hook(self, instance, status):
         super(RunProjectUpdate, self).post_run_hook(instance, status)
@@ -1454,6 +1810,24 @@ class RunProjectUpdate(BaseTask):
             if self.runner_callback.playbook_new_revision:
                 instance.scm_revision = self.runner_callback.playbook_new_revision
                 instance.save(update_fields=['scm_revision'])
+                if instance.scm_type and instance.scm_type != 'git':
+                    project_path = instance.get_project_path(check_if_exists=False)
+                    if project_path:
+                        marker_path = os.path.join(project_path, SCM_REVISION_FILE)
+                        try:
+                            fd = os.open(marker_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o644)
+                            with os.fdopen(fd, 'w') as f:
+                                f.write(instance.scm_revision)
+                        except OSError:
+                            logger.warning(f'Could not write revision marker at {marker_path}')
+            elif instance.scm_type and instance.scm_type != 'git' and status != 'successful':
+                project_path = instance.get_project_path(check_if_exists=False)
+                if project_path:
+                    marker_path = os.path.join(project_path, SCM_REVISION_FILE)
+                    try:
+                        os.remove(marker_path)
+                    except FileNotFoundError:
+                        pass
 
             # Roles and collection folders copy to durable cache
             base_path = instance.get_cache_path()
@@ -1469,13 +1843,10 @@ class RunProjectUpdate(BaseTask):
                         shutil.rmtree(cache_path)
                     os.rename(stage_path, cache_path)
                     logger.debug('{0} wrote to cache at {1}'.format(instance.log_format, cache_path))
+
+                self._sync_requirements_cache(base_path, cache_path)
             elif os.path.exists(stage_path):
                 shutil.rmtree(stage_path)  # cannot trust content update produced
-
-            if self.job_private_data_dir:
-                if status == 'successful':
-                    # copy project folder before resetting to default branch
-                    self.make_local_copy(instance, self.job_private_data_dir)
         finally:
             if instance.launch_type != 'sync':
                 self.release_lock(instance.project)
@@ -1508,12 +1879,12 @@ class RunProjectUpdate(BaseTask):
         return params
 
     def build_credentials_list(self, project_update):
-        if project_update.scm_type == 'insights' and project_update.credential:
+        if project_update.credential:
             return [project_update.credential]
         return []
 
 
-@task_awx(queue=get_task_queuename)
+@task(queue=get_task_queuename)
 class RunInventoryUpdate(SourceControlMixin, BaseTask):
     model = InventoryUpdate
     event_model = InventoryUpdateEvent
@@ -1618,7 +1989,7 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
             inventory_update.log_lifecycle("start_job_fact_cache")
             for input_inventory in inventory_update.inventory.input_inventories.all():
                 args.append('-i')
-                script_params = dict(hostvars=True, towervars=True)
+                script_params = {"hostvars": True, "towervars": True}
                 source_inv_path = self.write_inventory_file(input_inventory, private_data_dir, f'hosts_{input_inventory.id}', script_params)
                 args.append(get_incontainer_path(source_inv_path, private_data_dir))
                 # Include any facts from input inventories so they can be used in filters
@@ -1690,6 +2061,24 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
     def build_credentials_list(self, inventory_update):
         # All credentials not used by inventory source injector
         return inventory_update.get_extra_credentials()
+
+    def populate_workload_identity_tokens(self, additional_credentials=None):
+        """Also generate OIDC tokens for the cloud credential.
+
+        The cloud credential is not in _credentials (it is handled by the
+        inventory source injector), but it may still need a workload identity
+        token generated for it.
+        """
+        cloud_cred = self.instance.get_cloud_credential()
+        creds = list(additional_credentials or [])
+        if cloud_cred:
+            creds.append(cloud_cred)
+        super().populate_workload_identity_tokens(additional_credentials=creds or None)
+        # Override get_cloud_credential on this instance so the injector
+        # uses the credential with OIDC context instead of doing a fresh
+        # DB fetch that would lose it.
+        if cloud_cred and cloud_cred.context:
+            self.instance.get_cloud_credential = lambda: cloud_cred
 
     def build_project_dir(self, inventory_update, private_data_dir):
         source_project = None
@@ -1776,7 +2165,7 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
             raise PostRunError('Error occured while saving inventory data, see traceback or server logs', status='error', tb=traceback.format_exc())
 
 
-@task_awx(queue=get_task_queuename)
+@task(queue=get_task_queuename)
 class RunAdHocCommand(BaseTask):
     """
     Run an ad hoc command using ansible.
@@ -1929,7 +2318,7 @@ class RunAdHocCommand(BaseTask):
         return d
 
 
-@task_awx(queue=get_task_queuename)
+@task(queue=get_task_queuename)
 class RunSystemJob(BaseTask):
     model = SystemJob
     event_model = SystemJobEvent

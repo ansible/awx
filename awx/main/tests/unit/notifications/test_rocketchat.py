@@ -7,9 +7,10 @@ import awx.main.notifications.rocketchat_backend as rocketchat_backend
 
 
 def test_send_messages():
-    with mock.patch('awx.main.notifications.rocketchat_backend.requests') as requests_mock, mock.patch(
-        'awx.main.notifications.rocketchat_backend.get_awx_http_client_headers'
-    ) as version_mock:
+    with (
+        mock.patch('awx.main.notifications.rocketchat_backend.requests') as requests_mock,
+        mock.patch('awx.main.notifications.rocketchat_backend.get_awx_http_client_headers') as version_mock,
+    ):
         requests_mock.post.return_value.status_code = 201
         version_mock.return_value = {'Content-Type': 'application/json', 'User-Agent': 'AWX 0.0.1.dev (open)'}
         backend = rocketchat_backend.RocketChatBackend()
@@ -31,6 +32,7 @@ def test_send_messages():
             data='{"text": "test subject"}',
             headers={'Content-Type': 'application/json', 'User-Agent': 'AWX 0.0.1.dev (open)'},
             verify=True,
+            allow_redirects=False,
         )
         assert sent_messages == 1
 
@@ -92,9 +94,10 @@ def test_send_messages_with_icon_url():
 
 
 def test_send_messages_with_no_verify_ssl():
-    with mock.patch('awx.main.notifications.rocketchat_backend.requests') as requests_mock, mock.patch(
-        'awx.main.notifications.rocketchat_backend.get_awx_http_client_headers'
-    ) as version_mock:
+    with (
+        mock.patch('awx.main.notifications.rocketchat_backend.requests') as requests_mock,
+        mock.patch('awx.main.notifications.rocketchat_backend.get_awx_http_client_headers') as version_mock,
+    ):
         requests_mock.post.return_value.status_code = 201
         version_mock.return_value = {'Content-Type': 'application/json', 'User-Agent': 'AWX 0.0.1.dev (open)'}
         backend = rocketchat_backend.RocketChatBackend(rocketchat_no_verify_ssl=True)
@@ -116,5 +119,6 @@ def test_send_messages_with_no_verify_ssl():
             data='{"text": "test subject"}',
             headers={'Content-Type': 'application/json', 'User-Agent': 'AWX 0.0.1.dev (open)'},
             verify=False,
+            allow_redirects=False,
         )
         assert sent_messages == 1

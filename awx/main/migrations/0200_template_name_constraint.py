@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 from awx.main.migrations._db_constraints import _rename_duplicates
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -32,7 +31,6 @@ def rename_wfjt(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0199_inventorygroupvariableswithhistory_and_more'),
     ]

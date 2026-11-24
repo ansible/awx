@@ -9,7 +9,6 @@ from awxkit.utils import not_provided, random_title, PseudoNamespace
 from . import base
 from . import page
 
-
 job_results = ('any', 'error', 'success')
 notification_types = ('awssns', 'email', 'irc', 'pagerduty', 'slack', 'twilio', 'webhook', 'mattermost', 'grafana', 'rocketchat')
 

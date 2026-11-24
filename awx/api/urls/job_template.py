@@ -23,7 +23,6 @@ from awx.api.views import (
     JobTemplateCopy,
 )
 
-
 urls = [
     re_path(r'^$', JobTemplateList.as_view(), name='job_template_list'),
     re_path(r'^(?P<pk>[0-9]+)/$', JobTemplateDetail.as_view(), name='job_template_detail'),

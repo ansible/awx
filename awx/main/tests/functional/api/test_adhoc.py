@@ -3,7 +3,6 @@ import pytest
 
 from awx.api.versioning import reverse
 
-
 """
     def run_test_ad_hoc_command(self, **kwargs):
         # Post to list to start a new ad hoc command.

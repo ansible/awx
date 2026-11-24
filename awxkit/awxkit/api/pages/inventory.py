@@ -11,7 +11,6 @@ import awxkit.exceptions as exc
 from . import base
 from . import page
 
-
 log = logging.getLogger(__name__)
 
 

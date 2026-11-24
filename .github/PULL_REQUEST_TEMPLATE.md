@@ -24,7 +24,7 @@ in as the first entry for your PR title.
 
 
 
-##### ADDITIONAL INFORMATION
+##### STEPS TO REPRODUCE AND EXTRA INFO
 <!---
 Include additional information to help people understand the change here.
 For bugs that don't have a linked bug report, a step-by-step reproduction

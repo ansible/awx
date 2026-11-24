@@ -43,13 +43,13 @@ From root of AWX project `~/projects/src/github.com/TheRealHaoLiu/awx`
 I can either do
 
 ```bash
-ln -s ~/projects/src/github.com/TheRealHaoLiu/ansible-runner tools/docker-compose/editable_dependencies/
+ln -s ~/projects/src/github.com/TheRealHaoLiu/django-ansible-base tools/docker-compose/editable_dependencies/
 ```
 
 or
 
 ```bash
-ln -s ../ansible-runner tools/docker-compose/editable_dependencies/
+ln -s ../django-ansible-base tools/docker-compose/editable_dependencies/
 ```
 
 ## How to remove indivisual editable dependencies

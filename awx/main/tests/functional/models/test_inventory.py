@@ -92,6 +92,22 @@ class TestInventoryScript:
 
 @pytest.mark.django_db
 class TestActiveCount:
+    @pytest.fixture(autouse=True)
+    def _bypass_active_count_cache(self):
+        from django.core.cache import cache
+
+        cache.delete('host_active_count')
+        original_set = cache.set
+
+        def skip_host_cache(key, *args, **kwargs):
+            if key == 'host_active_count':
+                return
+            return original_set(key, *args, **kwargs)
+
+        with mock.patch.object(cache, 'set', side_effect=skip_host_cache):
+            yield
+        cache.delete('host_active_count')
+
     def test_host_active_count(self, organization):
         inv1 = Inventory.objects.create(name='inv1', organization=organization)
         inv2 = Inventory.objects.create(name='inv2', organization=organization)
@@ -108,6 +124,28 @@ class TestActiveCount:
         source.hosts.create(name='remotely-managed-host', inventory=inventory)
         assert Host.objects.active_count() == 1
 
+    def test_active_count_minus_constructed(self, organization):
+        """
+        Active hosts do not include duplicated hosts from construted inventories.
+        """
+        inv = Inventory.objects.create(name='source-inv', organization=organization)
+        inv.hosts.create(name='host1')
+        assert Host.objects.active_count() == 1
+
+        constructed = Inventory.objects.create(name='constructed-inv', kind='constructed', organization=organization)
+        Host.objects.create(name='host1', inventory=constructed)
+        assert Host.objects.active_count() == 1
+
+    def test_org_active_count_minus_constructed(self, organization):
+        """Org-scoped count must also exclude constructed-inventory shadow rows."""
+        inv = Inventory.objects.create(name='source-inv', organization=organization)
+        inv.hosts.create(name='host1')
+        assert Host.objects.org_active_count(organization.id) == 1
+
+        constructed = Inventory.objects.create(name='constructed-inv', kind='constructed', organization=organization)
+        Host.objects.create(name='host1', inventory=constructed)
+        assert Host.objects.org_active_count(organization.id) == 1
+
     def test_host_case_insensitivity(self, organization):
         inv1 = Inventory.objects.create(name='inv1', organization=organization)
         inv2 = Inventory.objects.create(name='inv2', organization=organization)
@@ -117,6 +155,41 @@ class TestActiveCount:
         assert Host.objects.active_count() == 1
         inv1.hosts.create(name='host2')
         assert Host.objects.active_count() == 2
+
+
+@pytest.mark.django_db
+class TestActiveCountCache:
+    @pytest.fixture(autouse=True)
+    def _clear_active_count_cache(self):
+        from awx.main.utils.common import memoize_delete
+
+        memoize_delete('host_active_count')
+        yield
+        memoize_delete('host_active_count')
+
+    def test_active_count_cache(self, organization):
+        inv = Inventory.objects.create(name='inv1', organization=organization)
+        inv.hosts.create(name='host1')
+        assert Host.objects.active_count() == 1
+
+        inv.hosts.create(name='host2')
+        assert Host.objects.active_count() == 1  # still cached
+
+        from awx.main.utils.common import memoize_delete
+
+        memoize_delete('host_active_count')
+        assert Host.objects.active_count() == 2
+
+    def test_active_count_cache_after_delete(self, organization):
+        inv = Inventory.objects.create(name='inv1', organization=organization)
+        h = inv.hosts.create(name='host1')
+        assert Host.objects.active_count() == 1
+
+        h.delete()
+        from awx.main.utils.common import memoize_delete
+
+        memoize_delete('host_active_count')
+        assert Host.objects.active_count() == 0
 
 
 @pytest.mark.django_db
@@ -266,6 +339,33 @@ def test_inventory_update_excessively_long_name(inventory, inventory_source):
     iu = inventory_source.update()
     assert inventory_source.name != inventory.name
     assert iu.name.startswith(inventory.name)
+
+
+@pytest.mark.django_db
+class TestConstructedInventory:
+    def test_constructed_inventory_aggregates_hosts_from_inputs(self, organization):
+        """Create 2 regular inventories with asymmetric host counts, create a constructed
+        inventory with those as inputs, verify both inventories are linked and hosts
+        from each are distinguishable"""
+        inv1 = Inventory.objects.create(name='source-inv-1', organization=organization)
+        inv1.hosts.create(name='host-a')
+        inv1.hosts.create(name='host-b')
+        inv1.hosts.create(name='host-c')
+
+        inv2 = Inventory.objects.create(name='source-inv-2', organization=organization)
+        inv2.hosts.create(name='host-d')
+
+        constructed = Inventory.objects.create(name='my-constructed', kind='constructed', organization=organization)
+        constructed.input_inventories.add(inv1)
+        constructed.input_inventories.add(inv2)
+
+        input_ids = set(constructed.input_inventories.values_list('id', flat=True))
+        assert input_ids == {inv1.id, inv2.id}
+
+        all_host_names = set()
+        for inv in constructed.input_inventories.all():
+            all_host_names.update(inv.hosts.values_list('name', flat=True))
+        assert all_host_names == {'host-a', 'host-b', 'host-c', 'host-d'}
 
 
 @pytest.mark.django_db

@@ -7,8 +7,12 @@ from django.core.exceptions import ValidationError
 
 from awx.api.versioning import reverse
 
-from awx.main.models import InventorySource, Inventory, ActivityStream
+from awx.main.models import InventorySource, Inventory, ActivityStream, Organization, Host, Job
 from awx.main.utils.inventory_vars import update_group_variables
+
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
+from django.utils.timezone import now
 
 
 @pytest.fixture
@@ -65,6 +69,44 @@ def test_inventory_host_name_unique(scm_inventory, post, admin_user):
 
 
 @pytest.mark.django_db
+def test_inventory_host_inline_port(scm_inventory, post, admin_user):
+    with mock.patch('ansible_base.lib.serializers.mixins.get_setting', return_value=True):
+        resp = post(
+            reverse('api:inventory_hosts_list', kwargs={'pk': scm_inventory.id}),
+            {'name': 'web.example.com:2222'},
+            admin_user,
+            expect=201,
+        )
+    assert resp.data['name'] == 'web.example.com'
+    assert '2222' in resp.data['variables']
+
+
+@pytest.mark.django_db
+def test_inventory_host_ipv6_name(scm_inventory, post, admin_user):
+    """HostSerializer demotes name from Tier 1 so IPv6 (multiple colons)
+    is not rejected once enforcement is on (AAP-78694)."""
+    with mock.patch('ansible_base.lib.serializers.mixins.get_setting', return_value=True):
+        resp = post(
+            reverse('api:inventory_hosts_list', kwargs={'pk': scm_inventory.id}),
+            {'name': '2001:db8::1'},
+            admin_user,
+            expect=201,
+        )
+    assert resp.data['name'] == '2001:db8::1'
+
+
+@pytest.mark.django_db
+def test_inventory_host_invalid_inline_port(scm_inventory, post, admin_user):
+    resp = post(
+        reverse('api:inventory_hosts_list', kwargs={'pk': scm_inventory.id}),
+        {'name': 'web.example.com:99999'},
+        admin_user,
+        expect=400,
+    )
+    assert 'Invalid port' in json.dumps(resp.data)
+
+
+@pytest.mark.django_db
 def test_inventory_host_list_ordering(scm_inventory, get, admin_user):
     # create 3 hosts, hit the inventory host list view 3 times and get the order visible there each time and compare
     inv_src = scm_inventory.inventory_sources.first()
@@ -78,6 +120,27 @@ def test_inventory_host_list_ordering(scm_inventory, get, admin_user):
     ).data['results']
     host_list = [host['id'] for host in resp]
     assert host_list == expected_ids
+
+
+@pytest.mark.django_db
+def test_inventory_hosts_attach_uses_bounded_membership_check(inventory, post, admin_user):
+    """attach()'s membership check must filter by the host's own pk and be LIMIT-bounded, not scan every host in the inventory."""
+    _now = now()
+    existing_hosts = [Host(name=f'existing-host-{i}', inventory=inventory, created=_now, modified=_now) for i in range(5)]
+    Host.objects.bulk_create(existing_hosts)
+
+    with CaptureQueriesContext(connection) as ctx:
+        post(reverse('api:inventory_hosts_list', kwargs={'pk': inventory.id}), {'name': 'new-host'}, admin_user, expect=201)
+
+    membership_check_queries = [
+        q['sql']
+        for q in ctx.captured_queries
+        if 'FROM "main_host"' in q['sql'] and '"main_host"."inventory_id" = ' in q['sql'] and '"main_host"."name" = ' not in q['sql']
+    ]
+    assert membership_check_queries, "expected a query checking host membership in the inventory"
+    for sql in membership_check_queries:
+        assert '"main_host"."id" = ' in sql, f"attach() membership check is not filtered by the host's own pk: {sql}"
+        assert 'LIMIT' in sql, f"attach() membership check is not LIMIT-bounded: {sql}"
 
 
 @pytest.mark.django_db
@@ -139,6 +202,14 @@ def test_async_inventory_deletion(delete, get, inventory, alice):
     resp = get(reverse('api:inventory_detail', kwargs={'pk': inventory.id}), alice)
     assert resp.status_code == 200
     assert resp.data.get('pending_deletion') is True
+
+
+@pytest.mark.django_db
+def test_inventory_with_a_running_job_cannot_be_deleted(delete, inventory, admin_user):
+    """A running job still needs its inventory, whether or not the job's controller is alive."""
+    Job.objects.create(inventory=inventory, status='running', controller_node='ctrl-1', execution_node='receptor-1')
+
+    delete(reverse('api:inventory_detail', kwargs={'pk': inventory.pk}), admin_user, expect=409)
 
 
 @pytest.mark.django_db
@@ -285,12 +356,12 @@ def test_urlencode_host_filter(post, admin_user, organization):
 def test_host_filter_unicode(post, admin_user, organization):
     post(
         reverse('api:inventory_list'),
-        data={'name': 'smart inventory', 'kind': 'smart', 'organization': organization.pk, 'host_filter': u'ansible_facts__ansible_distribution=レッドハット'},
+        data={'name': 'smart inventory', 'kind': 'smart', 'organization': organization.pk, 'host_filter': 'ansible_facts__ansible_distribution=レッドハット'},
         user=admin_user,
         expect=201,
     )
     si = Inventory.objects.get(name='smart inventory')
-    assert si.host_filter == u'ansible_facts__ansible_distribution=レッドハット'
+    assert si.host_filter == 'ansible_facts__ansible_distribution=レッドハット'
 
 
 @pytest.mark.django_db
@@ -302,7 +373,7 @@ def test_host_filter_invalid_ansible_facts_lookup(post, admin_user, organization
             'name': 'smart inventory',
             'kind': 'smart',
             'organization': organization.pk,
-            'host_filter': u'ansible_facts__ansible_distribution__{}=cent'.format(lookup),
+            'host_filter': 'ansible_facts__ansible_distribution__{}=cent'.format(lookup),
         },
         user=admin_user,
         expect=400,
@@ -417,7 +488,7 @@ def test_inventory_source_vars_prohibition(post, inventory, admin_user):
         mock_settings.INV_ENV_VARIABLE_BLOCKED = ('FOOBAR',)
         r = post(
             reverse('api:inventory_source_list'),
-            {'name': 'new inv src', 'source_vars': '{\"FOOBAR\": \"val\"}', 'inventory': inventory.pk},
+            {'name': 'new inv src', 'source_vars': '{"FOOBAR": "val"}', 'inventory': inventory.pk},
             admin_user,
             expect=400,
         )
@@ -462,6 +533,26 @@ class TestInventorySourceCredential:
         )
         assert 'Cloud-based inventory sources (such as ec2)' in r.data['credential'][0]
         assert 'require credentials for the matching cloud service' in r.data['credential'][0]
+
+    def test_credential_dict_value_returns_400(self, inventory, admin_user, put):
+        """Passing a dict for the credential field should return 400, not 500.
+
+        Reproduces a bug where int() raises TypeError on non-scalar types
+        (dict, list) which was uncaught, resulting in a 500 Internal Server Error.
+        """
+        inv_src = InventorySource.objects.create(name='test-src', inventory=inventory, source='ec2')
+        r = put(
+            url=reverse('api:inventory_source_detail', kwargs={'pk': inv_src.pk}),
+            data={
+                'name': 'test-src',
+                'inventory': inventory.pk,
+                'source': 'ec2',
+                'credential': {'username': 'admin', 'password': 'secret'},
+            },
+            user=admin_user,
+            expect=400,
+        )
+        assert r.status_code == 400
 
     def test_vault_credential_not_allowed(self, project, inventory, vault_credential, admin_user, post):
         """Vault credentials cannot be associated via the deprecated field"""
@@ -709,7 +800,6 @@ class TestConstructedInventory:
 
 @pytest.mark.django_db
 class TestInventoryAllVariables:
-
     @staticmethod
     def simulate_update_from_source(inv_src, variables_dict, overwrite_vars=True):
         """
@@ -943,3 +1033,122 @@ class TestInventoryAllVariables:
         # Test step 6: Value of var x from source A reappears, because the
         # latest update from source B did not contain var x.
         self.update_and_verify(inv_src_c, {}, expect={"x": 1}, teststep=6)
+
+
+@pytest.mark.django_db
+def test_inventory_names_unique_per_organization(post, admin_user):
+    """Validate that two inventories can have the same name if they belong to different organizations."""
+    org1 = Organization.objects.create(name='org-inv-1')
+    org2 = Organization.objects.create(name='org-inv-2')
+    inv_name = 'SharedInventoryName'
+
+    # Create inventory with same name in org1
+    resp1 = post(
+        reverse('api:inventory_list'),
+        {'name': inv_name, 'organization': org1.id},
+        admin_user,
+        expect=201,
+    )
+    inv1_id = resp1.data['id']
+
+    # Create inventory with same name in org2 - should succeed
+    resp2 = post(
+        reverse('api:inventory_list'),
+        {'name': inv_name, 'organization': org2.id},
+        admin_user,
+        expect=201,
+    )
+    inv2_id = resp2.data['id']
+
+    assert inv1_id != inv2_id
+    inv1 = Inventory.objects.get(id=inv1_id)
+    inv2 = Inventory.objects.get(id=inv2_id)
+    assert inv1.name == inv2.name == inv_name
+    assert inv1.organization.id == org1.id
+    assert inv2.organization.id == org2.id
+
+    # Attempt to create another inventory with same name in org1 - should fail
+    resp3 = post(
+        reverse('api:inventory_list'),
+        {'name': inv_name, 'organization': org1.id},
+        admin_user,
+        expect=400,
+    )
+    assert 'Inventory with this Name and Organization already exists' in json.dumps(resp3.data)
+
+
+@pytest.mark.django_db
+class TestSourcePathTraversal:
+    """Serializer-level path traversal prevention on InventorySource.source_path (AAP-78700)."""
+
+    def _create_payload(self, inventory, project, source_path, name='scm-src'):
+        return {
+            'inventory': inventory.pk,
+            'name': name,
+            'source': 'scm',
+            'source_project': project.pk,
+            'source_path': source_path,
+            'source_vars': 'plugin: a.b.c',
+        }
+
+    @pytest.mark.parametrize(
+        'source_path',
+        [
+            '../etc/passwd',
+            'inventories/../secrets',
+            '..\\windows\\path',
+        ],
+    )
+    def test_create_rejects_traversal(self, post, inventory, project, admin_user, source_path):
+        response = post(
+            reverse('api:inventory_source_list'),
+            self._create_payload(inventory, project, source_path),
+            admin_user,
+            expect=400,
+        )
+        assert 'source_path' in response.data
+
+    def test_create_accepts_valid_path(self, post, inventory, project, admin_user):
+        response = post(
+            reverse('api:inventory_source_list'),
+            self._create_payload(inventory, project, 'playbooks/main.yml'),
+            admin_user,
+            expect=201,
+        )
+        assert response.data['source_path'] == 'playbooks/main.yml'
+
+    def test_update_rejects_changed_traversal_path(self, patch, inventory, project, admin_user):
+        with mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.update'):
+            inv_src = InventorySource.objects.create(
+                inventory=inventory,
+                name='scm-src',
+                source='scm',
+                source_project=project,
+                source_path='playbooks/main.yml',
+            )
+        response = patch(
+            inv_src.get_absolute_url(),
+            {'source_path': '../etc/passwd'},
+            admin_user,
+            expect=400,
+        )
+        assert 'source_path' in response.data
+
+    def test_update_grandfathers_unchanged_traversal_path(self, patch, inventory, project, admin_user):
+        legacy_path = '../legacy/hosts'
+        with mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.update'):
+            inv_src = InventorySource.objects.create(
+                inventory=inventory,
+                name='legacy-src',
+                source='scm',
+                source_project=project,
+                source_path=legacy_path,
+            )
+        response = patch(
+            inv_src.get_absolute_url(),
+            {'source_path': legacy_path, 'name': 'legacy-src-renamed'},
+            admin_user,
+            expect=200,
+        )
+        assert response.data['source_path'] == legacy_path
+        assert response.data['name'] == 'legacy-src-renamed'

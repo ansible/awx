@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
-      packages: write
+      packages: read
       contents: read
     steps:
       - name: Check for each of the lines

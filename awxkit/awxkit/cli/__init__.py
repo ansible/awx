@@ -11,7 +11,6 @@ from awxkit.utils import to_str
 from awxkit.exceptions import Unauthorized, Common
 from awxkit.cli.utils import cprint
 
-
 # you'll only see these warnings if you've explicitly *disabled* SSL
 # verification, so they're a little annoying, redundant
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -27,10 +26,8 @@ def run(stdout=sys.stdout, stderr=sys.stderr, argv=[]):
         sys.exit(1)
     except ConnectionError as e:
         cli.parser.print_help()
-        msg = (
-            '\nThere was a network error of some kind trying to reach '
-            '{}.\nYou might need to specify (or double-check) '
-            '--conf.host'.format(cli.get_config('host'))
+        msg = '\nThere was a network error of some kind trying to reach {}.\nYou might need to specify (or double-check) --conf.host'.format(
+            cli.get_config('host')
         )
         if isinstance(e, SSLError):
             msg = (
@@ -61,7 +58,7 @@ def run(stdout=sys.stdout, stderr=sys.stderr, argv=[]):
             sys.stdout.write(e.__class__.__name__)
             print('')
         sys.exit(1)
-    except Exception as e:
+    except Exception as e:  # noqa: F841
         if cli.verbose:
             e = traceback.format_exc()
         cprint(e, 'red', file=stderr)

@@ -8,7 +8,6 @@ from django.utils.translation import gettext_lazy as _
 from awx.conf import register, fields
 from awx.ui.fields import PendoTrackingStateField, CustomLogoField  # noqa
 
-
 register(
     'PENDO_TRACKING_STATE',
     field_class=PendoTrackingStateField,

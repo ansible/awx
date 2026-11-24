@@ -86,13 +86,13 @@ class TestWorkflowDAG:
         return (g, wf_root_nodes, wf_leaf_nodes)
 
     def test_get_root_nodes(self, workflow_dag_root_children):
-        (g, wf_root_nodes, ignore) = workflow_dag_root_children
+        g, wf_root_nodes, ignore = workflow_dag_root_children
         assert set([n.id for n in wf_root_nodes]) == set([n['node_object'].id for n in g.get_root_nodes()])
 
 
 class TestDNR:
     def test_mark_dnr_nodes(self, workflow_dag_1):
-        (g, nodes) = workflow_dag_1
+        g, nodes = workflow_dag_1
 
         r'''
                 0
@@ -166,7 +166,7 @@ class TestAllWorkflowNodes:
         return (g, nodes)
 
     def test_simple_all_convergence(self, simple_all_convergence):
-        (g, nodes) = simple_all_convergence
+        g, nodes = simple_all_convergence
         dnr_nodes = g.mark_dnr_nodes()
         assert 0 == len(dnr_nodes), "no nodes should be marked DNR"
 
@@ -197,7 +197,7 @@ class TestAllWorkflowNodes:
         return (g, nodes)
 
     def test_all_converge_edge_case_1(self, workflow_all_converge_1):
-        (g, nodes) = workflow_all_converge_1
+        g, nodes = workflow_all_converge_1
         dnr_nodes = g.mark_dnr_nodes()
         assert 2 == len(dnr_nodes), "node[1] and node[2] should be marked DNR"
         assert nodes[1] == dnr_nodes[0], "Node 1 should be marked DNR"
@@ -233,7 +233,7 @@ class TestAllWorkflowNodes:
         return (g, nodes)
 
     def test_all_converge_edge_case_2(self, workflow_all_converge_2):
-        (g, nodes) = workflow_all_converge_2
+        g, nodes = workflow_all_converge_2
         dnr_nodes = g.mark_dnr_nodes()
         assert 1 == len(dnr_nodes), "1 and only 1 node should be marked DNR"
         assert nodes[2] == dnr_nodes[0], "Node 3 should be marked DNR"
@@ -268,7 +268,7 @@ class TestAllWorkflowNodes:
         return (g, nodes)
 
     def test_workflow_all_converge_will_run(self, workflow_all_converge_will_run):
-        (g, nodes) = workflow_all_converge_will_run
+        g, nodes = workflow_all_converge_will_run
         dnr_nodes = g.mark_dnr_nodes()
         assert 0 == len(dnr_nodes), "No nodes should get marked DNR"
 
@@ -306,7 +306,7 @@ class TestAllWorkflowNodes:
         return (g, nodes)
 
     def test_workflow_all_converge_while_parent_runs(self, workflow_all_converge_dnr):
-        (g, nodes) = workflow_all_converge_dnr
+        g, nodes = workflow_all_converge_dnr
         dnr_nodes = g.mark_dnr_nodes()
         assert 0 == len(dnr_nodes), "No nodes should get marked DNR"
 
@@ -315,7 +315,7 @@ class TestAllWorkflowNodes:
 
     def test_workflow_all_converge_with_incorrect_parent(self, workflow_all_converge_dnr):
         # Another tick of the scheduler
-        (g, nodes) = workflow_all_converge_dnr
+        g, nodes = workflow_all_converge_dnr
         nodes[1].job.status = 'successful'
         dnr_nodes = g.mark_dnr_nodes()
         assert 1 == len(dnr_nodes), "1 and only 1 node should be marked DNR"
@@ -326,7 +326,7 @@ class TestAllWorkflowNodes:
 
     def test_workflow_all_converge_runs(self, workflow_all_converge_dnr):
         # Trick the scheduler again to make sure the convergence node acutally runs
-        (g, nodes) = workflow_all_converge_dnr
+        g, nodes = workflow_all_converge_dnr
         nodes[1].job.status = 'failed'
         dnr_nodes = g.mark_dnr_nodes()
         assert 0 == len(dnr_nodes), "No nodes should be marked DNR"
@@ -375,7 +375,7 @@ class TestAllWorkflowNodes:
         return (g, nodes)
 
     def test_workflow_all_converge_deep_dnr_tree(self, workflow_all_converge_deep_dnr_tree):
-        (g, nodes) = workflow_all_converge_deep_dnr_tree
+        g, nodes = workflow_all_converge_deep_dnr_tree
         dnr_nodes = g.mark_dnr_nodes()
 
         assert 4 == len(dnr_nodes), "All nodes w/ no jobs should be marked DNR"
@@ -391,7 +391,7 @@ class TestAllWorkflowNodes:
 class TestIsWorkflowDone:
     @pytest.fixture
     def workflow_dag_2(self, workflow_dag_1):
-        (g, nodes) = workflow_dag_1
+        g, nodes = workflow_dag_1
         r'''
                S0
                /\
@@ -416,7 +416,7 @@ class TestIsWorkflowDone:
 
     @pytest.fixture
     def workflow_dag_failed(self, workflow_dag_1):
-        (g, nodes) = workflow_dag_1
+        g, nodes = workflow_dag_1
         r'''
                S0
                /\
@@ -453,7 +453,7 @@ class TestIsWorkflowDone:
 
     @pytest.fixture
     def workflow_dag_failure(self, workflow_dag_canceled):
-        (g, nodes) = workflow_dag_canceled
+        g, nodes = workflow_dag_canceled
         nodes[0].job.status = 'failed'
         return (g, nodes)
 
@@ -463,21 +463,20 @@ class TestIsWorkflowDone:
         assert g.is_workflow_done() is False
 
     def test_workflow_done_and_failed(self, workflow_dag_failed):
-        (g, nodes) = workflow_dag_failed
+        g, nodes = workflow_dag_failed
 
         assert g.is_workflow_done() is True
         assert g.has_workflow_failed() == (
             True,
             smart_str(
                 _(
-                    "No error handling path for workflow job node(s) [({},{})]. Workflow job node(s)"
-                    " missing unified job template and error handling path []."
+                    "No error handling path for workflow job node(s) [({},{})]. Workflow job node(s) missing unified job template and error handling path []."
                 ).format(nodes[2].id, nodes[2].job.status)
             ),
         )
 
     def test_is_workflow_done_no_unified_job_tempalte_end(self, workflow_dag_failed):
-        (g, nodes) = workflow_dag_failed
+        g, nodes = workflow_dag_failed
 
         nodes[2].unified_job_template = None
 
@@ -485,14 +484,14 @@ class TestIsWorkflowDone:
         assert g.has_workflow_failed() == (
             True,
             smart_str(
-                _(
-                    "No error handling path for workflow job node(s) []. Workflow job node(s) missing" " unified job template and error handling path [{}]."
-                ).format(nodes[2].id)
+                _("No error handling path for workflow job node(s) []. Workflow job node(s) missing unified job template and error handling path [{}].").format(
+                    nodes[2].id
+                )
             ),
         )
 
     def test_is_workflow_done_no_unified_job_tempalte_begin(self, workflow_dag_1):
-        (g, nodes) = workflow_dag_1
+        g, nodes = workflow_dag_1
 
         nodes[0].unified_job_template = None
         g.mark_dnr_nodes()
@@ -501,34 +500,32 @@ class TestIsWorkflowDone:
         assert g.has_workflow_failed() == (
             True,
             smart_str(
-                _(
-                    "No error handling path for workflow job node(s) []. Workflow job node(s) missing" " unified job template and error handling path [{}]."
-                ).format(nodes[0].id)
+                _("No error handling path for workflow job node(s) []. Workflow job node(s) missing unified job template and error handling path [{}].").format(
+                    nodes[0].id
+                )
             ),
         )
 
     def test_canceled_should_fail(self, workflow_dag_canceled):
-        (g, nodes) = workflow_dag_canceled
+        g, nodes = workflow_dag_canceled
 
         assert g.has_workflow_failed() == (
             True,
             smart_str(
                 _(
-                    "No error handling path for workflow job node(s) [({},{})]. Workflow job node(s)"
-                    " missing unified job template and error handling path []."
+                    "No error handling path for workflow job node(s) [({},{})]. Workflow job node(s) missing unified job template and error handling path []."
                 ).format(nodes[0].id, nodes[0].job.status)
             ),
         )
 
     def test_failure_should_fail(self, workflow_dag_failure):
-        (g, nodes) = workflow_dag_failure
+        g, nodes = workflow_dag_failure
 
         assert g.has_workflow_failed() == (
             True,
             smart_str(
                 _(
-                    "No error handling path for workflow job node(s) [({},{})]. Workflow job node(s)"
-                    " missing unified job template and error handling path []."
+                    "No error handling path for workflow job node(s) [({},{})]. Workflow job node(s) missing unified job template and error handling path []."
                 ).format(nodes[0].id, nodes[0].job.status)
             ),
         )
@@ -555,7 +552,7 @@ class TestBFSNodesToRun:
         return (g, nodes)
 
     def test_cancel_still_runs_children(self, workflow_dag_canceled):
-        (g, nodes) = workflow_dag_canceled
+        g, nodes = workflow_dag_canceled
         g.mark_dnr_nodes()
 
         assert set([nodes[1], nodes[2]]) == set(g.bfs_nodes_to_run())
@@ -587,7 +584,7 @@ class TestDocsExample:
         return (g, nodes)
 
     def test_dnr_step(self, complex_dag):
-        (g, nodes) = complex_dag
+        g, nodes = complex_dag
         base_dir = '/awx_devel'
 
         g.generate_graphviz_plot(file_name=os.path.join(base_dir, "workflow_step0.gv"))

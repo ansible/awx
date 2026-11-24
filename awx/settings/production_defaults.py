@@ -19,12 +19,12 @@ SECRET_KEY = None
 # See https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = []
 
+# In production, trust the X-Forwarded-For header set by the reverse proxy
+REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR']
+
 # Ansible base virtualenv paths and enablement
 # only used for deprecated fields and management commands for them
 BASE_VENV_PATH = os.path.realpath("/var/lib/awx/venv")
-
-# Switch to a writable location for the dispatcher sockfile location
-DISPATCHERD_DEBUGGING_SOCKFILE = os.path.realpath('/var/run/tower/dispatcherd.sock')
 
 # Very important that this is editable (not read_only) in the API
 AWX_ISOLATION_SHOW_PATHS = [

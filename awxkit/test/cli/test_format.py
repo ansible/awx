@@ -56,12 +56,10 @@ def test_yaml_import():
     def _dummy_authenticate():
         pass
 
-    yaml_fd = io.StringIO(
-        """
+    yaml_fd = io.StringIO("""
         workflow_job_templates:
           - name: Workflow1
-        """
-    )
+        """)
     yaml_fd.name = 'file.yaml'
     cli = CLI(stdin=yaml_fd)
     cli.parse_args(['--conf.format', 'yaml'])

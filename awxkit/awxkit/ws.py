@@ -10,7 +10,6 @@ from urllib.parse import urlparse
 
 from awxkit.config import config
 
-
 log = logging.getLogger(__name__)
 
 
@@ -205,7 +204,7 @@ class WSClient(object):
         message = json.loads(message)
         log.debug('received message: {}'.format(message))
         if self._add_received_time:
-            message['received_time'] = datetime.datetime.utcnow()
+            message['received_time'] = datetime.datetime.now(datetime.UTC)
 
         if all([message.get('group_name') == 'jobs', message.get('status') == 'pending', message.get('unified_job_id'), self._should_subscribe_to_pending_job]):
             if bool(message.get('project_id')) == (self._should_subscribe_to_pending_job['events'] == 'project_update_events'):

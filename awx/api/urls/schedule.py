@@ -5,7 +5,6 @@ from django.urls import re_path
 
 from awx.api.views import ScheduleList, ScheduleDetail, ScheduleUnifiedJobsList, ScheduleCredentialsList, ScheduleLabelsList, ScheduleInstanceGroupList
 
-
 urls = [
     re_path(r'^$', ScheduleList.as_view(), name='schedule_list'),
     re_path(r'^(?P<pk>[0-9]+)/$', ScheduleDetail.as_view(), name='schedule_detail'),

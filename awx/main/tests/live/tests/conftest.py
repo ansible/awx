@@ -8,22 +8,24 @@ import logging
 import pytest
 
 from django.conf import settings
+from django.core.cache import cache
 
 from awx.api.versioning import reverse
 
 # These tests are invoked from the awx/main/tests/live/ subfolder
 # so any fixtures from higher-up conftest files must be explicitly included
 from awx.main.tests.functional.conftest import *  # noqa
-from awx.main.tests.conftest import load_all_credentials  # noqa: F401; pylint: disable=unused-import
+from awx.main.tests.conftest import load_all_credentials  # noqa: F401  # pylint: disable=unused-import
 from awx.main.tests import data
 
-from awx.main.models import Project, JobTemplate, Organization, Inventory
-
+from awx.main.models import Project, JobTemplate, Organization, Inventory, WorkflowJob, UnifiedJob
+from awx.main.tasks.system import clear_setting_cache
 
 logger = logging.getLogger(__name__)
 
 
 PROJ_DATA = os.path.join(os.path.dirname(data.__file__), 'projects')
+COLL_DATA = os.path.join(os.path.dirname(data.__file__), 'collections')
 
 
 def _copy_folders(source_path, dest_path, clear=False):
@@ -55,11 +57,23 @@ def live_tmp_folder():
         shutil.rmtree(path)
     os.mkdir(path)
     _copy_folders(PROJ_DATA, path)
+    _copy_folders(COLL_DATA, path)
     for dirname in os.listdir(path):
         source_dir = os.path.join(path, dirname)
         subprocess.run(GIT_COMMANDS, cwd=source_dir, shell=True)
+    # force invalidation of key before checking it in case it is stale
+    cache.delete_many(['AWX_ISOLATION_SHOW_PATHS'])
+    settings._awx_conf_memoizedcache.clear()
     if path not in settings.AWX_ISOLATION_SHOW_PATHS:
+        logger.info(f'Modifying settings.AWX_ISOLATION_SHOW_PATHS for live test: {settings.AWX_ISOLATION_SHOW_PATHS + [path]}')
         settings.AWX_ISOLATION_SHOW_PATHS = settings.AWX_ISOLATION_SHOW_PATHS + [path]
+        cache.delete_many(['AWX_ISOLATION_SHOW_PATHS'])
+        settings._awx_conf_memoizedcache.clear()
+        # cache is cleared in test environment, but need to clear in test environment
+        clear_setting_cache.delay(['AWX_ISOLATION_SHOW_PATHS'])
+        time.sleep(5.0)  # for _awx_conf_memoizedcache to expire on all workers
+    else:
+        logger.info(f'Believed that {path} is already in settings.AWX_ISOLATION_SHOW_PATHS: {settings.AWX_ISOLATION_SHOW_PATHS}')
     return path
 
 
@@ -88,6 +102,21 @@ def wait_for_events(uj, timeout=2):
 
 
 def unified_job_stdout(uj):
+    if type(uj) is UnifiedJob:
+        uj = uj.get_real_instance()
+    if isinstance(uj, WorkflowJob):
+        outputs = []
+        for node in uj.workflow_job_nodes.all().select_related('job').order_by('id'):
+            if node.job is None:
+                continue
+            outputs.append(
+                'workflow node {node_id} job {job_id} output:\n{output}'.format(
+                    node_id=node.id,
+                    job_id=node.job.id,
+                    output=unified_job_stdout(node.job),
+                )
+            )
+        return '\n'.join(outputs)
     wait_for_events(uj)
     return '\n'.join([event.stdout for event in uj.get_event_queryset().order_by('created')])
 
@@ -139,7 +168,7 @@ def podman_image_generator():
 
 @pytest.fixture
 def project_factory(post, default_org, admin):
-    def _rf(scm_url=None, local_path=None):
+    def _rf(scm_url=None, local_path=None, **extra_kwargs):
         proj_kwargs = {}
         if local_path:
             # manual path
@@ -152,6 +181,9 @@ def project_factory(post, default_org, admin):
             proj_kwargs['scm_url'] = scm_url
         else:
             raise RuntimeError('Need to provide scm_url or local_path')
+
+        if extra_kwargs:
+            proj_kwargs.update(extra_kwargs)
 
         proj_kwargs['name'] = project_name
         proj_kwargs['organization'] = default_org.id

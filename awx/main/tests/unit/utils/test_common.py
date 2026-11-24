@@ -163,13 +163,13 @@ def memoized_function(mocker, mock_cache):
 
 def test_memoize_track_function(memoized_function, mock_cache):
     assert memoized_function('scott', 'scotterson') == 'scotterson'
-    assert mock_cache.get('myfunction') == {u'scott-scotterson': 'scotterson'}
+    assert mock_cache.get('myfunction') == {'scott-scotterson': 'scotterson'}
     assert memoized_function('scott', 'scotterson') == 'scotterson'
 
     assert memoized_function.calls['scott'] == 1
 
     assert memoized_function('john', 'smith') == 'smith'
-    assert mock_cache.get('myfunction') == {u'scott-scotterson': 'scotterson', u'john-smith': 'smith'}
+    assert mock_cache.get('myfunction') == {'scott-scotterson': 'scotterson', 'john-smith': 'smith'}
     assert memoized_function('john', 'smith') == 'smith'
 
     assert memoized_function.calls['john'] == 1
@@ -180,7 +180,7 @@ def test_memoize_delete(memoized_function, mock_cache):
     assert memoized_function('john', 'smith') == 'smith'
     assert memoized_function.calls['john'] == 1
 
-    assert mock_cache.get('myfunction') == {u'john-smith': 'smith'}
+    assert mock_cache.get('myfunction') == {'john-smith': 'smith'}
 
     with mock.patch('awx.main.utils.common.memoize_delete', side_effect=mock_cache.delete):
         common.memoize_delete('myfunction')
@@ -330,17 +330,13 @@ class TestHostnameRegexValidator:
 
     def test_bad_call(self, regex_expr, re_flags):
         h = HostnameRegexValidator(regex=regex_expr, flags=re_flags)
-        try:
+        with pytest.raises(ValidationError, match=r"^\['illegal characters detected in hostname=@#\$%\)\$#\(TUFAS_DG. Please verify.'\]$"):
             h("@#$%)$#(TUFAS_DG")
-        except ValidationError as e:
-            assert e.message is not None
 
     def test_good_call_with_inverse(self, regex_expr, re_flags, inverse_match=True):
         h = HostnameRegexValidator(regex=regex_expr, flags=re_flags, inverse_match=inverse_match)
-        try:
+        with pytest.raises(ValidationError, match=r"^\['Enter a valid value.'\]$"):
             h("1.2.3.4")
-        except ValidationError as e:
-            assert e.message is not None
 
     def test_bad_call_with_inverse(self, regex_expr, re_flags, inverse_match=True):
         h = HostnameRegexValidator(regex=regex_expr, flags=re_flags, inverse_match=inverse_match)

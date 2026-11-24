@@ -1,12 +1,15 @@
 import pytest
 
 from uuid import uuid4
+from unittest import mock
 
 from awx.api.versioning import reverse
 
 from awx.main.models.jobs import JobTemplate
 from awx.main.models import Organization, Inventory, WorkflowJob, ExecutionEnvironment, Host
 from awx.main.scheduler import TaskManager
+
+from django.test import override_settings
 
 
 @pytest.mark.django_db
@@ -31,6 +34,12 @@ def test_bulk_host_create_num_queries(organization, inventory, post, get, user, 
     organization.admin_role.members.add(org_admin)
     organization.inventory_admin_role.members.add(org_inv_admin)
     inventory.admin_role.members.add(inventory_admin)
+
+    # The first request in a process pays one query per database-backed
+    # setting it reads; later ones hit the settings wrapper's in-memory
+    # cache. Warm it so the budget below measures steady state regardless
+    # of which test ran first in this xdist worker.
+    post(reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': [{'name': uuid4()}]}, superuser, expect=201)
 
     for u in [org_admin, inventory_admin, org_inv_admin, superuser]:
         hosts = [{'name': uuid4()} for i in range(num_hosts)]
@@ -97,6 +106,17 @@ def test_bulk_job_launch_queries(job_template, organization, inventory, project,
     jt.save()
     inventory.save()
     jobs = [{'unified_job_template': jt.id, 'inventory': inventory.id} for _ in range(num_jobs)]
+
+    # The first request in a process pays one query per database-backed
+    # setting it reads; later ones hit the settings wrapper's in-memory
+    # cache. Warm it so the budget below measures steady state regardless
+    # of which test ran first in this xdist worker.
+    post(
+        reverse('api:bulk_job_launch'),
+        {'name': 'Bulk Job Launch Warmup', 'jobs': [{'unified_job_template': jt.id, 'inventory': inventory.id}]},
+        normal_user,
+        expect=201,
+    )
 
     # This is not working, we need to figure that out if we want to include tests for more jobs
     # with mock.patch('awx.api.serializers.settings.BULK_JOB_MAX_LAUNCH', num_jobs + 1):
@@ -445,3 +465,226 @@ def get_inventory_hosts(get, inv_id, use_user):
     data = get(reverse('api:inventory_hosts_list', kwargs={'pk': inv_id}), use_user, expect=200).data
     results = [host['id'] for host in data['results']]
     return results
+
+
+@pytest.mark.django_db
+def test_bulk_job_launch_respects_settings_limit(job_template, organization, inventory, project, post, patch, get, user):
+    """Test that bulk job launch respects BULK_JOB_MAX_LAUNCH setting."""
+    normal_user = user('normal_user', False)
+    organization.member_role.members.add(normal_user)
+
+    jt = JobTemplate.objects.create(
+        name='bulk-test-jt',
+        ask_inventory_on_launch=True,
+        project=project,
+        playbook='helloworld.yml',
+        allow_simultaneous=True,
+    )
+    jt.execute_role.members.add(normal_user)
+    inventory.use_role.members.add(normal_user)
+
+    # Test with limit set to 3
+    with override_settings(BULK_JOB_MAX_LAUNCH=3):
+        # Attempt to launch 5 jobs when limit is 3 - should fail
+        jobs = [{'unified_job_template': jt.id, 'inventory': inventory.id} for _ in range(5)]
+        resp = post(
+            reverse('api:bulk_job_launch'),
+            {'name': 'Bulk Job Test', 'jobs': jobs},
+            normal_user,
+            expect=400,
+        )
+        assert 'Number of requested jobs exceeds system setting' in str(resp.data)
+
+    # Test with limit increased to 10
+    with override_settings(BULK_JOB_MAX_LAUNCH=10):
+        # Now launching 5 jobs should succeed
+        jobs = [{'unified_job_template': jt.id, 'inventory': inventory.id} for _ in range(5)]
+        resp = post(
+            reverse('api:bulk_job_launch'),
+            {'name': 'Bulk Job Test', 'jobs': jobs},
+            normal_user,
+            expect=201,
+        )
+        bulk_job = get(resp.data['url'], normal_user, expect=200).data
+        # Verify the workflow job was created
+        assert bulk_job['name'] == 'Bulk Job Test'
+
+
+# Tests for BulkHostCreateSerializer duplicate detection optimization
+@pytest.mark.django_db
+def test_bulk_host_create_duplicate_within_batch(organization, inventory, post, user):
+    """
+    Test that duplicate hostnames within the same batch are detected.
+    This tests the Counter-based duplicate detection logic.
+    """
+    inventory.organization = organization
+    inv_admin = user('inventory_admin', False)
+    organization.member_role.members.add(inv_admin)
+    inventory.admin_role.members.add(inv_admin)
+
+    # Try to create hosts where 'duplicate-host' appears twice in the same batch
+    hosts = [
+        {'name': 'unique-host-1'},
+        {'name': 'duplicate-host'},
+        {'name': 'unique-host-2'},
+        {'name': 'duplicate-host'},  # Duplicate within batch
+    ]
+
+    response = post(reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': hosts}, inv_admin, expect=400)
+
+    assert 'Hostnames must be unique in an inventory' in response.data['__all__'][0]
+    assert 'duplicate-host' in response.data['__all__'][0]
+    assert Host.objects.filter(inventory=inventory).count() == 0
+
+
+@pytest.mark.django_db
+def test_bulk_host_create_duplicate_against_existing(organization, inventory, post, user):
+    """
+    Test that duplicate hostnames against existing inventory hosts are detected.
+    This tests the database query-based duplicate detection.
+    """
+    inventory.organization = organization
+    inv_admin = user('inventory_admin', False)
+    organization.member_role.members.add(inv_admin)
+    inventory.admin_role.members.add(inv_admin)
+
+    Host.objects.create(name='existing-host-1', inventory=inventory)
+    Host.objects.create(name='existing-host-2', inventory=inventory)
+
+    # Try to create hosts where one already exists
+    hosts = [
+        {'name': 'new-host-1'},
+        {'name': 'existing-host-1'},
+        {'name': 'new-host-2'},
+    ]
+
+    response = post(reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': hosts}, inv_admin, expect=400)
+
+    assert 'Hostnames must be unique in an inventory' in response.data['__all__'][0]
+    assert 'existing-host-1' in response.data['__all__'][0]
+    assert Host.objects.filter(inventory=inventory).count() == 2
+
+
+@pytest.mark.django_db
+def test_bulk_host_create_combined_duplicates(organization, inventory, post, user):
+    """
+    Test detection of both batch-internal duplicates and duplicates against existing hosts.
+    """
+    inventory.organization = organization
+    inventory_admin = user('inventory_admin', False)
+    organization.member_role.members.add(inventory_admin)
+    inventory.admin_role.members.add(inventory_admin)
+
+    Host.objects.create(name='existing-host', inventory=inventory)
+
+    # Try to create hosts with both types of duplicates
+    hosts = [
+        {'name': 'new-host'},
+        {'name': 'batch-duplicate'},
+        {'name': 'existing-host'},
+        {'name': 'batch-duplicate'},
+    ]
+
+    response = post(reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': hosts}, inventory_admin, expect=400)
+
+    error_message = response.data['__all__'][0]
+    assert 'Hostnames must be unique in an inventory' in error_message
+    assert 'batch-duplicate' in error_message or 'existing-host' in error_message
+
+
+@pytest.mark.django_db
+def test_bulk_host_create_no_duplicates_success(organization, inventory, post, user):
+    """
+    Test that hosts are created successfully when there are no duplicates.
+    """
+    inventory.organization = organization
+    inventory_admin = user('inventory_admin', False)
+    organization.member_role.members.add(inventory_admin)
+    inventory.admin_role.members.add(inventory_admin)
+
+    Host.objects.create(name='existing-host-1', inventory=inventory)
+    Host.objects.create(name='existing-host-2', inventory=inventory)
+
+    # Create new hosts with unique names
+    hosts = [
+        {'name': 'new-host-1'},
+        {'name': 'new-host-2'},
+        {'name': 'new-host-3'},
+    ]
+
+    response = post(reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': hosts}, inventory_admin, expect=201)
+
+    assert len(response.data['hosts']) == 3
+    assert Host.objects.filter(inventory=inventory).count() == 5
+    assert Host.objects.filter(inventory=inventory, name='new-host-1').exists()
+    assert Host.objects.filter(inventory=inventory, name='new-host-2').exists()
+    assert Host.objects.filter(inventory=inventory, name='new-host-3').exists()
+
+
+@pytest.mark.django_db
+def test_bulk_host_create_performance_large_inventory(organization, inventory, post, user, django_assert_max_num_queries):
+    """
+    Test that duplicate detection is performant and doesn't load all hosts.
+    """
+    inventory.organization = organization
+    inventory_admin = user('inventory_admin', False)
+    organization.member_role.members.add(inventory_admin)
+    inventory.admin_role.members.add(inventory_admin)
+
+    # Create 10k existing hosts to simulate a reasonably large inventory
+    from django.utils.timezone import now
+
+    _now = now()
+    existing_hosts = [Host(name=f'existing-host-{i}', inventory=inventory, created=_now, modified=_now) for i in range(10000)]
+    Host.objects.bulk_create(existing_hosts)
+
+    new_hosts = [{'name': f'new-host-{i}'} for i in range(10)]
+
+    # The number of queries should be bounded and not scale with inventory size
+    # This should be around 15-20 queries regardless of whether there are 10k or 500k+ existing hosts
+    with django_assert_max_num_queries(20):
+        response = post(reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': new_hosts}, inventory_admin, expect=201)
+
+    assert len(response.data['hosts']) == 10
+    assert Host.objects.filter(inventory=inventory).count() == 10010
+
+
+@pytest.mark.django_db
+def test_bulk_job_launch_rejects_unsafe_limit(organization, inventory, project, post, user):
+    """PromptFieldCleanTextMixin._run_clean_text_validation must raise when
+    enforcement is on -- BulkJobNodeSerializer skips the normal validate()
+    chain that would otherwise do this (AAP-78694)."""
+    normal_user = user('normal_user', False)
+    organization.member_role.members.add(normal_user)
+    jt = JobTemplate.objects.create(name='my-jt', inventory=inventory, project=project, playbook='helloworld.yml')
+    jt.execute_role.members.add(normal_user)
+    with mock.patch('awx.api.serializers.get_setting', return_value=True):
+        response = post(
+            reverse('api:bulk_job_launch'),
+            {'name': 'Bulk Job Launch', 'jobs': [{'unified_job_template': jt.id, 'limit': '<script>x</script>'}]},
+            normal_user,
+            expect=400,
+        )
+    assert 'limit' in str(response.data)
+
+
+@pytest.mark.django_db
+def test_bulk_job_launch_allows_jinja_extra_vars(organization, inventory, project, post, user):
+    """BulkJobLaunchSerializer stringifies extra_vars before CleanTextMixin
+    runs; excluded_fields must keep legitimate Jinja from being rejected
+    (AAP-78694)."""
+    normal_user = user('normal_user', False)
+    organization.member_role.members.add(normal_user)
+    jt = JobTemplate.objects.create(name='my-jt', inventory=inventory, project=project, playbook='helloworld.yml')
+    jt.execute_role.members.add(normal_user)
+    with mock.patch('ansible_base.lib.serializers.mixins.get_setting', return_value=True):
+        post(
+            reverse('api:bulk_job_launch'),
+            {
+                'name': 'Bulk Job Launch',
+                'jobs': [{'unified_job_template': jt.id}],
+                'extra_vars': {'foo': '{{ bar }}'},
+            },
+            normal_user,
+            expect=201,
+        )

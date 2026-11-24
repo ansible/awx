@@ -18,7 +18,7 @@ Fixing and updating the documentation are always appreciated, so reviewing the b
 Things to know prior to submitting revisions
 ----------------------------------------------
 
-- Please follow the `Ansible code of conduct <http://docs.ansible.com/ansible/latest/community/code_of_conduct.html>`_ in all your interactions with the community.
+- Please follow the `Ansible code of conduct <https://docs.ansible.com/projects/ansible/latest/community/code_of_conduct.html>`_ in all your interactions with the community.
 - All doc revisions or additions are done through pull requests against the ``devel`` branch.
 - You must use ``git commit --signoff`` for any commit to be merged, and agree that usage of ``--signoff`` constitutes agreement with the terms of `DCO 1.1 <https://github.com/ansible/awx/blob/devel/DCO_1_1.md>`_.
 - Take care to make sure no merge commits are in the submission, and use ``git rebase`` vs ``git merge`` for this reason.
