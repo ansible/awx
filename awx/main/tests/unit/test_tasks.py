@@ -2886,6 +2886,7 @@ class TestCopytreeWithoutMetadata:
         assert (dst / 'plugins').stat().st_mtime_ns == expected  # set last, after its children were created
         assert (dst / 'plugins' / 'modules' / 'mod.py').stat().st_mtime_ns == expected
         assert os.lstat(dst / 'rel_link').st_mtime_ns == expected  # the link itself, not its target
+        assert os.lstat(dst / 'rel_link').st_atime_ns == expected  # readlink() must not be sampled after this
 
     def test_readonly_source_dir(self, tmp_path, umask_022):
         src = tmp_path / 'src'
