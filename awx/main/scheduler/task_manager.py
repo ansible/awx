@@ -39,7 +39,6 @@ from awx.main.models import (
     WorkflowJob,
     WorkflowJobNode,
     WorkflowJobTemplate,
-    CLOUD_INVENTORY_SOURCES,
 )
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.main.utils import (
@@ -398,7 +397,8 @@ class DependencyManager(TaskBase):
             # Iterate through all input inventories
             for input_inv in inventory_task.inventory.input_inventories.all():
                 # Find inventory sources with update_on_launch enabled
-                for inv_src in input_inv.inventory_sources.filter(update_on_launch=True, source__in=CLOUD_INVENTORY_SOURCES):
+                # Exclude 'constructed' sources to avoid circular dependencies
+                for inv_src in input_inv.inventory_sources.filter(update_on_launch=True).exclude(source='constructed'):
                     # Respect cache timeout - only update if needed
                     latest_update = inv_src.inventory_updates.order_by("-created").first()
                     if self.should_update_again(latest_update, inv_src.update_cache_timeout):
