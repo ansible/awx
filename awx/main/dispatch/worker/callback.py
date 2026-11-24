@@ -10,10 +10,11 @@ from django.conf import settings
 from django.utils.functional import cached_property
 from django.utils.timezone import now as tz_now
 from django import db
-from django.db import transaction, connection as django_connection
+from django.db import transaction, IntegrityError, connection as django_connection
 from django_guid import set_guid
 
 import psutil
+import psycopg
 
 import redis
 
@@ -30,25 +31,32 @@ import awx.main.analytics.subsystem_metrics as s_metrics
 logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 
 
+def _is_unique_constraint_violation(exc):
+    """Return True if exc is a unique-key IntegrityError (already stored, safe to skip)."""
+    if isinstance(exc.__cause__, psycopg.errors.UniqueViolation):
+        return True
+    return 'UNIQUE constraint failed' in str(exc)  # sqlite, in unit tests
+
+
 def job_stats_wrapup(job_identifier, event=None):
     """Fill in the unified job host_status_counts, fire off notifications if needed"""
     try:
-        # empty dict (versus default of None) can still indicate that events have been processed
-        # for job types like system jobs, and jobs with no hosts matched
-        host_status_counts = {}
-        if event:
-            host_status_counts = event.get_host_status_counts()
-
         # Update host_status_counts while holding the row lock
         with transaction.atomic():
             uj = UnifiedJob.objects.select_for_update().get(pk=job_identifier)
-            uj.host_status_counts = host_status_counts
+            # Already set: another controller ran stats_wrapup for this job (both can process
+            # playbook_on_stats when a job is adopted), so there is nothing left to do here.
+            if uj.host_status_counts is not None:
+                return
+            # empty dict (versus default of None) can still indicate that events have been processed
+            # for job types like system jobs, and jobs with no hosts matched
+            uj.host_status_counts = event.get_host_status_counts() if event else {}
             uj.save(update_fields=['host_status_counts'])
 
         uj.log_lifecycle("stats_wrapup_finished")
 
         # If the status was a finished state before this update was made, send notifications
-        # If not, we will send notifications when the status changes
+        # If not, we will send notifications when the status changes.
         if uj.status not in ACTIVE_STATES:
             events_processed_hook(uj)
 
@@ -240,6 +248,15 @@ class CallbackBrokerWorker:
                             events.remove(e)
                             saved_events.append(e)  # Importantly, remove successfully saved events from the buffer
                         except Exception as exc_indv:
+                            if isinstance(exc_indv, IntegrityError) and _is_unique_constraint_violation(exc_indv):
+                                # Duplicate event from concurrent adoption stream — already stored.
+                                events.remove(e)
+                                # A receiver that died after storing the stats event but before
+                                # the wrapup above never ran it. Wrapup is idempotent.
+                                if e.event == e.WRAPUP_EVENT:
+                                    job_stats_wrapup(getattr(e, e.JOB_REFERENCE), event=e)
+                                continue
+
                             retry_count = getattr(e, '_retry_count', 0) + 1
                             e._retry_count = retry_count
 
@@ -260,7 +277,7 @@ class CallbackBrokerWorker:
                     if not getattr(e, '_skip_websocket_message', False):
                         metrics_events_broadcast += 1
                         emit_event_detail(e)
-                    if getattr(e, '_notification_trigger_event', False):
+                    if e.event == e.WRAPUP_EVENT:
                         job_stats_wrapup(getattr(e, e.JOB_REFERENCE), event=e)
             self.last_flush = time.time()
             # only update metrics if we saved events
@@ -322,9 +339,6 @@ class CallbackBrokerWorker:
 
                 if skip_websocket_message:  # if this event sends websocket messages, fire them off on flush
                     event._skip_websocket_message = True
-
-                if notification_trigger_event:  # if this is an Ansible stats event, ensure notifications on flush
-                    event._notification_trigger_event = True
 
                 self.buff.setdefault(cls, []).append(event)
 

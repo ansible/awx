@@ -3,13 +3,17 @@ import time
 from unittest import mock
 from uuid import uuid4
 
+import redis
+
+from django.db import IntegrityError as DjangoIntegrityError
 from django.test import TransactionTestCase
+from django.utils.timezone import now as tz_now
 
 from awx.main.dispatch.worker.callback import job_stats_wrapup, CallbackBrokerWorker
 
 from awx.main.models.jobs import Job
 from awx.main.models.inventory import InventoryUpdate, InventorySource
-from awx.main.models.events import InventoryUpdateEvent
+from awx.main.models.events import InventoryUpdateEvent, JobEvent
 
 
 @pytest.mark.django_db
@@ -32,6 +36,59 @@ def test_wrapup_does_send_notifications(mocker):
     job.refresh_from_db()
     assert job.host_status_counts == {}
     mock.assert_called_once_with('succeeded')
+
+
+@pytest.mark.django_db
+def test_wrapup_skips_notifications_if_already_processed(mocker):
+    """Fix 2 (AAP-96718): if host_status_counts is already set, another controller already ran
+    stats_wrapup. The second call must not fire a duplicate notification."""
+    job = Job.objects.create(status='successful', host_status_counts={'ok': 3})
+    notification_mock = mocker.patch('awx.main.models.notifications.JobNotificationMixin.send_notification_templates')
+    job_stats_wrapup(job.id)
+    notification_mock.assert_not_called()
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('wrapup_dispatched', [True, False], ids=['replay-reached-wrapup', 'replay-deduped'])
+def test_adopter_finalize_runs_the_hook_a_dead_receiver_skipped(mocker, wrapup_dispatched):
+    """The old receiver committed host_status_counts and died before events_processed_hook.
+    The job is still running, so it is adopted. The replayed stats event skips the hook because the
+    counts are set, and the adopter's finalize runs it, once."""
+    from awx.main.tasks.jobs import _finalize_job_run
+
+    job = Job.objects.create(status='running', host_status_counts={'ok': 1}, celery_task_id='adopt-1')
+    hook = mocker.patch('awx.main.dispatch.worker.callback.events_processed_hook')
+    mocker.patch('awx.main.tasks.jobs.events_processed_hook', hook)
+    mocker.patch('awx.main.models.unified_jobs.UnifiedJob.websocket_emit_status')
+
+    job_stats_wrapup(job.id)  # the adopter's replay of playbook_on_stats
+    hook.assert_not_called()
+    job.refresh_from_db()
+    assert job.host_status_counts == {'ok': 1}, 'the replay must keep the counts the old receiver saved'
+
+    callback = mock.Mock(wrapup_event_dispatched=wrapup_dispatched)
+    callback.get_delayed_update_fields.return_value = {}
+    # as receptor.py's adoption finalize calls it
+    _finalize_job_run(Job, job.pk, callback, 'successful', owner_task_id='adopt-1', _required_status='running')
+
+    hook.assert_called_once()
+    assert hook.call_args[0][0].pk == job.pk
+
+
+@pytest.mark.django_db
+def test_read_survives_a_redis_connection_error():
+    # 5.17 Redis restart across the cluster. A worker mid-blpop when Redis restarts must not
+    # crash: it logs, backs off, and returns FLUSH so the dispatcher's main loop keeps running
+    # and retries on the next read instead of losing the whole callback receiver.
+    worker = CallbackBrokerWorker.__new__(CallbackBrokerWorker)
+    worker.queue_name = 'callback_tasks'
+    worker.redis = mock.Mock()
+    worker.redis.blpop.side_effect = redis.exceptions.ConnectionError('Connection refused')
+
+    with mock.patch('time.sleep'), mock.patch.object(CallbackBrokerWorker, 'record_statistics') as record_stats:
+        assert worker.read() == {'event': 'FLUSH'}
+
+    record_stats.assert_not_called()  # has_redis_error skips the statistics path
 
 
 class TestCallbackBrokerWorker(TransactionTestCase):
@@ -93,6 +150,45 @@ class TestCallbackBrokerWorker(TransactionTestCase):
         # Could not save, should be logged, and buffer should be cleared
         assert worker.buff.get(InventoryUpdateEvent, []) == []
         assert InventoryUpdateEvent.objects.filter(uuid=events[0].uuid).count() == 0  # sanity
+
+    def test_flush_ignores_duplicate_job_counter(self):
+        """Fix (AAP-96718): when two controllers stream the same receptor work unit, bulk_create
+        raises IntegrityError on the (job_id, counter, job_created) unique constraint. The worker
+        must silently discard the duplicate in the individual-save fallback, not keep it in the
+        buffer for retry."""
+        job = Job.objects.create(status='running')
+        created_ts = tz_now()
+
+        worker = CallbackBrokerWorker()
+        duplicate = JobEvent(job=job, counter=1, job_created=created_ts, uuid=str(uuid4()), created=created_ts)
+        worker.buff = {JobEvent: [duplicate]}
+
+        # Simulate the unique constraint firing on bulk_create and on individual save.
+        unique_error = DjangoIntegrityError('UNIQUE constraint failed: main_jobevent.job_id, main_jobevent.counter, main_jobevent.job_created')
+        with mock.patch.object(JobEvent.objects, 'bulk_create', side_effect=unique_error):
+            with mock.patch.object(duplicate, 'save', side_effect=unique_error):
+                worker.flush(force=True)
+
+        assert worker.buff.get(JobEvent, []) == [], "duplicate event must not remain in buffer"
+
+    def test_flush_finishes_the_stats_wrapup_of_a_replayed_stats_event(self):
+        """A receiver that died after storing the stats event but before the wrapup never ran
+        it, so the replay hits the unique constraint and must complete the wrapup."""
+        job = Job.objects.create(status='running')
+        created_ts = tz_now()
+
+        worker = CallbackBrokerWorker()
+        duplicate = JobEvent(job=job, counter=1, job_created=created_ts, uuid=str(uuid4()), created=created_ts, event='playbook_on_stats')
+        worker.buff = {JobEvent: [duplicate]}
+
+        unique_error = DjangoIntegrityError('UNIQUE constraint failed: main_jobevent.job_id, main_jobevent.counter, main_jobevent.job_created')
+        with mock.patch.object(JobEvent.objects, 'bulk_create', side_effect=unique_error):
+            with mock.patch.object(duplicate, 'save', side_effect=unique_error):
+                with mock.patch('awx.main.dispatch.worker.callback.job_stats_wrapup') as wrapup:
+                    worker.flush(force=True)
+
+        wrapup.assert_called_once_with(job.id, event=duplicate)
+        assert worker.buff.get(JobEvent, []) == []
 
     def test_flush_with_empty_buffer(self):
         worker = CallbackBrokerWorker()
