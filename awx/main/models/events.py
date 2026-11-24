@@ -134,11 +134,6 @@ class BasePlaybookEvent(CreatedModifiedModel):
     class Meta:
         abstract = True
 
-    @property
-    def is_wrapup_event(self):
-        """True for the event that marks the end of the job's output and triggers stats wrapup."""
-        return self.event == self.WRAPUP_EVENT
-
     # Playbook events will be structured to form the following hierarchy:
     # - playbook_on_start (once for each playbook file)
     #   - playbook_on_vars_prompt (for each play, but before play starts, we
@@ -695,11 +690,6 @@ class BaseCommandEvent(CreatedModifiedModel):
 
     class Meta:
         abstract = True
-
-    @property
-    def is_wrapup_event(self):
-        """True for the event that marks the end of the job's output and triggers stats wrapup."""
-        return self.event == self.WRAPUP_EVENT
 
     event_data = JSONBlob(default=dict, blank=True)
     uuid = models.CharField(

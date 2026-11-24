@@ -5,6 +5,7 @@ import logging
 from collections import deque
 from typing import Tuple, Optional
 
+from awx.main.models.credential import build_safe_env
 from awx.main.models.event_query import EventQuery
 
 # Django
@@ -315,8 +316,6 @@ class RunnerCallback:
         The masked values win over the pattern masking: they also cover credential-plugin
         values whose names match no pattern.
         """
-        from awx.main.models.credential import build_safe_env  # Circular import
-
         masked = self.safe_env
         if masked:
             job_env = build_safe_env(runner_config.env)

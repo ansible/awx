@@ -253,7 +253,7 @@ class CallbackBrokerWorker:
                                 events.remove(e)
                                 # A receiver that died after storing the stats event but before
                                 # the wrapup above never ran it. Wrapup is idempotent.
-                                if e.is_wrapup_event:
+                                if e.event == e.WRAPUP_EVENT:
                                     job_stats_wrapup(getattr(e, e.JOB_REFERENCE), event=e)
                                 continue
 
@@ -277,7 +277,7 @@ class CallbackBrokerWorker:
                     if not getattr(e, '_skip_websocket_message', False):
                         metrics_events_broadcast += 1
                         emit_event_detail(e)
-                    if e.is_wrapup_event:
+                    if e.event == e.WRAPUP_EVENT:
                         job_stats_wrapup(getattr(e, e.JOB_REFERENCE), event=e)
             self.last_flush = time.time()
             # only update metrics if we saved events
