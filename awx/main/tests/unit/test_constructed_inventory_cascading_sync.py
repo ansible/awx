@@ -6,14 +6,12 @@
 
 import pytest
 from unittest import mock
-from datetime import timedelta
 from django.utils.timezone import now as tz_now
 
 from awx.main.models import (
     Inventory,
     InventorySource,
     InventoryUpdate,
-    Job,
     Project,
     UnifiedJob,
 )
@@ -188,7 +186,7 @@ class TestConstructedInventoryCascadingSync:
 
         # Input 2: update_on_launch=False
         inv_s2 = Inventory.objects.create(name='invS2', organization_id=1)
-        inv_s2_source = InventorySource.objects.create(
+        _inv_s2_source = InventorySource.objects.create(
             name='invS2-source',
             inventory=inv_s2,
             source='scm',
