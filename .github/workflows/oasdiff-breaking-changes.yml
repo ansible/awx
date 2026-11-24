@@ -1,0 +1,31 @@
+---
+# oasdiff breaking change detection — Syntara/AO pattern.
+# Spec is committed to the repo; baseline extracted via git show.
+# Consumes reusable workflow from ansible/actions.
+# Jira: AAP-86434 (AC1, AC2, AC4)
+name: "API: Breaking Change Detection"
+
+on:
+  pull_request:
+    branches:
+      - devel
+      - release_**
+      - feature_**
+      - stable-**
+    paths:
+      - 'openapi.yaml'
+      - '.github/workflows/oasdiff-breaking-change*.yml'
+
+concurrency:
+  group: oasdiff-breaking-changes-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  detect:
+    uses: ansible/actions/.github/workflows/oasdiff-detect-breaking-changes.yml@364fabf5470712ced6b63e1a27c9bcfac66f81e6
+    with:
+      spec-path: openapi.yaml

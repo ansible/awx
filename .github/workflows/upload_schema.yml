@@ -39,14 +39,14 @@ jobs:
           DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} \
           COMPOSE_TAG=${{ github.base_ref || github.ref_name }} \
           docker run -u $(id -u) --rm -v ${{ github.workspace }}:/awx_devel/:Z \
-            --workdir=/awx_devel `make print-DEVEL_IMAGE_NAME` /start_tests.sh genschema
+            --workdir=/awx_devel $(make print-DEVEL_IMAGE_NAME) /start_tests.sh genschema
 
       - name: Upload API Schema
         uses: keithweaver/aws-s3-github-action@4dd5a7b81d54abaa23bbac92b27e85d7f405ae53
         with:
           command: cp
-          source: ${{ github.workspace }}/schema.json
-          destination: s3://awx-public-ci-files/${{ github.event.repository.name }}/${{ github.ref_name }}/schema.json
+          source: ${{ github.workspace }}/openapi.yaml
+          destination: s3://awx-public-ci-files/${{ github.event.repository.name }}/${{ github.ref_name }}/openapi.yaml
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_KEY }}
           aws_region: us-east-1

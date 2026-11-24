@@ -17,7 +17,12 @@ jobs:
           AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
           AWS_REGION: 'us-east-1'
+          DELETED_BRANCH: ${{ github.event.ref }}
         run: |
+          if echo "$DELETED_BRANCH" | grep -qE '\{\{|\{%'; then
+            echo "##[error]Branch name contains Jinja delimiters — aborting"
+            exit 1
+          fi
           ansible localhost -c local, -m command -a "{{ ansible_python_interpreter + ' -m pip install boto3'}}"
           ansible localhost -c local -m aws_s3 \
-          -a "bucket=awx-public-ci-files object=${{ github.event.repository.name }}/${GITHUB_REF##*/}/schema.json mode=delobj permission=public-read"
+          -a "bucket=awx-public-ci-files object=${{ github.event.repository.name }}/${DELETED_BRANCH}/openapi.yaml mode=delobj permission=public-read"
