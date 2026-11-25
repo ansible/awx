@@ -7,7 +7,7 @@ from django.db.utils import IntegrityError
 from unittest import mock
 import pytest
 
-from awx.main.models import JobTemplate, Schedule, ActivityStream
+from awx.main.models import Credential, Inventory, JobTemplate, Label, Schedule, ActivityStream
 
 from crum import impersonate
 
@@ -539,3 +539,290 @@ def test_skip_sundays():
 def test_get_end_date(rrule, expected_result):
     ruleset = Schedule.rrulestr(rrule)
     assert expected_result == Schedule.get_end_date(ruleset)
+
+
+def _future_schedule(job_template, name, inventory=None):
+    return Schedule.objects.create(
+        name=name,
+        rrule='DTSTART:20300112T210000Z RRULE:FREQ=DAILY;INTERVAL=1',
+        unified_job_template=job_template,
+        inventory=inventory,
+    )
+
+
+@pytest.mark.django_db
+def test_scheduled_job_errors_when_saved_inventory_no_longer_prompts(job_template, inventory):
+    other = Inventory.objects.create(name='schedule-inv', organization=inventory.organization)
+    job_template.inventory = None
+    job_template.ask_inventory_on_launch = True
+    job_template.save()
+    schedule = _future_schedule(job_template, 'override-inv', inventory=other)
+
+    job_template.ask_inventory_on_launch = False
+    job_template.inventory = inventory
+    job_template.save()
+
+    job, start = schedule.create_scheduled_job()
+
+    assert start is False
+    assert job.status == 'error'
+    assert job.failed is True
+    assert job.finished is not None
+    assert 'schedule-inv' in job.job_explanation
+    assert inventory.name in job.job_explanation
+    assert 'was not run' in job.job_explanation
+    assert job.inventory_id == inventory.id
+    assert job.emitted_events == 1
+    event = job.job_events.get()
+    assert event.event == 'error'
+    assert event.failed is True
+    assert 'schedule-inv' in event.stdout
+    assert inventory.name in event.stdout
+
+
+@pytest.mark.django_db
+def test_scheduled_job_starts_when_saved_inventory_matches_template(job_template, inventory):
+    job_template.ask_inventory_on_launch = False
+    job_template.inventory = inventory
+    job_template.save()
+    schedule = _future_schedule(job_template, 'same-inv', inventory=inventory)
+
+    job, start = schedule.create_scheduled_job()
+
+    assert start is True
+    assert job.status == 'new'
+    assert job.job_explanation == ''
+    assert job.inventory_id == inventory.id
+
+
+@pytest.mark.django_db
+def test_scheduled_job_starts_when_schedule_has_no_inventory(job_template, inventory):
+    job_template.ask_inventory_on_launch = False
+    job_template.inventory = inventory
+    job_template.save()
+    schedule = _future_schedule(job_template, 'no-inv')
+
+    job, start = schedule.create_scheduled_job()
+
+    assert start is True
+    assert job.status == 'new'
+    assert job.job_explanation == ''
+    assert job.inventory_id == inventory.id
+
+
+@pytest.mark.django_db
+def test_scheduled_job_uses_prompted_inventory(job_template, inventory):
+    other = Inventory.objects.create(name='prompted-inv', organization=inventory.organization)
+    job_template.ask_inventory_on_launch = True
+    job_template.inventory = inventory
+    job_template.save()
+    schedule = _future_schedule(job_template, 'prompted-inv', inventory=other)
+
+    job, start = schedule.create_scheduled_job()
+
+    assert start is True
+    assert job.status == 'new'
+    assert job.job_explanation == ''
+    assert job.inventory_id == other.id
+
+
+def _assert_blocked(job, start, schedule_value, template_value):
+    assert start is False
+    assert job.status == 'error'
+    assert job.failed is True
+    assert 'was not run' in job.job_explanation
+    assert str(schedule_value) in job.job_explanation
+    assert str(template_value) in job.job_explanation
+    event = job.job_events.get()
+    assert event.event == 'error'
+    assert str(schedule_value) in event.stdout
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    'field_name,ask_field,schedule_value,template_value',
+    [
+        ('limit', 'ask_limit_on_launch', 'web', 'db'),
+        ('job_type', 'ask_job_type_on_launch', 'check', 'run'),
+        ('verbosity', 'ask_verbosity_on_launch', 3, 0),
+        ('job_tags', 'ask_tags_on_launch', 'deploy', 'check'),
+        ('skip_tags', 'ask_skip_tags_on_launch', 'migrate', ''),
+        ('diff_mode', 'ask_diff_mode_on_launch', True, False),
+        ('forks', 'ask_forks_on_launch', 10, 5),
+        ('timeout', 'ask_timeout_on_launch', 60, 0),
+        ('job_slice_count', 'ask_job_slice_count_on_launch', 4, 1),
+        ('scm_branch', 'ask_scm_branch_on_launch', 'feature', 'main'),
+    ],
+)
+def test_scheduled_job_errors_when_saved_prompt_no_longer_prompts(job_template, inventory, field_name, ask_field, schedule_value, template_value):
+    setattr(job_template, ask_field, True)
+    setattr(job_template, field_name, template_value)
+    job_template.save()
+    schedule = _future_schedule(job_template, 'override-{}'.format(field_name), inventory=inventory)
+    setattr(schedule, field_name, schedule_value)
+    schedule.save()
+
+    setattr(job_template, ask_field, False)
+    job_template.save()
+
+    job, start = schedule.create_scheduled_job()
+
+    _assert_blocked(job, start, schedule_value, template_value if template_value != '' else 'none')
+    assert getattr(job, field_name) == template_value
+
+
+@pytest.mark.django_db
+def test_scheduled_job_starts_when_saved_limit_matches_template(job_template, inventory):
+    job_template.ask_limit_on_launch = False
+    job_template.limit = 'web'
+    job_template.save()
+    schedule = _future_schedule(job_template, 'same-limit', inventory=inventory)
+    schedule.limit = 'web'
+    schedule.save()
+
+    job, start = schedule.create_scheduled_job()
+
+    assert start is True
+    assert job.status == 'new'
+    assert job.job_explanation == ''
+    assert job.limit == 'web'
+
+
+@pytest.mark.django_db
+def test_scheduled_job_uses_prompted_limit(job_template, inventory):
+    job_template.ask_limit_on_launch = True
+    job_template.limit = 'db'
+    job_template.save()
+    schedule = _future_schedule(job_template, 'prompted-limit', inventory=inventory)
+    schedule.limit = 'web'
+    schedule.save()
+
+    job, start = schedule.create_scheduled_job()
+
+    assert start is True
+    assert job.status == 'new'
+    assert job.limit == 'web'
+
+
+@pytest.mark.django_db
+def test_scheduled_job_errors_when_saved_credential_no_longer_prompts(job_template, inventory, machine_credential, credentialtype_ssh):
+    schedule_cred = Credential.objects.create(
+        credential_type=credentialtype_ssh, name='schedule-cred', inputs={'username': 'schedule', 'password': 'secret'}
+    )
+    job_template.ask_credential_on_launch = True
+    job_template.save()
+    job_template.credentials.add(machine_credential)
+    schedule = _future_schedule(job_template, 'override-cred', inventory=inventory)
+    schedule.credentials.add(schedule_cred)
+
+    job_template.ask_credential_on_launch = False
+    job_template.save()
+
+    job, start = schedule.create_scheduled_job()
+
+    _assert_blocked(job, start, 'schedule-cred', machine_credential.name)
+    assert set(job.credentials.values_list('name', flat=True)) == {machine_credential.name}
+
+
+@pytest.mark.django_db
+def test_scheduled_job_starts_when_saved_credential_matches_template(job_template, inventory, machine_credential):
+    job_template.ask_credential_on_launch = False
+    job_template.save()
+    job_template.credentials.add(machine_credential)
+    schedule = _future_schedule(job_template, 'same-cred', inventory=inventory)
+    schedule.credentials.add(machine_credential)
+
+    job, start = schedule.create_scheduled_job()
+
+    assert start is True
+    assert job.status == 'new'
+    assert job.job_explanation == ''
+
+
+@pytest.mark.django_db
+def test_scheduled_job_errors_when_saved_extra_vars_no_longer_prompt(job_template, inventory):
+    job_template.ask_variables_on_launch = True
+    job_template.extra_vars = {'env': 'prod'}
+    job_template.save()
+    schedule = _future_schedule(job_template, 'override-vars', inventory=inventory)
+    schedule.extra_vars = {'env': 'dev'}
+    schedule.save()
+
+    job_template.ask_variables_on_launch = False
+    job_template.save()
+
+    job, start = schedule.create_scheduled_job()
+
+    _assert_blocked(job, start, 'env=dev', 'env=prod')
+
+
+@pytest.mark.django_db
+def test_scheduled_job_errors_when_survey_answer_is_no_longer_accepted(job_template, inventory):
+    job_template.survey_enabled = True
+    job_template.survey_spec = {
+        'name': 'survey',
+        'description': '',
+        'spec': [{'variable': 'target', 'type': 'text', 'required': False, 'question_name': 'Target', 'question_description': ''}],
+    }
+    job_template.save()
+    schedule = _future_schedule(job_template, 'survey-answer', inventory=inventory)
+    schedule.extra_vars = {'target': 'dev'}
+    schedule.save()
+
+    job_template.survey_enabled = False
+    job_template.survey_spec = {}
+    job_template.save()
+
+    job, start = schedule.create_scheduled_job()
+
+    _assert_blocked(job, start, 'target=dev', 'target=none')
+
+
+@pytest.mark.django_db
+def test_scheduled_job_starts_when_saved_extra_vars_match_template(job_template, inventory):
+    job_template.ask_variables_on_launch = False
+    job_template.extra_vars = {'env': 'prod'}
+    job_template.save()
+    schedule = _future_schedule(job_template, 'same-vars', inventory=inventory)
+    schedule.extra_vars = {'env': 'prod'}
+    schedule.save()
+
+    job, start = schedule.create_scheduled_job()
+
+    assert start is True
+    assert job.status == 'new'
+    assert job.job_explanation == ''
+
+
+@pytest.mark.django_db
+def test_scheduled_job_errors_when_saved_labels_no_longer_prompt(job_template, inventory):
+    schedule_label = Label.objects.create(name='schedule-label', organization=inventory.organization)
+    template_label = Label.objects.create(name='template-label', organization=inventory.organization)
+    job_template.ask_labels_on_launch = True
+    job_template.save()
+    job_template.labels.add(template_label)
+    schedule = _future_schedule(job_template, 'override-labels', inventory=inventory)
+    schedule.labels.add(schedule_label)
+
+    job_template.ask_labels_on_launch = False
+    job_template.save()
+
+    job, start = schedule.create_scheduled_job()
+
+    _assert_blocked(job, start, 'schedule-label', 'template-label')
+
+
+@pytest.mark.django_db
+def test_scheduled_job_starts_when_saved_labels_match_template(job_template, inventory):
+    label = Label.objects.create(name='same-label', organization=inventory.organization)
+    job_template.ask_labels_on_launch = False
+    job_template.save()
+    job_template.labels.add(label)
+    schedule = _future_schedule(job_template, 'same-labels', inventory=inventory)
+    schedule.labels.add(label)
+
+    job, start = schedule.create_scheduled_job()
+
+    assert start is True
+    assert job.status == 'new'
+    assert job.job_explanation == ''
