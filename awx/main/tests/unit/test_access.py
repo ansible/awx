@@ -177,6 +177,45 @@ def test_fk_value_unchanged(job_template_with_ids, user_unit, field_name, new_va
     assert access._fk_value_unchanged(job_template_with_ids, field_name, new_value) is expected
 
 
+def test_jt_opa_query_path_none_to_empty_string_is_nonsensitive(job_template_with_ids, user_unit):
+    """The UI sends opa_query_path='' on every save; templates that predate the field hold None.
+    That must not be treated as a sensitive change (AAP-95160)."""
+    access = JobTemplateAccess(user_unit)
+    job_template_with_ids.opa_query_path = None
+    assert access.changes_are_non_sensitive(job_template_with_ids, {'description': 'x', 'opa_query_path': ''})
+
+
+@pytest.mark.parametrize(
+    'current, new_value, expected',
+    [
+        (None, '', True),
+        (None, None, True),
+        ('', None, True),
+        (None, 'package/rule', False),
+        ('package/rule', '', False),
+        ('package/rule', None, False),
+        ('package/rule', 'other/rule', False),
+    ],
+)
+def test_blank_value_unchanged(job_template_with_ids, user_unit, current, new_value, expected):
+    access = JobTemplateAccess(user_unit)
+    job_template_with_ids.opa_query_path = current
+    assert access._blank_value_unchanged(job_template_with_ids, 'opa_query_path', new_value) is expected
+
+
+def test_jt_opa_query_path_real_change_is_sensitive(job_template_with_ids, user_unit):
+    access = JobTemplateAccess(user_unit)
+    job_template_with_ids.opa_query_path = None
+    assert not access.changes_are_non_sensitive(job_template_with_ids, {'opa_query_path': 'package/rule'})
+
+
+def test_blank_value_unchanged_ignores_non_nullable_fields(job_template_with_ids, user_unit):
+    """Only nullable+blankable text fields get None/'' equivalence."""
+    access = JobTemplateAccess(user_unit)
+    assert access._blank_value_unchanged(job_template_with_ids, 'inventory', '') is False
+    assert access._blank_value_unchanged(job_template_with_ids, 'extra_vars', None) is False
+
+
 def test_jt_existing_values_are_nonsensitive(job_template_with_ids, user_unit):
     """Assure that permission checks are not required if submitted data is
     identical to what the job template already has."""

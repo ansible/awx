@@ -9,7 +9,7 @@ from functools import reduce
 
 # Django
 from django.conf import settings
-from django.db.models import Q, Prefetch
+from django.db.models import CharField, Prefetch, Q, TextField
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
@@ -1614,7 +1614,12 @@ class JobTemplateAccess(NotificationAttachMixin, UnifiedCredentialsMixin, BaseAc
             if field_name not in [x.name for x in obj._meta.concrete_fields]:
                 continue
             if hasattr(obj, field_name) and getattr(obj, field_name) != new_value:
-                if field_name not in allowed_fields and field_name not in ask_field_names and not self._fk_value_unchanged(obj, field_name, new_value):
+                if (
+                    field_name not in allowed_fields
+                    and field_name not in ask_field_names
+                    and not self._fk_value_unchanged(obj, field_name, new_value)
+                    and not self._blank_value_unchanged(obj, field_name, new_value)
+                ):
                     return False
         return True
 
@@ -1624,6 +1629,17 @@ class JobTemplateAccess(NotificationAttachMixin, UnifiedCredentialsMixin, BaseAc
         if new_value == getattr(obj, fk_id_attr, None):
             return True
         return hasattr(obj, fk_id_attr) and getattr(obj, fk_id_attr) is None and new_value == ''
+
+    def _blank_value_unchanged(self, obj, field_name, new_value):
+        """True if the current and new values are both 'empty' (None vs '') for a nullable, blankable text field.
+
+        The UI sends '' for fields like opa_query_path even when untouched, while rows that predate
+        the field (or were never saved through the API) hold NULL.
+        """
+        field = obj._meta.get_field(field_name)
+        if not (field.null and field.blank and isinstance(field, (CharField, TextField))):
+            return False
+        return getattr(obj, field_name) in (None, '') and new_value in (None, '')
 
     def can_delete(self, obj):
         return self.user.is_superuser or self.user in obj.admin_role
