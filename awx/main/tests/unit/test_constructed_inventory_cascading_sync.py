@@ -12,6 +12,7 @@ from awx.main.models import (
     Inventory,
     InventorySource,
     InventoryUpdate,
+    Organization,
     Project,
     UnifiedJob,
 )
@@ -30,6 +31,9 @@ class TestConstructedInventoryCascadingSync:
         Test that input inventory sources with update_on_launch=True are added as dependencies
         for the constructed inventory update task.
         """
+        # Create organization
+        org = Organization.objects.create(name='Test Org')
+
         # Create project
         project = Project.objects.create(
             name='Test Project',
@@ -40,7 +44,7 @@ class TestConstructedInventoryCascadingSync:
         # Create input inventory 1 with source (update_on_launch=True)
         inv_s1 = Inventory.objects.create(
             name='invS1',
-            organization_id=1,
+            organization=org,
         )
         inv_s1_source = InventorySource.objects.create(
             name='invS1-source',
@@ -55,7 +59,7 @@ class TestConstructedInventoryCascadingSync:
         # Create input inventory 2 with source (update_on_launch=True)
         inv_s2 = Inventory.objects.create(
             name='invS2',
-            organization_id=1,
+            organization=org,
         )
         inv_s2_source = InventorySource.objects.create(
             name='invS2-source',
@@ -70,7 +74,7 @@ class TestConstructedInventoryCascadingSync:
         # Create constructed inventory
         inv_c = Inventory.objects.create(
             name='InvC',
-            organization_id=1,
+            organization=org,
             kind='constructed',
         )
         inv_c.input_inventories.add(inv_s1, inv_s2)
@@ -109,6 +113,9 @@ class TestConstructedInventoryCascadingSync:
         """
         Test that cache timeout is respected - recent updates are reused instead of creating new ones.
         """
+        # Create organization
+        org = Organization.objects.create(name='Test Org')
+
         # Create project
         project = Project.objects.create(
             name='Test Project',
@@ -117,7 +124,7 @@ class TestConstructedInventoryCascadingSync:
         )
 
         # Create input inventory with source
-        inv_s1 = Inventory.objects.create(name='invS1', organization_id=1)
+        inv_s1 = Inventory.objects.create(name='invS1', organization=org)
         inv_s1_source = InventorySource.objects.create(
             name='invS1-source',
             inventory=inv_s1,
@@ -138,7 +145,7 @@ class TestConstructedInventoryCascadingSync:
         )
 
         # Create constructed inventory
-        inv_c = Inventory.objects.create(name='InvC', organization_id=1, kind='constructed')
+        inv_c = Inventory.objects.create(name='InvC', organization=org, kind='constructed')
         inv_c.input_inventories.add(inv_s1)
 
         inv_c_source = InventorySource.objects.create(
@@ -168,6 +175,9 @@ class TestConstructedInventoryCascadingSync:
         """
         Test that only sources with update_on_launch=True are synced.
         """
+        # Create organization
+        org = Organization.objects.create(name='Test Org')
+
         project = Project.objects.create(
             name='Test Project',
             scm_type='git',
@@ -175,7 +185,7 @@ class TestConstructedInventoryCascadingSync:
         )
 
         # Input 1: update_on_launch=True
-        inv_s1 = Inventory.objects.create(name='invS1', organization_id=1)
+        inv_s1 = Inventory.objects.create(name='invS1', organization=org)
         inv_s1_source = InventorySource.objects.create(
             name='invS1-source',
             inventory=inv_s1,
@@ -185,7 +195,7 @@ class TestConstructedInventoryCascadingSync:
         )
 
         # Input 2: update_on_launch=False
-        inv_s2 = Inventory.objects.create(name='invS2', organization_id=1)
+        inv_s2 = Inventory.objects.create(name='invS2', organization=org)
         _inv_s2_source = InventorySource.objects.create(
             name='invS2-source',
             inventory=inv_s2,
@@ -195,7 +205,7 @@ class TestConstructedInventoryCascadingSync:
         )
 
         # Constructed inventory
-        inv_c = Inventory.objects.create(name='InvC', organization_id=1, kind='constructed')
+        inv_c = Inventory.objects.create(name='InvC', organization=org, kind='constructed')
         inv_c.input_inventories.add(inv_s1, inv_s2)
 
         inv_c_source = InventorySource.objects.create(
@@ -222,8 +232,11 @@ class TestConstructedInventoryCascadingSync:
         """
         Test that constructed inventory with no input inventory sources doesn't break.
         """
+        # Create organization
+        org = Organization.objects.create(name='Test Org')
+
         # Constructed inventory with no inputs
-        inv_c = Inventory.objects.create(name='InvC-Empty', organization_id=1, kind='constructed')
+        inv_c = Inventory.objects.create(name='InvC-Empty', organization=org, kind='constructed')
 
         inv_c_source = InventorySource.objects.create(
             name='InvC-auto',
@@ -247,11 +260,14 @@ class TestConstructedInventoryCascadingSync:
         """
         Test that input inventories with no sources don't cause errors.
         """
+        # Create organization
+        org = Organization.objects.create(name='Test Org')
+
         # Input inventory with no sources
-        inv_s1 = Inventory.objects.create(name='invS1-NoSource', organization_id=1)
+        inv_s1 = Inventory.objects.create(name='invS1-NoSource', organization=org)
 
         # Constructed inventory
-        inv_c = Inventory.objects.create(name='InvC', organization_id=1, kind='constructed')
+        inv_c = Inventory.objects.create(name='InvC', organization=org, kind='constructed')
         inv_c.input_inventories.add(inv_s1)
 
         inv_c_source = InventorySource.objects.create(
@@ -276,6 +292,9 @@ class TestConstructedInventoryCascadingSync:
         """
         Test that normal (non-constructed) inventory behavior is unchanged.
         """
+        # Create organization
+        org = Organization.objects.create(name='Test Org')
+
         project = Project.objects.create(
             name='Test Project',
             scm_type='git',
@@ -283,7 +302,7 @@ class TestConstructedInventoryCascadingSync:
         )
 
         # Normal inventory with SCM source
-        inv = Inventory.objects.create(name='Normal-Inv', organization_id=1)
+        inv = Inventory.objects.create(name='Normal-Inv', organization=org)
         inv_source = InventorySource.objects.create(
             name='normal-source',
             inventory=inv,
@@ -313,6 +332,9 @@ class TestConstructedInventoryCascadingSync:
         """
         Test that constructed inventory SCM sources still create project dependencies.
         """
+        # Create organization
+        org = Organization.objects.create(name='Test Org')
+
         project = Project.objects.create(
             name='Test Project',
             scm_type='git',
@@ -320,7 +342,7 @@ class TestConstructedInventoryCascadingSync:
         )
 
         # Constructed inventory with SCM source (edge case)
-        inv_c = Inventory.objects.create(name='InvC', organization_id=1, kind='constructed')
+        inv_c = Inventory.objects.create(name='InvC', organization=org, kind='constructed')
 
         inv_c_source = InventorySource.objects.create(
             name='InvC-scm-source',
