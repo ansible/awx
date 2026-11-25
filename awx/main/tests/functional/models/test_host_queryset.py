@@ -177,6 +177,19 @@ class TestHostLatestSummaryQuerySet:
 
         assert len(ctx.captured_queries) == 0
 
+    def test_bulk_attach_defers_large_job_fields(self):
+        """The bulk-attach should defer large job fields like extra_vars and artifacts
+        to prevent unnecessary memory usage."""
+        inventory = self._create_inventory_with_hosts(3)
+        self._run_job(inventory)
+
+        hosts = list(Host.objects.filter(inventory=inventory).with_latest_summary_id())
+        job = hosts[0].latest_summary.job
+
+        deferred = job.get_deferred_fields()
+        assert 'extra_vars' in deferred
+        assert 'artifacts' in deferred
+
     def test_chaining_preserves_annotation(self):
         """Chaining .filter() after .with_latest_summary_id() should
         preserve the annotation and bulk-attach behavior."""

@@ -72,7 +72,9 @@ class HostLatestSummaryQuerySet(models.QuerySet):
         latest_summary_ids = [host._latest_summary_id for host in self._result_cache if host._latest_summary_id is not None]
 
         if latest_summary_ids:
-            summaries_by_id = JobHostSummary.objects.select_related('job', 'job__job_template').in_bulk(latest_summary_ids)
+            summaries_by_id = (
+                JobHostSummary.objects.select_related('job', 'job__job_template').defer('job__extra_vars', 'job__artifacts').in_bulk(latest_summary_ids)
+            )
         else:
             summaries_by_id = {}
 
