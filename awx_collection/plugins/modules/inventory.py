@@ -74,6 +74,11 @@ options:
       description:
         - Prevent falling back to instance groups set on the organization
       type: bool
+    opa_query_path:
+      description:
+        - The query path for the OPA policy to evaluate prior to job execution.
+        - The query path should be formatted as package/rule.
+      type: str
     state:
       description:
         - Desired state of the resource.
@@ -149,6 +154,7 @@ def main():
         host_filter=dict(),
         instance_groups=dict(type="list", elements='str'),
         prevent_instance_group_fallback=dict(type='bool'),
+        opa_query_path=dict(),
         state=dict(choices=['present', 'absent', 'exists'], default='present'),
         input_inventories=dict(type='list', elements='str'),
     )
@@ -167,6 +173,7 @@ def main():
     kind = module.params.get('kind')
     host_filter = module.params.get('host_filter')
     prevent_instance_group_fallback = module.params.get('prevent_instance_group_fallback')
+    opa_query_path = module.params.get('opa_query_path')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     org_id = module.resolve_name_to_id('organizations', organization)
@@ -203,6 +210,8 @@ def main():
         inventory_fields['description'] = description
     if variables is not None:
         inventory_fields['variables'] = json.dumps(variables)
+    if opa_query_path is not None:
+        inventory_fields['opa_query_path'] = opa_query_path
 
     association_fields = {}
 

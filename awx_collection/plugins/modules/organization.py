@@ -48,6 +48,11 @@ options:
       description:
         - The max hosts allowed in this organizations
       type: int
+    opa_query_path:
+      description:
+        - The query path for the OPA policy to evaluate prior to job execution.
+        - The query path should be formatted as package/rule.
+      type: str
     state:
       description:
         - Desired state of the resource.
@@ -124,6 +129,7 @@ def main():
         default_environment=dict(),
         custom_virtualenv=dict(),
         max_hosts=dict(type='int'),
+        opa_query_path=dict(),
         instance_groups=dict(type="list", elements='str'),
         notification_templates_started=dict(type="list", elements='str'),
         notification_templates_success=dict(type="list", elements='str'),
@@ -143,6 +149,7 @@ def main():
     default_ee = module.params.get('default_environment')
     custom_virtualenv = module.params.get('custom_virtualenv')
     max_hosts = module.params.get('max_hosts')
+    opa_query_path = module.params.get('opa_query_path')
     state = module.params.get('state')
 
     # Attempt to look up organization based on the provided name
@@ -202,6 +209,8 @@ def main():
         org_fields['custom_virtualenv'] = custom_virtualenv
     if max_hosts is not None:
         org_fields['max_hosts'] = max_hosts
+    if opa_query_path is not None:
+        org_fields['opa_query_path'] = opa_query_path
 
     # If the state was present and we can let the module build or update the existing organization, this will return on its own
     module.create_or_update_if_needed(
