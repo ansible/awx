@@ -579,7 +579,6 @@ EXAMPLES = '''
 
 from ..module_utils.controller_api import ControllerAPIModule
 
-import json
 
 response = []
 
@@ -915,9 +914,6 @@ def main():
         field_val = module.params.get(field_name)
         if field_val is not None:
             new_fields[field_name] = field_val
-
-    if 'extra_vars' in new_fields:
-        new_fields['extra_vars'] = json.dumps(new_fields['extra_vars'])
 
     association_fields = {}
 
