@@ -300,10 +300,7 @@ def main():
         for item in credentials:
             association_fields['credentials'].append(module.resolve_name_to_id('credentials', item))
 
-    # We need to clear out the organization from the search fields the searches for labels and instance_groups doesnt support it and won't be needed anymore
-    if 'organization' in search_fields:
-        del search_fields['organization']
-
+    # Process labels WITH organization context (labels are org-scoped)
     if labels is not None:
         association_fields['labels'] = []
         for item in labels:
@@ -312,6 +309,10 @@ def main():
                 module.fail_json(msg='Could not find label entry with name {0}'.format(item))
             else:
                 association_fields['labels'].append(label_id['id'])
+    # Create a separate search_fields copy for instance_groups (which are global resources)
+    search_fields = search_fields.copy()
+    if 'organization' in search_fields:
+        del search_fields['organization']
 
     if instance_groups is not None:
         association_fields['instance_groups'] = []

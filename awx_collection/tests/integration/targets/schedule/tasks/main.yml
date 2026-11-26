@@ -9,6 +9,7 @@
     org_name: "AWX-Collection-tests-organization-org-{{ test_id }}"
     sched1: "AWX-Collection-tests-schedule-sched1-{{ test_id }}"
     sched2: "AWX-Collection-tests-schedule-sched2-{{ test_id }}"
+    sched_dup: "AWX-Collection-tests-schedule-dup-{{ test_id }}"
     cred1: "AWX-Collection-tests-schedule-cred1-{{ test_id }}"
     proj1: "AWX-Collection-tests-schedule-proj1-{{ test_id }}"
     proj2: "AWX-Collection-tests-schedule-proj2-{{ test_id }}"
@@ -17,6 +18,7 @@
     ee1: "AWX-Collection-tests-schedule-ee1-{{ test_id }}"
     label1: "AWX-Collection-tests-schedule-l1-{{ test_id }}"
     label2: "AWX-Collection-tests-schedule-l2-{{ test_id }}"
+    dup_label: "AWX-Collection-dup-label-{{ test_id }}"
     ig1: "AWX-Collection-tests-schedule-ig1-{{ test_id }}"
     ig2: "AWX-Collection-tests-schedule-ig2-{{ test_id }}"
     slice_inventory: "AWX-Collection-tests-schedule-slice-inv-{{ test_id }}"
@@ -205,7 +207,7 @@
     - name: Create labels
       label:
         name: "{{ item }}"
-        organization: "{{ org_name }}"
+        organization: Default
       loop:
         - "{{ label1 }}"
         - "{{ label2 }}"
@@ -309,6 +311,34 @@
         that:
           - result is changed
 
+    - name: Create duplicate label in Default organization
+      label:
+        name: "{{ dup_label }}"
+        organization: Default
+        state: present
+
+    - name: Create duplicate label in test organization
+      label:
+        name: "{{ dup_label }}"
+        organization: "{{ org_name }}"
+        state: present
+
+    - name: Create schedule with duplicate label name
+      schedule:
+        name: "{{ sched_dup }}"
+        state: present
+        unified_job_template: "{{ jt1 }}"
+        organization: Default
+        rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
+        labels:
+          - "{{ dup_label }}"
+      register: result
+
+    - name: Assert duplicate-label schedule changed
+      ansible.builtin.assert:
+        that:
+          - result is changed
+
     - name: Create a second Job Template in new org
       job_template:
         name: "{{ jt2 }}"
@@ -359,6 +389,7 @@
       loop:
         - "{{ sched1 }}"
         - "{{ sched2 }}"
+        - "{{ sched_dup }}"
       failed_when: false
 
     - name: Delete the jt1
