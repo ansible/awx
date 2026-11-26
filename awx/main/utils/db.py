@@ -10,6 +10,8 @@ from awx import MODE
 from django.conf import settings
 from django.db import connection
 
+from ansible_base.lib.utils.bulk_validation_audit import audit_bulk_model_instances
+
 
 def set_connection_name(function):
     set_application_name(settings.DATABASES, settings.CLUSTER_HOST_ID, function=function)
@@ -28,6 +30,9 @@ def bulk_update_sorted_by_id(model, objects, fields, batch_size=1000):
     which helps avoid the row-level locking contention that can lead to deadlocks
     in PostgreSQL when multiple processes are involved.
 
+    When ``fields`` includes registered Char/Text columns, logs Tier 1/2 ORM bypass
+    violations (warnings only) via django-ansible-base before ``bulk_update``.
+
     Returns:
         int: The number of rows affected by the update.
     """
@@ -36,6 +41,7 @@ def bulk_update_sorted_by_id(model, objects, fields, batch_size=1000):
         return 0  # Return 0 when nothing is updated
 
     sorted_objects = sorted(objects, key=lambda obj: obj.id)
+    audit_bulk_model_instances(sorted_objects, operation='bulk_update', update_fields=fields)
     return model.objects.bulk_update(sorted_objects, fields, batch_size=batch_size)
 
 
