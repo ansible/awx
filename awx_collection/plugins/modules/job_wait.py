@@ -43,7 +43,7 @@ options:
       choices: ['project_updates', 'jobs', 'inventory_updates', 'workflow_jobs']
       default: 'jobs'
       type: str
-extends_documentation_fragment: awx.awx.auth
+extends_documentation_fragment: awx.awx.auth_session_id, awx.awx.auth
 '''
 
 EXAMPLES = '''

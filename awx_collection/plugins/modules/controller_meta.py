@@ -20,7 +20,7 @@ description:
     - Allows a user to find out what collection this module exists in.
     - This takes common module parameters, but does nothing with them.
 options: {}
-extends_documentation_fragment: awx.awx.auth
+extends_documentation_fragment: awx.awx.auth_session_id, awx.awx.auth
 '''
 
 

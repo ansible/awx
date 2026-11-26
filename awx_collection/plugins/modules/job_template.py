@@ -317,7 +317,7 @@ options:
         - Prevent falling back to instance groups set on the associated inventory or organization
       type: bool
 
-extends_documentation_fragment: awx.awx.auth
+extends_documentation_fragment: awx.awx.auth_session_id, awx.awx.auth
 
 notes:
   - JSON for survey_spec can be found in the API Documentation. See

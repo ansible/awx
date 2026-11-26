@@ -140,7 +140,7 @@ options:
       description:
         - Name of the inventory source's inventory's organization.
       type: str
-extends_documentation_fragment: awx.awx.auth
+extends_documentation_fragment: awx.awx.auth_session_id, awx.awx.auth
 '''
 
 EXAMPLES = '''
