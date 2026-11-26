@@ -1,4 +1,5 @@
 from unittest import mock
+import socket
 import pytest
 
 from requests.adapters import HTTPAdapter
@@ -161,7 +162,12 @@ def test_notification_template_list_includes_notification_errors(get, user, noti
 
 
 @pytest.mark.django_db
-def test_custom_environment_injection(post, user, organization):
+def test_custom_environment_injection(post, user, organization, mocker):
+    # The HTTP transport is mocked below; URL validation should not need DNS.
+    mocker.patch(
+        'awx.main.notifications.url_validation.socket.getaddrinfo',
+        return_value=[(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP, '', ('8.8.8.8', 443))],
+    )
     u = user('admin-poster', True)
     url = reverse('api:notification_template_list')
     response = post(

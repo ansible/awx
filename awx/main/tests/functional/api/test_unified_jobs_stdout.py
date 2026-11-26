@@ -28,6 +28,14 @@ from awx.main.models import (
 )
 
 
+@pytest.fixture(autouse=True)
+def job_output_directory(tmp_path):
+    # Keep stdout files local to each test without changing settings for the
+    # rest of the suite (in particular, the default-settings snapshot tests).
+    with mock.patch.object(settings, 'JOBOUTPUT_ROOT', str(tmp_path)):
+        yield
+
+
 def _mk_project_update(created=None):
     kwargs = {}
     if created:

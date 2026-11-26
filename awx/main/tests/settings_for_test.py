@@ -1,6 +1,7 @@
 # Python
 import sys
 import uuid
+import os
 
 try:
     import sqlean
@@ -8,6 +9,13 @@ except ImportError:
     pass
 else:
     sys.modules['sqlite3'] = sqlean
+
+# Set these before importing awx.settings: its package initializer loads Dynaconf
+# before the development compatibility module gets a chance to set AWX_MODE.
+# Tests should not need /var/log/tower or a production settings file. Preserve
+# explicit overrides for tests that exercise other configurations.
+os.environ.setdefault('AWX_MODE', 'development')
+os.environ.setdefault('AWX_LOGGING_MODE', 'stdout')
 
 # Load development settings for base variables.
 from awx.settings.development import *  # NOQA
