@@ -230,7 +230,7 @@ HTTP/1.1 201 Created
     -H "Authorization: Bearer <token>" \
     -H "Content-Type: application/json" \
     -X POST \
-    -d '{"source_credential": 2, "input_field_name": "password", "metadata": {"public_key": "UNSIGNED PUBLIC KEY", "secret_path": "/ssh/", "role": "example-role"}}'
+    -d '{"source_credential": 2, "input_field_name": "ssh_public_key_data", "metadata": {"public_key": "UNSIGNED PUBLIC KEY", "secret_path": "/ssh/", "role": "example-role"}}'
 HTTP/1.1 201 Created
 ```
 
