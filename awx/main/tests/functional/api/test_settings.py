@@ -193,3 +193,39 @@ def test_logging_aggregator_connection_test_valid(put, post, admin):
     # "Test" the logger
     url = reverse('api:setting_logging_test')
     post(url, {}, user=admin, expect=202)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    'value, expected',
+    [
+        (0, 200),
+        (17, 200),
+        (2147483647, 200),
+        (-1, 400),
+        (2147483648, 400),  # wraps negative in impstats' C int, and rsyslogd writes statistics nonstop
+    ],
+)
+def test_logging_aggregator_queue_stats_interval_bounds(get, patch, admin, value, expected):
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
+    response = patch(url, user=admin, data={'LOG_AGGREGATOR_ACTION_QUEUE_STATS_INTERVAL': value}, expect=expected)
+    if expected == 400:
+        assert 'LOG_AGGREGATOR_ACTION_QUEUE_STATS_INTERVAL' in response.data
+    # a rejected value is not stored
+    assert get(url, user=admin, expect=200).data['LOG_AGGREGATOR_ACTION_QUEUE_STATS_INTERVAL'] == (value if expected == 200 else 0)
+
+
+@pytest.mark.django_db
+def test_logging_aggregator_queue_stats_interval_listed_after_revert(patch, delete, admin):
+    # run_rsyslog_configurer clears the cached LOG_AGGREGATOR_* values it finds in dir(settings), which lists
+    # database rows and file defaults only; without a file default a reverted setting would keep its cached value
+    from django.conf import settings
+
+    from awx.conf.models import Setting
+
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
+    patch(url, user=admin, data={'LOG_AGGREGATOR_ACTION_QUEUE_STATS_INTERVAL': 60}, expect=200)
+    delete(url, user=admin, expect=204)
+    assert not Setting.objects.filter(key='LOG_AGGREGATOR_ACTION_QUEUE_STATS_INTERVAL').exists()
+    assert 'LOG_AGGREGATOR_ACTION_QUEUE_STATS_INTERVAL' in dir(settings)
+    assert settings.LOG_AGGREGATOR_ACTION_QUEUE_STATS_INTERVAL == 0
