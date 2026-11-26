@@ -519,6 +519,35 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
 class TowerScheduleState(SingletonModel):
     schedule_last_run = models.DateTimeField(auto_now_add=True)
 
+    @classmethod
+    def get_or_heal_solo(cls):
+        duplicates = cls.objects.order_by('id')
+        ids = list(duplicates.values_list('id', flat=True))
+        if len(ids) > 1:
+            keep_id = ids[0]
+            cls.objects.exclude(id=keep_id).delete()
+            logger.error(
+                'TowerScheduleState had %s rows (ids=%s); deleted extras, kept id=%s',
+                len(ids),
+                ids,
+                keep_id,
+            )
+        try:
+            return cls.get_solo()
+        except cls.MultipleObjectsReturned:
+            # Broken PK / multiple rows matching pk=1 — last-resort SQL heal
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    DELETE FROM main_towerschedulestate
+                    WHERE id NOT IN (
+                        SELECT id FROM main_towerschedulestate ORDER BY id LIMIT 1
+                    )
+                    """
+                )
+            logger.error('TowerScheduleState.get_solo raised MultipleObjectsReturned; ran SQL dedupe')
+            return cls.get_solo()
+
 
 def schedule_policy_task():
     from awx.main.tasks.system import apply_cluster_membership_policies

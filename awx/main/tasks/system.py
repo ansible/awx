@@ -1825,7 +1825,7 @@ def awx_periodic_scheduler():
         logger.debug("Starting periodic scheduler")
 
         run_now = now()
-        state = TowerScheduleState.get_solo()
+        state = TowerScheduleState.get_or_heal_solo()
         last_run = state.schedule_last_run
         logger.debug("Last scheduler run was: %s", last_run)
         state.schedule_last_run = run_now
