@@ -36,7 +36,7 @@ def main():
             continue
         try:
             current_hash = hash(settings_file)
-        except:
+        except Exception:
             sys.stderr.write("Could not open settings.py, skipping config watcher")
             childutils.listener.ok(sys.stdout)
             continue
@@ -54,7 +54,7 @@ def main():
                         sys.stderr.write('Restarting %s\n' % program)
                         rpc.supervisor.stopProcess(program)
                         rpc.supervisor.startProcess(program)
-        except:
+        except Exception:
             sys.stderr.write("No previous hash found")
 
         write_hash(hash_file, current_hash)
