@@ -179,6 +179,44 @@ def test_logging_aggregator_valid_settings(put, post, admin, type, host, port, u
         assert '$encrypted$' in response.data.get('LOG_AGGREGATOR_PASSWORD')
 
 
+@pytest.mark.parametrize(
+    'value, expected',
+    [
+        (0, 200),
+        (3, 200),
+        (8, 200),  # rsyslog's default: discard nothing
+        (-1, 400),  # rsyslog would discard everything, the same as 0
+        (9, 400),  # rsyslog would discard nothing, the same as 8
+        ('debug', 400),  # rsyslog reads a name with its facility table and discards everything
+    ],
+)
+@pytest.mark.django_db
+def test_logging_aggregator_discard_severity_bounds(get, patch, admin, value, expected):
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
+    response = patch(url, user=admin, data={'LOG_AGGREGATOR_ACTION_QUEUE_DISCARD_SEVERITY': value}, expect=expected)
+    if expected == 400:
+        assert 'LOG_AGGREGATOR_ACTION_QUEUE_DISCARD_SEVERITY' in response.data
+    # a rejected value is not stored
+    assert get(url, user=admin, expect=200).data['LOG_AGGREGATOR_ACTION_QUEUE_DISCARD_SEVERITY'] == (value if expected == 200 else 5)
+
+
+@pytest.mark.django_db
+def test_logging_aggregator_discard_severity_listed_after_revert(patch, delete, admin):
+    # run_rsyslog_configurer clears the cached LOG_AGGREGATOR_* values it finds in dir(settings), which lists
+    # database rows and file defaults only; without a file default a reverted setting would keep its cached value
+    from django.conf import settings
+
+    from awx.conf.models import Setting
+
+    key = 'LOG_AGGREGATOR_ACTION_QUEUE_DISCARD_SEVERITY'
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
+    patch(url, user=admin, data={key: 8}, expect=200)
+    delete(url, user=admin, expect=204)
+    assert not Setting.objects.filter(key=key).exists()
+    assert key in dir(settings)
+    assert settings.LOG_AGGREGATOR_ACTION_QUEUE_DISCARD_SEVERITY == 5
+
+
 @pytest.mark.django_db
 def test_logging_aggregator_connection_test_valid(put, post, admin):
     _, mock_settings = _mock_logging_defaults()
