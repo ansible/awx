@@ -85,6 +85,7 @@ def test_default_cred_types():
         'conjur',
         'controller',
         'galaxy_api_token',
+        'galaxy_service_account',
         'gce',
         'github_token',
         'github_app_lookup',
