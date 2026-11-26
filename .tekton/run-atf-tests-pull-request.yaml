@@ -25,16 +25,22 @@ spec:
     tasks: "7h"
     finally: "1h"
   pipelineRef:
-    resolver: bundles
+    resolver: git
     params:
-      - name: name
-        value: aap-api-tests
-      - name: bundle
-        value: quay.io/aap-ci/tekton-catalog/pipeline/test/aap-api-tests:0.1@sha256:40e7aacc45b400977842b64c6a4418418453b1072ebafac1fdeb17dc9789895e
-      - name: kind
-        value: pipeline
-      - name: secret
-        value: quay-aap-ci-viewer
+      - name: org
+        value: ansible-automation-platform
+      - name: repo
+        value: aap-konflux-pipelines
+      - name: revision
+        value: fix/update-collection-tests-task-bundle-digest
+      - name: pathInRepo
+        value: pipelines/test/aap-api-tests/0.1/pipeline.yaml
+      - name: token
+        value: github-aap-pde-ci-bot-credentials-ansible-automation-platform
+      - name: tokenKey
+        value: password
+      - name: scmType
+        value: github
 
   taskRunTemplate:
     serviceAccountName: konflux-integration-runner
