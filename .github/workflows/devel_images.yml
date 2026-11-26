@@ -61,12 +61,12 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '18'
-        if: matrix.build-targets.image-name == 'awx'
+        if: matrix.build-targets.image-name == 'awx' && endsWith(github.repository, '/awx')
 
       - name: Prebuild new UI for awx image (to speed up build process)
         run: |
           make ui
-        if: matrix.build-targets.image-name == 'awx'
+        if: matrix.build-targets.image-name == 'awx' && endsWith(github.repository, '/awx')
 
       - uses: ./.github/actions/setup-ssh-agent
         with:
@@ -75,3 +75,4 @@ jobs:
       - name: Build and push AWX devel images
         run: |
           make ${{ matrix.build-targets.make-target }}
+        if: matrix.build-targets.image-name != 'awx' || endsWith(github.repository, '/awx')
