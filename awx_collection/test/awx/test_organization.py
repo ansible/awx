@@ -22,6 +22,7 @@ def test_create_organization(run_module, admin_user):
         'validate_certs': None,
         'aap_token': None,
         'controller_config_file': None,
+        'opa_query_path': 'foo/bar',
     }
 
     result = run_module('organization', module_args, admin_user)
@@ -31,6 +32,7 @@ def test_create_organization(run_module, admin_user):
     assert result == {"name": "foo", "changed": True, "id": org.id, "invocation": {"module_args": module_args}}
 
     assert org.description == 'barfoo'
+    assert org.opa_query_path == 'foo/bar'
 
 
 @pytest.mark.django_db
