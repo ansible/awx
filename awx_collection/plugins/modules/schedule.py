@@ -260,10 +260,17 @@ def main():
     sched_search_fields = {}
     if organization:
         search_fields['organization'] = module.resolve_name_to_id('organizations', organization)
+    # The unified job template lookup should not fail if the template is absent and the
+    # state on the schedule is also absent. If the schedule has a state of present, then
+    # this should fail as the unified job template cannot be nonexistent.
+    # Same pattern as credential_input_source (AAP-80457) / AAP-101726.
     unified_job_template_id = None
     if unified_job_template:
         search_fields['name'] = unified_job_template
-        unified_job_template_id = module.get_one('unified_job_templates', **{'data': search_fields})['id']
+        ujt = module.get_one('unified_job_templates', allow_none=(state == 'absent'), **{'data': search_fields})
+        if ujt is None:
+            module.exit_json(**{'changed': False})
+        unified_job_template_id = ujt['id']
         sched_search_fields['unified_job_template'] = unified_job_template_id
 
     # Attempt to look up an existing item based on the provided data

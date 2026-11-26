@@ -37,6 +37,42 @@ def test_delete_same_named_schedule(run_module, project, inventory, admin_user):
     assert Schedule.objects.filter(name='Some Schedule').count() == 1
 
 
+@pytest.mark.django_db
+def test_schedule_delete_missing_unified_job_template(run_module, admin_user):
+    """state=absent with a missing UJT should be idempotent (AAP-101726)."""
+    result = run_module(
+        'schedule',
+        {
+            'name': 'Example Nightly Schedule',
+            'unified_job_template': 'Nonexistent Example JT',
+            'state': 'absent',
+        },
+        admin_user,
+    )
+
+    assert not result.get('failed', False), result.get('msg', result)
+    assert not result.get('changed'), result
+    assert Schedule.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_schedule_create_missing_unified_job_template(run_module, admin_user):
+    """state=present with a missing UJT should still fail (AAP-101726)."""
+    result = run_module(
+        'schedule',
+        {
+            'name': 'Example Nightly Schedule',
+            'unified_job_template': 'Nonexistent Example JT',
+            'rrule': 'DTSTART:20300112T210000Z RRULE:FREQ=DAILY;INTERVAL=1',
+            'state': 'present',
+        },
+        admin_user,
+    )
+
+    assert result.get('failed', True), "Should fail when unified job template does not exist with state: present"
+    assert Schedule.objects.count() == 0
+
+
 @pytest.mark.parametrize(
     "freq, kwargs, expect",
     [
