@@ -123,3 +123,33 @@ class TestMetadataSurveySpecOptions:
         actions = metadata.determine_actions(request, view)
 
         assert actions['POST'] is sentinel
+
+
+class LaunchTimeRelatedFieldsSerializer(serializers.Serializer):
+    credentials = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    instance_groups = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    labels = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
+
+class TestMetadataLaunchTimeListOfIdsFields:
+
+    def test_credentials_reports_list_of_ids(self, monkeypatch):
+        monkeypatch.setattr(awx_metadata, 'inject_top_level_clean_text_patterns', lambda field, field_info: field_info)
+        serializer = LaunchTimeRelatedFieldsSerializer()
+        field = serializer.fields['credentials']
+        field_info = awx_metadata.Metadata().get_field_info(field)
+        assert field_info['type'] == 'list_of_ids'
+
+    def test_instance_groups_reports_list_of_ids(self, monkeypatch):
+        monkeypatch.setattr(awx_metadata, 'inject_top_level_clean_text_patterns', lambda field, field_info: field_info)
+        serializer = LaunchTimeRelatedFieldsSerializer()
+        field = serializer.fields['instance_groups']
+        field_info = awx_metadata.Metadata().get_field_info(field)
+        assert field_info['type'] == 'list_of_ids'
+
+    def test_unrelated_many_related_field_is_not_coerced(self, monkeypatch):
+        monkeypatch.setattr(awx_metadata, 'inject_top_level_clean_text_patterns', lambda field, field_info: field_info)
+        serializer = LaunchTimeRelatedFieldsSerializer()
+        field = serializer.fields['labels']
+        field_info = awx_metadata.Metadata().get_field_info(field)
+        assert field_info['type'] != 'list_of_ids'
