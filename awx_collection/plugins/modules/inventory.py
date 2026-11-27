@@ -65,6 +65,12 @@ options:
         - list of Instance Group names, IDs, or named URLs for this Organization to run on.
       type: list
       elements: str
+    labels:
+      description:
+        - The labels applied to this inventory.
+        - Labels must already exist (create with the label module first).
+      type: list
+      elements: str
     input_inventories:
       description:
         - List of Inventory names, IDs, or named URLs to use as input for Constructed Inventory.
@@ -92,6 +98,15 @@ EXAMPLES = '''
     organization: "Bar Org"
     state: present
     controller_config_file: "~/tower_cli.cfg"
+
+- name: Add inventory with labels
+  inventory:
+    name: "Labeled Inventory"
+    organization: "Default"
+    labels:
+      - prod
+      - west
+    state: present
 
 - name: Copy inventory
   inventory:
@@ -148,6 +163,7 @@ def main():
         kind=dict(choices=['', 'smart', 'constructed']),
         host_filter=dict(),
         instance_groups=dict(type="list", elements='str'),
+        labels=dict(type='list', elements='str'),
         prevent_instance_group_fallback=dict(type='bool'),
         state=dict(choices=['present', 'absent', 'exists'], default='present'),
         input_inventories=dict(type='list', elements='str'),
@@ -211,6 +227,18 @@ def main():
         association_fields['instance_groups'] = []
         for item in instance_group_names:
             association_fields['instance_groups'].append(module.resolve_name_to_id('instance_groups', item))
+
+    labels = module.params.get('labels')
+    if labels is not None:
+        association_fields['labels'] = []
+        # Labels are organization-scoped; resolve within the inventory organization.
+        label_search = {'organization': org_id}
+        for item in labels:
+            label_id = module.get_one('labels', name_or_id=item, **{'data': label_search})
+            if label_id is None:
+                module.fail_json(msg='Could not find label entry with name {0}'.format(item))
+            else:
+                association_fields['labels'].append(label_id['id'])
 
     # We need to perform a check to make sure you are not trying to convert a regular inventory into a smart one.
     if inventory and inventory['kind'] == '' and inventory_fields['kind'] == 'smart':
