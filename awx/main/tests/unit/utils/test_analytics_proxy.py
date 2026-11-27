@@ -1,6 +1,8 @@
 import pytest
 import requests
+
 from unittest import mock
+from requests.utils import get_environ_proxies
 
 from awx.main.utils.analytics_proxy import OIDCClient, TokenType, TokenError
 
@@ -87,6 +89,7 @@ def test_make_request(oidc_client, token):
                 'Authorization': f'Bearer {token.access_token}',
                 'Accept': 'application/json',
             },
+            proxies=get_environ_proxies('https://does_not_exist.com'),
         )
 
 
@@ -109,4 +112,48 @@ def test_make_request_existing_token(oidc_client, token):
                 'Authorization': f'Bearer {token.access_token}',
                 'Accept': 'application/json',
             },
+            proxies=get_environ_proxies('https://does_not_exist.com'),
         )
+
+
+def test_generate_access_token_passes_process_proxy(oidc_client, monkeypatch):
+    monkeypatch.setenv('HTTPS_PROXY', 'http://proxy.example:3128')
+    monkeypatch.setenv('https_proxy', 'http://proxy.example:3128')
+    monkeypatch.delenv('NO_PROXY', raising=False)
+    monkeypatch.delenv('no_proxy', raising=False)
+    with mock.patch(
+        'awx.main.utils.analytics_proxy.requests.post',
+        return_value=mock.Mock(json=lambda: MOCK_TOKEN_RESPONSE, raise_for_status=mock.Mock(return_value=None)),
+    ) as mock_post:
+        oidc_client._generate_access_token()
+
+    assert mock_post.call_args.kwargs['proxies']['https'] == 'http://proxy.example:3128'
+
+
+def test_generate_access_token_honors_no_proxy(oidc_client, monkeypatch):
+    monkeypatch.setenv('HTTPS_PROXY', 'http://proxy.example:3128')
+    monkeypatch.setenv('https_proxy', 'http://proxy.example:3128')
+    monkeypatch.setenv('NO_PROXY', 'my-token-url.com')
+    monkeypatch.setenv('no_proxy', 'my-token-url.com')
+    with mock.patch(
+        'awx.main.utils.analytics_proxy.requests.post',
+        return_value=mock.Mock(json=lambda: MOCK_TOKEN_RESPONSE, raise_for_status=mock.Mock(return_value=None)),
+    ) as mock_post:
+        oidc_client._generate_access_token()
+
+    assert 'https' not in mock_post.call_args.kwargs['proxies']
+
+
+def test_make_request_passes_process_proxy(oidc_client, token, monkeypatch):
+    monkeypatch.setenv('HTTPS_PROXY', 'http://proxy.example:3128')
+    monkeypatch.setenv('https_proxy', 'http://proxy.example:3128')
+    monkeypatch.delenv('NO_PROXY', raising=False)
+    monkeypatch.delenv('no_proxy', raising=False)
+    oidc_client.token = token
+    with (
+        mock.patch.object(oidc_client, '_generate_access_token', side_effect=RuntimeError('expected not to be called')),
+        mock.patch('awx.main.utils.analytics_proxy.requests.request') as mock_request,
+    ):
+        oidc_client.make_request('GET', 'https://does_not_exist.com')
+
+    assert mock_request.call_args.kwargs['proxies']['https'] == 'http://proxy.example:3128'

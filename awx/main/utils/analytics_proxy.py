@@ -9,6 +9,7 @@ from enum import Enum
 from typing import Optional, Any
 
 import requests
+from requests.utils import get_environ_proxies
 
 DEFAULT_OIDC_TOKEN_ENDPOINT = 'https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token'
 
@@ -139,6 +140,7 @@ class OIDCClient:
                 'scope': self.scopes,
             },
             headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            proxies=get_environ_proxies(self.token_url),
         )
         try:
             response.raise_for_status()
@@ -162,6 +164,7 @@ class OIDCClient:
         Actually make an API call.
         '''
         self._add_headers(headers)
+        kwargs.setdefault('proxies', get_environ_proxies(url))
         return requests.request(method, url, headers=headers, **kwargs)
 
     def make_request(self, method: str, endpoint: str, **kwargs: Any) -> requests.Response:
