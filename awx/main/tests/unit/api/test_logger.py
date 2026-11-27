@@ -202,6 +202,28 @@ def test_rsyslog_conf_template(enabled, log_type, host, port, protocol, errorfil
     assert expected_config in tmpl
 
 
+@pytest.mark.parametrize(
+    'protocol, host, expected',
+    [
+        ('https', 'https://logs.example.com:99999', 'serverport="443"'),  # invalid URL port, then the scheme default
+        ('https', 'logs.example.com', 'serverport="443"'),
+        ('tcp', 'logs.example.com', 'action(type="omfile" file="/dev/null")'),
+    ],
+)
+def test_rsyslog_conf_port_that_fails_validation_on_read(protocol, host, expected):
+    # an out-of-range port stored before the bound existed makes settings raise AttributeError for it
+    mock_settings, _ = _mock_logging_defaults()
+
+    setattr(mock_settings, 'LOGGING', getattr(settings, 'LOGGING'))
+    setattr(mock_settings, 'LOG_AGGREGATOR_ENABLED', True)
+    setattr(mock_settings, 'LOG_AGGREGATOR_TYPE', 'other')
+    setattr(mock_settings, 'LOG_AGGREGATOR_HOST', host)
+    setattr(mock_settings, 'LOG_AGGREGATOR_PROTOCOL', protocol)
+    delattr(mock_settings, 'LOG_AGGREGATOR_PORT')
+
+    assert expected in construct_rsyslog_conf_template(mock_settings)
+
+
 def test_splunk_auth():
     mock_settings, _ = _mock_logging_defaults()
     # Set test settings
