@@ -281,3 +281,18 @@ def test_unicode_with_base64_ansi(sqlite_copy, get, admin):
     response = get(url, user=admin, expect=200)
     content = base64.b64decode(json.loads(smart_str(response.content))['content'])
     assert smart_str(content).splitlines() == ['オ%d' % i for i in range(3)]
+
+
+@pytest.mark.django_db
+def test_system_job_list_serializer(sqlite_copy, get, admin):
+    """List omits result_stdout; detail still returns event stdout."""
+    created = tz_now()
+    job = SystemJob(created=created)
+    job.save()
+    for i in range(3):
+        SystemJobEvent(system_job=job, stdout='Testing {}\n'.format(i), start_line=i, job_created=created).save()
+    list_resp = get(reverse('api:system_job_list'), user=admin, expect=200)
+    assert 'result_stdout' not in list_resp.data['results'][0]
+
+    detail_resp = get(reverse('api:system_job_detail', kwargs={'pk': job.pk}), user=admin, expect=200)
+    assert smart_str(detail_resp.data['result_stdout']).splitlines() == ['Testing %d' % i for i in range(3)]
