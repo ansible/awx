@@ -289,6 +289,12 @@ def test_invalid_host_facts(mock_facts_settings, bulk_update_sorted_by_id, priva
                 AutomationControllerJobScope.CLAIM_UNIFIED_JOB_TEMPLATE_ID: 6,
                 AutomationControllerJobScope.CLAIM_INSTANCE_GROUP_NAME: 'Test Instance Group',
                 AutomationControllerJobScope.CLAIM_INSTANCE_GROUP_ID: 7,
+                AutomationControllerJobScope.CLAIM_GROUPS: [
+                    'org:Test Org',
+                    'org:Test Org/project:Test Project',
+                    'org:Test Org/project:Test Project/jt:Test Job Template',
+                    'org:Test Org/project:Test Project/jt:Test Job Template/playbook:site.yml',
+                ],
             },
         ),
         (
@@ -301,6 +307,7 @@ def test_invalid_host_facts(mock_facts_settings, bulk_update_sorted_by_id, priva
                 AutomationControllerJobScope.CLAIM_ORGANIZATION_ID: 1,
                 AutomationControllerJobScope.CLAIM_ORGANIZATION_NAME: '',
                 AutomationControllerJobScope.CLAIM_PLAYBOOK_NAME: '',
+                AutomationControllerJobScope.CLAIM_GROUPS: ['org:'],
             },
         ),
     ],
@@ -347,6 +354,10 @@ def test_populate_claims_for_workload(job_attrs, expected_claims):
                 AutomationControllerJobScope.CLAIM_EXECUTION_ENVIRONMENT_ID: 4,
                 AutomationControllerJobScope.CLAIM_INSTANCE_GROUP_NAME: 'Test Instance Group',
                 AutomationControllerJobScope.CLAIM_INSTANCE_GROUP_ID: 7,
+                AutomationControllerJobScope.CLAIM_GROUPS: [
+                    'org:Test Org',
+                    'org:Test Org/project:Test Project',
+                ],
             },
         ),
         (
@@ -402,6 +413,7 @@ def test_populate_claims_for_project_update(workload_attrs, expected_claims):
                 AutomationControllerJobScope.CLAIM_EXECUTION_ENVIRONMENT_ID: 4,
                 AutomationControllerJobScope.CLAIM_INSTANCE_GROUP_NAME: 'Test Instance Group',
                 AutomationControllerJobScope.CLAIM_INSTANCE_GROUP_ID: 7,
+                AutomationControllerJobScope.CLAIM_GROUPS: ['org:Test Org'],
             },
         ),
         (
@@ -454,6 +466,7 @@ def test_populate_claims_for_inventory_update(workload_attrs, expected_claims):
                 AutomationControllerJobScope.CLAIM_EXECUTION_ENVIRONMENT_ID: 4,
                 AutomationControllerJobScope.CLAIM_INSTANCE_GROUP_NAME: 'Test Instance Group',
                 AutomationControllerJobScope.CLAIM_INSTANCE_GROUP_ID: 7,
+                AutomationControllerJobScope.CLAIM_GROUPS: ['org:Test Org'],
             },
         ),
         (
